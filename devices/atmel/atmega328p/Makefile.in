@@ -1,0 +1,13 @@
+# Device configuration file for ATMega328P
+ARCH_DIR := $(PICORTOS_DIR)/arch/avr/avr5
+DEVICE_DIR := $(PICORTOS_DIR)/devices/atmel/atmega328p
+
+DEFINE := -D__AVR_ATmega328P__
+
+INCLUDE := -I$(PICORTOS_DIR) -I$(PICORTOS_DIR)/arch/include
+INCLUDE += -I$(DEVICE_DIR) -I$(ARCH_DIR)
+
+SRC_C := $(PICORTOS_DIR)/picoRTOS.c
+SRC_C += $(ARCH_DIR)/picoRTOS_port.c
+
+SRC_S := $(ARCH_DIR)/picoRTOS_portasm.S

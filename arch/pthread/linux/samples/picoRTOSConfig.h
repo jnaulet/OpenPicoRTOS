@@ -1,0 +1,15 @@
+#ifndef PICORTOS_CONFIG_H
+#define PICORTOS_CONFIG_H
+
+/* CLOCKS */
+#define CONFIG_SYSCLK_HZ 0
+#define CONFIG_TICK_HZ   100
+
+/* TASKS */
+#define CONFIG_TASK_COUNT 2
+#define TASK_TICK_PRIO    0
+#define TASK_BLINK_PRIO   1
+
+#define CONFIG_DEFAULT_STACK_COUNT 128
+
+#endif

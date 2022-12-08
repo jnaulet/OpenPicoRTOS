@@ -1,0 +1,88 @@
+Format: 1.51
+
+
+Title: picoRTOS
+SubTitle: Complete API documentation
+
+Footer: distributed under MIT license
+
+# You can add a timestamp to your documentation like one of these:
+# Timestamp: Generated on month day, year
+# Timestamp: Updated mm/dd/yyyy
+# Timestamp: Last updated mon day
+#
+#   m     - One or two digit month.  January is "1"
+#   mm    - Always two digit month.  January is "01"
+#   mon   - Short month word.  January is "Jan"
+#   month - Long month word.  January is "January"
+#   d     - One or two digit day.  1 is "1"
+#   dd    - Always two digit day.  1 is "01"
+#   day   - Day with letter extension.  1 is "1st"
+#   yy    - Two digit year.  2006 is "06"
+#   yyyy  - Four digit year.  2006 is "2006"
+#   year  - Four digit year.  2006 is "2006"
+
+# These are indexes you deleted, so Natural Docs will not add them again
+# unless you remove them from this line.
+
+Don't Index: Types, Constants
+
+
+# --------------------------------------------------------------------------
+# 
+# Cut and paste the lines below to change the order in which your files
+# appear on the menu.  Don't worry about adding or removing files, Natural
+# Docs will take care of that.
+# 
+# You can further organize the menu by grouping the entries.  Add a
+# "Group: [name] {" line to start a group, and add a "}" to end it.
+# 
+# You can add text and web links to the menu by adding "Text: [text]" and
+# "Link: [name] ([URL])" lines, respectively.
+# 
+# The formatting and comments are auto-generated, so don't worry about
+# neatness when editing the file.  Natural Docs will clean it up the next
+# time it is run.  When working with groups, just deal with the braces and
+# forget about the indentation and comments.
+# 
+# --------------------------------------------------------------------------
+
+
+Group: Configuration  {
+
+   File: picoRTOSConfig.h  (no auto-title, etc/picoRTOSConfig.h)
+   }  # Group: Configuration
+
+Group: picoRTOS-scheduler-API  {
+
+   File: Functions  (no auto-title, picoRTOS.c)
+   File: Macros  (no auto-title, picoRTOS.h)
+   }  # Group: picoRTOS-scheduler-API
+
+Group: picoRTOS-SMP-extensions  {
+
+   File: Functions  (no auto-title, picoRTOS-SMP.c)
+   }  # Group: picoRTOS-SMP-extensions
+
+Group: picoRTOS-IPC-API  {
+
+   File: Futexes  (no auto-title, ipc/picoRTOS_futex.c)
+   File: Mutexes  (no auto-title, ipc/picoRTOS_mutex.c)
+   File: Conditions  (no auto-title, ipc/picoRTOS_cond.c)
+   File: Queues  (no auto-title, ipc/picoRTOS_queue.h)
+   }  # Group: picoRTOS-IPC-API
+
+Group: picoRTOS-port-API  {
+
+   File: Functions  (no auto-title, arch/include/picoRTOS_port.h)
+   File: SMP extensions  (no auto-title, arch/include/picoRTOS-SMP_port.h)
+   }  # Group: picoRTOS-port-API
+
+Group: Index  {
+
+   Index: Everything
+   File Index: Files
+   Function Index: Functions
+   Macro Index: Macros
+   }  # Group: Index
+

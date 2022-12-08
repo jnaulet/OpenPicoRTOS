@@ -1,0 +1,114 @@
+#ifndef PICORTOS_H
+#define PICORTOS_H
+
+#include <stddef.h>
+#include <stdbool.h>
+
+#include "picoRTOS_types.h"
+#include "picoRTOSConfig.h"
+
+#define PICORTOS_CYCLES_PER_TICK (CONFIG_SYSCLK_HZ / CONFIG_TICK_HZ)
+
+/* TASKS */
+typedef void (*picoRTOS_task_fn_t)(void*);
+
+struct picoRTOS_task {
+    /*@temp@*/ picoRTOS_task_fn_t fn;
+    /*@temp@*/ void *priv;
+    /*@temp@*/ picoRTOS_stack_t *stack;
+    size_t stack_count;
+};
+
+void picoRTOS_task_init(/*@out@*/ struct picoRTOS_task *task,
+                        picoRTOS_task_fn_t fn, /*@null@*/ void *priv,
+                        /*@reldef@*/ picoRTOS_stack_t *stack,
+                        size_t stack_count);
+
+/* SCHEDULER */
+void picoRTOS_init(void);
+void picoRTOS_add_task(struct picoRTOS_task *task,
+                       picoRTOS_priority_t prio);                       /* register task */
+picoRTOS_priority_t picoRTOS_get_next_available_priority(void);         /* get next free priority slot */
+picoRTOS_priority_t picoRTOS_get_last_available_priority(void);         /* get last free priority slot */
+
+/*@maynotreturn@*/ void picoRTOS_start(void);                           /* starts picoRTOS */
+void picoRTOS_suspend(void);                                            /* suspends the scheduling */
+void picoRTOS_resume(void);                                             /* resumes the scheduling */
+
+void picoRTOS_schedule(void);                                           /* move to next task */
+void picoRTOS_sleep(picoRTOS_tick_t delay);                             /* put current task to sleep */
+void picoRTOS_sleep_until(picoRTOS_tick_t *ref,                         /* put current task to sleep until */
+                          picoRTOS_tick_t period);
+
+/*@noreturn@*/ void picoRTOS_kill(void);                                /* kills the current task */
+
+picoRTOS_priority_t picoRTOS_self(void);                                /* gets the current thread priority */
+picoRTOS_tick_t picoRTOS_get_tick(void);                                /* get current tick */
+
+/* TIME MANAGEMENT */
+
+/* Group: picoRTOS scheduler API */
+
+/* Macro: PICORTOS_DELAY_SEC(x)
+ * Converts seconds to picoRTOS_tick_t
+ *
+ * Parameters:
+ *  x - a value in seconds
+ */
+#define PICORTOS_DELAY_SEC(x) (picoRTOS_tick_t)((x) * CONFIG_TICK_HZ)
+
+/* Macro: PICORTOS_DELAY_MSEC(x)
+ * Converts milliseconds to picoRTOS_tick_t
+ *
+ * Parameters:
+ *  x - a value in milliseconds
+ */
+#define PICORTOS_DELAY_MSEC(x) (picoRTOS_tick_t)(((x) * CONFIG_TICK_HZ) / 1000)
+
+/* Macro: PICORTOS_DELAY_USEC(x)
+ * Converts microseconds in picoRTOS_tick_t
+ *
+ * Parameters:
+ *  x - a value in microseconds
+ */
+#define PICORTOS_DELAY_USEC(x) (picoRTOS_tick_t)(((x) * CONFIG_TICK_HZ) / 1000000)
+
+/* INTERRUPT MANAGEMENT */
+
+typedef void (*picoRTOS_isr_fn)(/*@null@*/ void*);
+
+void picoRTOS_register_interrupt(picoRTOS_irq_t irq,
+                                 /*@notnull@*/ picoRTOS_isr_fn fn,
+                                 /*@null@*/ void *priv);
+
+void picoRTOS_enable_interrupt(picoRTOS_irq_t irq);
+void picoRTOS_disable_interrupt(picoRTOS_irq_t irq);
+
+/* ASSERT */
+
+#ifndef arch_break
+# define arch_break() ({ for (;;) {} })
+# define arch_break_false() (false)
+#else
+# define arch_break_false() (arch_break(), false)
+#endif
+
+/* Group: picoRTOS assert API */
+
+#if !defined(NDEBUG)
+/* Macro: picoRTOS_break()
+ * Throws a debug exception, ignored if -DNDEBUG */
+# define picoRTOS_break() arch_break()
+/* Macro: picoRTOS_assert(x)
+ * Returns x, throws a debug exception if x is false, unless -DNDEBUG */
+# define picoRTOS_assert(x) ((x) ? (true) : arch_break_false())
+/* Macro: picoRTOS_assert_fatal(x)
+ * Throws a debug exception if x is false, stalls the system if -DNDEBUG */
+# define picoRTOS_assert_fatal(x) if (!(x)) arch_break()
+#else
+# define picoRTOS_break()
+# define picoRTOS_assert(x) (x)
+# define picoRTOS_assert_fatal(x) if (!(x)) { picoRTOS_suspend(); arch_break(); }
+#endif
+
+#endif
