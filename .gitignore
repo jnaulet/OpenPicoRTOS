@@ -51,5 +51,12 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-# documentation
-docs/*
+# Emacs backups files
+*~
+
+# uncrustify backup files
+*.uncrustify
+
+# html and js files
+*.html
+*.js

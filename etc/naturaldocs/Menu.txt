@@ -22,11 +22,6 @@ Footer: distributed under MIT license
 #   yyyy  - Four digit year.  2006 is "2006"
 #   year  - Four digit year.  2006 is "2006"
 
-# These are indexes you deleted, so Natural Docs will not add them again
-# unless you remove them from this line.
-
-Don't Index: Types, Constants
-
 
 # --------------------------------------------------------------------------
 # 
@@ -53,6 +48,51 @@ Group: Configuration  {
    File: picoRTOSConfig.h  (no auto-title, etc/picoRTOSConfig.h)
    }  # Group: Configuration
 
+Group: hw-specific  {
+
+   Group: ATMega / AVR  {
+
+      File: ADC  (no auto-title, drivers/adc/adc-avr.c)
+      File: EEPROM  (no auto-title, drivers/eeprom/eeprom-avr.c)
+      File: GPIO  (no auto-title, drivers/gpio/gpio-avr.c)
+      File: MUX  (no auto-title, drivers/mux/mux-avr.c)
+      File: PWM  (no auto-title, drivers/pwm/pwm-avr.c)
+      File: SPI  (no auto-title, drivers/spi/spi-avr.c)
+      File: SPI  (no auto-title, drivers/spi/spi-avr_usart.c)
+      File: TWI  (no auto-title, drivers/twi/twi-avr.c)
+      File: UART  (no auto-title, drivers/uart/uart-avr.c)
+      File: Watchdog  (no auto-title, drivers/wd/wd-avr.c)
+      }  # Group: ATMega / AVR
+
+   Group: RP2040  {
+
+      File: ADC  (no auto-title, drivers/adc/adc-rp2040.c)
+      File: Clocks  (no auto-title, drivers/clock/clock-rp2040.c)
+      File: DMA  (no auto-title, drivers/dma/dma-rp2040.c)
+      File: GPIO  (no auto-title, drivers/gpio/gpio-sio.c)
+      File: MUX  (no auto-title, drivers/mux/mux-rp2040.c)
+      File: PWM  (no auto-title, drivers/pwm/pwm-rp2040.c)
+      File: SPI  (no auto-title, drivers/spi/spi-pl022.c)
+      File: TWI  (no auto-title, drivers/twi/twi-dw_apb_i2c.c)
+      File: UART  (no auto-title, drivers/uart/uart-pl011.c)
+      File: Watchdog  (no auto-title, drivers/wd/wd-rp2040.c)
+      }  # Group: RP2040
+
+   Group: SAM  {
+
+      File: ADC  (no auto-title, drivers/adc/adc-sam.c)
+      File: Clocks  (no auto-title, drivers/clock/clock-sam_pmc.c)
+      File: GPIO  (no auto-title, drivers/gpio/gpio-sam_pio.c)
+      File: MUX  (no auto-title, drivers/mux/mux-sam_pio.c)
+      File: PWM  (no auto-title, drivers/pwm/pwm-sam.c)
+      File: SPI  (no auto-title, drivers/spi/spi-sam.c)
+      File: TWI  (no auto-title, drivers/twi/twi-sam.c)
+      File: UART  (no auto-title, drivers/uart/uart-sam.c)
+      File: Watchdog  (no auto-title, drivers/wd/wd-sam.c)
+      }  # Group: SAM
+
+   }  # Group: hw-specific
+
 Group: picoRTOS-scheduler-API  {
 
    File: Functions  (no auto-title, picoRTOS.c)
@@ -78,11 +118,29 @@ Group: picoRTOS-port-API  {
    File: SMP extensions  (no auto-title, arch/include/picoRTOS-SMP_port.h)
    }  # Group: picoRTOS-port-API
 
+Group: picoRTOS-Runtime-HAL  {
+
+   File: ADC  (no auto-title, drivers/include/adc.h)
+   File: CAN  (no auto-title, drivers/include/can.h)
+   File: Clock  (no auto-title, drivers/include/clock.h)
+   File: EEPROM  (no auto-title, drivers/include/eeprom.h)
+   File: Flash  (no auto-title, drivers/include/flash.h)
+   File: GPIO  (no auto-title, drivers/include/gpio.h)
+   File: IPWM  (no auto-title, drivers/include/ipwm.h)
+   File: PWM  (no auto-title, drivers/include/pwm.h)
+   File: SPI  (no auto-title, drivers/include/spi.h)
+   File: TWI  (no auto-title, drivers/include/twi.h)
+   File: UART  (no auto-title, drivers/include/uart.h)
+   File: Watchdog  (no auto-title, drivers/include/wd.h)
+   }  # Group: picoRTOS-Runtime-HAL
+
 Group: Index  {
 
    Index: Everything
+   Constant Index: Constants
    File Index: Files
    Function Index: Functions
    Macro Index: Macros
+   Type Index: Types
    }  # Group: Index
 

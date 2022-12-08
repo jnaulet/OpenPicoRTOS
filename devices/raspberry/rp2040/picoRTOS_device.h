@@ -3,9 +3,31 @@
 
 /* MEMORY MAPPING */
 
-#define ADDR_PWM 0x40050000
+#define ADDR_RESET      0x4000c000
 
-#define ADDR_SIO 0xd0000000
+#define ADDR_IO_BANK0   0x40014000
+#define ADDR_PADS_BANK0 0x4001c000
+
+#define ADDR_UART0      0x40034000
+#define ADDR_UART1      0x40038000
+
+#define ADDR_SPI0       0x4003c000
+#define ADDR_SPI1       0x40040000
+
+#define ADDR_I2C0       0x40044000
+#define ADDR_I2C1       0x40048000
+
+#define ADDR_PWM        0x40050000
+
+#define ADDR_WATCHDOG   0x40058000
+
+#define ADDR_ADC        0x4004c000
+
+#define ADDR_DMA        0x50000000
+
+#define ADDR_SIO        0xd0000000
+
+#define ADDR_SIO_GPIO   0xd0000004
 
 /* IRQs */
 

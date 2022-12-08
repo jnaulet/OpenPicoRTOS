@@ -10,6 +10,10 @@
 #define ADDR_PORTE 0x2c
 #define ADDR_PORTF 0x2f
 #define ADDR_PORTG 0x32
+#define ADDR_PORTH 0x100
+#define ADDR_PORTJ 0x103
+#define ADDR_PORTK 0x106
+#define ADDR_PORTL 0x109
 
 #define ADDR_TIFR0 0x35
 #define ADDR_TIFR1 0x36
@@ -33,6 +37,7 @@
 #define ADDR_TC2 0xb0
 #define ADDR_TC3 0x90
 #define ADDR_TC4 0xa0
+#define ADDR_TC5 0x120
 
 #define ADDR_SPI 0x4c
 
