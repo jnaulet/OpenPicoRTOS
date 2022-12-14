@@ -19,28 +19,47 @@ pico_sdk_init()
 set(PICORTOS_PATH ../..)
 include(${PICORTOS_PATH}/devices/raspberry/rp2040/rp2040-SMP.cmake)
 
-# Add blink example
-add_executable(blink
-  blink.c
+# Add raspberry-pico-SMP example
+add_executable(raspberry-pico-SMP
+  main.c
+  raspberry-pico.c
   ${PICORTOS_SRC_FILES}
   ${PICORTOS_PATH}/ipc/picoRTOS_mutex.c
   ${PICORTOS_PATH}/ipc/picoRTOS_cond.c
+  ${PICORTOS_PATH}/drivers/adc/adc-rp2040.c
+  ${PICORTOS_PATH}/drivers/clock/clock-rp2040.c
+  ${PICORTOS_PATH}/drivers/gpio/gpio-sio.c
+  ${PICORTOS_PATH}/drivers/mux/mux-rp2040.c
+  ${PICORTOS_PATH}/drivers/pwm/pwm-rp2040.c
+  ${PICORTOS_PATH}/drivers/spi/spi-pl022.c
+  ${PICORTOS_PATH}/drivers/uart/uart-pl011.c
+  ${PICORTOS_PATH}/drivers/twi/twi-dw_apb_i2c.c
+  ${PICORTOS_PATH}/drivers/wd/wd-rp2040.c
   )
 
 # picoRTOS includes
-target_include_directories(blink PRIVATE
+target_include_directories(raspberry-pico-SMP PRIVATE
   .
   ${PICORTOS_INCLUDE_DIRS}
+  ${PICORTOS_PATH}/drivers/include
+  ${PICORTOS_PATH}/drivers/adc
+  ${PICORTOS_PATH}/drivers/clock
+  ${PICORTOS_PATH}/drivers/gpio
+  ${PICORTOS_PATH}/drivers/mux
+  ${PICORTOS_PATH}/drivers/pwm
+  ${PICORTOS_PATH}/drivers/spi
+  ${PICORTOS_PATH}/drivers/twi
+  ${PICORTOS_PATH}/drivers/uart
+  ${PICORTOS_PATH}/drivers/wd
   )
 
 # pull in common dependencies
-target_link_libraries(blink
+target_link_libraries(raspberry-pico-SMP
   pico_stdlib
-  pico_multicore
   )
 
 # create map/bin/hex file etc.
-pico_add_extra_outputs(blink)
+pico_add_extra_outputs(raspberry-pico-SMP)
 
 add_compile_options(-Wall
         -Wno-format          # int != int32_t as far as the compiler is concerned because gcc has int32_t as long int

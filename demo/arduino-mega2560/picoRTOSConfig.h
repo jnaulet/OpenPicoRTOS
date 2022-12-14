@@ -6,12 +6,15 @@
 #define CONFIG_TICK_HZ          1000
 
 /* TASKS */
-#define CONFIG_TASK_COUNT       2
+#define CONFIG_TASK_COUNT       8
 #define TASK_TICK_PRIO          0
-#define TASK_BLINK_PRIO         1
+#define TASK_WD_PRIO            (CONFIG_TASK_COUNT - 1)
 
 /* STACK */
 #define CONFIG_DEFAULT_STACK_COUNT 128
+
+/* DEADLOCK */
+#define CONFIG_DEADLOCK_COUNT 1000
 
 /* DEBUG */
 #define CONFIG_CHECK_STACK_INTEGRITY
