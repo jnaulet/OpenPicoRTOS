@@ -1,5 +1,14 @@
 # Release notes
 
+## picoRTOS v1.6.0
+### What's new ?
+
+A lot ! picoRTOS now offers a HAL and a bunch of experimental drivers for all
+supported platforms.
+
+Demos have been updated to reflect that and show the power of this new
+code-level HAL.
+
 ## picoRTOS v1.5.4
 ### What's new ?
 
