@@ -83,12 +83,13 @@ static void __attribute__((naked)) core1_start_first_task(void)
 
 static void arch_flush_rd_fifo(void)
 {
-    unsigned long dummy;
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
     while ((*SIO_FIFO_ST & 0x1) != 0 &&
-           deadlock-- != 0)
+           deadlock-- != 0) {
+        volatile unsigned long dummy;
         dummy = *SIO_FIFO_RD;
+    }
 
     picoRTOS_assert_fatal(deadlock != -1);
     ASM("sev");
