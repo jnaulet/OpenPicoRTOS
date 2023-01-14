@@ -27,7 +27,8 @@ int main(void)
     /* basics */
     picoRTOS_task_init(&task, task_main, NULL, stack, (size_t)CONFIG_DEFAULT_STACK_COUNT);
     picoRTOS_init();
-    picoRTOS_add_task(&task, (picoRTOS_priority_t)0);
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+    picoRTOS_add_task(&task, picoRTOS_get_last_available_priority());
     picoRTOS_start();
     picoRTOS_suspend();
     picoRTOS_resume();
@@ -40,10 +41,13 @@ int main(void)
     picoRTOS_enable_interrupt((picoRTOS_irq_t)0);
     picoRTOS_disable_interrupt((picoRTOS_irq_t)0);
     /* ipcs */
+    picoRTOS_futex_init(&futex);
     picoRTOS_futex_lock(&futex);
     picoRTOS_futex_unlock(&futex);
+    picoRTOS_mutex_init(&mutex);
     picoRTOS_mutex_lock(&mutex);
     picoRTOS_mutex_unlock(&mutex);
+    picoRTOS_cond_init(&cond);
     picoRTOS_cond_signal(&cond);
     picoRTOS_cond_broadcast(&cond);
     picoRTOS_cond_wait(&cond, &mutex);
