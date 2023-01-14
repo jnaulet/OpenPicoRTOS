@@ -2,9 +2,25 @@
 
 Very small, lightning fast, yet portable preemptive RTOS with SMP suppport.
 
-## Presentation
+## Quick Presentation
 
-picoRTOS is a teeny tiny RTOS with as little overhead as humanely possible.
+picoRTOS is a teeny tiny RTOS with as little overhead as humanly possible.
+
+## Book of requirements
+
+OpenPicoRTOS has been designed with these requirements in mind:
+  - Compliance with "The Power Of 10" from the NASA/JPL (https://en.wikipedia.org/wiki/The_Power_of_10:_Rules_for_Developing_Safety-Critical_Code)
+  - Limited use of inline assembly:
+    - Inline assembly should be side-effect free (no use or modification of variables)
+    - Inline assembly can be safely removed from the static analysis
+  - Smallest footprint possible
+  - Fully static
+  - Fully predictable
+  - High portability
+  - Lowest overhead possible
+  - Support for SMP
+
+More information here: https://github.com/jnaulet/OpenPicoRTOS/blob/main/etc/Requirements.md
 
 ## Documentation
 
