@@ -19,12 +19,10 @@
 #define AVR_TCNTn  ((volatile unsigned char*)(ADDR_TC0 + 2))
 #define AVR_OCRnA  ((volatile unsigned char*)(ADDR_TC0 + 3))
 
-static int prescaler = 0;
-
 /* SETUP */
 static void timer_setup(void)
 {
-    int ocr = (PICORTOS_CYCLES_PER_TICK - 1);
+#define OCR (PICORTOS_CYCLES_PER_TICK - 1)
 
     *AVR_TCCRnA = (unsigned char)(1 << 1); /* CTC mode */
     *AVR_TCCRnB = (unsigned char)0;
@@ -33,25 +31,26 @@ static void timer_setup(void)
     *AVR_TIMSKn |= (unsigned char)(1u << 1);
 
     /* prescaler computation */
-    if (ocr < 0x100) {
-        prescaler = 1;
-        *AVR_TCCRnB |= (unsigned char)1; /* no prescaler */
-    } else if (ocr < 0x800) {
-        prescaler = 8;
-        *AVR_TCCRnB |= (unsigned char)2; /* div8 prescaler */
-    } else if (ocr < 0x4000) {
-        prescaler = 64;
-        *AVR_TCCRnB |= (unsigned char)3; /* div64 prescaler */
-    } else if (ocr < 0x10000) {
-        prescaler = 256;
-        *AVR_TCCRnB |= (unsigned char)4; /* div256 prescaler */
-    } else if (ocr < 0x40000) {
-        prescaler = 1024;
-        *AVR_TCCRnB |= (unsigned char)5; /* div1024 prescaler */
-    }
+#if OCR < 0x100
+# define PRESCALER 1
+    *AVR_TCCRnB |= (unsigned char)1; /* no prescaler */
+#elif OCR < 0x800
+# define PRESCALER 8
+    *AVR_TCCRnB |= (unsigned char)2; /* div8 prescaler */
+#elif OCR < 0x4000
+# define PRESCALER 64
+    *AVR_TCCRnB |= (unsigned char)3; /* div64 prescaler */
+#elif OCR < 0x10000
+# define PRESCALER 256
+    *AVR_TCCRnB |= (unsigned char)4; /* div256 prescaler */
+#elif OCR < 0x40000
+# define PRESCALER 1024
+    *AVR_TCCRnB |= (unsigned char)5; /* div1024 prescaler */
+#else
+# error Cannot compute systick
+#endif
 
-    picoRTOS_assert_fatal(prescaler != 0);
-    *AVR_OCRnA = (unsigned char)(ocr / prescaler);
+    *AVR_OCRnA = (unsigned char)(OCR / PRESCALER);
 }
 
 /* FUNCTIONS TO IMPLEMENT */
@@ -165,5 +164,5 @@ void arch_disable_interrupt(picoRTOS_irq_t irq)
 picoRTOS_cycles_t arch_counter(void)
 {
     return (picoRTOS_cycles_t)*AVR_TCNTn *
-           (picoRTOS_cycles_t)prescaler;
+           (picoRTOS_cycles_t)PRESCALER;
 }
