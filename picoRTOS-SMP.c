@@ -426,9 +426,11 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
     /* make task available for everyone */
     picoRTOS.task[index].state = PICORTOS_SMP_TASK_STATE_READY;
 
-    /* advance tick (only on main core) */
-    if (core == picoRTOS.main_core)
+    /* advance tick & propagate to auxiliary cores */
+    if (core == picoRTOS.main_core) {
         picoRTOS.tick++;
+        arch_propagate_tick();
+    }
 
     /* quick pass on sleeping tasks + idle */
     size_t n = (size_t)TASK_COUNT;

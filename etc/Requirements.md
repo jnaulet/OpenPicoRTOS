@@ -134,7 +134,10 @@ No complex algorithm, no linked lists, just an array of tasks that run in a fixe
 
 ## 8. Support for SMP
 
-OpenPicoRTOS-SMP offers this feature and tries to keep it simple. Cores are always running in sync.
+OpenPicoRTOS-SMP offers this feature and tries to keep it simple:
+  - Cores are always running in sync
+  - The main core is the "tick master"
+
 On every tick, all cores are forced to execute picoRTOS_tick() and will all find their first ready-to-run task.
 Then any syscall will allow a core to find its next one, excluding tasks currently running on other cores and tasks already executed.
 

@@ -57,6 +57,14 @@ extern void arch_spin_lock(void);                               /* protects code
  */
 extern void arch_spin_unlock(void);                             /* ends code section protection */
 
+/* Function: arch_propagate_tick
+ * Propagates the system tick interrupt to auxiliary cores
+ *
+ * This function is called by the main core evey time it increments the tick and is used to
+ * trigger the auxiliary cores tick interrupt
+ */
+extern void arch_propagate_tick(void);
+
 /* INTERRUPT MANAGEMENT (optional) */
 
 /* Function: arch_smp_enable_interrupt
