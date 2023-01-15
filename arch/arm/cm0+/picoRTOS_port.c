@@ -11,7 +11,6 @@
 
 /* NVIC */
 #define NVIC_ISER         ((volatile unsigned long*)0xe000e100)
-#define NVIC_ICSR         ((volatile unsigned long*)0xe000ed04)
 #define NVIC_SHPR3        ((volatile unsigned long*)0xe000ed20)
 
 /* VTOR */
@@ -66,10 +65,10 @@ void arch_init(void)
     *NVIC_SHPR3 |= 0xffff0000ul;
 
     /* SYSTICK */
-    *SYSTICK_CSR &= ~1ul;                                       /* stop systick */
-    *SYSTICK_CVR = 0ul;                                         /* reset */
-    *SYSTICK_RVR = (unsigned long)SYSTICK_RVR_VALUE;            /* set period */
-    *SYSTICK_CSR |= 0x7ul;                                      /* enable interrupt & start */
+    *SYSTICK_CSR = 0;                                       /* stop systick */
+    *SYSTICK_CVR = 0;                                       /* reset */
+    *SYSTICK_RVR = (unsigned long)SYSTICK_RVR_VALUE;        /* set period */
+    *SYSTICK_CSR = 0x7ul;                                   /* enable interrupt & start */
 }
 
 void arch_suspend(void)
@@ -171,7 +170,6 @@ void arch_disable_interrupt(picoRTOS_irq_t irq)
     *NVIC_ISER &= ~(1ul << irq);
 }
 
-__attribute__((weak))
 picoRTOS_cycles_t arch_counter(void)
 {
     return (picoRTOS_cycles_t)SYSTICK_RVR_VALUE -
