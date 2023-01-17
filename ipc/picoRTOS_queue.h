@@ -3,11 +3,13 @@
 
 #include <errno.h>
 #include "picoRTOS.h"
+#include "picoRTOS_futex.h"
 
 /*
  * Don' use directly, use PICORTOS_QUEUE(type, count)
  */
 struct picoRTOS_queue_head {
+    picoRTOS_futex_t lock;
     size_t mask;
     volatile size_t r;
     volatile size_t w;
@@ -21,7 +23,7 @@ int picoRTOS_queue_head_push(struct picoRTOS_queue_head *ctx);
 /* Macro: PICORTOS_QUEUE(type, count)
  * Declares a queue (FIFO)
  *
- * Queues are thread-safe as long as they are used in a producer-consumer fashion
+ * Queues are thread-safe
  *
  * Parameters:
  *  type - The type of data used in this queue (char, int, uint32_t, etc)

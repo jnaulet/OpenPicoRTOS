@@ -76,7 +76,7 @@ not recommended, though.
  - futexes (require arch_test_and_set)
  - re-entrant mutexes (require arch_compare_and_swap)
  - conditions (require mutexes)
- - queues (doesn't require atomic ops)
+ - queues (requires futexes)
 
 ## Interrupt management
 
