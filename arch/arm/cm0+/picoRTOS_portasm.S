@@ -117,4 +117,7 @@ arch_NVIC_handler:
 	.align 2
 	.type ISR_TABLE, %object
 ISR_TABLE:
-	.space DEVICE_INTERRUPT_VECTOR_COUNT * 8
+	.rept DEVICE_INTERRUPT_VECTOR_COUNT
+	.long 0
+	.long 0
+	.endr
