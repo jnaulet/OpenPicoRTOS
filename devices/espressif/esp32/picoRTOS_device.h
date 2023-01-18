@@ -1,0 +1,8 @@
+#ifndef PICORTOS_DEVICE_H
+#define PICORTOS_DEVICE_H
+
+#define IRQ_TIMER0 6
+
+#define DEVICE_INTERRUPT_VECTOR_COUNT 32
+
+#endif

@@ -1,0 +1,13 @@
+# Device configuration file for ATSAM3X8E
+ARCH_DIR := $(PICORTOS_DIR)/arch/xtensa/lx6
+DEVICE_DIR := $(PICORTOS_DIR)/devices/espressif/esp32
+
+DEFINE :=
+
+INCLUDE := -I$(PICORTOS_DIR) -I$(PICORTOS_DIR)/arch/include
+INCLUDE += -I$(DEVICE_DIR) -I$(ARCH_DIR)
+
+SRC_C := $(PICORTOS_DIR)/picoRTOS.c
+SRC_C += $(ARCH_DIR)/picoRTOS_port.c
+
+SRC_S := $(ARCH_DIR)/picoRTOS_portasm.S
