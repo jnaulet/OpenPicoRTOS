@@ -1,0 +1,82 @@
+; Assembly routines for PIC18F
+; Very hasardous right now
+	#include "pic18f16q40.inc"
+
+PUSH1	macro REG
+	movff REG, PREINC1
+	endm
+
+POP1	macro REG
+	movff POSTDEC1, REG
+	endm
+
+SAVE_CALLSTACK macro
+	movff STKPTR, WREG	; save current pointer
+Loop1:	PUSH1 TOSL
+	PUSH1 TOSH
+	PUSH1 TOSU
+	decfsz STKPTR, F
+	goto Loop1
+	nop
+	PUSH1 WREG	; store prev pointer
+	endm
+
+SAVE_CONTEXT macro
+	PUSH1 WREG
+	PUSH1 STATUS
+	; PUSH1 INTCON
+	PUSH1 BSR
+	PUSH1 FSR2L
+	PUSH1 FSR2H
+	PUSH1 FSR0L
+	PUSH1 FSR0H
+	PUSH1 TABLAT
+	PUSH1 TBLPTRU
+	PUSH1 TBLPTRH
+	PUSH1 TBLPTRL
+	PUSH1 PRODH
+	PUSH1 PRODL
+	PUSH1 PCLATU
+	PUSH1 PCLATH
+	SAVE_CALLSTACK
+	endm
+
+RESTORE_CALLSTACK macro
+	POP1 WREG
+Loop2:	POP1 TOSU
+	POP1 TOSH
+	POP1 TOSL
+	PUSH
+	decfsz WREG, F
+	goto Loop2
+	nop
+	endm
+
+RESTORE_CONTEXT macro
+	RESTORE_CALLSTACK
+	POP1 PCLATH
+	POP1 PCLATU
+	POP1 PRODL
+	POP1 PRODH
+	POP1 TBLPTRL
+	POP1 TBLPTRH
+	POP1 TBLPTRU
+	POP1 TABLAT
+	POP1 FSR0H
+	POP1 FSR0L
+	POP1 FSR2H
+	POP1 FSR2L
+	POP1 BSR
+	; POP1 INTCON
+	POP1 STATUS
+	POP1 WREG
+	endm
+
+arch_start_first_task:
+	movff 0x501, FSR1L	; set current stack (FSR1)
+	movff 0x502, FSR1H
+	RESTORE_CONTEXT
+	retfie 0
+
+arch_syscall:
+	return 0
