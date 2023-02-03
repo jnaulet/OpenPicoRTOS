@@ -1,0 +1,20 @@
+#ifndef ADAFRUIT_ITSYBITSY_M4_H
+#define ADAFRUIT_ITSYBITSY_M4_H
+
+#include "adc-same5x.h"
+#include "gpio-same5x.h"
+#include "spi-sercom.h"
+#include "uart-sercom.h"
+#include "pwm-same5x_tc.h"
+
+struct adafruit_itsybitsy_m4 {
+    struct gpio RED;
+    struct spi SPI;
+    struct uart UART;
+    struct pwm D5;
+    struct adc ADC;
+};
+
+int adafruit_itsybitsy_m4_init(/*@out@*/ struct adafruit_itsybitsy_m4 *ctx);
+
+#endif
