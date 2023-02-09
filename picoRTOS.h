@@ -24,6 +24,16 @@ void picoRTOS_task_init(/*@out@*/ struct picoRTOS_task *task,
                         /*@reldef@*/ picoRTOS_stack_t *stack,
                         size_t stack_count);
 
+/* Group: picoRTOS scheduler API */
+
+/* Macro: PICORTOS_STACK_COUNT(x)
+ * Computes stack count from array
+ *
+ * Parameters:
+ *  x - a picoRTOS_stack_t array
+ */
+#define PICORTOS_STACK_COUNT(x) (sizeof(x) / sizeof(picoRTOS_stack_t))
+
 /* SCHEDULER */
 void picoRTOS_init(void);
 void picoRTOS_add_task(struct picoRTOS_task *task,
@@ -46,8 +56,6 @@ picoRTOS_priority_t picoRTOS_self(void);                                /* gets 
 picoRTOS_tick_t picoRTOS_get_tick(void);                                /* get current tick */
 
 /* TIME MANAGEMENT */
-
-/* Group: picoRTOS scheduler API */
 
 /* Macro: PICORTOS_DELAY_SEC(x)
  * Converts seconds to picoRTOS_tick_t
