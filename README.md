@@ -35,6 +35,7 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - ARM Cortex-M3
  - AVR6
  - AVR5
+ - TinyAVR 1-Series / AVRXMEGA3
 
 ### Multi-core SMP
  - RP2040 SMP
@@ -48,8 +49,10 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
 
  - Atmel ATMega2560
  - Atmel ATMega328P
+ - Atmel ATMega32u4
  - Atmel ATSAM3X8E
  - Raspberry Pico RP2040
+ - Atmel ATtiny817
 
 ## Working principle
 

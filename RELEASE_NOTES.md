@@ -1,5 +1,17 @@
 # Release notes
 
+## picoRTOS v1.6.1
+### What's new ?
+
+Support has been added for Atmel tinyAVR 1-series. Some drivers and test demo have been added to
+the project.
+
+AVR assembly ports have been simplified to the extreme using .rept macros
+
+A shortcut macro for stacks has been added: PICORTOS_STACK_COUNT(x)
+
+Queues are now fully thread-safe.
+
 ## picoRTOS v1.6.0
 ### What's new ?
 
