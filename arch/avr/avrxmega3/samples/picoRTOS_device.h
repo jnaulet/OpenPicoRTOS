@@ -1,121 +1,80 @@
 #ifndef PICORTOS_DEVICE_H
 #define PICORTOS_DEVICE_H
 
+/* ATTINY817 Device */
+
 /* MEMORY MAPPING */
 
-#define ADDR_PORTA 0x20
-#define ADDR_PORTB 0x23
-#define ADDR_PORTC 0x26
-#define ADDR_PORTD 0x29
-#define ADDR_PORTE 0x2c
-#define ADDR_PORTF 0x2f
-#define ADDR_PORTG 0x32
-
-#define ADDR_TIFR0 0x35
-#define ADDR_TIFR1 0x36
-#define ADDR_TIFR2 0x37
-#define ADDR_TIFR3 0x38
-#define ADDR_TIFR4 0x39
-#define ADDR_TIFR5 0x3a
-
-#define ADDR_PCIFR 0x3b
-#define ADDR_EIFR  0x3c
-#define ADDR_EIMSK 0x3d
-
-#define ADDR_GPIOR0 0x3e
-
-#define ADDR_EEPROM 0x3f
-
-#define ADDR_GTCCR 0x43
-
-#define ADDR_TC0 0x44
-#define ADDR_TC1 0x80
-#define ADDR_TC2 0xb0
-#define ADDR_TC3 0x90
-#define ADDR_TC4 0xa0
-
-#define ADDR_SPI 0x4c
-
-#define ADDR_SPMCSR 0x57
-
-#define ADDR_WDT 0x60
-
-#define ADDR_TIMSK0 0x6e
-#define ADDR_TIMSK1 0x6f
-#define ADDR_TIMSK2 0x70
-#define ADDR_TIMSK3 0x71
-#define ADDR_TIMSK4 0x72
-#define ADDR_TIMSK5 0x73
-
-#define ADDR_ADC 0x78
-
-#define ADDR_TWI 0xb8
-
-#define ADDR_USART0 0xc0
-#define ADDR_USART1 0xc8
-#define ADDR_USART2 0xd0
+#define ADDR_VPORTA  0x0000
+#define ADDR_VPORTB  0x0004
+#define ADDR_VPORTC  0x0008
+#define ADDR_GPIO    0x001c
+#define ADDR_CPU     0x0030
+#define ADDR_RSTCTRL 0x0040
+#define ADDR_SLPCTRL 0x0050
+#define ADDR_CLKCTRL 0x0060
+#define ADDR_BOD     0x0080
+#define ADDR_VREF    0x00a0
+#define ADDR_WDT     0x0100
+#define ADDR_CPUINT  0x0110
+#define ADDR_CRCSCAN 0x0120
+#define ADDR_RTC     0x0140
+#define ADDR_EVSYS   0x0180
+#define ADDR_CCL     0x01c0
+#define ADDR_PORTMUX 0x0200
+#define ADDR_PORTA   0x0400
+#define ADDR_PORTB   0x0420
+#define ADDR_PORTC   0x0440
+#define ADDR_ADC0    0x0600
+#define ADDR_AC0     0x0670
+#define ADDR_DAC0    0x0680
+#define ADDR_USART0  0x0800
+#define ADDR_TWI0    0x0810
+#define ADDR_SPI0    0x0820
+#define ADDR_TCA0    0x0a00
+#define ADDR_TCB0    0x0a40
+#define ADDR_TCD0    0x0a80
+#define ADDR_SYSCFG  0x0f00
+#define ADDR_NVMCTRL 0x1000
+#define ADDR_SIGROW  0x1100
+#define ADDR_FUSES   0x1280
+#define ADDR_USERROW 0x1300
 
 /* IRQs */
 
-#define IRQ_INT0         2
-#define IRQ_INT1         3
-#define IRQ_INT2         4
-#define IRQ_INT3         5
-#define IRQ_INT4         6
-#define IRQ_INT5         7
-#define IRQ_INT6         8
-#define IRQ_INT7         9
-#define IRQ_PCINT0       10
-#define IRQ_PCINT1       11
-#define IRQ_PCINT2       12
-#define IRQ_WDT          13
-#define IRQ_TIMER2_COMPA 14
-#define IRQ_TIMER2_COMPB 15
-#define IRQ_TIMER2_OVF   16
-#define IRQ_TIMER1_CAPT  17
-#define IRQ_TIMER1_COMPA 18
-#define IRQ_TIMER1_COMPB 19
-#define IRQ_TIMER1_COMPC 20
-#define IRQ_TINER1_OVF   21
-#define IRQ_TIMER0_COMPA 22
-#define IRQ_TIMER0_COMPB 23
-#define IRQ_TIMER0_OVF   24
-#define IRQ_SPI_STC      25
-#define IRQ_USART0_RX    26
-#define IRQ_USART0_UDRE  27
-#define IRQ_USART0_TX    28
-#define IRQ_ANALOG_COMP  29
-#define IRQ_ADC          30
-#define IRQ_EE_READY     31
-#define IRQ_TIMER3_CAPT  32
-#define IRQ_TIMER3_COMPA 33
-#define IRQ_TIMER3_COMPB 34
-#define IRQ_TIMER3_COMPC 35
-#define IRQ_TIMR3_OVF    36
-#define IRQ_USART1_RX    37
-#define IRQ_USART1_UDE   38
-#define IRQ_USART1_TX    39
-#define IRQ_TWI          40
-#define IRQ_SPM_READY    41
-#define IRQ_TIMER4_CAPT  42
-#define IRQ_TIMER4_COMPA 43
-#define IRQ_TIMER4_COMPB 44
-#define IRQ_TIMER4_COMPC 45
-#define IRQ_TIMER4_OVF   46
-#define IRQ_TIMER5_CAPT  47
-#define IRQ_TIMER5_COMPA 48
-#define IRQ_TIMER5_COMPB 49
-#define IRQ_TIMER5_COMPC 50
-#define IRQ_TIMER5_OVF   51
-#define IRQ_USART2_RX    52
-#define IRQ_USART2_UDRE  53
-#define IRQ_USART2_TX    54
-#define IRQ_USART3_RX    55
-#define IRQ_USART3_UDRE  56
-#define IRQ_USART3_TX    57
+#define IRQ_CRCSCAN_NMI 1
+#define IRQ_BOD_VLM     2
+#define IRQ_PORTA_PORT  3
+#define IRQ_PORTB_PORT  4
+#define IRQ_PORTC_PORT  5
+#define IRQ_RTC_CNT     6
+#define IRQ_RTC_PIT     7
+#define IRQ_TCA0_OVF    8
+#define IRQ_TCA0_LUNF   8
+#define IRQ_TCA0_HUNF   9
+#define IRQ_TCA0_CMP0   10
+#define IRQ_TCA0_LCMP0  10
+#define IRQ_TCA0_CMP1   11
+#define IRQ_TCA0_LCMP1  11
+#define IRQ_TCA0_CMP2   12
+#define IRQ_TCA0_LCMP2  12
+#define IRQ_TCB0_INT    13
+#define IRQ_TCD0_OVF    14
+#define IRQ_TCD0_TRIG   15
+#define IRQ_AC0_AC      16
+#define IRQ_AC0_RESRDY  17
+#define IRQ_AC0_WCOMP   18
+#define IRQ_TWI0_TWIS   19
+#define IRQ_TWI0_TWIM   20
+#define IRQ_SPI0_INT    21
+#define IRQ_USART0_RXC  22
+#define IRQ_USART0_RXC  22
+#define IRQ_USART0_DRE  23
+#define IRQ_USART0_TXC  24
+#define IRQ_NVMCTRL_EE  25
 
 /* DEVICE INFO */
 
-#define DEVICE_INTERRUPT_VECTOR_COUNT 56
+#define DEVICE_INTERRUPT_VECTOR_COUNT 25
 
 #endif
