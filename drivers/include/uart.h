@@ -45,7 +45,7 @@ int uart_write(struct uart *ctx, const char *buf, size_t n);
  *
  * Parameters:
  *  ctx - A UART interface
- *  buf - A buffer to recevie the read data
+ *  buf - A buffer to receive the read data
  *  n - The size of the buffer (in bytes)
  *
  * Returns:
