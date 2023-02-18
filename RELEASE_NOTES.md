@@ -1,5 +1,22 @@
 # Release notes
 
+## picoRTOS v1.6.2
+### What's new ?
+
+Support has been added for the following architectures:
+  - ARM Cortex M4/F
+  - MIPS M51xx
+
+This support is incomplete as far as the MIPS is concerned (no support for FPU or DSP yet).
+This is on purpose, as the split between architecture ankd BSP is not completely decided yet.
+
+The follwing devices are now at least partially supported:
+  - Atmel SAMD5x/E5x
+  - Atmel TinyAVR ATtiny1607
+  - PIC32MZ-EF
+
+Basic drivers are provided for these platforms, SAMD5x and ATtiny have good support, PIC32 is fairly incomplete.
+
 ## picoRTOS v1.6.1
 ### What's new ?
 

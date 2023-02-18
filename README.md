@@ -33,9 +33,10 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
 
  - ARM Cortex-M0+
  - ARM Cortex-M3
- - AVR6
- - AVR5
- - TinyAVR 1-Series / AVRXMEGA3
+ - ARM Cortex-M4/F
+ - Atmel AVR5+
+ - Atmel TinyAVR 0+ Series
+ - MIPS M51xx / PIC32Mx
 
 ### Multi-core SMP
  - RP2040 SMP
@@ -51,8 +52,11 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - Atmel ATMega328P
  - Atmel ATMega32u4
  - Atmel ATSAM3X8E
- - Raspberry Pico RP2040
+ - Atmel ATSAMD5x/E5x
  - Atmel ATtiny817
+ - Atmel ATtiny1607
+ - Microchip PIC32MZ-EF
+ - Raspberry Pico RP2040
 
 ## Working principle
 
@@ -141,7 +145,15 @@ Code-wise, using picoRTOS is quite straightforward :
 Hint: tasks are converted to internal structures in picoRTOS_add_task and can be local
 but stacks need to be persistant (prefer static to globals to reduce scope).
 
-## Demo
+## Featured demos
 
-Some demo code is available under the demo directory for every supported architecture
-so you can see for yourself if this software suits your needs.
+Basic demo code is provided for the following boards:
+  - Adafruit ItsyBitsy M4 Express
+  - Arduino Due
+  - Arduino Mega2560
+  - Arduino Uno
+  - ATtiny817-Xplained Mini
+  - ATtiny1607 Curiosity Nano
+  - Curiosity 2.0 PIC32 MZ EF
+  - Raspberry Pi Pico (single core)
+  - Raspberry Pi Pico (dual-core SMP)

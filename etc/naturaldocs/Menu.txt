@@ -57,29 +57,36 @@ Group: hw-specific  {
       File: GPIO  (no auto-title, drivers/gpio/gpio-avr.c)
       File: MUX  (no auto-title, drivers/mux/mux-avr.c)
       File: PWM  (no auto-title, drivers/pwm/pwm-avr.c)
-
-      Group: Spi  {
-
-         File: SPI  (no auto-title, drivers/spi/spi-avr.c)
-         File: SPI  (no auto-title, drivers/spi/spi-avr_usart.c)
-         }  # Group: Spi
-
+      File: SPI  (no auto-title, drivers/spi/spi-avr.c)
+      File: SPI / USART  (no auto-title, drivers/spi/spi-avr_usart.c)
       File: TWI  (no auto-title, drivers/twi/twi-avr.c)
       File: UART  (no auto-title, drivers/uart/uart-avr.c)
       File: Watchdog  (no auto-title, drivers/wd/wd-avr.c)
       }  # Group: ATMega / AVR
 
-   Group: TinyAVR 1-series  {
+   Group: PIC32MX  {
 
-      File: ADC  (no auto-title, drivers/adc/adc-attiny1x.c)
-      File: Clocks  (no auto-title, drivers/clock/clock-attiny1x.c)
-      File: GPIO  (no auto-title, drivers/gpio/gpio-attiny1x.c)
-      File: MUX  (no auto-title, drivers/mux/mux-attiny1x.c)
-      File: PWM  (no auto-title, drivers/pwm/pwm-attiny1x_tca.c)
-      File: SPI  (no auto-title, drivers/spi/spi-attiny1x.c)
-      File: UART  (no auto-title, drivers/uart/uart-attiny1x_usart.c)
-      File: Watchdog  (no auto-title, drivers/wd/wd-attiny1x.c)
-      }  # Group: TinyAVR 1-series
+      File: Clocks  (no auto-title, drivers/clock/clock-pic32mx.c)
+      File: GPIO  (no auto-title, drivers/gpio/gpio-pic32mx.c)
+      File: Misc.  (no auto-title, drivers/misc/misc-pic32mx.c)
+      File: MUX  (no auto-title, drivers/mux/mux-pic32mx.c)
+      File: PWM  (no auto-title, drivers/pwm/pwm-pic32mx.c)
+      File: SPI  (no auto-title, drivers/spi/spi-pic32mx.c)
+      File: UART  (no auto-title, drivers/uart/uart-pic32mx.c)
+      File: Watchdog  (no auto-title, drivers/wd/wd-pic32mx.c)
+      }  # Group: PIC32MX
+
+   Group: TinyAVR  {
+
+      File: ADC  (no auto-title, drivers/adc/adc-tinyavr.c)
+      File: Clocks  (no auto-title, drivers/clock/clock-tinyavr.c)
+      File: GPIO  (no auto-title, drivers/gpio/gpio-tinyavr.c)
+      File: MUX  (no auto-title, drivers/mux/mux-tinyavr.c)
+      File: PWM &lparen;TCA&rparen;  (no auto-title, drivers/pwm/pwm-tinyavr_tca.c)
+      File: SPI  (no auto-title, drivers/spi/spi-tinyavr.c)
+      File: UART  (no auto-title, drivers/uart/uart-tinyavr_usart.c)
+      File: Watchdog  (no auto-title, drivers/wd/wd-tinyavr.c)
+      }  # Group: TinyAVR
 
    Group: RP2040  {
 
@@ -95,7 +102,7 @@ Group: hw-specific  {
       File: Watchdog  (no auto-title, drivers/wd/wd-rp2040.c)
       }  # Group: RP2040
 
-   Group: SAM  {
+   Group: SAM3X8E  {
 
       File: ADC  (no auto-title, drivers/adc/adc-sam.c)
       File: Clocks  (no auto-title, drivers/clock/clock-sam_pmc.c)
@@ -106,7 +113,18 @@ Group: hw-specific  {
       File: TWI  (no auto-title, drivers/twi/twi-sam.c)
       File: UART  (no auto-title, drivers/uart/uart-sam.c)
       File: Watchdog  (no auto-title, drivers/wd/wd-sam.c)
-      }  # Group: SAM
+      }  # Group: SAM3X8E
+
+   Group: SAMD5x/E5x  {
+
+      File: ADC  (no auto-title, drivers/adc/adc-same5x.c)
+      File: Clocks  (no auto-title, drivers/clock/clock-same5x.c)
+      File: GPIO  (no auto-title, drivers/gpio/gpio-same5x.c)
+      File: MUX  (no auto-title, drivers/mux/mux-same5x.c)
+      File: PWM  (no auto-title, drivers/pwm/pwm-same5x_tc.c)
+      File: SPI  (no auto-title, drivers/spi/spi-sercom.c)
+      File: UART  (no auto-title, drivers/uart/uart-sercom.c)
+      }  # Group: SAMD5x/E5x
 
    }  # Group: hw-specific
 
