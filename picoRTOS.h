@@ -53,7 +53,7 @@ void picoRTOS_sleep_until(picoRTOS_tick_t *ref,                         /* put c
 /*@noreturn@*/ void picoRTOS_kill(void);                                /* kills the current task */
 
 picoRTOS_priority_t picoRTOS_self(void);                                /* gets the current thread priority */
-picoRTOS_tick_t picoRTOS_get_tick(void);                                /* get current tick */
+/*@unused@*/ picoRTOS_tick_t picoRTOS_get_tick(void);                   /* get current tick */
 
 /* TIME MANAGEMENT */
 
