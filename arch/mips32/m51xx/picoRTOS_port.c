@@ -2,11 +2,11 @@
 #include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
-#define INTC_INTCON_SET ((volatile unsigned long*)(ADDR_INTC + 0x8))
-#define INTC_IFS0_CLR   ((volatile unsigned long*)(ADDR_INTC + 0x44))
-#define INTC_IEC0_SET   ((volatile unsigned long*)(ADDR_INTC + 0xc8))
-#define INTC_IPC0_SET   ((volatile unsigned long*)(ADDR_INTC + 0x148))
-#define INTC_OFFn       ((volatile unsigned long*)(ADDR_INTC + 0x540))
+#define INTC_INTCON ((volatile unsigned long*)(ADDR_INTC + 0x0))
+#define INTC_IFSn   ((volatile unsigned long*)(ADDR_INTC + 0x40))
+#define INTC_IECn   ((volatile unsigned long*)(ADDR_INTC + 0xc0))
+#define INTC_IPCn   ((volatile unsigned long*)(ADDR_INTC + 0x140))
+#define INTC_OFFn   ((volatile unsigned long*)(ADDR_INTC + 0x540))
 
 /*@external@*/ extern void arch_start_first_task(picoRTOS_stack_t *sp);
 /*@external@*/ extern void arch_syscall(picoRTOS_syscall_t syscall, void *priv);
@@ -17,6 +17,9 @@
 /* interrupts */
 /*@external@*/ extern void arch_CORE_TIMER(void);
 /*@external@*/ extern void arch_SYSCALL(void);
+
+/* stats */
+/*@external@*/ extern picoRTOS_cycles_t arch_counter(void);
 
 /* FUNCTIONS TO IMPLEMENT */
 
@@ -30,12 +33,12 @@ void arch_init(void)
     INTC_OFFn[1] = (unsigned long)arch_SYSCALL;
 
     /* set multi-vector mode */
-    *INTC_INTCON_SET = (1ul << 12);
+    *INTC_INTCON |= (1ul << 12);
 
     /* enable interrupts */
-    *INTC_IFS0_CLR = 3ul;
-    *INTC_IEC0_SET = 3ul;
-    *INTC_IPC0_SET = 0x505ul;
+    INTC_IFSn[0] &= ~0x3;
+    INTC_IECn[0] |= 0x3;
+    INTC_IPCn[0] |= 0x505;
 }
 
 void arch_suspend(void)
@@ -102,16 +105,31 @@ void arch_register_interrupt(picoRTOS_irq_t irq, picoRTOS_isr_fn fn, void *priv)
 void arch_enable_interrupt(picoRTOS_irq_t irq)
 {
     picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT);
+
+    /* find the correct IEC offset */
+    size_t IEC_index = (size_t)(irq >> 5);
+    size_t IEC_bit = (size_t)(0x1fu & irq);
+
+    /* find the correct IPC offset */
+    size_t IPC_index = (size_t)(irq >> 6);
+    size_t IPC_shift = (size_t)((0x1u & irq) << 16);
+
+    /* Beware: indexes have to * 4 cause of microchip clear/set/invert structure
+     * TODO: find a way to make this more generic and portable */
+    INTC_IFSn[IEC_index << 2] &= ~(1 << IEC_bit);
+    INTC_IPCn[IPC_index << 2] |= (0x5 << IPC_shift);
+    INTC_IECn[IEC_index << 2] |= (1 << IEC_bit);
 }
 
 void arch_disable_interrupt(picoRTOS_irq_t irq)
 {
     picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT);
-}
 
-/* STATS */
+    /* find the correct IEC offset */
+    size_t IEC_index = (size_t)(irq >> 5);
+    size_t IEC_bit = (size_t)(0x1f & irq);
 
-picoRTOS_cycles_t arch_counter(void)
-{
-    return (picoRTOS_cycles_t)0;
+    /* Beware: indexes have to * 4 cause of microchip clear/set/invert structure
+     * TODO: find a way to make this more generic and portable */
+    INTC_IECn[IEC_index << 2] &= ~(1 << IEC_bit);
 }

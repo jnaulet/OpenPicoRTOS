@@ -11,6 +11,7 @@
 	.global arch_EIC_handler
 
 	.global arch_compare_and_swap
+	.global arch_counter
 
 	.extern picoRTOS_tick
 	.extern picoRTOS_syscall
@@ -55,7 +56,7 @@
 	.equ TIMER_CORE_PERIOD, (CONFIG_SYSCLK_HZ / CONFIG_TICK_HZ) / 2
 	/* interrupt control */
 	.equ INTC_INTSTAT, ADDR_INTC + 0x20
-	.equ INTC_IFS0_CLR, ADDR_INTC + 0x44
+	.equ INTC_IFS0, ADDR_INTC + 0x40
 	/* Coprocessor 0 registers */
 	.equ CP0_COUNT, $9
 	.equ CP0_COMPARE, $11
@@ -155,8 +156,9 @@ arch_CORE_TIMER:
 	addu k0, k0, k1
 	mtc0 k0, CP0_COMPARE
 	/* ack irq */
-	addiu k0, zero, 1
-	la fp, INTC_IFS0_CLR
+	la fp, INTC_IFS0
+	lw k0, (fp)
+	ins k0, zero, 0, 1
 	sw k0, (fp)
 	/* quick stack restore & swap */
 	or sp, v0, zero
@@ -179,8 +181,9 @@ arch_SYSCALL:
 	xori k0, k0, 0x100	/* flip IP0 */
 	mtc0 k0, CP0_CAUSE
 	/* ack irq */
-	addiu k0, zero, 2
-	la fp, INTC_IFS0_CLR
+	la fp, INTC_IFS0
+	lw k0, (fp)
+	ins k0, zero, 1, 1
 	sw k0, (fp)
 	/* quick stack restore & swap */
 	or sp, v0, zero
@@ -255,13 +258,24 @@ arch_EIC_handler:
 	jr k1
 	nop
 	/* ack IFSx */
-	la fp, INTC_IFS0_CLR
+	la fp, INTC_IFS0
 	addu fp, fp, t2
-	sw t1, (fp)
+	lw k1, (fp)
+	xor k1, k1, t1	/* flip IFSx bit */
+	sw k1, (fp)
 	/* back to task */
 	SWITCH_TO_TASK_STACK k0
 	RESTORE_CONTEXT sp
 	eret
+
+	.align 2
+	.type arch_counter, %function
+arch_counter:
+	mfc0 v0, CP0_COUNT
+	mfc0 v1, CP0_COMPARE
+	subu v0, v0, v1
+	jr ra
+	sll v0, v0, 1
 
 	.bss
 
