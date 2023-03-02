@@ -1,4 +1,4 @@
-#include "wd-attiny1x.h"
+#include "wd-tinyavr.h"
 #include "picoRTOS.h"
 #include "picoRTOS_device.h"
 
@@ -7,7 +7,7 @@
 #define CCP_IOREG 0xd8
 static volatile uint8_t *CCP = (volatile uint8_t*)(ADDR_CPU + 0x4);
 
-struct WDT_ATTINY1X {
+struct WDT_TINYAVR {
     volatile uint8_t CTRLA;
     volatile uint8_t STATUS;
 };
@@ -20,7 +20,7 @@ struct WDT_ATTINY1X {
 #define STATUS_LOCK     (1 << 7)
 #define STATUS_SYNCBUSY (1 << 0)
 
-/* Function: wd_attiny1x_init
+/* Function: wd_tinyavr_init
  * Initializes the watchdog timer
  *
  * Parameters:
@@ -30,14 +30,14 @@ struct WDT_ATTINY1X {
  * Returns:
  * Always 0
  */
-int wd_attiny1x_init(struct wd *ctx, struct WDT_ATTINY1X *base)
+int wd_tinyavr_init(struct wd *ctx, struct WDT_TINYAVR *base)
 {
     ctx->base = base;
     ctx->ctrla = 0;
     return 0;
 }
 
-/* Function: wd_attiny1x_setup
+/* Function: wd_tinyavr_setup
  * Configures a watchdog timer
  *
  * Parameters:
@@ -47,10 +47,10 @@ int wd_attiny1x_init(struct wd *ctx, struct WDT_ATTINY1X *base)
  * Return:
  * 0 if success, -errno otherwise
  */
-int wd_attiny1x_setup(struct wd *ctx, struct wd_attiny1x_settings *settings)
+int wd_tinyavr_setup(struct wd *ctx, struct wd_tinyavr_settings *settings)
 {
-    if (!picoRTOS_assert(settings->window < WD_ATTINY1X_PERIOD_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->period < WD_ATTINY1X_PERIOD_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(settings->window < WD_TINYAVR_PERIOD_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(settings->period < WD_TINYAVR_PERIOD_COUNT)) return -EINVAL;
 
     ctx->ctrla = (uint8_t)(CTRLA_WINDOW(settings->window) | CTRLA_PERIOD(settings->period));
     return 0;

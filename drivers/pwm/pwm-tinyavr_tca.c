@@ -1,9 +1,9 @@
-#include "pwm-attiny1x_tca.h"
+#include "pwm-tinyavr_tca.h"
 #include "picoRTOS.h"
 
 #include <stdint.h>
 
-struct PWM_ATTINY1X_TCA {
+struct PWM_TINYAVR_TCA {
     volatile uint8_t CTRLA;
     volatile uint8_t CTRLB;
     volatile uint8_t CTRLC;
@@ -23,10 +23,10 @@ struct PWM_ATTINY1X_TCA {
     volatile uint16_t CNT;
     uint8_t RESERVED3[4];
     volatile uint16_t PER;
-    volatile uint16_t CMPn[PWM_ATTINY1X_TCA_CMP_COUNT];
+    volatile uint16_t CMPn[PWM_TINYAVR_TCA_CMP_COUNT];
     uint8_t RESERVED4[8];
     volatile uint16_t PERBUF;
-    volatile uint16_t CMPnBUF[PWM_ATTINY1X_TCA_CMP_COUNT];
+    volatile uint16_t CMPnBUF[PWM_TINYAVR_TCA_CMP_COUNT];
 };
 
 #define CTRLA_CLKSEL_M  0x7u
@@ -49,7 +49,7 @@ struct PWM_ATTINY1X_TCA {
 #define CTRLE_LUPD   (1 << 1)
 #define CTRLE_DIR    (1 << 0)
 
-/* Function: pwm_attiny1x_tca_init
+/* Function: pwm_tinyavr_tca_init
  * Initializes a PWM block (TCAx)
  *
  * Parameters:
@@ -60,7 +60,7 @@ struct PWM_ATTINY1X_TCA {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_attiny1x_tca_init(struct pwm_attiny1x_tca *ctx, struct PWM_ATTINY1X_TCA *base, clock_id_t clkid)
+int pwm_tinyavr_tca_init(struct pwm_tinyavr_tca *ctx, struct PWM_TINYAVR_TCA *base, clock_id_t clkid)
 {
     ctx->base = base;
     ctx->freq = clock_get_freq(clkid);
@@ -73,19 +73,19 @@ int pwm_attiny1x_tca_init(struct pwm_attiny1x_tca *ctx, struct PWM_ATTINY1X_TCA 
     return 0;
 }
 
-static int set_clksel(struct pwm_attiny1x_tca *ctx, pwm_attiny1x_tca_clksel_t clksel)
+static int set_clksel(struct pwm_tinyavr_tca *ctx, pwm_tinyavr_tca_clksel_t clksel)
 {
-    if (!picoRTOS_assert(clksel < PWM_ATTINY1X_TCA_CLKSEL_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(clksel < PWM_TINYAVR_TCA_CLKSEL_COUNT)) return -EINVAL;
 
     switch (clksel) {
-    case PWM_ATTINY1X_TCA_CLKSEL_DIV1: ctx->div = 1ul; break;
-    case PWM_ATTINY1X_TCA_CLKSEL_DIV2: ctx->div = 2ul; break;
-    case PWM_ATTINY1X_TCA_CLKSEL_DIV4: ctx->div = 4ul; break;
-    case PWM_ATTINY1X_TCA_CLKSEL_DIV8: ctx->div = 8ul; break;
-    case PWM_ATTINY1X_TCA_CLKSEL_DIV16: ctx->div = 16ul; break;
-    case PWM_ATTINY1X_TCA_CLKSEL_DIV64: ctx->div = 64ul; break;
-    case PWM_ATTINY1X_TCA_CLKSEL_DIV256: ctx->div = 256ul; break;
-    case PWM_ATTINY1X_TCA_CLKSEL_DIV1024: ctx->div = 1024ul; break;
+    case PWM_TINYAVR_TCA_CLKSEL_DIV1: ctx->div = 1ul; break;
+    case PWM_TINYAVR_TCA_CLKSEL_DIV2: ctx->div = 2ul; break;
+    case PWM_TINYAVR_TCA_CLKSEL_DIV4: ctx->div = 4ul; break;
+    case PWM_TINYAVR_TCA_CLKSEL_DIV8: ctx->div = 8ul; break;
+    case PWM_TINYAVR_TCA_CLKSEL_DIV16: ctx->div = 16ul; break;
+    case PWM_TINYAVR_TCA_CLKSEL_DIV64: ctx->div = 64ul; break;
+    case PWM_TINYAVR_TCA_CLKSEL_DIV256: ctx->div = 256ul; break;
+    case PWM_TINYAVR_TCA_CLKSEL_DIV1024: ctx->div = 1024ul; break;
     default:
         picoRTOS_break();
         /*@notreached@*/
@@ -98,7 +98,7 @@ static int set_clksel(struct pwm_attiny1x_tca *ctx, pwm_attiny1x_tca_clksel_t cl
     return 0;
 }
 
-/* Function: pwm_attiny1x_tca_setup
+/* Function: pwm_tinyavr_tca_setup
  * Configures a PWM block
  *
  * Parameters:
@@ -108,9 +108,9 @@ static int set_clksel(struct pwm_attiny1x_tca *ctx, pwm_attiny1x_tca_clksel_t cl
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_attiny1x_tca_setup(struct pwm_attiny1x_tca *ctx, struct pwm_attiny1x_tca_settings *settings)
+int pwm_tinyavr_tca_setup(struct pwm_tinyavr_tca *ctx, struct pwm_tinyavr_tca_settings *settings)
 {
-    if (!picoRTOS_assert(settings->wgmode < PWM_ATTINY1X_TCA_WGMODE_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(settings->wgmode < PWM_TINYAVR_TCA_WGMODE_COUNT)) return -EINVAL;
 
     int res;
 
@@ -123,7 +123,7 @@ int pwm_attiny1x_tca_setup(struct pwm_attiny1x_tca *ctx, struct pwm_attiny1x_tca
     return 0;
 }
 
-/* Function: pwm_attiny1x_tca_pwm_init
+/* Function: pwm_tinyavr_tca_pwm_init
  * Initializes a PWM output
  *
  * Parameters:
@@ -134,11 +134,11 @@ int pwm_attiny1x_tca_setup(struct pwm_attiny1x_tca *ctx, struct pwm_attiny1x_tca
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_attiny1x_tca_pwm_init(struct pwm *ctx,
-                              struct pwm_attiny1x_tca *pwm,
-                              pwm_attiny1x_tca_cmp_t cmp)
+int pwm_tinyavr_tca_pwm_init(struct pwm *ctx,
+                             struct pwm_tinyavr_tca *pwm,
+                             pwm_tinyavr_tca_cmp_t cmp)
 {
-    if (!picoRTOS_assert(cmp < PWM_ATTINY1X_TCA_CMP_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(cmp < PWM_TINYAVR_TCA_CMP_COUNT)) return -EINVAL;
 
     ctx->pwm = pwm;
     ctx->cmp = cmp;
@@ -150,7 +150,7 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
 {
     if (!picoRTOS_assert(period > 0)) return -EINVAL;
 
-    struct pwm_attiny1x_tca *pwm = ctx->pwm;
+    struct pwm_tinyavr_tca *pwm = ctx->pwm;
 
     /* real tinyAVR channel frequency */
     unsigned long hz = (unsigned long)pwm->freq / pwm->div;
@@ -164,7 +164,7 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
 int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle)
 {
     size_t index = (size_t)ctx->cmp;
-    struct pwm_attiny1x_tca *pwm = ctx->pwm;
+    struct pwm_tinyavr_tca *pwm = ctx->pwm;
     unsigned long cmpn = ((unsigned long)duty_cycle * ctx->ncycles) >> 16;
 
     pwm->base->CMPn[index] = (uint16_t)cmpn;
@@ -173,14 +173,14 @@ int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle)
 
 void pwm_start(struct pwm *ctx)
 {
-    struct pwm_attiny1x_tca *pwm = ctx->pwm;
+    struct pwm_tinyavr_tca *pwm = ctx->pwm;
 
     pwm->base->CTRLESET = (uint8_t)CTRLE_CMD(0x2);
 
     switch (ctx->cmp) {
-    case PWM_ATTINY1X_TCA_CMP0: pwm->base->CTRLB |= CTRLB_CMP0EN; break;
-    case PWM_ATTINY1X_TCA_CMP1: pwm->base->CTRLB |= CTRLB_CMP1EN; break;
-    case PWM_ATTINY1X_TCA_CMP2: pwm->base->CTRLB |= CTRLB_CMP2EN; break;
+    case PWM_TINYAVR_TCA_CMP0: pwm->base->CTRLB |= CTRLB_CMP0EN; break;
+    case PWM_TINYAVR_TCA_CMP1: pwm->base->CTRLB |= CTRLB_CMP1EN; break;
+    case PWM_TINYAVR_TCA_CMP2: pwm->base->CTRLB |= CTRLB_CMP2EN; break;
     default:
         picoRTOS_break();
     }
@@ -188,12 +188,12 @@ void pwm_start(struct pwm *ctx)
 
 void pwm_stop(struct pwm *ctx)
 {
-    struct pwm_attiny1x_tca *pwm = ctx->pwm;
+    struct pwm_tinyavr_tca *pwm = ctx->pwm;
 
     switch (ctx->cmp) {
-    case PWM_ATTINY1X_TCA_CMP0: pwm->base->CTRLB &= ~CTRLB_CMP0EN; break;
-    case PWM_ATTINY1X_TCA_CMP1: pwm->base->CTRLB &= ~CTRLB_CMP1EN; break;
-    case PWM_ATTINY1X_TCA_CMP2: pwm->base->CTRLB &= ~CTRLB_CMP2EN; break;
+    case PWM_TINYAVR_TCA_CMP0: pwm->base->CTRLB &= ~CTRLB_CMP0EN; break;
+    case PWM_TINYAVR_TCA_CMP1: pwm->base->CTRLB &= ~CTRLB_CMP1EN; break;
+    case PWM_TINYAVR_TCA_CMP2: pwm->base->CTRLB &= ~CTRLB_CMP2EN; break;
     default:
         picoRTOS_break();
     }

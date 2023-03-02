@@ -1,9 +1,9 @@
-#include "adc-attiny1x.h"
+#include "adc-tinyavr.h"
 #include "picoRTOS.h"
 
 #include <stdint.h>
 
-struct ADC_ATTINY1X {
+struct ADC_TINYAVR {
     volatile uint8_t CTRLA;
     volatile uint8_t CTRLB;
     volatile uint8_t CTRLC;
@@ -40,7 +40,7 @@ struct ADC_ATTINY1X {
 
 #define INTFLAGS_RESRDY (1 << 0)
 
-/* Function: adc_attiny1x_init
+/* Function: adc_tinyavr_init
  * Initializes an ADC block
  *
  * Parameters:
@@ -51,11 +51,11 @@ struct ADC_ATTINY1X {
  * Returns:
  * always 0
  */
-int adc_attiny1x_init(struct adc_attiny1x *ctx, struct ADC_ATTINY1X *base, clock_id_t clkid)
+int adc_tinyavr_init(struct adc_tinyavr *ctx, struct ADC_TINYAVR *base, clock_id_t clkid)
 {
     ctx->base = base;
     ctx->clkid = clkid;
-    ctx->state = ADC_ATTINY1X_STATE_IDLE;
+    ctx->state = ADC_TINYAVR_STATE_IDLE;
 
     /* enable */
     ctx->base->CTRLA = (uint8_t)CTRLA_ENABLE;
@@ -63,7 +63,7 @@ int adc_attiny1x_init(struct adc_attiny1x *ctx, struct ADC_ATTINY1X *base, clock
     return 0;
 }
 
-/* Function: adc_attiny1x_setup
+/* Function: adc_tinyavr_setup
  * Configures an ADC block
  *
  * Parameters:
@@ -73,14 +73,14 @@ int adc_attiny1x_init(struct adc_attiny1x *ctx, struct ADC_ATTINY1X *base, clock
  * Returns:
  * 0 in case of success, -errno otherwise
  */
-int adc_attiny1x_setup(struct adc_attiny1x *ctx, struct adc_attiny1x_settings *settings)
+int adc_tinyavr_setup(struct adc_tinyavr *ctx, struct adc_tinyavr_settings *settings)
 {
-    if (!picoRTOS_assert(settings->ressel < ADC_ATTINY1X_RESSEL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->refsel < ADC_ATTINY1X_REFSEL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->clk_freq >= (unsigned long)ADC_ATTINY1X_CLK_FREQ_MIN)) return -EINVAL;
-    if (!picoRTOS_assert(settings->clk_freq <= (unsigned long)ADC_ATTINY1X_CLK_FREQ_MAX)) return -EINVAL;
+    if (!picoRTOS_assert(settings->ressel < ADC_TINYAVR_RESSEL_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(settings->refsel < ADC_TINYAVR_REFSEL_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(settings->clk_freq >= (unsigned long)ADC_TINYAVR_CLK_FREQ_MIN)) return -EINVAL;
+    if (!picoRTOS_assert(settings->clk_freq <= (unsigned long)ADC_TINYAVR_CLK_FREQ_MAX)) return -EINVAL;
 
-    if (settings->ressel == ADC_ATTINY1X_RESSEL_8BIT) ctx->base->CTRLA |= CTRLA_RESSEL;
+    if (settings->ressel == ADC_TINYAVR_RESSEL_8BIT) ctx->base->CTRLA |= CTRLA_RESSEL;
     else ctx->base->CTRLA &= ~CTRLA_RESSEL;
 
     ctx->base->CTRLC &= ~CTRLC_REFSEL(CTRLC_REFSEL_M);
@@ -115,7 +115,7 @@ int adc_attiny1x_setup(struct adc_attiny1x *ctx, struct adc_attiny1x_settings *s
 
 /* channels */
 
-/* Function: adc_attiny1x_adc_init
+/* Function: adc_tinyavr_adc_init
  * Initializes an ADC channel
  *
  * Parameters:
@@ -126,9 +126,9 @@ int adc_attiny1x_setup(struct adc_attiny1x *ctx, struct adc_attiny1x_settings *s
  * Returns:
  * 0 in case of success, -errno otherwise
  */
-int adc_attiny1x_adc_init(struct adc *ctx, struct adc_attiny1x *adc, adc_attiny1x_muxpos_t muxpos)
+int adc_tinyavr_adc_init(struct adc *ctx, struct adc_tinyavr *adc, adc_tinyavr_muxpos_t muxpos)
 {
-    if (!picoRTOS_assert(muxpos < ADC_ATTINY1X_MUXPOS_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(muxpos < ADC_TINYAVR_MUXPOS_COUNT)) return -EINVAL;
 
     ctx->adc = adc;
     ctx->muxpos = muxpos;
@@ -152,7 +152,7 @@ int adc_setup(struct adc *ctx, struct adc_settings *settings)
 
 static int adc_read_idle(struct adc *ctx)
 {
-    struct adc_attiny1x *adc = ctx->adc;
+    struct adc_tinyavr *adc = ctx->adc;
 
     /* check status */
     if ((adc->base->COMMAND & COMMAND_STCONV) != 0)
@@ -164,13 +164,13 @@ static int adc_read_idle(struct adc *ctx)
     /* start conversion */
     adc->base->COMMAND = (uint8_t)COMMAND_STCONV;
 
-    adc->state = ADC_ATTINY1X_STATE_ACQ;
+    adc->state = ADC_TINYAVR_STATE_ACQ;
     return -EAGAIN;
 }
 
 static int adc_read_acq(struct adc *ctx, int *data)
 {
-    struct adc_attiny1x *adc = ctx->adc;
+    struct adc_tinyavr *adc = ctx->adc;
 
     if ((adc->base->INTFLAGS & INTFLAGS_RESRDY) == 0)
         return -EAGAIN;
@@ -184,17 +184,17 @@ static int adc_read_acq(struct adc *ctx, int *data)
     /* clear flag */
     adc->base->INTFLAGS = (uint8_t)INTFLAGS_RESRDY;
 
-    adc->state = ADC_ATTINY1X_STATE_IDLE;
+    adc->state = ADC_TINYAVR_STATE_IDLE;
     return 1;
 }
 
 int adc_read(struct adc *ctx, int *data)
 {
-    struct adc_attiny1x *adc = ctx->adc;
+    struct adc_tinyavr *adc = ctx->adc;
 
     switch (adc->state) {
-    case ADC_ATTINY1X_STATE_IDLE: return adc_read_idle(ctx);
-    case ADC_ATTINY1X_STATE_ACQ: return adc_read_acq(ctx, data);
+    case ADC_TINYAVR_STATE_IDLE: return adc_read_idle(ctx);
+    case ADC_TINYAVR_STATE_ACQ: return adc_read_acq(ctx, data);
     default: break;
     }
 

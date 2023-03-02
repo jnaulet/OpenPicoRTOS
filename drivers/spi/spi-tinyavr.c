@@ -1,9 +1,9 @@
-#include "spi-attiny1x.h"
+#include "spi-tinyavr.h"
 #include "picoRTOS.h"
 
 #include <stdint.h>
 
-struct SPI_ATTINY1X {
+struct SPI_TINYAVR {
     volatile uint8_t CTRLA;
     volatile uint8_t CTRLB;
     volatile uint8_t INTCTRL;
@@ -32,7 +32,7 @@ struct SPI_ATTINY1X {
 #define INTFLAGS_SSIF   (1 << 4)
 #define INTFLAGS_BUFOVF (1 << 0)
 
-/* Function: spi_attiny1x_init
+/* Function: spi_tinyavr_init
  * Initializes a SPI
  *
  * Parameters:
@@ -43,7 +43,7 @@ struct SPI_ATTINY1X {
  * Returns:
  * always 0
  */
-int spi_attiny1x_init(struct spi *ctx, struct SPI_ATTINY1X *base, clock_id_t clkid)
+int spi_tinyavr_init(struct spi *ctx, struct SPI_TINYAVR *base, clock_id_t clkid)
 {
     ctx->base = base;
     ctx->clkid = clkid;

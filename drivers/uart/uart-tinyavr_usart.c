@@ -1,9 +1,9 @@
-#include "uart-attiny1x_usart.h"
+#include "uart-tinyavr_usart.h"
 #include "picoRTOS.h"
 
 #include <stdint.h>
 
-struct USART_ATTINY1X_UART {
+struct USART_TINYAVR_UART {
     volatile uint8_t RXDATAL;
     volatile uint8_t RXDATAH;
     volatile uint8_t TXDATAL;
@@ -58,7 +58,7 @@ struct USART_ATTINY1X_UART {
 #define CTRLC_UDORD     (1 << 2)
 #define CTRLC_UCPHA     (1 << 1)
 
-/* Function: uart_attiny1x_usart_init
+/* Function: uart_tinyavr_usart_init
  * Initializes an USART as UART
  *
  * Parameters:
@@ -69,9 +69,9 @@ struct USART_ATTINY1X_UART {
  * Returns:
  * Always 0
  */
-int uart_attiny1x_usart_init(struct uart *ctx,
-                             struct USART_ATTINY1X_UART *base,
-                             clock_id_t clkid)
+int uart_tinyavr_usart_init(struct uart *ctx,
+                            struct USART_TINYAVR_UART *base,
+                            clock_id_t clkid)
 {
     ctx->base = base;
     ctx->clkid = clkid;

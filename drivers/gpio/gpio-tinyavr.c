@@ -1,9 +1,9 @@
-#include "gpio-attiny1x.h"
+#include "gpio-tinyavr.h"
 #include "picoRTOS.h"
 
 #include <stdint.h>
 
-struct GPIO_ATTINY1X {
+struct GPIO_TINYAVR {
     volatile uint8_t DIR;
     volatile uint8_t DIRSET;
     volatile uint8_t DIRCLR;
@@ -15,10 +15,10 @@ struct GPIO_ATTINY1X {
     volatile uint8_t IN;
     volatile uint8_t INTFLAGS;
     uint8_t RESERVED0[6];
-    volatile uint8_t PINnCTRL[GPIO_ATTINY1X_PIN_COUNT];
+    volatile uint8_t PINnCTRL[GPIO_TINYAVR_PIN_COUNT];
 };
 
-/* Function: gpio_attiny1x_init
+/* Function: gpio_tinyavr_init
  * Initializes a GPIO
  *
  * Parameters:
@@ -29,11 +29,11 @@ struct GPIO_ATTINY1X {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int gpio_attiny1x_init(struct gpio *ctx,
-                       struct GPIO_ATTINY1X *base,
-                       size_t pin)
+int gpio_tinyavr_init(struct gpio *ctx,
+                      struct GPIO_TINYAVR *base,
+                      size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)GPIO_ATTINY1X_PIN_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(pin < (size_t)GPIO_TINYAVR_PIN_COUNT)) return -EINVAL;
 
     ctx->base = base;
     ctx->pin = pin;

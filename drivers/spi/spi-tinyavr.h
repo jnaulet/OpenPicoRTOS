@@ -1,18 +1,18 @@
-#ifndef SPI_ATTINY1X_H
-#define SPI_ATTINY1X_H
+#ifndef SPI_TINYAVR_H
+#define SPI_TINYAVR_H
 
 #include "spi.h"
 #include "clock.h"
 
-struct SPI_ATTINY1X;
+struct SPI_TINYAVR;
 
 struct spi {
-    /*@temp@*/ struct SPI_ATTINY1X *base;
+    /*@temp@*/ struct SPI_TINYAVR *base;
     clock_id_t clkid;
     int balance;
 };
 
-int spi_attiny1x_init(/*@out@*/ struct spi *ctx, struct SPI_ATTINY1X *base, clock_id_t clkid);
+int spi_tinyavr_init(/*@out@*/ struct spi *ctx, struct SPI_TINYAVR *base, clock_id_t clkid);
 
 /* Runtime calls:
  * int spi_setup(struct spi *ctx, const struct spi_settings *settings);
