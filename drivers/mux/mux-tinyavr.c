@@ -1,5 +1,6 @@
 #include "mux-tinyavr.h"
 #include "picoRTOS.h"
+#include "picoRTOS_device.h"
 
 #include <stdint.h>
 
@@ -19,6 +20,16 @@ struct MUX_TINYAVR {
 };
 
 #define PINnCTRL_PULLUPEN (1 << 3)
+
+struct TINYAVR_PORTMUX {
+    volatile uint8_t CTRLA;
+    volatile uint8_t CTRLB;
+    volatile uint8_t CTRLC;
+    volatile uint8_t CTRLD;
+};
+
+static struct TINYAVR_PORTMUX *PORTMUX =
+    (struct TINYAVR_PORTMUX*)ADDR_PORTMUX;
 
 /* Function: mux_tinyavr_init
  * Initializes a port for muxing
@@ -87,5 +98,24 @@ int mux_tinyavr_pull_up(struct mux *ctx, size_t pin)
     if (!picoRTOS_assert(pin < (size_t)MUX_TINYAVR_PIN_COUNT)) return -EINVAL;
 
     ctx->base->PINnCTRL[pin] = (uint8_t)PINnCTRL_PULLUPEN;
+    return 0;
+}
+
+int mux_tinyavr_select_alt_pin(mux_tinyavr_alt_t alt)
+{
+    if (!picoRTOS_assert(alt < MUX_TINYAVR_ALT_COUNT)) return -EINVAL; /* ! */
+
+    size_t shift = (size_t)0xfu & alt;
+
+    switch (alt >> 4) {
+    case 0: PORTMUX->CTRLA |= (1 << shift); break;
+    case 1: PORTMUX->CTRLB |= (1 << shift); break;
+    case 2: PORTMUX->CTRLC |= (1 << shift); break;
+    case 3: PORTMUX->CTRLD |= (1 << shift); break;
+    default:
+        picoRTOS_break();
+        /*@notreached@*/ return -EIO;
+    }
+
     return 0;
 }
