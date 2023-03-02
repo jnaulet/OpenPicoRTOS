@@ -1,0 +1,13 @@
+# Device configuration file for ATTiny1607
+ARCH_DIR := $(PICORTOS_DIR)/arch/avr/avrxmega3
+DEVICE_DIR := $(PICORTOS_DIR)/devices/atmel/attiny1607
+
+DEFINE := -D__ATtiny1607__
+
+INCLUDE := -I$(PICORTOS_DIR) -I$(PICORTOS_DIR)/arch/include
+INCLUDE += -I$(DEVICE_DIR) -I$(ARCH_DIR)
+
+SRC_C := $(PICORTOS_DIR)/picoRTOS.c
+SRC_C += $(ARCH_DIR)/picoRTOS_port.c
+
+SRC_S := $(ARCH_DIR)/picoRTOS_portasm.S
