@@ -19,14 +19,14 @@ INCLUDE += -I$(PICORTOS_DIR)/drivers/uart
 INCLUDE += -I$(PICORTOS_DIR)/drivers/wd
 
 # Drivers
-SRC_C += $(PICORTOS_DIR)/drivers/adc/adc-attiny1x.c
-SRC_C += $(PICORTOS_DIR)/drivers/clock/clock-attiny1x.c
-SRC_C += $(PICORTOS_DIR)/drivers/gpio/gpio-attiny1x.c
-SRC_C += $(PICORTOS_DIR)/drivers/mux/mux-attiny1x.c
-SRC_C += $(PICORTOS_DIR)/drivers/pwm/pwm-attiny1x_tca.c
-SRC_C += $(PICORTOS_DIR)/drivers/spi/spi-attiny1x.c
-SRC_C += $(PICORTOS_DIR)/drivers/uart/uart-attiny1x_usart.c
-SRC_C += $(PICORTOS_DIR)/drivers/wd/wd-attiny1x.c
+SRC_C += $(PICORTOS_DIR)/drivers/adc/adc-tinyavr.c
+SRC_C += $(PICORTOS_DIR)/drivers/clock/clock-tinyavr.c
+SRC_C += $(PICORTOS_DIR)/drivers/gpio/gpio-tinyavr.c
+SRC_C += $(PICORTOS_DIR)/drivers/mux/mux-tinyavr.c
+SRC_C += $(PICORTOS_DIR)/drivers/pwm/pwm-tinyavr_tca.c
+SRC_C += $(PICORTOS_DIR)/drivers/spi/spi-tinyavr.c
+SRC_C += $(PICORTOS_DIR)/drivers/uart/uart-tinyavr_usart.c
+SRC_C += $(PICORTOS_DIR)/drivers/wd/wd-tinyavr.c
 
 # demo
 SRC_C += attiny817-xplained.c

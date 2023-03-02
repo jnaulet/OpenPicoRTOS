@@ -22,14 +22,14 @@
         <itemPath>../attiny817-xplained.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f4" displayName="drivers" projectFiles="true">
-        <itemPath>../../../drivers/adc/adc-attiny1x.c</itemPath>
-        <itemPath>../../../drivers/mux/mux-attiny1x.c</itemPath>
-        <itemPath>../../../drivers/pwm/pwm-attiny1x_tca.c</itemPath>
-        <itemPath>../../../drivers/clock/clock-attiny1x.c</itemPath>
-        <itemPath>../../../drivers/gpio/gpio-attiny1x.c</itemPath>
-        <itemPath>../../../drivers/spi/spi-attiny1x.c</itemPath>
-        <itemPath>../../../drivers/uart/uart-attiny1x_usart.c</itemPath>
-        <itemPath>../../../drivers/wd/wd-attiny1x.c</itemPath>
+        <itemPath>../../../drivers/adc/adc-tinyavr.c</itemPath>
+        <itemPath>../../../drivers/mux/mux-tinyavr.c</itemPath>
+        <itemPath>../../../drivers/pwm/pwm-tinyavr_tca.c</itemPath>
+        <itemPath>../../../drivers/clock/clock-tinyavr.c</itemPath>
+        <itemPath>../../../drivers/gpio/gpio-tinyavr.c</itemPath>
+        <itemPath>../../../drivers/spi/spi-tinyavr.c</itemPath>
+        <itemPath>../../../drivers/uart/uart-tinyavr_usart.c</itemPath>
+        <itemPath>../../../drivers/wd/wd-tinyavr.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f2" displayName="picoRTOS" projectFiles="true">
         <itemPath>../../../picoRTOS.c</itemPath>

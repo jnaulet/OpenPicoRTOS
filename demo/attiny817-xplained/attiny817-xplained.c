@@ -1,20 +1,20 @@
 #include "attiny817-xplained.h"
 #include "picoRTOS_device.h"
 
-#include "clock-attiny1x.h"
-#include "mux-attiny1x.h"
+#include "clock-tinyavr.h"
+#include "mux-tinyavr.h"
 
 static void clock_init(void)
 {
     struct clock_settings CLOCK_settings = {
-        CLOCK_ATTINY1X_CLKSEL_OSC20M,
+        CLOCK_TINYAVR_CLKSEL_OSC20M,
         false,                      /* clkout_enable */
         false,                      /* prescaler_enable */
-        CLOCK_ATTINY1X_PDIV_COUNT,  /* ignore */
+        CLOCK_TINYAVR_PDIV_COUNT,   /* ignore */
         false,                      /* lock_enable */
     };
 
-    (void)clock_attiny1x_init(&CLOCK_settings);
+    (void)clock_tinyavr_init(&CLOCK_settings);
 }
 
 static void mux_init(void)
@@ -23,31 +23,31 @@ static void mux_init(void)
     static struct mux PORTB;
 
     /* ports */
-    (void)mux_attiny1x_init(&PORTA, (struct MUX_ATTINY1X*)ADDR_PORTA);
-    (void)mux_attiny1x_init(&PORTB, (struct MUX_ATTINY1X*)ADDR_PORTB);
+    (void)mux_tinyavr_init(&PORTA, (struct MUX_TINYAVR*)ADDR_PORTA);
+    (void)mux_tinyavr_init(&PORTB, (struct MUX_TINYAVR*)ADDR_PORTB);
 
     /* SPI */
-    (void)mux_attiny1x_output(&PORTA, (size_t)1);   /* MOSI */
-    (void)mux_attiny1x_input(&PORTA, (size_t)2);    /* MISO */
-    (void)mux_attiny1x_output(&PORTA, (size_t)3);   /* SCK */
+    (void)mux_tinyavr_output(&PORTA, (size_t)1);    /* MOSI */
+    (void)mux_tinyavr_input(&PORTA, (size_t)2);     /* MISO */
+    (void)mux_tinyavr_output(&PORTA, (size_t)3);    /* SCK */
 
     /* UART */
-    (void)mux_attiny1x_output(&PORTB, (size_t)2);   /* TxD */
-    (void)mux_attiny1x_input(&PORTB, (size_t)3);    /* RxD */
-    (void)mux_attiny1x_pull_up(&PORTB, (size_t)2);
+    (void)mux_tinyavr_output(&PORTB, (size_t)2);    /* TxD */
+    (void)mux_tinyavr_input(&PORTB, (size_t)3);     /* RxD */
+    (void)mux_tinyavr_pull_up(&PORTB, (size_t)2);
 
     /* ADC */
-    (void)mux_attiny1x_input(&PORTA, (size_t)4);    /* AIN04 */
+    (void)mux_tinyavr_input(&PORTA, (size_t)4);    /* AIN04 */
 
     /* PWMs */
-    (void)mux_attiny1x_output(&PORTB, (size_t)0);   /* WO0 */
-    (void)mux_attiny1x_output(&PORTB, (size_t)1);   /* WO1 */
+    (void)mux_tinyavr_output(&PORTB, (size_t)0);    /* WO0 */
+    (void)mux_tinyavr_output(&PORTB, (size_t)1);    /* WO1 */
 }
 
 static int gpio_init(/*@partial@*/ struct attiny817_xplained *ctx)
 {
-    (void)gpio_attiny1x_init(&ctx->USER_LED, (struct GPIO_ATTINY1X*)ADDR_PORTC, (size_t)0);
-    (void)gpio_attiny1x_init(&ctx->USER_BUTTON, (struct GPIO_ATTINY1X*)ADDR_PORTC, (size_t)5);
+    (void)gpio_tinyavr_init(&ctx->USER_LED, (struct GPIO_TINYAVR*)ADDR_PORTC, (size_t)0);
+    (void)gpio_tinyavr_init(&ctx->USER_BUTTON, (struct GPIO_TINYAVR*)ADDR_PORTC, (size_t)5);
 
     return 0;
 }
@@ -62,8 +62,8 @@ static int uart_init(/*@partial@*/ struct attiny817_xplained *ctx)
         false,  /* 1 */
     };
 
-    (void)uart_attiny1x_usart_init(&ctx->UART, (struct USART_ATTINY1X_UART*)ADDR_USART0,
-                                   CLOCK_ATTINY1X_CLK_PER);
+    (void)uart_tinyavr_usart_init(&ctx->UART, (struct USART_TINYAVR_UART*)ADDR_USART0,
+                                  CLOCK_TINYAVR_CLK_PER);
 
     return uart_setup(&ctx->UART, &UART_settings);
 }
@@ -79,21 +79,21 @@ static int spi_init(/*@partial@*/ struct attiny817_xplained *ctx)
         (size_t)0,  /* ignore SS */
     };
 
-    (void)spi_attiny1x_init(&ctx->SPI, (struct SPI_ATTINY1X*)ADDR_SPI0, CLOCK_ATTINY1X_CLK_PER);
+    (void)spi_tinyavr_init(&ctx->SPI, (struct SPI_TINYAVR*)ADDR_SPI0, CLOCK_TINYAVR_CLK_PER);
     return spi_setup(&ctx->SPI, &SPI_settings);
 }
 
 static int adc_init(/*@partial@*/ struct attiny817_xplained *ctx)
 {
-    static struct adc_attiny1x ADC0;
-    struct adc_attiny1x_settings ADC0_settings = {
-        ADC_ATTINY1X_RESSEL_10BIT,
-        ADC_ATTINY1X_REFSEL_VDD,
+    static struct adc_tinyavr ADC0;
+    struct adc_tinyavr_settings ADC0_settings = {
+        ADC_TINYAVR_RESSEL_10BIT,
+        ADC_TINYAVR_REFSEL_VDD,
         1500000ul, /* 1.5Mhz max */
     };
 
-    (void)adc_attiny1x_init(&ADC0, (struct ADC_ATTINY1X*)ADDR_ADC0, CLOCK_ATTINY1X_CLK_PER);
-    (void)adc_attiny1x_setup(&ADC0, &ADC0_settings);
+    (void)adc_tinyavr_init(&ADC0, (struct ADC_TINYAVR*)ADDR_ADC0, CLOCK_TINYAVR_CLK_PER);
+    (void)adc_tinyavr_setup(&ADC0, &ADC0_settings);
 
     /* AIN4 settings */
     struct adc_settings ADC_settings_mV = {
@@ -102,19 +102,19 @@ static int adc_init(/*@partial@*/ struct attiny817_xplained *ctx)
         0   /* offset */
     };
 
-    (void)adc_attiny1x_adc_init(&ctx->AIN04, &ADC0, ADC_ATTINY1X_MUXPOS_AIN4);
+    (void)adc_tinyavr_adc_init(&ctx->AIN04, &ADC0, ADC_TINYAVR_MUXPOS_AIN4);
     return adc_setup(&ctx->AIN04, &ADC_settings_mV);
 }
 
 static int wdt_init(/*@partial@*/ struct attiny817_xplained *ctx)
 {
-    struct wd_attiny1x_settings WDT_settings = {
-        WD_ATTINY1X_PERIOD_8MS, /* window */
-        WD_ATTINY1X_PERIOD_8MS, /* period */
+    struct wd_tinyavr_settings WDT_settings = {
+        WD_TINYAVR_PERIOD_8MS,  /* window */
+        WD_TINYAVR_PERIOD_8MS,  /* period */
     };
 
-    (void)wd_attiny1x_init(&ctx->WDT, (struct WDT_ATTINY1X*)ADDR_WDT);
-    (void)wd_attiny1x_setup(&ctx->WDT, &WDT_settings);
+    (void)wd_tinyavr_init(&ctx->WDT, (struct WDT_TINYAVR*)ADDR_WDT);
+    (void)wd_tinyavr_setup(&ctx->WDT, &WDT_settings);
 
     /* don't start here for memory management reasons */
     return 0;
@@ -122,17 +122,17 @@ static int wdt_init(/*@partial@*/ struct attiny817_xplained *ctx)
 
 static int pwm_init(/*@partial@*/ struct attiny817_xplained *ctx)
 {
-    static struct pwm_attiny1x_tca TCA;
-    struct pwm_attiny1x_tca_settings TCA_settings = {
-        PWM_ATTINY1X_TCA_CLKSEL_DIV1,
-        PWM_ATTINY1X_TCA_WGMODE_SINGLESLOPE,
+    static struct pwm_tinyavr_tca TCA;
+    struct pwm_tinyavr_tca_settings TCA_settings = {
+        PWM_TINYAVR_TCA_CLKSEL_DIV1,
+        PWM_TINYAVR_TCA_WGMODE_SINGLESLOPE,
     };
 
-    (void)pwm_attiny1x_tca_init(&TCA, (struct PWM_ATTINY1X_TCA*)ADDR_TCA0, CLOCK_ATTINY1X_CLK_PER);
-    (void)pwm_attiny1x_tca_setup(&TCA, &TCA_settings);
+    (void)pwm_tinyavr_tca_init(&TCA, (struct PWM_TINYAVR_TCA*)ADDR_TCA0, CLOCK_TINYAVR_CLK_PER);
+    (void)pwm_tinyavr_tca_setup(&TCA, &TCA_settings);
 
-    (void)pwm_attiny1x_tca_pwm_init(&ctx->PWM.WO0, &TCA, PWM_ATTINY1X_TCA_CMP0);
-    (void)pwm_attiny1x_tca_pwm_init(&ctx->PWM.WO1, &TCA, PWM_ATTINY1X_TCA_CMP1);
+    (void)pwm_tinyavr_tca_pwm_init(&ctx->PWM.WO0, &TCA, PWM_TINYAVR_TCA_CMP0);
+    (void)pwm_tinyavr_tca_pwm_init(&ctx->PWM.WO1, &TCA, PWM_TINYAVR_TCA_CMP1);
 
     return 0;
 }

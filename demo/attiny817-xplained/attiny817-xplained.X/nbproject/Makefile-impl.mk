@@ -27,7 +27,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 PROJECTNAME=attiny817-xplained.X
 
 # Active Configuration
-DEFAULTCONF=Config3
+DEFAULTCONF=Config1
 CONF=${DEFAULTCONF}
 
 # All Configurations

@@ -1,12 +1,12 @@
 #ifndef ATTINY817_XPLAINED_H
 #define ATTINY817_XPLAINED_H
 
-#include "adc-attiny1x.h"
-#include "gpio-attiny1x.h"
-#include "spi-attiny1x.h"
-#include "uart-attiny1x_usart.h"
-#include "wd-attiny1x.h"
-#include "pwm-attiny1x_tca.h"
+#include "adc-tinyavr.h"
+#include "gpio-tinyavr.h"
+#include "spi-tinyavr.h"
+#include "uart-tinyavr_usart.h"
+#include "wd-tinyavr.h"
+#include "pwm-tinyavr_tca.h"
 
 struct attiny817_xplained {
     struct gpio USER_BUTTON;
