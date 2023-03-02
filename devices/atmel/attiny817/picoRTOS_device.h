@@ -68,7 +68,6 @@
 #define IRQ_TWI0_TWIM   20
 #define IRQ_SPI0_INT    21
 #define IRQ_USART0_RXC  22
-#define IRQ_USART0_RXC  22
 #define IRQ_USART0_DRE  23
 #define IRQ_USART0_TXC  24
 #define IRQ_NVMCTRL_EE  25
