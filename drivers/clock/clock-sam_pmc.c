@@ -299,7 +299,7 @@ int clock_sam_pmc_enable(clock_id_t clkid, clock_sam_pmc_periph_div_t periph_div
  * Disable a particular clock
  *
  * Parameters:
- *  clkid = The clock id
+ *  clkid - The clock id
  *
  * Returns:
  * 0 if success, -errno otherwise
