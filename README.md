@@ -6,6 +6,18 @@ Very small, lightning fast, yet portable preemptive RTOS with SMP suppport.
 
 picoRTOS is a teeny tiny RTOS with as little overhead as humanly possible.
 
+## Table of contents
+
+  1. [Book of requirements](#book-of-requirements)
+  2. [Documentation](#documentation)
+  3. [Supported architectures](#supported-architectures)
+  4. [Featured devices](#featured-devices)
+  5. [Working principle](#working-principle)
+  6. [Advanced features](#advanced-features)
+  7. [Interrupt management](#interrupt-management)
+  8. [How to use](#how-to-use)
+  9. [Featured demos](#featured-demos)
+
 ## Book of requirements
 
 OpenPicoRTOS has been designed with these requirements in mind:
