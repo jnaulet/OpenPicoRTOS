@@ -142,6 +142,21 @@ static void adc_main(void *priv)
     }
 }
 
+/*
+ * wd_main is a thread that refreshed the watchdog
+ */
+static void wd_main(void *priv)
+{
+    picoRTOS_assert_fatal(priv != NULL);
+
+    struct wd *WDT = (struct wd*)priv;
+
+    for (;;) {
+        picoRTOS_sleep(PICORTOS_DELAY_MSEC(32));
+        wd_refresh(WDT);
+    }
+}
+
 int main(void)
 {
     static struct adafruit_itsybitsy_m4 itsybitsy;
@@ -155,6 +170,7 @@ int main(void)
     static picoRTOS_stack_t stack2[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack3[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack4[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack5[CONFIG_DEFAULT_STACK_COUNT];
 
     /* TICK */
     picoRTOS_task_init(&task, led_main, &itsybitsy.RED, stack0, PICORTOS_STACK_COUNT(stack0));
@@ -175,6 +191,10 @@ int main(void)
     /* ADC */
     picoRTOS_task_init(&task, adc_main, &itsybitsy.ADC, stack4, PICORTOS_STACK_COUNT(stack4));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+
+    /* WDT */
+    picoRTOS_task_init(&task, wd_main, &itsybitsy.WDT, stack5, PICORTOS_STACK_COUNT(stack5));
+    picoRTOS_add_task(&task, picoRTOS_get_last_available_priority());
 
     picoRTOS_start();
 

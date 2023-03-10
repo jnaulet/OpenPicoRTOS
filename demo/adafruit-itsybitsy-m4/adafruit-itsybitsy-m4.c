@@ -90,6 +90,9 @@ static void clock_init(void)
     (void)clock_same5x_mclk_enable(CLOCK_SAME5X_MCLK_APBD_ADC0);
     (void)clock_same5x_setup(CLOCK_SAME5X_ADC0, GCLK_DFLL12M);
     (void)clock_same5x_enable(CLOCK_SAME5X_ADC0);
+
+    /* WDT */
+    (void)clock_same5x_mclk_enable(CLOCK_SAME5X_MCLK_APBA_WDT);
 }
 
 static void mux_init(void)
@@ -184,6 +187,20 @@ static int adc_init(/*@partial@*/ struct adafruit_itsybitsy_m4 *ctx)
     return adc_setup(&ctx->ADC, &ADC_settings_mV);
 }
 
+static int wd_init(/*@partial@*/ struct adafruit_itsybitsy_m4 *ctx)
+{
+    struct wd_same5x_settings WD_settings = {
+        WD_SAME5X_PERIOD_64CYC,
+        true, /* window_mode */
+        WD_SAME5X_PERIOD_16CYC
+    };
+
+    (void)wd_same5x_init(&ctx->WDT, (struct WD_SAME5X*)ADDR_WDT);
+    (void)wd_same5x_setup(&ctx->WDT, &WD_settings);
+
+    return wd_start(&ctx->WDT);
+}
+
 int adafruit_itsybitsy_m4_init(struct adafruit_itsybitsy_m4 *ctx)
 {
     clock_init();
@@ -195,6 +212,7 @@ int adafruit_itsybitsy_m4_init(struct adafruit_itsybitsy_m4 *ctx)
     (void)uart_init(ctx);
     (void)pwm_init(ctx);
     (void)adc_init(ctx);
+    (void)wd_init(ctx);
 
     return 0;
 }

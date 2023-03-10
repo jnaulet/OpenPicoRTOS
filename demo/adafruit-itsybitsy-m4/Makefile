@@ -25,7 +25,7 @@ INCLUDE += -I$(PICORTOS_DIR)/drivers/mux
 INCLUDE += -I$(PICORTOS_DIR)/drivers/pwm
 INCLUDE += -I$(PICORTOS_DIR)/drivers/spi
 INCLUDE += -I$(PICORTOS_DIR)/drivers/uart
-INCLUDE += -I$(PICORTOS_DIR)/drivers/usart
+INCLUDE += -I$(PICORTOS_DIR)/drivers/wd
 
 # drivers
 SRC_C += $(PICORTOS_DIR)/drivers/adc/adc-same5x.c
@@ -35,6 +35,7 @@ SRC_C += $(PICORTOS_DIR)/drivers/mux/mux-same5x.c
 SRC_C += $(PICORTOS_DIR)/drivers/pwm/pwm-same5x_tc.c
 SRC_C += $(PICORTOS_DIR)/drivers/spi/spi-sercom.c
 SRC_C += $(PICORTOS_DIR)/drivers/uart/uart-sercom.c
+SRC_C += $(PICORTOS_DIR)/drivers/wd/wd-same5x.c
 
 # sketch files
 SRC_H += $(PICORTOS_DIR)/drivers/include/adc.h
@@ -51,6 +52,8 @@ SRC_H += $(PICORTOS_DIR)/drivers/include/spi.h
 SRC_H += $(PICORTOS_DIR)/drivers/spi/spi-sercom.h
 SRC_H += $(PICORTOS_DIR)/drivers/include/uart.h
 SRC_H += $(PICORTOS_DIR)/drivers/uart/uart-sercom.h
+SRC_H += $(PICORTOS_DIR)/drivers/include/wd.h
+SRC_H += $(PICORTOS_DIR)/drivers/wd/wd-same5x.h
 
 # demo
 SRC_C += main.c

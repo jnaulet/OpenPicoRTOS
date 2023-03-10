@@ -31,6 +31,7 @@
         <itemPath>../../../drivers/pwm/pwm-same5x_tc.c</itemPath>
         <itemPath>../../../drivers/uart/uart-sercom.c</itemPath>
         <itemPath>../../../drivers/adc/adc-same5x.c</itemPath>
+        <itemPath>../../../drivers/wd/wd-same5x.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f2" displayName="picoRTOS" projectFiles="true">
         <itemPath>../../../picoRTOS.c</itemPath>
@@ -55,14 +56,14 @@
         <targetDevice>ATSAMD51G19A</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>AtmelIceTool</platformTool>
+        <platformTool>noID</platformTool>
         <languageToolchain>ARM</languageToolchain>
         <languageToolchainVersion>10.2.1</languageToolchainVersion>
         <platform>2</platform>
       </toolsSet>
       <packs>
-        <pack name="CMSIS" vendor="ARM" version="5.8.0"/>
         <pack name="SAMD51_DFP" vendor="Microchip" version="3.6.120"/>
+        <pack name="CMSIS" vendor="ARM" version="5.8.0"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -162,7 +163,7 @@
       <ARM-Global>
         <property key="bin" value="false"/>
         <property key="common-include-directories"
-                  value="../;../../..;../../../arch/include;../../../arch/arm/cm4f;../../../drivers/include;../../../drivers/clock;../../../devices/atmel/atsame5x;../../../drivers/mux;../../../drivers/gpio;../../../drivers/spi;../../../drivers/uart;../../../drivers/pwm;../../../drivers/usart;../../../drivers/adc"/>
+                  value="../;../../..;../../../arch/include;../../../arch/arm/cm4f;../../../drivers/include;../../../drivers/clock;../../../devices/atmel/atsame5x;../../../drivers/mux;../../../drivers/gpio;../../../drivers/spi;../../../drivers/uart;../../../drivers/pwm;../../../drivers/usart;../../../drivers/adc;../../../drivers/wd"/>
         <property key="eep" value="false"/>
         <property key="hex" value="true"/>
         <property key="lss" value="false"/>

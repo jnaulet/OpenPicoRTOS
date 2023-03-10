@@ -6,6 +6,7 @@
 #include "spi-sercom.h"
 #include "uart-sercom.h"
 #include "pwm-same5x_tc.h"
+#include "wd-same5x.h"
 
 struct adafruit_itsybitsy_m4 {
     struct gpio RED;
@@ -13,6 +14,7 @@ struct adafruit_itsybitsy_m4 {
     struct uart UART;
     struct pwm D5;
     struct adc ADC;
+    struct wd WDT;
 };
 
 int adafruit_itsybitsy_m4_init(/*@out@*/ struct adafruit_itsybitsy_m4 *ctx);
