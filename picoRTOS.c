@@ -13,12 +13,6 @@
 
 /* SCHEDULER main structures */
 
-struct picoRTOS_task_stat {
-    picoRTOS_cycles_t counter;
-    picoRTOS_cycles_t watermark_lo;
-    picoRTOS_cycles_t watermark_hi;
-};
-
 typedef enum {
     PICORTOS_TASK_STATE_EMPTY,
     PICORTOS_TASK_STATE_READY,
@@ -26,12 +20,19 @@ typedef enum {
 } picoRTOS_task_state_t;
 
 struct picoRTOS_task_core {
+    /* state machine */
     /*@temp@*/ picoRTOS_stack_t *sp;
     picoRTOS_task_state_t state;
     picoRTOS_tick_t tick;
+    /* checks */
     /*@temp@*/ picoRTOS_stack_t *stack;
     size_t stack_count;
-    struct picoRTOS_task_stat stat;
+    /* statistics */
+    struct {
+        picoRTOS_cycles_t counter;
+        picoRTOS_cycles_t watermark_lo;
+        picoRTOS_cycles_t watermark_hi;
+    } stat;
 };
 
 /* user-defined tasks + idle */
@@ -39,6 +40,7 @@ struct picoRTOS_task_core {
 #define TASK_IDLE_PRIO  (TASK_COUNT - 1)
 /* shortcut for current task */
 #define TASK_CURRENT()  (picoRTOS.task[picoRTOS.index])
+#define TASK_BY_PRIO(x) (picoRTOS.task[(x)])
 
 struct picoRTOS_core {
     bool is_running;
@@ -54,9 +56,11 @@ static struct picoRTOS_core picoRTOS;
 
 static void task_core_zero(/*@out@*/ struct picoRTOS_task_core *task)
 {
+    /* state machine */
     task->sp = NULL;
     task->state = PICORTOS_TASK_STATE_EMPTY;
     task->tick = 0;
+    /* checks */
     task->stack = NULL;
     task->stack_count = 0;
     /* stats */
@@ -95,6 +99,22 @@ static void task_core_stat_preempt(struct picoRTOS_task_core *task)
 
 /* Group: picoRTOS scheduler API */
 
+static void task_idle_init(void)
+{
+    /* IDLE */
+    struct picoRTOS_task idle;
+
+    picoRTOS_task_init(&idle, arch_idle, NULL, picoRTOS.idle_stack,
+                       (size_t)ARCH_MIN_STACK_COUNT);
+
+    /* similar to picoRTOS_add_task, but without count limit */
+    TASK_BY_PRIO(TASK_IDLE_PRIO).sp = arch_prepare_stack(&idle);
+    TASK_BY_PRIO(TASK_IDLE_PRIO).state = PICORTOS_TASK_STATE_READY;
+    /* stat */
+    TASK_BY_PRIO(TASK_IDLE_PRIO).stack = idle.stack;
+    TASK_BY_PRIO(TASK_IDLE_PRIO).stack_count = idle.stack_count;
+}
+
 /* Function: picoRTOS_init
  * Initialises picoRTOS (mandatory)
  */
@@ -104,16 +124,11 @@ void picoRTOS_init(void)
     size_t n = (size_t)TASK_COUNT;
 
     while (n-- != 0)
-        task_core_zero(&picoRTOS.task[n]);
+        task_core_zero(&TASK_BY_PRIO(n));
 
     /* IDLE */
-    struct picoRTOS_task idle;
-
-    picoRTOS_task_init(&idle, arch_idle, NULL, picoRTOS.idle_stack,
-                       (size_t)ARCH_MIN_STACK_COUNT);
-
-    picoRTOS_add_task(&idle, (picoRTOS_priority_t)TASK_IDLE_PRIO);
-    picoRTOS.index = (size_t)TASK_IDLE_PRIO; /* starts at idle */
+    task_idle_init();
+    picoRTOS.index = (size_t)TASK_IDLE_PRIO; /* first task */
     picoRTOS.tick = 0;
 
     /* RTOS status */
@@ -171,14 +186,14 @@ void picoRTOS_task_init(struct picoRTOS_task *task,
  */
 void picoRTOS_add_task(struct picoRTOS_task *task, picoRTOS_priority_t prio)
 {
-    picoRTOS_assert_fatal(prio < (picoRTOS_priority_t)TASK_COUNT);
-    picoRTOS_assert_fatal(picoRTOS.task[prio].state == PICORTOS_TASK_STATE_EMPTY);
+    picoRTOS_assert_fatal(prio < (picoRTOS_priority_t)CONFIG_TASK_COUNT);
+    picoRTOS_assert_fatal(TASK_BY_PRIO(prio).state == PICORTOS_TASK_STATE_EMPTY);
 
-    picoRTOS.task[prio].sp = arch_prepare_stack(task);
-    picoRTOS.task[prio].state = PICORTOS_TASK_STATE_READY;
+    TASK_BY_PRIO(prio).sp = arch_prepare_stack(task);
+    TASK_BY_PRIO(prio).state = PICORTOS_TASK_STATE_READY;
     /* stat */
-    picoRTOS.task[prio].stack = task->stack;
-    picoRTOS.task[prio].stack_count = task->stack_count;
+    TASK_BY_PRIO(prio).stack = task->stack;
+    TASK_BY_PRIO(prio).stack_count = task->stack_count;
 }
 
 /* Function: picoRTOS_get_next_available_priority
@@ -202,7 +217,7 @@ picoRTOS_priority_t picoRTOS_get_next_available_priority(void)
     picoRTOS_priority_t prio = (picoRTOS_priority_t)0;
 
     for (; prio < (picoRTOS_priority_t)CONFIG_TASK_COUNT; prio++)
-        if (picoRTOS.task[prio].state == PICORTOS_TASK_STATE_EMPTY)
+        if (TASK_BY_PRIO(prio).state == PICORTOS_TASK_STATE_EMPTY)
             return prio;
 
     /* no slot available */
@@ -234,7 +249,7 @@ picoRTOS_priority_t picoRTOS_get_last_available_priority(void)
     picoRTOS_priority_t prio = (picoRTOS_priority_t)CONFIG_TASK_COUNT;
 
     while (prio-- != 0)
-        if (picoRTOS.task[prio].state == PICORTOS_TASK_STATE_EMPTY)
+        if (TASK_BY_PRIO(prio).state == PICORTOS_TASK_STATE_EMPTY)
             return prio;
 
     /* no slot available */
@@ -250,7 +265,7 @@ void picoRTOS_start(void)
 {
     arch_init();
     picoRTOS.is_running = true;
-    arch_start_first_task(picoRTOS.task[TASK_IDLE_PRIO].sp);
+    arch_start_first_task(TASK_BY_PRIO(TASK_IDLE_PRIO).sp);
 }
 
 /* Function: picoRTOS_suspend
@@ -366,8 +381,9 @@ picoRTOS_tick_t picoRTOS_get_tick(void)
 static void syscall_sleep(picoRTOS_tick_t delay)
 {
     if (delay > 0) {
-        TASK_CURRENT().tick = picoRTOS.tick + delay;
-        TASK_CURRENT().state = PICORTOS_TASK_STATE_SLEEP;
+        struct picoRTOS_task_core *task = &TASK_CURRENT();
+        task->tick = picoRTOS.tick + delay;
+        task->state = PICORTOS_TASK_STATE_SLEEP;
     }
 }
 
@@ -379,11 +395,16 @@ static void syscall_kill(void)
 /*@exposed@*/
 static picoRTOS_stack_t *syscall_switch_context(picoRTOS_stack_t *sp)
 {
-    /* store current sp */
-    TASK_CURRENT().sp = sp;
+    struct picoRTOS_task_core *task = &TASK_CURRENT();
+
+    picoRTOS_assert_fatal(sp >= task->stack);
+    picoRTOS_assert_fatal(sp < (task->stack + task->stack_count));
 
     /* stats */
-    task_core_stat_switch(&TASK_CURRENT());
+    task_core_stat_switch(task);
+
+    /* store current sp */
+    task->sp = sp;
 
     /* choose next task to run */
     do
@@ -392,17 +413,18 @@ static picoRTOS_stack_t *syscall_switch_context(picoRTOS_stack_t *sp)
     while (picoRTOS.index < (size_t)TASK_IDLE_PRIO &&
            TASK_CURRENT().state != PICORTOS_TASK_STATE_READY);
 
-    /* stats */
-    task_core_stat_begin(&TASK_CURRENT());
+    /* refresh current task pointer */
+    task = &TASK_CURRENT();
 
-    return TASK_CURRENT().sp;
+    /* stats */
+    task_core_stat_begin(task);
+
+    return task->sp;
 }
 
 picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, picoRTOS_syscall_t syscall, void *priv)
 {
     picoRTOS_assert_fatal(syscall < PICORTOS_SYSCALL_COUNT);
-    picoRTOS_assert_fatal(sp >= TASK_CURRENT().stack);
-    picoRTOS_assert_fatal(sp < (TASK_CURRENT().stack + TASK_CURRENT().stack_count));
 
     switch (syscall) {
     case PICORTOS_SYSCALL_SLEEP: syscall_sleep((picoRTOS_tick_t)priv); break;
@@ -417,14 +439,16 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, picoRTOS_syscall_t sysc
 
 picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
 {
-    picoRTOS_assert_fatal(sp >= TASK_CURRENT().stack);
-    picoRTOS_assert_fatal(sp < (TASK_CURRENT().stack + TASK_CURRENT().stack_count));
+    struct picoRTOS_task_core *task = &TASK_CURRENT();
 
-    /* store current sp */
-    TASK_CURRENT().sp = sp;
+    picoRTOS_assert_fatal(sp >= task->stack);
+    picoRTOS_assert_fatal(sp < (task->stack + task->stack_count));
 
     /* stats */
-    task_core_stat_preempt(&TASK_CURRENT());
+    task_core_stat_preempt(task);
+
+    /* store current sp */
+    task->sp = sp;
 
     /* advance tick */
     picoRTOS.tick++;
@@ -433,23 +457,26 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
     size_t n = (size_t)TASK_COUNT;
 
     while (n-- != 0) {
-        if (picoRTOS.task[n].state == PICORTOS_TASK_STATE_SLEEP &&
-            picoRTOS.task[n].tick == picoRTOS.tick)
+        if (TASK_BY_PRIO(n).state == PICORTOS_TASK_STATE_SLEEP &&
+            TASK_BY_PRIO(n).tick == picoRTOS.tick)
             /* task is ready to rumble */
-            picoRTOS.task[n].state = PICORTOS_TASK_STATE_READY;
+            TASK_BY_PRIO(n).state = PICORTOS_TASK_STATE_READY;
 
         /* select highest priority ready task */
-        if (picoRTOS.task[n].state == PICORTOS_TASK_STATE_READY)
+        if (TASK_BY_PRIO(n).state == PICORTOS_TASK_STATE_READY)
             picoRTOS.index = n;
 
         /* reset task counter */
-        picoRTOS.task[n].stat.counter = (picoRTOS_cycles_t)0;
+        TASK_BY_PRIO(n).stat.counter = (picoRTOS_cycles_t)0;
     }
 
-    /* stats */
-    task_core_stat_begin(&TASK_CURRENT());
+    /* refresh current task pointer */
+    task = &TASK_CURRENT();
 
-    return TASK_CURRENT().sp;
+    /* stats */
+    task_core_stat_begin(task);
+
+    return task->sp;
 }
 
 /* Group: picoRTOS interrupt API */
