@@ -3,7 +3,6 @@
 
 #include "can.h"
 #include "clock.h"
-#include "picoRTOS_futex.h"
 
 struct CAN_SAM;
 
@@ -25,6 +24,11 @@ struct can {
 int can_sam_init(/*@out@*/ struct can *ctx, struct CAN_SAM *base, clock_id_t clkid);
 
 /* Runtime calls:
+ * int can_setup(struct can *ctx, struct can_settings *settings);
+ * int can_accept(struct can *ctx, can_id_t id, can_id_t accept_mask);
+ * int can_write(struct can *ctx, can_id_t id, const void *buf, size_t n);
+ * int can_read(struct can *ctx, can_id_t *id, void *buf, size_t n);
+ * int can_request_frame(struct can *ctx, can_id_t id);
  */
 
 #endif
