@@ -5,6 +5,7 @@ CHECK += arch/arm/cm3
 CHECK += arch/avr/avr5
 CHECK += arch/avr/avr6
 CHECK += arch/avr/avrxmega3
+CHECK += arch/c2000/c28x
 CHECK += arch/mips32/m51xx
 
 SPLINT := splint
