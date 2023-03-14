@@ -1,0 +1,16 @@
+# Device configuration file for TI F28379x
+ARCH_DIR := $(PICORTOS_DIR)/arch/c2000/c28x
+DEVICE_DIR := $(PICORTOS_DIR)/devices/ti/f28379x
+
+DEFINE := -D__TMS320C28XX__
+
+INCLUDE := -I$(PICORTOS_DIR) -I$(PICORTOS_DIR)/arch/include
+INCLUDE += -I$(DEVICE_DIR) -I$(ARCH_DIR) -I$(DEVICE_DIR)/cmd
+
+SRC_C := $(PICORTOS_DIR)/picoRTOS.c
+SRC_C += $(ARCH_DIR)/picoRTOS_port.c
+
+SRC_S := $(DEVICE_DIR)/startup.asm
+SRC_S += $(ARCH_DIR)/picoRTOS_portasm.asm
+
+ENTRY_POINT := --entry_point=Reset_Handler
