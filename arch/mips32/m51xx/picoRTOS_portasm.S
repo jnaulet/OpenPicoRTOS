@@ -64,90 +64,99 @@
 	.equ CP0_EPC, $14
 
 	.macro SWITCH_TO_MAIN_STACK rD
-	la at, main_sp
-	lw at, (at)
+	la at, stack
 	or \rD, sp, zero
-	or sp, at, zero
+	lw sp, (at)
 	.endm
 
-	.macro SWITCH_TO_TASK_STACK rD
-	la at, main_sp
+	.macro SWITCH_TO_TASK_STACK rS
+	la at, stack
 	sw sp, (at)
-	or sp, \rD, zero
+	or sp, \rS, zero
 	.endm
 
 	.macro SAVE_CONTEXT rD
-	addiu \rD, \rD, -108
-	sw v0, 0(\rD)
-	sw v1, 4(\rD)
-	sw a0, 8(\rD)
-	sw a1, 12(\rD)
-	sw a2, 16(\rD)
-	sw a3, 20(\rD)
-	sw t0, 24(\rD)
-	sw t1, 28(\rD)
-	sw t2, 32(\rD)
-	sw t3, 36(\rD)
-	sw t4, 40(\rD)
-	sw t5, 44(\rD)
-	sw t6, 48(\rD)
-	sw t7, 52(\rD)
-	sw s0, 56(\rD)
-	sw s1, 60(\rD)
-	sw s2, 64(\rD)
-	sw s3, 68(\rD)
-	sw s4, 72(\rD)
-	sw s5, 76(\rD)
-	sw s7, 80(\rD)
-	sw s7, 84(\rD)
-	sw t8, 88(\rD)
-	sw t9, 92(\rD)
-	sw fp, 96(\rD)
-	sw ra, 100(\rD)
+	addiu sp, sp, -116
+	sw v0, 0(sp)
+	sw v1, 4(sp)
+	sw a0, 8(sp)
+	sw a1, 12(sp)
+	sw a2, 16(sp)
+	sw a3, 20(sp)
+	sw t0, 24(sp)
+	sw t1, 28(sp)
+	sw t2, 32(sp)
+	sw t3, 36(sp)
+	sw t4, 40(sp)
+	sw t5, 44(sp)
+	sw t6, 48(sp)
+	sw t7, 52(sp)
+	sw s0, 56(sp)
+	sw s1, 60(sp)
+	sw s2, 64(sp)
+	sw s3, 68(sp)
+	sw s4, 72(sp)
+	sw s5, 76(sp)
+	sw s7, 80(sp)
+	sw s7, 84(sp)
+	sw t8, 88(sp)
+	sw t9, 92(sp)
+	sw fp, 96(sp)
+	sw ra, 100(sp)
+	/* special registers */
+	mflo at
+	sw at, 104(sp)
+	mfhi at
+	sw at, 108(sp)
 	mfc0 at, CP0_EPC
-	sw at, 104(\rD)
+	sw at, 112(sp)
+	SWITCH_TO_MAIN_STACK \rD
 	.endm
 
 	.macro RESTORE_CONTEXT rD
-	lw v0, 0(\rD)
-	lw v1, 4(\rD)
-	lw a0, 8(\rD)
-	lw a1, 12(\rD)
-	lw a2, 16(\rD)
-	lw a3, 20(\rD)
-	lw t0, 24(\rD)
-	lw t1, 28(\rD)
-	lw t2, 32(\rD)
-	lw t3, 36(\rD)
-	lw t4, 40(\rD)
-	lw t5, 44(\rD)
-	lw t6, 48(\rD)
-	lw t7, 52(\rD)
-	lw s0, 56(\rD)
-	lw s1, 60(\rD)
-	lw s2, 64(\rD)
-	lw s3, 68(\rD)
-	lw s4, 72(\rD)
-	lw s5, 76(\rD)
-	lw s7, 80(\rD)
-	lw s7, 84(\rD)
-	lw t8, 88(\rD)
-	lw t9, 92(\rD)
-	lw fp, 96(\rD)
-	lw ra, 100(\rD)
-	lw at, 104(\rD)
+	SWITCH_TO_TASK_STACK \rD
+	lw v0, 0(sp)
+	lw v1, 4(sp)
+	lw a0, 8(sp)
+	lw a1, 12(sp)
+	lw a2, 16(sp)
+	lw a3, 20(sp)
+	lw t0, 24(sp)
+	lw t1, 28(sp)
+	lw t2, 32(sp)
+	lw t3, 36(sp)
+	lw t4, 40(sp)
+	lw t5, 44(sp)
+	lw t6, 48(sp)
+	lw t7, 52(sp)
+	lw s0, 56(sp)
+	lw s1, 60(sp)
+	lw s2, 64(sp)
+	lw s3, 68(sp)
+	lw s4, 72(sp)
+	lw s5, 76(sp)
+	lw s7, 80(sp)
+	lw s7, 84(sp)
+	lw t8, 88(sp)
+	lw t9, 92(sp)
+	lw fp, 96(sp)
+	lw ra, 100(sp)
+	/* special registers */
+	lw at, 104(sp)
+	mtlo at
+	lw at, 108(sp)
+	mthi at
+	lw at, 112(sp)
 	mtc0 at, CP0_EPC
-	addiu \rD, \rD, 108
+	addiu sp, sp, 116
 	.endm
 
 	.text
 
 	.align 2
 arch_CORE_TIMER:
-	SWITCH_TO_MAIN_STACK k0
-	SAVE_CONTEXT k0
 	/* tick */
-	or a0, k0, zero
+	SAVE_CONTEXT a0
 	jal picoRTOS_tick
 	nop
 	/* reset timer */
@@ -160,18 +169,15 @@ arch_CORE_TIMER:
 	lw k0, (fp)
 	ins k0, zero, 0, 1
 	sw k0, (fp)
-	/* quick stack restore & swap */
-	or sp, v0, zero
-	RESTORE_CONTEXT sp
+	/* epilogue */
+	RESTORE_CONTEXT v0
 	eret
 
 	/* Should be syscall (EBASE + 0x180) but due to complications related to the
 	 * microchip BSP, this is Core Software Interrupt 0 */
 	.align 2
 arch_SYSCALL:
-	SWITCH_TO_MAIN_STACK k0
-	SAVE_CONTEXT k0
-	or a0, k0, zero	/* get task stack from k0 */
+	SAVE_CONTEXT a0
 	lw a1, 8(a0)	/* get syscall from task stack */
 	lw a2, 12(a0)	/* get priv from task stack */
 	jal picoRTOS_syscall
@@ -185,9 +191,8 @@ arch_SYSCALL:
 	lw k0, (fp)
 	ins k0, zero, 1, 1
 	sw k0, (fp)
-	/* quick stack restore & swap */
-	or sp, v0, zero
-	RESTORE_CONTEXT sp
+	/* epilogue */
+	RESTORE_CONTEXT v0
 	eret
 
 	.align 2
@@ -200,8 +205,7 @@ arch_start_first_task:
 	mtc0 t0, CP0_COMPARE
 	ehb
 	/* restore first context */
-	SWITCH_TO_TASK_STACK a0
-	RESTORE_CONTEXT sp
+	RESTORE_CONTEXT a0
 	/* emulate return from exception */
 	mfc0 ra, CP0_EPC
 	jr ra
@@ -229,7 +233,7 @@ arch_compare_and_swap:
 	jr ra
 	or v0, a1, zero
 .arch_compare_and_swap_fail_cmp:
-	sc at, 0 (a0)	/* turn off llbit */
+	sc at, (a0)	/* turn off llbit */
 .arch_compare_and_swap_fail_sc:
 	jr ra
 	or v0, a2, zero
@@ -237,7 +241,6 @@ arch_compare_and_swap:
 	.align 2
 	.type arch_EIC_handler, %function
 arch_EIC_handler:
-	SWITCH_TO_MAIN_STACK k0
 	SAVE_CONTEXT k0
 	/* extract irq parameters */
 	la fp, INTC_INTSTAT
@@ -264,8 +267,7 @@ arch_EIC_handler:
 	xor k1, k1, t1	/* flip IFSx bit */
 	sw k1, (fp)
 	/* back to task */
-	SWITCH_TO_TASK_STACK k0
-	RESTORE_CONTEXT sp
+	RESTORE_CONTEXT k0
 	eret
 
 	.align 2
@@ -280,7 +282,7 @@ arch_counter:
 	.bss
 
 	.align 2
-main_sp:
+stack:
 	.long 0
 
 	.global ISR_TABLE

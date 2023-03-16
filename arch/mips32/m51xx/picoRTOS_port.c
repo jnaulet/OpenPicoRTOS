@@ -62,7 +62,7 @@ picoRTOS_stack_t *arch_prepare_stack(struct picoRTOS_task *task)
 
     sp[2] = (picoRTOS_stack_t)task->priv;           /* A0 */
     sp[25] = (picoRTOS_stack_t)picoRTOS_start;      /* RA */
-    sp[26] = (picoRTOS_stack_t)task->fn;            /* EPC */
+    sp[28] = (picoRTOS_stack_t)task->fn;            /* EPC */
 
     return sp;
 }
