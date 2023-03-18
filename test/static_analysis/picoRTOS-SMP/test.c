@@ -16,7 +16,7 @@ int main(void)
 {
     int dummy = 0;
     struct picoRTOS_task task;
-    picoRTOS_stack_t stack[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack[CONFIG_DEFAULT_STACK_COUNT];
     picoRTOS_futex_t futex = PICORTOS_FUTEX_INITIALIZER;
     struct picoRTOS_mutex mutex = PICORTOS_MUTEX_INITIALIZER;
     struct picoRTOS_cond cond = PICORTOS_COND_INITIALIZER;
@@ -57,7 +57,8 @@ int main(void)
     (void)PICORTOS_QUEUE_READ(&queue, &dummy);
 
     /* SMP */
-    picoRTOS_SMP_set_core_mask((picoRTOS_priority_t)0, (picoRTOS_mask_t)0x1);
+    picoRTOS_SMP_add_task(&task, picoRTOS_get_last_available_priority(),
+                          (picoRTOS_mask_t)(1 << 1));
     picoRTOS_SMP_enable_interrupt((picoRTOS_irq_t)0, (picoRTOS_mask_t)0x1);
     picoRTOS_SMP_disable_interrupt((picoRTOS_irq_t)0, (picoRTOS_mask_t)0x1);
 

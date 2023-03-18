@@ -7,7 +7,8 @@ SPLINTFLAGS := -checks -unixlib -I. -I$(PICORTOS_DIR)
 SPLINTFLAGS += -I$(PICORTOS_DIR)/arch/include
 
 CPPCHECK := cppcheck
-CPPCHECKFLAGS := --enable=all -DNDEBUG -I. -I$(PICORTOS_DIR)
+CPPCHECKFLAGS := --enable=all --inline-suppr
+CPPCHECKFLAGS += -DNDEBUG -I. -I$(PICORTOS_DIR)
 CPPCHECKFLAGS += -I$(PICORTOS_DIR)/arch/include
 CPPCHECKFLAGS += --suppress=missingIncludeSystem
 
