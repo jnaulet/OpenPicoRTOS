@@ -50,10 +50,10 @@ void picoRTOS_sleep(picoRTOS_tick_t delay);                             /* put c
 void picoRTOS_sleep_until(picoRTOS_tick_t *ref,                         /* put current task to sleep until */
                           picoRTOS_tick_t period);
 
-/*@noreturn@*/ void picoRTOS_kill(void);                                /* kills the current task */
+/*@noreturn@*/ void picoRTOS_kill(void);                            /* kills the current task */
 
-picoRTOS_priority_t picoRTOS_self(void);                                /* gets the current thread priority */
-/*@unused@*/ picoRTOS_tick_t picoRTOS_get_tick(void);                   /* get current tick */
+picoRTOS_pid_t picoRTOS_self(void);                                 /* gets the current thread priority */
+/*@unused@*/ picoRTOS_tick_t picoRTOS_get_tick(void);               /* get current tick */
 
 /* TIME MANAGEMENT */
 

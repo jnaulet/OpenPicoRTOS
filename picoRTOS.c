@@ -33,18 +33,23 @@ struct picoRTOS_task_core {
         picoRTOS_cycles_t watermark_lo;
         picoRTOS_cycles_t watermark_hi;
     } stat;
+    /* shared priority support */
+    picoRTOS_priority_t prio;
+    picoRTOS_priority_t sub;
+    size_t sub_count;
 };
 
 /* user-defined tasks + idle */
 #define TASK_COUNT      (CONFIG_TASK_COUNT + 1)
 #define TASK_IDLE_PRIO  (TASK_COUNT - 1)
+#define TASK_IDLE_PID   (TASK_COUNT - 1)
 /* shortcut for current task */
 #define TASK_CURRENT()  (picoRTOS.task[picoRTOS.index])
-#define TASK_BY_PRIO(x) (picoRTOS.task[(x)])
+#define TASK_BY_PID(x)  (picoRTOS.task[(x)])
 
 struct picoRTOS_core {
     bool is_running;
-    size_t index;
+    picoRTOS_pid_t index;
     picoRTOS_tick_t tick;
     struct picoRTOS_task_core task[TASK_COUNT];
     /* IDLE */
@@ -54,7 +59,7 @@ struct picoRTOS_core {
 /* main core component */
 static struct picoRTOS_core picoRTOS;
 
-static void task_core_zero(/*@out@*/ struct picoRTOS_task_core *task)
+static void task_core_init(/*@out@*/ struct picoRTOS_task_core *task)
 {
     /* state machine */
     task->sp = NULL;
@@ -67,6 +72,40 @@ static void task_core_zero(/*@out@*/ struct picoRTOS_task_core *task)
     task->stat.counter = (picoRTOS_cycles_t)0;
     task->stat.watermark_lo = (picoRTOS_cycles_t)PICORTOS_CYCLES_PER_TICK;
     task->stat.watermark_hi = (picoRTOS_cycles_t)0;
+    /* shared priority support */
+    task->prio = (picoRTOS_priority_t)TASK_COUNT;
+    task->sub = (picoRTOS_priority_t)0;
+    task->sub_count = (size_t)1;
+}
+
+static bool task_core_is_available(struct picoRTOS_task_core *task)
+{
+    /* task is ready and it's its turn */
+    return task->state == PICORTOS_TASK_STATE_READY &&
+           ((size_t)picoRTOS.tick % task->sub_count) == (size_t)task->sub;
+}
+
+static void task_core_quickcpy(/*@out@*/ struct picoRTOS_task_core *dst,
+                               const struct picoRTOS_task_core *src)
+{
+    /* state machine */
+    dst->sp = src->sp;
+    dst->state = src->state;
+    /* checks */
+    dst->stack = src->stack;
+    dst->stack_count = src->stack_count;
+    /* shared priorities */
+    dst->prio = src->prio;
+}
+
+static void task_core_quickswap(struct picoRTOS_task_core *t1,
+                                struct picoRTOS_task_core *t2)
+{
+    struct picoRTOS_task_core tmp;
+
+    task_core_quickcpy(&tmp, t1);
+    task_core_quickcpy(t1, t2);
+    task_core_quickcpy(t2, &tmp);
 }
 
 static inline void task_core_stat_begin(struct picoRTOS_task_core *task)
@@ -107,12 +146,15 @@ static void task_idle_init(void)
     picoRTOS_task_init(&idle, arch_idle, NULL, picoRTOS.idle_stack,
                        (size_t)ARCH_MIN_STACK_COUNT);
 
-    /* similar to picoRTOS_add_task, but without count limit */
-    TASK_BY_PRIO(TASK_IDLE_PRIO).sp = arch_prepare_stack(&idle);
-    TASK_BY_PRIO(TASK_IDLE_PRIO).state = PICORTOS_TASK_STATE_READY;
-    /* stat */
-    TASK_BY_PRIO(TASK_IDLE_PRIO).stack = idle.stack;
-    TASK_BY_PRIO(TASK_IDLE_PRIO).stack_count = idle.stack_count;
+    /* similar to picoRTOS_add_task, but without count limit
+     * don't really care about pid, as it will be sorted anyway */
+    TASK_BY_PID(TASK_IDLE_PID).sp = arch_prepare_stack(&idle);
+    TASK_BY_PID(TASK_IDLE_PID).state = PICORTOS_TASK_STATE_READY;
+    /* checks */
+    TASK_BY_PID(TASK_IDLE_PID).stack = idle.stack;
+    TASK_BY_PID(TASK_IDLE_PID).stack_count = idle.stack_count;
+    /* shared priorities, ignored by sort anyway */
+    TASK_BY_PID(TASK_IDLE_PID).prio = (picoRTOS_priority_t)TASK_IDLE_PRIO;
 }
 
 /* Function: picoRTOS_init
@@ -124,12 +166,12 @@ void picoRTOS_init(void)
     size_t n = (size_t)TASK_COUNT;
 
     while (n-- != 0)
-        task_core_zero(&TASK_BY_PRIO(n));
+        task_core_init(&TASK_BY_PID(n));
 
     /* IDLE */
     task_idle_init();
-    picoRTOS.index = (size_t)TASK_IDLE_PRIO; /* first task */
-    picoRTOS.tick = 0;
+    picoRTOS.index = (picoRTOS_pid_t)TASK_IDLE_PID; /* first task */
+    picoRTOS.tick = (picoRTOS_tick_t)-1;            /* 1st tick will be 0 */
 
     /* RTOS status */
     picoRTOS.is_running = false;
@@ -187,13 +229,23 @@ void picoRTOS_task_init(struct picoRTOS_task *task,
 void picoRTOS_add_task(struct picoRTOS_task *task, picoRTOS_priority_t prio)
 {
     picoRTOS_assert_fatal(prio < (picoRTOS_priority_t)CONFIG_TASK_COUNT);
-    picoRTOS_assert_fatal(TASK_BY_PRIO(prio).state == PICORTOS_TASK_STATE_EMPTY);
 
-    TASK_BY_PRIO(prio).sp = arch_prepare_stack(task);
-    TASK_BY_PRIO(prio).state = PICORTOS_TASK_STATE_READY;
-    /* stat */
-    TASK_BY_PRIO(prio).stack = task->stack;
-    TASK_BY_PRIO(prio).stack_count = task->stack_count;
+    static picoRTOS_pid_t pid = (picoRTOS_pid_t)0;
+
+    picoRTOS_assert_fatal(pid < (picoRTOS_pid_t)CONFIG_TASK_COUNT);
+    picoRTOS_assert_fatal(TASK_BY_PID(pid).state == PICORTOS_TASK_STATE_EMPTY);
+
+    /* state machine */
+    TASK_BY_PID(pid).sp = arch_prepare_stack(task);
+    TASK_BY_PID(pid).state = PICORTOS_TASK_STATE_READY;
+    /* checks */
+    TASK_BY_PID(pid).stack = task->stack;
+    TASK_BY_PID(pid).stack_count = task->stack_count;
+    /* shared priorities */
+    TASK_BY_PID(pid).prio = prio;
+
+    /* increment */
+    pid++;
 }
 
 /* Function: picoRTOS_get_next_available_priority
@@ -211,19 +263,26 @@ void picoRTOS_add_task(struct picoRTOS_task *task, picoRTOS_priority_t prio)
  *
  * Remarks:
  * If no priority is available, picoRTOS will throw a debug exception and stall
+ *
+ * Beware:
+ * This function might not be as useful in picoRTOS v1.7.x as it was in picoRTOS v1.6.x
+ * and might disappear in the future
  */
 picoRTOS_priority_t picoRTOS_get_next_available_priority(void)
 {
+    picoRTOS_pid_t pid = (picoRTOS_pid_t)0;
     picoRTOS_priority_t prio = (picoRTOS_priority_t)0;
 
-    for (; prio < (picoRTOS_priority_t)CONFIG_TASK_COUNT; prio++)
-        if (TASK_BY_PRIO(prio).state == PICORTOS_TASK_STATE_EMPTY)
-            return prio;
+    for (; pid < (picoRTOS_pid_t)CONFIG_TASK_COUNT; pid++)
+        if (TASK_BY_PID(pid).prio == prio) {
+            pid = (picoRTOS_pid_t)0; /* "recursive" */
+            prio++;
+        }
 
     /* no slot available */
-    picoRTOS_assert_fatal(prio != (picoRTOS_priority_t)CONFIG_TASK_COUNT);
-    /*@notreached@*/
-    return (picoRTOS_priority_t)-1;
+    picoRTOS_assert_fatal(prio < (picoRTOS_priority_t)TASK_IDLE_PRIO);
+
+    return prio;
 }
 
 /* Function: picoRTOS_get_last_available_priority
@@ -243,19 +302,63 @@ picoRTOS_priority_t picoRTOS_get_next_available_priority(void)
  *
  * Remarks:
  * If no priority is available, picoRTOS will throw a debug exception and stall
+ *
+ * Beware:
+ * This function might not be as useful in picoRTOS v1.7.x as it was in picoRTOS v1.6.x
+ * and might disappear in the future
  */
 picoRTOS_priority_t picoRTOS_get_last_available_priority(void)
 {
-    picoRTOS_priority_t prio = (picoRTOS_priority_t)CONFIG_TASK_COUNT;
+    picoRTOS_pid_t pid = (picoRTOS_pid_t)0;
+    picoRTOS_priority_t prio = (picoRTOS_priority_t)(TASK_IDLE_PRIO - 1);
 
-    while (prio-- != 0)
-        if (TASK_BY_PRIO(prio).state == PICORTOS_TASK_STATE_EMPTY)
-            return prio;
+    for (; pid < (picoRTOS_pid_t)CONFIG_TASK_COUNT; pid++)
+        if (TASK_BY_PID(pid).prio == prio) {
+            pid = (picoRTOS_pid_t)0; /* "recursive" */
+            prio--;
+        }
 
-    /* no slot available */
-    picoRTOS_assert_fatal(prio != (picoRTOS_priority_t)-1);
-    /*@notreached@*/
-    return (picoRTOS_priority_t)-1;
+    /* no slot available: overflow */
+    picoRTOS_assert_fatal(prio < (picoRTOS_priority_t)TASK_IDLE_PRIO);
+
+    return prio;
+}
+
+static void core_sort_tasks(void)
+{
+    /* selection sort (simple & in-place) */
+    picoRTOS_pid_t i = (picoRTOS_pid_t)1;
+
+    for (; i < (picoRTOS_pid_t)CONFIG_TASK_COUNT; i++) {
+
+        picoRTOS_pid_t j = i;
+
+        while (j > 0 && TASK_BY_PID(j - 1).prio > TASK_BY_PID(j).prio) {
+            task_core_quickswap(&TASK_BY_PID(j), &TASK_BY_PID(j - 1));
+            j--;
+        }
+    }
+}
+
+static void core_arrange_shared_priorities(void)
+{
+    picoRTOS_pid_t i = (picoRTOS_pid_t)1;
+    picoRTOS_priority_t sub = (picoRTOS_priority_t)0;
+
+    /* count subs */
+    for (; i < (picoRTOS_pid_t)CONFIG_TASK_COUNT; i++) {
+        /* increment sub priority & count */
+        if (TASK_BY_PID(i).prio == TASK_BY_PID(i - 1).prio) {
+            TASK_BY_PID(i).sub = ++sub;
+            TASK_BY_PID(i).sub_count = (size_t)sub + 1;
+        }else
+            sub = (picoRTOS_priority_t)0;
+    }
+
+    /* adjust sub_count */
+    for (i = (picoRTOS_pid_t)CONFIG_TASK_COUNT; i-- != 0;)
+        if (TASK_BY_PID(i).prio == TASK_BY_PID(i + 1).prio)
+            TASK_BY_PID(i).sub_count = (size_t)TASK_BY_PID(i + 1).sub_count;
 }
 
 /* Function: picoRTOS_start
@@ -263,9 +366,12 @@ picoRTOS_priority_t picoRTOS_get_last_available_priority(void)
  */
 void picoRTOS_start(void)
 {
+    core_sort_tasks();
+    core_arrange_shared_priorities();
+
     arch_init();
     picoRTOS.is_running = true;
-    arch_start_first_task(TASK_BY_PRIO(TASK_IDLE_PRIO).sp);
+    arch_start_first_task(TASK_BY_PID(TASK_IDLE_PID).sp);
 }
 
 /* Function: picoRTOS_suspend
@@ -361,10 +467,10 @@ void picoRTOS_kill(void)
 /* Function: picoRTOS_self
  * Returns the current task's priority/identitifer
  */
-picoRTOS_priority_t picoRTOS_self(void)
+picoRTOS_pid_t picoRTOS_self(void)
 {
     picoRTOS_assert_fatal(picoRTOS.is_running);
-    return (picoRTOS_priority_t)picoRTOS.index;
+    return (picoRTOS_pid_t)picoRTOS.index;
 }
 
 /* Function: picoRTOS_get_tick
@@ -409,9 +515,8 @@ static picoRTOS_stack_t *syscall_switch_context(picoRTOS_stack_t *sp)
     /* choose next task to run */
     do
         picoRTOS.index++;
-    /* ignore sleeping and empty tasks */
-    while (picoRTOS.index < (size_t)TASK_IDLE_PRIO &&
-           TASK_CURRENT().state != PICORTOS_TASK_STATE_READY);
+    /* ignore sleeping, empty tasks & out-of-round sub-tasks */
+    while (!task_core_is_available(&TASK_CURRENT()));
 
     /* refresh current task pointer */
     task = &TASK_CURRENT();
@@ -454,20 +559,23 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
     picoRTOS.tick++;
 
     /* quick pass on sleeping tasks + idle */
-    size_t n = (size_t)TASK_COUNT;
+    picoRTOS_pid_t pid = (picoRTOS_pid_t)TASK_COUNT;
 
-    while (n-- != 0) {
-        if (TASK_BY_PRIO(n).state == PICORTOS_TASK_STATE_SLEEP &&
-            TASK_BY_PRIO(n).tick == picoRTOS.tick)
+    while (pid-- != 0) {
+
+        task = &TASK_BY_PID(pid);
+
+        if (task->state == PICORTOS_TASK_STATE_SLEEP &&
+            task->tick == picoRTOS.tick)
             /* task is ready to rumble */
-            TASK_BY_PRIO(n).state = PICORTOS_TASK_STATE_READY;
+            task->state = PICORTOS_TASK_STATE_READY;
 
         /* select highest priority ready task */
-        if (TASK_BY_PRIO(n).state == PICORTOS_TASK_STATE_READY)
-            picoRTOS.index = n;
+        if (task_core_is_available(task))
+            picoRTOS.index = pid;
 
         /* reset task counter */
-        TASK_BY_PRIO(n).stat.counter = (picoRTOS_cycles_t)0;
+        task->stat.counter = (picoRTOS_cycles_t)0;
     }
 
     /* refresh current task pointer */

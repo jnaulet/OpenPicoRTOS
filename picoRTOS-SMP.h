@@ -18,8 +18,9 @@
 
 /* TASKS (potentially unused) */
 
-/*@unused@*/ void picoRTOS_SMP_set_core_mask(picoRTOS_priority_t prio,
-                                             picoRTOS_mask_t core_mask);
+/*@unused@*/ void picoRTOS_SMP_add_task(struct picoRTOS_task *task,
+                                        picoRTOS_priority_t prio,
+                                        picoRTOS_mask_t core_mask);
 
 /* INTERRUPT MANAGEMENT (optional) */
 
