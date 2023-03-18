@@ -124,6 +124,7 @@ Group: hw-specific  {
       File: PWM  (no auto-title, drivers/pwm/pwm-same5x_tc.c)
       File: SPI  (no auto-title, drivers/spi/spi-sercom.c)
       File: UART  (no auto-title, drivers/uart/uart-sercom.c)
+      File: Watchdog  (no auto-title, drivers/wd/wd-same5x.c)
       }  # Group: SAMD5x/E5x
 
    }  # Group: hw-specific
