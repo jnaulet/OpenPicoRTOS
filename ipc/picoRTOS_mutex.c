@@ -39,11 +39,11 @@ void picoRTOS_mutex_init(struct picoRTOS_mutex *mutex)
 int picoRTOS_mutex_trylock(struct picoRTOS_mutex *mutex)
 {
     picoRTOS_atomic_t unused = (picoRTOS_atomic_t)-1;
-    picoRTOS_atomic_t prio = (picoRTOS_atomic_t)picoRTOS_self();
+    picoRTOS_atomic_t pid = (picoRTOS_atomic_t)picoRTOS_self();
 
     /* mutex is re-entrant */
-    if (arch_compare_and_swap(&mutex->owner, unused, prio) != unused &&
-        mutex->owner != prio)
+    if (arch_compare_and_swap(&mutex->owner, unused, pid) != unused &&
+        mutex->owner != pid)
         return -EAGAIN;
 
     mutex->count++;
