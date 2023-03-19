@@ -223,14 +223,11 @@ int main(void)
     /* LED0 on core #0 */
     prio = picoRTOS_get_next_available_priority();
     picoRTOS_task_init(&task, led0_main, &blink, stack1, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-    picoRTOS_add_task(&task, prio);
-    picoRTOS_SMP_set_core_mask(prio, (picoRTOS_mask_t)0x2);
+    picoRTOS_SMP_add_task(&task, prio, (picoRTOS_mask_t)(1 << 1));
 
-    /* LED1 on core #1 */
-    prio = picoRTOS_get_next_available_priority();
+    /* LED1 on core #1 (round-robin) */
     picoRTOS_task_init(&task, led1_main, &blink, stack2, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-    picoRTOS_add_task(&task, prio);
-    picoRTOS_SMP_set_core_mask(prio, (picoRTOS_mask_t)0x1);
+    picoRTOS_SMP_add_task(&task, prio, (picoRTOS_mask_t)(1 << 0));
 
     /* SPI */
     picoRTOS_task_init(&task, spi_main, blink.pico.SPI, stack3, (size_t)CONFIG_DEFAULT_STACK_COUNT);
