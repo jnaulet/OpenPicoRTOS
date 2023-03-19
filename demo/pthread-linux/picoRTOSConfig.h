@@ -3,12 +3,10 @@
 
 /* CLOCKS */
 #define CONFIG_SYSCLK_HZ 250
-#define CONFIG_TICK_HZ   100
+#define CONFIG_TICK_HZ   10
 
 /* TASKS */
-#define CONFIG_TASK_COUNT 2
-#define TASK_TICK_PRIO    0
-#define TASK_BLINK_PRIO   1
+#define CONFIG_TASK_COUNT 5
 
 #define CONFIG_DEFAULT_STACK_COUNT 128
 
