@@ -1,4 +1,4 @@
-# OpenPicoRTOS [![Latest Release](https://img.shields.io/github/release-date/jnaulet/OpenPicoRTOS)](https://img.shields.io) [![Commits since](https://img.shields.io/github/commits-since/jnaulet/OpenPicoRTOS/latest/v1.6.x)](https://img.shields.io)
+# OpenPicoRTOS [![Latest Release](https://img.shields.io/github/release-date/jnaulet/OpenPicoRTOS)](https://img.shields.io) [![Commits since](https://img.shields.io/github/commits-since/jnaulet/OpenPicoRTOS/latest/v1.7.x)](https://img.shields.io)
 
 Very small, lightning fast, yet portable preemptive RTOS with SMP suppport.
 
@@ -9,13 +9,13 @@ picoRTOS is a teeny tiny RTOS with as little overhead as humanly possible.
 ## Table of contents
 
   1. [Book of requirements](#book-of-requirements)
-  2. [Documentation](#documentation)
+  2. [API Documentation](#api-documentation)
   3. [Supported architectures](#supported-architectures)
   4. [Featured devices](#featured-devices)
   5. [Working principle](#working-principle)
-  6. [Advanced features](#advanced-features)
+  6. [Inter-processus communication](#inter-processus-communication)
+  8. [Shared priorities](#shared-priorities)
   7. [Interrupt management](#interrupt-management)
-  8. [How to use](#how-to-use)
   9. [Featured demos](#featured-demos)
 
 ## Book of requirements
@@ -35,7 +35,7 @@ OpenPicoRTOS has been designed with these requirements in mind:
 
 More information here: https://github.com/jnaulet/OpenPicoRTOS/blob/main/etc/Requirements.md
 
-## Documentation
+## API Documentation
 
 HTML documentation of the complete API is available in the documentation directory and
 at the following address: https://jnaulet.github.io/OpenPicoRTOS
@@ -73,18 +73,29 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
 
 ## Working principle
 
-On every new schedule (tick) task 0 is executed first.
-Any call to a sleeping function (picoRTOS_schedule, picoRTOS_sleep or
-picoRTOS_sleep_until) will allow the scheduler to move to the next task until
-it reaches idle or a new tick occurs and the cycle starts over.
+On every new cycle (tick), picoRTOS stops the execution of the current task and runs the highest
+priority task available.   
+A few criterias make a task available for scheduling, it has to be:
+  - Ready (aka not sleeping/busy)
+  - The tick modulo has to match the task sub-priority (see shared priorities)
+  - In case of SMP, the task core mask has to match the current running core
 
-To increase speed and predictability, every task is identified by its exclusive
-level of priority, no round robin support is offered.
+Any syscall (picoRTOS_schedule, picoRTOS_sleep or picoRTOS_sleep_until) will allow picoRTOS to run
+the next highest priority task available until it reaches idle or a new tick occurs and the cycle
+starts over.
+
+Task execution order goes from highest (0) to lowest (CONFIG_TASK_COUNT - 1) priority.
+
+Example:
+
+    tick: prio0 -> prio1 -> prio2 -> ... (towards idle)   
+    tick: prio0 -> prio1 -> prio2 -> ... (towards idle)
+    ...
 
 No memory management is offered, everything is static, which makes the static analyzer's
 job much easier for critical applications.
 
-## Advanced features
+## Inter-processus communication
 
 IPCs are available to architectures that support the correct associated atomic operations.
 A small infringement has been made to the hard real time philosophy of the project by supporting
@@ -98,6 +109,22 @@ not recommended, though.
  - conditions (require mutexes)
  - queues (requires futexes)
 
+## Shared priorities
+
+Version 1.7 introduces shared priorities for tasks, a.k.a round-robin scheduling.
+
+When several tasks share the same priority, the order of execution (highest to lowest
+priority) doesn't change, but these tasks will be executed alternatively, on a tick
+modulo basis.
+
+Example with 2 tasks (B & C) sharing a priority of 1:
+
+    tick 0: taskA (prio 0) -> taskB (prio 1) -> taskD (prio 2) -> ...    
+    tick 1: taskA (prio 0) -> taskC (prio 1) -> taskD (prio 2) -> ...  
+    tick 2: taskA (prio 0) -> taskB (prio 1) -> taskD (prio 2) -> ...  
+    tick 3: taskA (prio 0) -> taskC (prio 1) -> taskD (prio 2) -> ...  
+    ...
+
 ## Interrupt management
 
 Version 1.5 introduces contextual interrupt management as an experimental feature.
@@ -106,57 +133,6 @@ All architectures are supported (at least partially) at the moment.
 
 This feature should be used with care, as interrupts tend to destroy the real-time part in
 "RTOS".
-
-## How to use
-
-Copy the picoRTOS directory in your project.
-
-Create a picoRTOSConfig.h file in the include path of your project.
-
-Sample configs are available for every supported archs in arch/x/y/samples and in the
-demo directory.
-
-Then, add the relevant arch files to your build using the provided devices build files.
-
-Example for ATMega2560:
-
-    PICORTOS_DIR := ./picoRTOS
-    -include $(PICORTOS_DIR)/devices/atmel/atmega2560/Makefile.in
-
-IPCs are not in the build files by default, you need to add them manually to your build:
-
-    INCLUDE += -I$(PICORTOS_DIR)/ipc
-    SRC_C += $(PICORTOS_DIR)/ipc/picoRTOS_futex.c
-
----
-
-Code-wise, using picoRTOS is quite straightforward :
-
-    #include "picoRTOS.h"
-    
-    void main(void)
-    {
-        picoRTOS_init();
-    
-        struct picoRTOS_task task0;
-        struct picoRTOS_task task1;
-        static picoRTOS_stack_t stack0[CONFIG_DEFAULT_STACK_COUNT];
-        static picoRTOS_stack_t stack1[CONFIG_DEFAULT_STACK_COUNT];
-        ...
-    
-        picoRTOS_task_init(&task0, task0_main, &task0_context, stack0, CONFIG_DEFAULT_TASK_COUNT);
-        picoRTOS_task_init(&task1, task1_main, &task1_context, stack1, CONFIG_DEFAULT_TASK_COUNT);
-        ...
-    
-        picoRTOS_add_task(&task0, TASK0_PRIO);
-        picoRTOS_add_task(&task1, TASK1_PRIO);
-        ...
-    
-        picoRTOS_start();
-    }
-
-Hint: tasks are converted to internal structures in picoRTOS_add_task and can be local
-but stacks need to be persistant (prefer static to globals to reduce scope).
 
 ## Featured demos
 
