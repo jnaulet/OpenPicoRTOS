@@ -105,7 +105,7 @@ static void led4_main(void *priv)
         }else if (--duty_cycle_pcent == 0)
             fade_in = true;
 
-        picoRTOS_sleep_until(&ref, PICORTOS_DELAY_MSEC(5)); /* 200Hz */
+        picoRTOS_sleep_until(&ref, PICORTOS_DELAY_MSEC(10)); /* 100Hz */
     }
 }
 
@@ -204,6 +204,127 @@ static void pwm_main(void *priv)
     }
 }
 
+/*
+ * This thread tests the i2c master by sending a byte (0xa5) to 0x69 and expecting a
+ * specific answer from a slave (0x5a)
+ */
+static void twi_master_main(void *priv)
+{
+    picoRTOS_assert_fatal(priv != NULL);
+
+    struct twi *TWI = (struct twi*)priv;
+    picoRTOS_tick_t ref = picoRTOS_get_tick();
+
+    for (;;) {
+        char c = (char)0xa5;
+        int timeout = (int)PICORTOS_DELAY_MSEC(500);
+
+        while (twi_write(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
+            picoRTOS_schedule();
+
+        picoRTOS_assert_fatal(timeout != -1);
+
+        while (twi_read(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
+            picoRTOS_schedule();
+
+        picoRTOS_assert_fatal(timeout != -1);
+        picoRTOS_assert_fatal(c == (char)0x5a);
+
+        picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
+    }
+}
+
+/*
+ * This thread tests the i2c slave, it reads a byte (0xa5) and send 0x5a back
+ */
+static void twi_slave_main(void *priv)
+{
+    picoRTOS_assert_fatal(priv != NULL);
+
+    struct twi *TWI = (struct twi*)priv;
+
+    for (;;) {
+        char c = (char)0;
+        int timeout = (int)PICORTOS_DELAY_SEC(2);
+
+        while (twi_read(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
+            picoRTOS_schedule();
+
+        picoRTOS_assert_fatal(timeout != -1);
+        picoRTOS_assert_fatal(c == (char)0xa5);
+
+        c = (char)0x5a;
+        while (twi_write(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
+            picoRTOS_schedule();
+
+        picoRTOS_assert_fatal(timeout != -1);
+    }
+}
+
+/* ADC test. Not much for the moment */
+static void adc_main(void *priv)
+{
+    picoRTOS_assert_fatal(priv != NULL);
+
+    struct adc *IVtemp = (struct adc*)priv;
+    picoRTOS_tick_t ref = picoRTOS_get_tick();
+
+    for (;;) {
+        picoRTOS_sleep_until(&ref, PICORTOS_DELAY_MSEC(500));
+
+        int res;
+        int temp = 0;
+        int timeout = (int)PICORTOS_DELAY_MSEC(200);
+
+        while ((res = adc_read(IVtemp, &temp)) == -EAGAIN && timeout-- != 0)
+            picoRTOS_schedule();
+
+        picoRTOS_assert_fatal(timeout != -1);
+        picoRTOS_assert_fatal(temp > 100);
+        picoRTOS_assert_fatal(temp < 800);
+    }
+}
+
+/*
+ * This thread is a CAN loopback test. Not 100% effective but that will do
+ */
+static void can_main(void *priv)
+{
+#define CAN_TEST_ID (can_id_t)0x7
+
+    picoRTOS_assert_fatal(priv != NULL);
+
+    static const char data[] = { "PINGPONG" };
+
+    can_id_t id = 0;
+    struct can *CAN = (struct can*)priv;
+
+    (void)can_accept(CAN, CAN_TEST_ID, (can_id_t)CAN_ACCEPT_STRICT);
+
+    for (;;) {
+
+        int res;
+        int loop = (int)PICORTOS_DELAY_SEC(1);
+        char rx[8] = { (char)0, (char)0, (char)0, (char)0,
+                       (char)0, (char)0, (char)0, (char)0 };
+
+        /* ping */
+        if ((res = can_write(CAN, CAN_TEST_ID, data, (size_t)8)) == -EAGAIN) {
+            picoRTOS_schedule();
+            continue;
+        }
+
+        /* pong */
+        while (((res = can_read(CAN, &id, rx, sizeof(rx)))) == -EAGAIN && loop-- != 0)
+            picoRTOS_schedule();
+
+        //picoRTOS_assert_fatal(res == (int)sizeof(rx));
+        picoRTOS_assert_fatal(loop != -1);
+        //picoRTOS_assert_fatal(id == CAN_TEST_ID);
+        //picoRTOS_assert_fatal(rx[7] == 'G');
+    }
+}
+
 int main(void)
 {
     static struct curiosity_20_pic32mz_ef board;
@@ -221,7 +342,12 @@ int main(void)
     static picoRTOS_stack_t stack5[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack6[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack7[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack8[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack9[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack10[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack11[CONFIG_DEFAULT_STACK_COUNT];
 
+    /* leds */
     picoRTOS_task_init(&task, led1_main, &board.LED1, stack0, PICORTOS_STACK_COUNT(stack0));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
     picoRTOS_task_init(&task, led2_main, &board.LED2, stack1, PICORTOS_STACK_COUNT(stack1));
@@ -230,14 +356,32 @@ int main(void)
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
     picoRTOS_task_init(&task, led4_main, &board.LED4, stack3, PICORTOS_STACK_COUNT(stack3));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+    /* uart */
     picoRTOS_task_init(&task, console_main, &board.UART6, stack4, PICORTOS_STACK_COUNT(stack4));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+    /* spi */
     picoRTOS_task_init(&task, spi_main, &board.SPI1, stack5, PICORTOS_STACK_COUNT(stack5));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+    /* pwm */
     picoRTOS_task_init(&task, pwm_main, &board.PWM1, stack6, PICORTOS_STACK_COUNT(stack6));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+    /* i2c */
+    /*
+     * picoRTOS_task_init(&task, twi_master_main, &board.I2C1, stack7, PICORTOS_STACK_COUNT(stack7));
+     * picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+     * picoRTOS_task_init(&task, twi_slave_main, &board.I2C2, stack8, PICORTOS_STACK_COUNT(stack8));
+     * picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+     */
+    /* adc */
+    picoRTOS_task_init(&task, adc_main, &board.IVtemp, stack9, PICORTOS_STACK_COUNT(stack9));
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+    /* can */
+    /*
+     * picoRTOS_task_init(&task, can_main, &board.CAN2, stack10, PICORTOS_STACK_COUNT(stack10));
+     * picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+     */
     /* lastly, watchdog */
-    picoRTOS_task_init(&task, wd_main, &board.WDT, stack7, PICORTOS_STACK_COUNT(stack7));
+    picoRTOS_task_init(&task, wd_main, &board.WDT, stack11, PICORTOS_STACK_COUNT(stack11));
     picoRTOS_add_task(&task, picoRTOS_get_last_available_priority());
 
     /* start the scheduler */

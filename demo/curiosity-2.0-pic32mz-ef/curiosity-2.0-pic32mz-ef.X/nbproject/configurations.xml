@@ -26,6 +26,9 @@
         <itemPath>../../../drivers/spi/spi-pic32mx.c</itemPath>
         <itemPath>../../../drivers/wd/wd-pic32mx.c</itemPath>
         <itemPath>../../../drivers/pwm/pwm-pic32mx.c</itemPath>
+        <itemPath>../../../drivers/twi/twi-pic32mx.c</itemPath>
+        <itemPath>../../../drivers/adc/adc-pic32mx.c</itemPath>
+        <itemPath>../../../drivers/can/can-pic32mx.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f2" displayName="picoRTOS" projectFiles="true">
         <logicalFolder name="f1" displayName="arch" projectFiles="true">
@@ -219,7 +222,7 @@
       </C32CPP>
       <C32Global>
         <property key="common-include-directories"
-                  value="../../../;../;../../../ipc;../../../arch/include;../../../arch/mips32/m51xx;../../../devices/microchip/pic32mz-ef;../../../drivers/include;../../../drivers/misc;../../../drivers/clock;../../../drivers/mux;../../../drivers/gpio;../../../drivers/uart;../../../drivers/spi;../../../drivers/wd;../../../drivers/pwm"/>
+                  value="../../../;../;../../../ipc;../../../arch/include;../../../arch/mips32/m51xx;../../../devices/microchip/pic32mz-ef;../../../drivers/include;../../../drivers/misc;../../../drivers/clock;../../../drivers/mux;../../../drivers/gpio;../../../drivers/uart;../../../drivers/spi;../../../drivers/wd;../../../drivers/pwm;../../../drivers/twi;../../../drivers/adc;../../../drivers/can"/>
         <property key="gp-relative-option" value=""/>
         <property key="legacy-libc" value="true"/>
         <property key="mdtcm" value=""/>
@@ -263,8 +266,8 @@
         <property key="codecoverage.enabled" value="Disable"/>
         <property key="codecoverage.enableoutputtofile" value="false"/>
         <property key="codecoverage.outputfile" value=""/>
-        <property key="debugoptions.debug-startup" value="Halt at main"/>
-        <property key="debugoptions.reset-behaviour" value="Reset Vector"/>
+        <property key="debugoptions.debug-startup" value="Use system settings"/>
+        <property key="debugoptions.reset-behaviour" value="Use system settings"/>
         <property key="lastid" value=""/>
         <property key="oscillator.auxfrequency" value="120"/>
         <property key="oscillator.auxfrequencyunit" value="Mega"/>

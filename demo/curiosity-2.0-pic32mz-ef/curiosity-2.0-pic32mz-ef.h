@@ -1,9 +1,12 @@
 #ifndef CURIOSITY_20_PIC32MZ_EF_H
 #define CURIOSITY_20_PIC32MZ_EF_H
 
+#include "adc-pic32mx.h"
+#include "can-pic32mx.h"
 #include "gpio-pic32mx.h"
 #include "pwm-pic32mx.h"
 #include "spi-pic32mx.h"
+#include "twi-pic32mx.h"
 #include "uart-pic32mx.h"
 #include "wd-pic32mx.h"
 
@@ -21,6 +24,11 @@ struct curiosity_20_pic32mz_ef {
     struct spi SPI1;
     struct wd WDT;
     struct pwm PWM1;
+    struct twi I2C1;
+    struct twi I2C2;
+    struct adc A0;
+    struct adc IVtemp;
+    struct can CAN2;
 };
 
 int curiosity_20_pic32mz_ef_init(/*@out@*/ struct curiosity_20_pic32mz_ef *ctx);
