@@ -70,7 +70,7 @@ picoRTOS_stack_t *arch_prepare_stack(struct picoRTOS_task *task)
 /* cppcheck-suppress constParameter */
 void arch_idle(void *null)
 {
-    picoRTOS_assert_fatal(null == NULL);
+    if (!picoRTOS_assert_fatal(null == NULL)) return;
 
     for (;;)
         ASM("wait");
@@ -96,7 +96,7 @@ extern void arch_EIC_handler(void);
 
 void arch_register_interrupt(picoRTOS_irq_t irq, picoRTOS_isr_fn fn, void *priv)
 {
-    picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT);
+    if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT)) return;
 
     ISR_TABLE[irq].fn = fn;
     ISR_TABLE[irq].priv = priv;
@@ -105,7 +105,7 @@ void arch_register_interrupt(picoRTOS_irq_t irq, picoRTOS_isr_fn fn, void *priv)
 
 void arch_enable_interrupt(picoRTOS_irq_t irq)
 {
-    picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT);
+    if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT)) return;
 
     /* find the correct IEC offset */
     size_t IEC_index = (size_t)(irq >> 5);
@@ -124,7 +124,7 @@ void arch_enable_interrupt(picoRTOS_irq_t irq)
 
 void arch_disable_interrupt(picoRTOS_irq_t irq)
 {
-    picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT);
+    if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT)) return;
 
     /* find the correct IEC offset */
     size_t IEC_index = (size_t)(irq >> 5);

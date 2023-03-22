@@ -101,7 +101,7 @@ picoRTOS_stack_t *arch_prepare_stack(struct picoRTOS_task *task)
 /* cppcheck-suppress constParameter */
 void arch_idle(void *null)
 {
-    picoRTOS_assert_fatal(null == NULL);
+    if (!picoRTOS_assert_fatal(null == NULL)) return;
 
     for (;;)
         ASM("sleep");
@@ -141,8 +141,8 @@ extern struct {
 
 void arch_register_interrupt(picoRTOS_irq_t irq, picoRTOS_isr_fn fn, void *priv)
 {
-    picoRTOS_assert_fatal(irq > (picoRTOS_irq_t)1);
-    picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)(DEVICE_INTERRUPT_VECTOR_COUNT + 2));
+    if (!picoRTOS_assert_fatal(irq > (picoRTOS_irq_t)1)) return;
+    if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)(DEVICE_INTERRUPT_VECTOR_COUNT + 2))) return;
 
     ISR_TABLE[irq - 2].fn = fn;
     ISR_TABLE[irq - 2].priv = priv;
@@ -150,13 +150,17 @@ void arch_register_interrupt(picoRTOS_irq_t irq, picoRTOS_isr_fn fn, void *priv)
 
 void arch_enable_interrupt(picoRTOS_irq_t irq)
 {
-    picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT);
+    if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT))
+        return;
+
     /* no effect */
 }
 
 void arch_disable_interrupt(picoRTOS_irq_t irq)
 {
-    picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT);
+    if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT))
+        return;
+
     /* no effect */
 }
 

@@ -103,7 +103,7 @@ picoRTOS_stack_t *arch_prepare_stack(struct picoRTOS_task *task)
 /* cppcheck-suppress constParameter */
 void arch_idle(void *null)
 {
-    picoRTOS_assert_fatal(null == NULL);
+    if (!picoRTOS_assert_fatal(null == NULL)) return;
 
     for (;;)
         ASM("wfe");
@@ -128,7 +128,8 @@ extern struct {
 
 void arch_register_interrupt(picoRTOS_irq_t irq, picoRTOS_isr_fn fn, void *priv)
 {
-    picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT);
+    if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT))
+        return;
 
 #ifndef DEVICE_MOVE_VTABLE_TO_RAM
     unsigned long *VTABLE = (unsigned long*)*VTOR;
@@ -141,14 +142,16 @@ void arch_register_interrupt(picoRTOS_irq_t irq, picoRTOS_isr_fn fn, void *priv)
 
 void arch_enable_interrupt(picoRTOS_irq_t irq)
 {
-    picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT);
+    if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT))
+        return;
 
     NVIC_ISER[irq >> 5] |= (1ul << (0x1fu & irq));
 }
 
 void arch_disable_interrupt(picoRTOS_irq_t irq)
 {
-    picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT);
+    if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT))
+        return;
 
     NVIC_ISER[irq >> 5] &= ~(1ul << (0x1fu & irq));
 }
