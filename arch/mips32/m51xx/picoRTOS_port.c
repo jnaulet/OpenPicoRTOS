@@ -112,7 +112,7 @@ void arch_enable_interrupt(picoRTOS_irq_t irq)
 
     /* find the correct IPC offset */
     size_t IPC_index = (size_t)(irq >> 6);
-    size_t IPC_shift = (size_t)((0x1u & irq) << 16);
+    size_t IPC_shift = (size_t)((0x1u & irq) << 4);
 
     /* Beware: indexes have to * 4 cause of microchip clear/set/invert structure
      * TODO: find a way to make this more generic and portable */
