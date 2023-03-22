@@ -68,7 +68,8 @@ void picoRTOS_mutex_lock(struct picoRTOS_mutex *mutex)
         picoRTOS_schedule();
 
     /* deadlock ? */
-    picoRTOS_assert_fatal(loop != -1);
+    if (!picoRTOS_assert_fatal(loop != -1))
+        return;
 }
 
 /* Function: picoRTOS_mutex_unlock
@@ -87,8 +88,8 @@ void picoRTOS_mutex_unlock(struct picoRTOS_mutex *mutex)
 {
     picoRTOS_atomic_t owner = (picoRTOS_atomic_t)picoRTOS_self();
 
-    picoRTOS_assert_fatal(mutex->owner == owner);
-    picoRTOS_assert_fatal(mutex->count > 0);
+    if (!picoRTOS_assert_fatal(mutex->owner == owner)) return;
+    if (!picoRTOS_assert_fatal(mutex->count > 0)) return;
 
     if (--mutex->count == 0)
         mutex->owner = (picoRTOS_atomic_t)-1;

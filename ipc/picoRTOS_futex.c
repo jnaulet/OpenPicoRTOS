@@ -60,7 +60,7 @@ void picoRTOS_futex_lock(picoRTOS_futex_t *futex)
         picoRTOS_schedule();
 
     /* check for deadlock */
-    picoRTOS_assert_fatal(loop != -1);
+    if (picoRTOS_assert_fatal(loop != -1)) return;
 }
 
 /* Function: picoRTOS_futex_unlock
@@ -76,7 +76,7 @@ void picoRTOS_futex_lock(picoRTOS_futex_t *futex)
  */
 void picoRTOS_futex_unlock(picoRTOS_futex_t *futex)
 {
-    picoRTOS_assert_fatal(*futex != (picoRTOS_atomic_t)0);
+    if (!picoRTOS_assert_fatal(*futex != (picoRTOS_atomic_t)0)) return;
 
     *futex = (picoRTOS_futex_t)0;
 }
