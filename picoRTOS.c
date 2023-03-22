@@ -40,19 +40,19 @@ struct picoRTOS_task_core {
 };
 
 /* user-defined tasks + idle */
-#define TASK_COUNT      (CONFIG_TASK_COUNT + 1)
-#define TASK_IDLE_PRIO  (TASK_COUNT - 1)
-#define TASK_IDLE_PID   (TASK_COUNT - 1)
+#define TASK_COUNT     (CONFIG_TASK_COUNT + 1)
+#define TASK_IDLE_PRIO (TASK_COUNT - 1)
+#define TASK_IDLE_PID  (TASK_COUNT - 1)
 /* shortcut for current task */
-#define TASK_CURRENT()  (picoRTOS.task[picoRTOS.index])
-#define TASK_BY_PID(x)  (picoRTOS.task[(x)])
+#define TASK_CURRENT() (picoRTOS.task[picoRTOS.index])
+#define TASK_BY_PID(x) (picoRTOS.task[(x)])
 
 struct picoRTOS_core {
     bool is_running;
     picoRTOS_pid_t index;
     picoRTOS_tick_t tick;
+    picoRTOS_pid_t pid_count;
     struct picoRTOS_task_core task[TASK_COUNT];
-    /* IDLE */
     picoRTOS_stack_t idle_stack[ARCH_MIN_STACK_COUNT];
 };
 
@@ -146,8 +146,7 @@ static void task_idle_init(void)
     picoRTOS_task_init(&idle, arch_idle, NULL, picoRTOS.idle_stack,
                        (size_t)ARCH_MIN_STACK_COUNT);
 
-    /* similar to picoRTOS_add_task, but without count limit
-     * don't really care about pid, as it will be sorted anyway */
+    /* similar to picoRTOS_add_task, but without count limit */
     TASK_BY_PID(TASK_IDLE_PID).sp = arch_prepare_stack(&idle);
     TASK_BY_PID(TASK_IDLE_PID).state = PICORTOS_TASK_STATE_READY;
     /* checks */
@@ -162,6 +161,9 @@ static void task_idle_init(void)
  */
 void picoRTOS_init(void)
 {
+    /* reset pids */
+    picoRTOS.pid_count = 0;
+
     /* zero all tasks */
     size_t n = (size_t)TASK_COUNT;
 
@@ -202,7 +204,7 @@ void picoRTOS_task_init(struct picoRTOS_task *task,
                         picoRTOS_stack_t *stack,
                         size_t stack_count)
 {
-    picoRTOS_assert_fatal(stack_count >= (size_t)ARCH_MIN_STACK_COUNT);
+    if (!picoRTOS_assert_fatal(stack_count >= (size_t)ARCH_MIN_STACK_COUNT)) return;
 
     task->fn = fn;
     task->stack = stack;
@@ -228,12 +230,12 @@ void picoRTOS_task_init(struct picoRTOS_task *task,
  */
 void picoRTOS_add_task(struct picoRTOS_task *task, picoRTOS_priority_t prio)
 {
-    picoRTOS_assert_fatal(prio < (picoRTOS_priority_t)CONFIG_TASK_COUNT);
+    if (!picoRTOS_assert_fatal(prio < (picoRTOS_priority_t)CONFIG_TASK_COUNT)) return;
 
-    static picoRTOS_pid_t pid = (picoRTOS_pid_t)0;
+    picoRTOS_pid_t pid = picoRTOS.pid_count;
 
-    picoRTOS_assert_fatal(pid < (picoRTOS_pid_t)CONFIG_TASK_COUNT);
-    picoRTOS_assert_fatal(TASK_BY_PID(pid).state == PICORTOS_TASK_STATE_EMPTY);
+    if (!picoRTOS_assert_fatal(pid < (picoRTOS_pid_t)CONFIG_TASK_COUNT)) return;
+    if (!picoRTOS_assert_fatal(TASK_BY_PID(pid).state == PICORTOS_TASK_STATE_EMPTY)) return;
 
     /* state machine */
     TASK_BY_PID(pid).sp = arch_prepare_stack(task);
@@ -245,7 +247,7 @@ void picoRTOS_add_task(struct picoRTOS_task *task, picoRTOS_priority_t prio)
     TASK_BY_PID(pid).prio = prio;
 
     /* increment */
-    pid++;
+    picoRTOS.pid_count++;
 }
 
 /* Function: picoRTOS_get_next_available_priority
@@ -280,7 +282,8 @@ picoRTOS_priority_t picoRTOS_get_next_available_priority(void)
         }
 
     /* no slot available */
-    picoRTOS_assert_fatal(prio < (picoRTOS_priority_t)TASK_IDLE_PRIO);
+    if (!picoRTOS_assert_fatal(prio < (picoRTOS_priority_t)TASK_IDLE_PRIO))
+        return (picoRTOS_priority_t)-1;
 
     return prio;
 }
@@ -319,7 +322,8 @@ picoRTOS_priority_t picoRTOS_get_last_available_priority(void)
         }
 
     /* no slot available: overflow */
-    picoRTOS_assert_fatal(prio < (picoRTOS_priority_t)TASK_IDLE_PRIO);
+    if (!picoRTOS_assert_fatal(prio < (picoRTOS_priority_t)TASK_IDLE_PRIO))
+        return (picoRTOS_priority_t)-1;
 
     return prio;
 }
@@ -342,23 +346,24 @@ static void core_sort_tasks(void)
 
 static void core_arrange_shared_priorities(void)
 {
-    picoRTOS_pid_t i = (picoRTOS_pid_t)1;
+    picoRTOS_pid_t pid;
     picoRTOS_priority_t sub = (picoRTOS_priority_t)0;
 
     /* count subs */
-    for (; i < (picoRTOS_pid_t)CONFIG_TASK_COUNT; i++) {
+    for (pid = (picoRTOS_pid_t)1;
+         pid < (picoRTOS_pid_t)CONFIG_TASK_COUNT; pid++) {
         /* increment sub priority & count */
-        if (TASK_BY_PID(i).prio == TASK_BY_PID(i - 1).prio) {
-            TASK_BY_PID(i).sub = ++sub;
-            TASK_BY_PID(i).sub_count = (size_t)sub + 1;
+        if (TASK_BY_PID(pid).prio == TASK_BY_PID(pid - 1).prio) {
+            TASK_BY_PID(pid).sub = ++sub;
+            TASK_BY_PID(pid).sub_count = (size_t)sub + 1;
         }else
             sub = (picoRTOS_priority_t)0;
     }
 
     /* adjust sub_count */
-    for (i = (picoRTOS_pid_t)CONFIG_TASK_COUNT; i-- != 0;)
-        if (TASK_BY_PID(i).prio == TASK_BY_PID(i + 1).prio)
-            TASK_BY_PID(i).sub_count = (size_t)TASK_BY_PID(i + 1).sub_count;
+    for (pid = (picoRTOS_pid_t)CONFIG_TASK_COUNT; pid-- != 0;)
+        if (TASK_BY_PID(pid).prio == TASK_BY_PID(pid + 1).prio)
+            TASK_BY_PID(pid).sub_count = (size_t)TASK_BY_PID(pid + 1).sub_count;
 }
 
 /* Function: picoRTOS_start
@@ -379,7 +384,7 @@ void picoRTOS_start(void)
  */
 void picoRTOS_suspend()
 {
-    picoRTOS_assert_fatal(picoRTOS.is_running);
+    if (!picoRTOS_assert_fatal(picoRTOS.is_running)) return;
     arch_suspend();
 }
 
@@ -388,7 +393,7 @@ void picoRTOS_suspend()
  */
 void picoRTOS_resume()
 {
-    picoRTOS_assert_fatal(picoRTOS.is_running);
+    if (!picoRTOS_assert_fatal(picoRTOS.is_running)) return;
     arch_resume();
 }
 
@@ -397,7 +402,7 @@ void picoRTOS_resume()
  */
 void picoRTOS_schedule(void)
 {
-    picoRTOS_assert_fatal(picoRTOS.is_running);
+    if (!picoRTOS_assert_fatal(picoRTOS.is_running)) return;
     arch_syscall(PICORTOS_SYSCALL_SWITCH_CONTEXT, NULL);
 }
 
@@ -410,7 +415,7 @@ void picoRTOS_schedule(void)
  */
 void picoRTOS_sleep(picoRTOS_tick_t delay)
 {
-    picoRTOS_assert_fatal(picoRTOS.is_running);
+    if (!picoRTOS_assert_fatal(picoRTOS.is_running)) return;
     arch_syscall(PICORTOS_SYSCALL_SLEEP, (void*)delay);
 }
 
@@ -437,8 +442,8 @@ void picoRTOS_sleep(picoRTOS_tick_t delay)
  */
 void picoRTOS_sleep_until(picoRTOS_tick_t *ref, picoRTOS_tick_t period)
 {
-    picoRTOS_assert_fatal(period > 0);
-    picoRTOS_assert_fatal(picoRTOS.is_running);
+    if (!picoRTOS_assert_fatal(period > 0)) return;
+    if (!picoRTOS_assert_fatal(picoRTOS.is_running)) return;
 
     picoRTOS_tick_t tick = picoRTOS_get_tick();
     picoRTOS_tick_t elapsed = tick - *ref;
@@ -460,7 +465,7 @@ void picoRTOS_sleep_until(picoRTOS_tick_t *ref, picoRTOS_tick_t period)
  */
 void picoRTOS_kill(void)
 {
-    picoRTOS_assert_fatal(picoRTOS.is_running);
+    if (!picoRTOS_assert_fatal(picoRTOS.is_running)) return;
     arch_syscall(PICORTOS_SYSCALL_KILL, NULL);
 }
 
@@ -469,7 +474,7 @@ void picoRTOS_kill(void)
  */
 picoRTOS_pid_t picoRTOS_self(void)
 {
-    picoRTOS_assert_fatal(picoRTOS.is_running);
+    if (!picoRTOS_assert_fatal(picoRTOS.is_running)) return (picoRTOS_pid_t)-1;
     return (picoRTOS_pid_t)picoRTOS.index;
 }
 
@@ -478,7 +483,7 @@ picoRTOS_pid_t picoRTOS_self(void)
  */
 picoRTOS_tick_t picoRTOS_get_tick(void)
 {
-    picoRTOS_assert_fatal(picoRTOS.is_running);
+    if (!picoRTOS_assert_fatal(picoRTOS.is_running)) return (picoRTOS_tick_t)-1;
     return picoRTOS.tick;
 }
 
@@ -498,13 +503,13 @@ static void syscall_kill(void)
     TASK_CURRENT().state = PICORTOS_TASK_STATE_EMPTY;
 }
 
-/*@exposed@*/
+/*@exposed@*/ /*@null@*/
 static picoRTOS_stack_t *syscall_switch_context(picoRTOS_stack_t *sp)
 {
     struct picoRTOS_task_core *task = &TASK_CURRENT();
 
-    picoRTOS_assert_fatal(sp >= task->stack);
-    picoRTOS_assert_fatal(sp < (task->stack + task->stack_count));
+    if (!picoRTOS_assert_fatal(sp >= task->stack)) return NULL;
+    if (!picoRTOS_assert_fatal(sp < (task->stack + task->stack_count))) return NULL;
 
     /* stats */
     task_core_stat_switch(task);
@@ -529,7 +534,7 @@ static picoRTOS_stack_t *syscall_switch_context(picoRTOS_stack_t *sp)
 
 picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, picoRTOS_syscall_t syscall, void *priv)
 {
-    picoRTOS_assert_fatal(syscall < PICORTOS_SYSCALL_COUNT);
+    if (!picoRTOS_assert_fatal(syscall < PICORTOS_SYSCALL_COUNT)) return NULL;
 
     switch (syscall) {
     case PICORTOS_SYSCALL_SLEEP: syscall_sleep((picoRTOS_tick_t)priv); break;
@@ -546,8 +551,8 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
 {
     struct picoRTOS_task_core *task = &TASK_CURRENT();
 
-    picoRTOS_assert_fatal(sp >= task->stack);
-    picoRTOS_assert_fatal(sp < (task->stack + task->stack_count));
+    if (!picoRTOS_assert_fatal(sp >= task->stack)) return NULL;
+    if (!picoRTOS_assert_fatal(sp < (task->stack + task->stack_count))) return NULL;
 
     /* stats */
     task_core_stat_preempt(task);
@@ -601,7 +606,6 @@ void picoRTOS_register_interrupt(picoRTOS_irq_t irq,
                                  picoRTOS_isr_fn fn,
                                  void *priv)
 {
-    picoRTOS_assert_fatal(fn != NULL);
     arch_register_interrupt(irq, fn, priv);
 }
 

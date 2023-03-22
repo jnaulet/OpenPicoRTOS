@@ -29,9 +29,10 @@ typedef enum {
  * Returns:
  *  The task stack you have to switch to (context restoration)
  */
-/*@exposed@*/ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp,
-                                                 picoRTOS_syscall_t syscall,
-                                                 /*@null@*/ void *priv);
+/*@exposed@*/ /*@null@*/
+picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp,
+                                   picoRTOS_syscall_t syscall,
+                                   /*@null@*/ void *priv);
 /* Function: picoRTOS_tick
  * Executes a tick increment
  *
@@ -43,7 +44,8 @@ typedef enum {
  * Returns:
  *  The task stack pointer you have to switch to (context restoration)
  */
-/*@exposed@*/ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp);  /* update tick */
+/*@exposed@*/ /*@null@*/
+picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp);  /* update tick */
 
 /* Function: arch_init
  * Architecture port initialization function

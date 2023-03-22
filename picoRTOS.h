@@ -86,7 +86,7 @@ picoRTOS_pid_t picoRTOS_self(void);                                 /* gets the 
 typedef void (*picoRTOS_isr_fn)(/*@null@*/ void*);
 
 void picoRTOS_register_interrupt(picoRTOS_irq_t irq,
-                                 /*@notnull@*/ picoRTOS_isr_fn fn,
+                                 picoRTOS_isr_fn fn,
                                  /*@null@*/ void *priv);
 
 void picoRTOS_enable_interrupt(picoRTOS_irq_t irq);
@@ -112,11 +112,12 @@ void picoRTOS_disable_interrupt(picoRTOS_irq_t irq);
 # define picoRTOS_assert(x) ((x) ? (true) : arch_break_false())
 /* Macro: picoRTOS_assert_fatal(x)
  * Throws a debug exception if x is false, stalls the system if -DNDEBUG */
-# define picoRTOS_assert_fatal(x) if (!(x)) arch_break()
+# define picoRTOS_assert_fatal(x) picoRTOS_assert(x)
 #else
 # define picoRTOS_break()
 # define picoRTOS_assert(x) (x)
-# define picoRTOS_assert_fatal(x) if (!(x)) { picoRTOS_suspend(); arch_break(); }
+# define arch_break_fatal() (({ picoRTOS_suspend(); arch_break(); }), false)
+# define picoRTOS_assert_fatal(x) ((x) ? (true) : arch_break_fatal())
 #endif
 
 #endif

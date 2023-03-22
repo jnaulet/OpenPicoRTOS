@@ -77,7 +77,9 @@ static void arch_flush_rd_fifo(void)
         dummy = *SIO_FIFO_RD;
     }
 
-    picoRTOS_assert_fatal(deadlock != -1);
+    if (!picoRTOS_assert_fatal(deadlock != -1))
+        return;
+
     ASM("sev");
 }
 
@@ -91,7 +93,8 @@ static int arch_xfer_to_core1(unsigned long value)
            deadlock_tx-- != 0) {
     }
 
-    picoRTOS_assert_fatal(deadlock_tx != -1);
+    if (!picoRTOS_assert_fatal(deadlock_tx != -1))
+        return -1;
 
     /* write to fifo */
     *SIO_FIFO_WR = value;
@@ -102,7 +105,8 @@ static int arch_xfer_to_core1(unsigned long value)
            deadlock_rx-- != 0)
         ASM("wfe");
 
-    picoRTOS_assert_fatal(deadlock_rx != -1);
+    if (!picoRTOS_assert_fatal(deadlock_rx != -1))
+        return -1;
 
     /* value is echoed back if ok */
     if (*SIO_FIFO_RD != value)
@@ -117,7 +121,7 @@ void arch_core_init(picoRTOS_core_t core,
                     picoRTOS_stack_t *sp)
 {
     /* only 1 auxiliary core */
-    picoRTOS_assert_fatal(core == (picoRTOS_core_t)1);
+    if (!picoRTOS_assert_fatal(core == (picoRTOS_core_t)1)) return;
 
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
@@ -142,7 +146,8 @@ void arch_core_init(picoRTOS_core_t core,
         break;
     }
 
-    picoRTOS_assert_fatal(deadlock != -1);
+    if (!picoRTOS_assert_fatal(deadlock != -1))
+        return;
 }
 
 picoRTOS_core_t arch_core(void)
@@ -159,7 +164,8 @@ void arch_spin_lock(void)
     }
 
     /* potential deadlock */
-    picoRTOS_assert_fatal(loop != -1);
+    if (!picoRTOS_assert_fatal(loop != -1))
+        return;
 }
 
 void arch_spin_unlock(void)
