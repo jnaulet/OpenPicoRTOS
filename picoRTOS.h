@@ -110,14 +110,17 @@ void picoRTOS_disable_interrupt(picoRTOS_irq_t irq);
 /* Macro: picoRTOS_assert(x)
  * Returns x, throws a debug exception if x is false, unless -DNDEBUG */
 # define picoRTOS_assert(x) ((x) ? (true) : arch_break_false())
+/* Macro: picoRTOS_assert_void(x)
+ * Throws a debug exception if x is false, unless -DNDEBUG */
+# define picoRTOS_assert_void(x) if (!(x)) arch_break()
 /* Macro: picoRTOS_assert_fatal(x)
- * Throws a debug exception if x is false, stalls the system if -DNDEBUG */
+ * Returns x, throws a debug exception if x is false, stalls the system if -DNDEBUG */
 # define picoRTOS_assert_fatal(x) picoRTOS_assert(x)
 #else
 # define picoRTOS_break()
 # define picoRTOS_assert(x) (x)
-# define arch_break_fatal() (({ picoRTOS_suspend(); arch_break(); }), false)
-# define picoRTOS_assert_fatal(x) ((x) ? (true) : arch_break_fatal())
+# define picoRTOS_assert_void(x) {}
+# define picoRTOS_assert_fatal(x) ((x) ? (true) : (({ picoRTOS_suspend(); arch_break(); }), false))
 #endif
 
 #endif
