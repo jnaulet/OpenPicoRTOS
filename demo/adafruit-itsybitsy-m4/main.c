@@ -6,7 +6,7 @@
  */
 static void led_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     picoRTOS_tick_t ref = picoRTOS_get_tick();
     struct gpio *RED = (struct gpio*)priv;
@@ -31,7 +31,7 @@ static void led_main(void *priv)
  */
 static void spi_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     size_t xfered = 0;
     struct spi *SPI = (struct spi*)priv;
@@ -46,14 +46,14 @@ static void spi_main(void *priv)
             continue;
         }
 
-        picoRTOS_assert_fatal(res > 0);
+        picoRTOS_assert_void(res > 0);
 
         /* ack xfer */
         xfered += (size_t)res;
 
         if (xfered == sizeof(tx)) {
-            picoRTOS_assert_fatal(rx[0] == (char)0xa5);
-            picoRTOS_assert_fatal(rx[4] == (char)0x4d);
+            picoRTOS_assert_void(rx[0] == (char)0xa5);
+            picoRTOS_assert_void(rx[4] == (char)0x4d);
             /* start again */
             xfered = 0;
         }
@@ -66,7 +66,7 @@ static void spi_main(void *priv)
  */
 static void uart_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     char tx = (char)0;
     struct uart *UART = (struct uart*)priv;
@@ -84,8 +84,8 @@ static void uart_main(void *priv)
         while (uart_read(UART, &rx, sizeof(rx)) == -EAGAIN && timeout-- != 0)
             picoRTOS_schedule();
 
-        picoRTOS_assert_fatal(timeout != -1);
-        picoRTOS_assert_fatal(tx == rx);
+        picoRTOS_assert_void(timeout != -1);
+        picoRTOS_assert_void(tx == rx);
 
         /* increment data */
         tx = (char)((int)tx + 1);
@@ -97,7 +97,7 @@ static void uart_main(void *priv)
  */
 static void pwm_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     struct pwm *PWM = (struct pwm*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -120,7 +120,7 @@ static void pwm_main(void *priv)
  */
 static void adc_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     struct adc *ADC = (struct adc*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -135,8 +135,8 @@ static void adc_main(void *priv)
         }
 
         /* Analog measurement from 3.3v */
-        picoRTOS_assert_fatal(sample_mV > 900);
-        picoRTOS_assert_fatal(sample_mV < 1200);
+        picoRTOS_assert_void(sample_mV > 900);
+        picoRTOS_assert_void(sample_mV < 1200);
 
         picoRTOS_sleep_until(&ref, PICORTOS_DELAY_MSEC(40l));
     }
@@ -147,7 +147,7 @@ static void adc_main(void *priv)
  */
 static void wd_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     struct wd *WDT = (struct wd*)priv;
 
@@ -199,6 +199,6 @@ int main(void)
     picoRTOS_start();
 
     /* not supposed to end there */
-    picoRTOS_assert_fatal(false);
+    picoRTOS_assert_void(false);
     return 1;
 }

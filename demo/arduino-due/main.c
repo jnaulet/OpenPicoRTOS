@@ -37,7 +37,7 @@ static void blink_init(struct blink *ctx)
  */
 static void tick_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     /* TICK is a gpio passed as a parameter from main
      * You can change it over there */
@@ -58,7 +58,7 @@ static void tick_main(void *priv)
  */
 static void blink_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     picoRTOS_tick_t ref = picoRTOS_get_tick();
     struct blink *blink = (struct blink*)priv;
@@ -97,7 +97,7 @@ static void blink_main(void *priv)
  */
 static void blink_again_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     struct blink *blink = (struct blink*)priv;
 
@@ -126,7 +126,7 @@ static void blink_again_main(void *priv)
  */
 static void console_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     struct uart *UART = (struct uart*)priv;
 
@@ -151,7 +151,7 @@ static void console_main(void *priv)
  */
 static void spi_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     size_t xfered = 0;
     struct spi *SPI = (struct spi*)priv;
@@ -166,14 +166,14 @@ static void spi_main(void *priv)
             continue;
         }
 
-        picoRTOS_assert_fatal(res > 0);
+        picoRTOS_assert_void(res > 0);
 
         /* ack xfer */
         xfered += (size_t)res;
 
         if (xfered == sizeof(tx)) {
-            picoRTOS_assert_fatal(rx[0] == (char)0xa5);
-            picoRTOS_assert_fatal(rx[4] == (char)0x4d);
+            picoRTOS_assert_void(rx[0] == (char)0xa5);
+            picoRTOS_assert_void(rx[4] == (char)0x4d);
             /* start again */
             xfered = 0;
         }
@@ -187,7 +187,7 @@ static void spi_main(void *priv)
  */
 static void wd_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     struct wd *WD = (struct wd*)priv;
 
@@ -203,7 +203,7 @@ static void wd_main(void *priv)
  */
 static void pwm_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     pwm_duty_cycle_t duty_cycle = 0;
     struct pwm *PWM = (struct pwm*)priv;
@@ -229,7 +229,7 @@ static void pwm_main(void *priv)
  */
 static void ipwm_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     struct ipwm *IPWM = (struct ipwm*)priv;
 
@@ -245,15 +245,15 @@ static void ipwm_main(void *priv)
             picoRTOS_schedule();
 
         /* check */
-        picoRTOS_assert_fatal(deadlock != -1);
-        picoRTOS_assert_fatal(period == (pwm_period_us_t)100);
+        picoRTOS_assert_void(deadlock != -1);
+        picoRTOS_assert_void(period == (pwm_period_us_t)100);
 
         deadlock = CONFIG_DEADLOCK_COUNT;
         while (ipwm_get_duty_cycle(IPWM, &duty_cycle) == -EAGAIN && deadlock-- != 0)
             picoRTOS_schedule();
 
         /* final check */
-        picoRTOS_assert_fatal(deadlock != -1);
+        picoRTOS_assert_void(deadlock != -1);
     }
 }
 
@@ -265,7 +265,7 @@ static void can_main(void *priv)
 #define CAN_ID_RX 0x6
 #define CAN_ID_TX 0x7
 
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     struct can *CAN = (struct can*)priv;
 
@@ -282,7 +282,7 @@ static void can_main(void *priv)
             continue;
         }
 
-        picoRTOS_assert_fatal(id != (can_id_t)CAN_ID_RX);
+        picoRTOS_assert_void(id != (can_id_t)CAN_ID_RX);
 
         (void)can_write(CAN, (can_id_t)CAN_ID_TX, msg, (size_t)res);
     }
@@ -294,7 +294,7 @@ static void can_main(void *priv)
  */
 static void adc_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     struct adc *ADC = (struct adc*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -309,8 +309,8 @@ static void adc_main(void *priv)
         }
 
         /* Analog measurement from 3.3v */
-        picoRTOS_assert_fatal(sample_mv > 3200);
-        picoRTOS_assert_fatal(sample_mv < 3400);
+        picoRTOS_assert_void(sample_mv > 3200);
+        picoRTOS_assert_void(sample_mv < 3400);
 
         picoRTOS_sleep_until(&ref, PICORTOS_DELAY_MSEC(40));
     }
@@ -322,7 +322,7 @@ static void adc_main(void *priv)
  */
 static void twi_master_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     struct twi *TWI = (struct twi*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -334,13 +334,13 @@ static void twi_master_main(void *priv)
         while (twi_write(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
             picoRTOS_schedule();
 
-        picoRTOS_assert_fatal(timeout != -1);
+        picoRTOS_assert_void(timeout != -1);
 
         while (twi_read(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
             picoRTOS_schedule();
 
-        picoRTOS_assert_fatal(timeout != -1);
-        picoRTOS_assert_fatal(c == (char)0x5a);
+        picoRTOS_assert_void(timeout != -1);
+        picoRTOS_assert_void(c == (char)0x5a);
 
         picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
     }
@@ -351,7 +351,7 @@ static void twi_master_main(void *priv)
  */
 static void twi_slave_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     struct twi *TWI = (struct twi*)priv;
 
@@ -362,14 +362,14 @@ static void twi_slave_main(void *priv)
         while (twi_read(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
             picoRTOS_schedule();
 
-        picoRTOS_assert_fatal(timeout != -1);
-        picoRTOS_assert_fatal(c == (char)0xa5);
+        picoRTOS_assert_void(timeout != -1);
+        picoRTOS_assert_void(c == (char)0xa5);
 
         c = (char)0x5a;
         while (twi_write(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
             picoRTOS_schedule();
 
-        picoRTOS_assert_fatal(timeout != -1);
+        picoRTOS_assert_void(timeout != -1);
     }
 }
 
@@ -438,6 +438,6 @@ int main(void)
     picoRTOS_start();
 
     /* we're not supposed to end here */
-    picoRTOS_assert_fatal(false);
+    picoRTOS_assert_void(false);
     return -1;
 }

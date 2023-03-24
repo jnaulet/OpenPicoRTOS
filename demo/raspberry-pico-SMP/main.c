@@ -40,7 +40,7 @@ static void blink_init(struct blink *ctx)
 
 static void tick_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     struct gpio *TICK = (struct gpio*)priv;
 
@@ -52,7 +52,7 @@ static void tick_main(void *priv)
 
 static void led0_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     struct blink *ctx = (struct blink*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -84,7 +84,7 @@ static void led0_main(void *priv)
 
 static void led1_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     struct blink *ctx = (struct blink*)priv;
 
@@ -109,7 +109,7 @@ static void led1_main(void *priv)
 
 static void spi_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     size_t xfered = 0;
     struct spi *SPI = (struct spi*)priv;
@@ -124,14 +124,14 @@ static void spi_main(void *priv)
             continue;
         }
 
-        picoRTOS_assert_fatal(res > 0);
+        picoRTOS_assert_void(res > 0);
 
         /* ack xfer */
         xfered += (size_t)res;
 
         if (xfered == sizeof(tx)) {
-            picoRTOS_assert_fatal(rx[0] == (char)0xa5);
-            picoRTOS_assert_fatal(rx[4] == (char)0x4d);
+            picoRTOS_assert_void(rx[0] == (char)0xa5);
+            picoRTOS_assert_void(rx[4] == (char)0x4d);
             /* start again */
             xfered = 0;
         }
@@ -143,7 +143,7 @@ static void spi_main(void *priv)
 
 static void adc_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     struct adc *ADC = (struct adc*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -156,7 +156,7 @@ static void adc_main(void *priv)
         while (adc_read(ADC, &value) == -EAGAIN && timeout-- != 0)
             picoRTOS_schedule();
 
-        picoRTOS_assert_fatal(timeout != -1);
+        picoRTOS_assert_void(timeout != -1);
 
         picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
     }
@@ -168,7 +168,7 @@ static void adc_main(void *priv)
  */
 static void twi_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     struct twi *TWI = (struct twi*)priv;
 
@@ -182,14 +182,14 @@ static void twi_main(void *priv)
         while ((res = twi_read(TWI, &who_am_i, sizeof(who_am_i))) == -EAGAIN)
             picoRTOS_schedule();
 
-        picoRTOS_assert_fatal(who_am_i == (char)0xea);
+        picoRTOS_assert_void(who_am_i == (char)0xea);
         picoRTOS_sleep(PICORTOS_DELAY_SEC(1));
     }
 }
 
 static void wd_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     struct wd *WD = (struct wd*)priv;
 
@@ -248,6 +248,6 @@ int main(void)
     picoRTOS_start();
 
     /* not supposed to end there */
-    picoRTOS_assert_fatal(false);
+    picoRTOS_assert_void(false);
     return 1;
 }

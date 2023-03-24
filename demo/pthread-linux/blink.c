@@ -5,7 +5,7 @@
 
 static void tick_main0(void *priv)
 {
-    picoRTOS_assert_fatal(priv == NULL);
+    picoRTOS_assert_void(priv == NULL);
 
     for (;;) {
         fprintf(stderr, "|\r");
@@ -15,7 +15,7 @@ static void tick_main0(void *priv)
 
 static void tick_main1(void *priv)
 {
-    picoRTOS_assert_fatal(priv == NULL);
+    picoRTOS_assert_void(priv == NULL);
 
     for (;;) {
         fprintf(stderr, "/\r");
@@ -25,7 +25,7 @@ static void tick_main1(void *priv)
 
 static void tick_main2(void *priv)
 {
-    picoRTOS_assert_fatal(priv == NULL);
+    picoRTOS_assert_void(priv == NULL);
 
     for (;;) {
         fprintf(stderr, "-\r");
@@ -35,7 +35,7 @@ static void tick_main2(void *priv)
 
 static void tick_main3(void *priv)
 {
-    picoRTOS_assert_fatal(priv == NULL);
+    picoRTOS_assert_void(priv == NULL);
 
     for (;;) {
         fprintf(stderr, "\\\r");
@@ -47,7 +47,7 @@ static void blink_main(void *priv)
 {
     picoRTOS_tick_t ref = picoRTOS_get_tick();
 
-    picoRTOS_assert_fatal(priv == NULL);
+    picoRTOS_assert_void(priv == NULL);
 
     for (;;) {
         picoRTOS_sleep_until(&ref, PICORTOS_DELAY_MSEC(500));
