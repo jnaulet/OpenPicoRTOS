@@ -105,8 +105,16 @@
 #define ADDR_OSCILLATOR       0xbf801200
 #define ADDR_PPS              0xbf801400
 
+/* Factory programmed flash */
+
+#define ADDR_DEVADCx 0xbfc54000
+#define ADDR_DEVSNx  0xbfc54020
+
 /* DEVICE */
 
-#define DEVICE_INTERRUPT_VECTOR_COUNT 213
+#define DEVICE_INTERRUPT_VECTOR_COUNT   213
+#define DEVICE_ADC_DEDICATED_SAR_COUNT  5
+#define DEVICE_ADC_SHARED_CL2_SAR_COUNT 7
+#define DEVICE_ADC_SHARED_CL3_SAR_COUNT 33
 
 #endif
