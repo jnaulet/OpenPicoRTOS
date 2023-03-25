@@ -28,11 +28,11 @@ add_executable(raspberry-pico-SMP
   ${PICORTOS_PATH}/ipc/picoRTOS_cond.c
   ${PICORTOS_PATH}/drivers/adc/adc-rp2040.c
   ${PICORTOS_PATH}/drivers/clock/clock-rp2040.c
-  ${PICORTOS_PATH}/drivers/gpio/gpio-sio.c
+  ${PICORTOS_PATH}/drivers/gpio/gpio-rp2040_sio.c
   ${PICORTOS_PATH}/drivers/mux/mux-rp2040.c
   ${PICORTOS_PATH}/drivers/pwm/pwm-rp2040.c
-  ${PICORTOS_PATH}/drivers/spi/spi-pl022.c
-  ${PICORTOS_PATH}/drivers/uart/uart-pl011.c
+  ${PICORTOS_PATH}/drivers/spi/spi-arm_pl022.c
+  ${PICORTOS_PATH}/drivers/uart/uart-arm_pl011.c
   ${PICORTOS_PATH}/drivers/twi/twi-dw_apb_i2c.c
   ${PICORTOS_PATH}/drivers/wd/wd-rp2040.c
   )

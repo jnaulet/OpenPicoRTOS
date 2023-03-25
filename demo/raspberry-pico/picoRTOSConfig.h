@@ -6,7 +6,7 @@
 #define CONFIG_TICK_HZ          1000
 
 /* TASKS */
-#define CONFIG_TASK_COUNT      7
+#define CONFIG_TASK_COUNT      8
 #define TASK_TICK_PRIO         0
 #define TASK_WD_PRIO           (CONFIG_TASK_COUNT - 1)
 
@@ -14,7 +14,7 @@
 #define CONFIG_DEFAULT_STACK_COUNT 256
 
 /* DRIVERS */
-#define CONFIG_DEADLOCK_COUNT     1000
+#define CONFIG_DEADLOCK_COUNT     CONFIG_TICK_HZ
 
 /* IPCs */
 #define CONFIG_ARCH_EMULATE_ATOMIC

@@ -2,7 +2,7 @@
 
 ## Description
 
-This simple demo uses the Rpi Pico + Pico-LCD kit & tests the following:
+This simple demo uses the Rpi Pico & tests the following:
 
   - ADC
   - GPIO
@@ -14,4 +14,7 @@ This simple demo uses the Rpi Pico + Pico-LCD kit & tests the following:
 
 ## Requirements
 
-No wiring is required for this test, only the kit
+Some wiring is required to perform this standalone test:
+
+  - GP20 to GP6 (SDA)
+  - GP21 to GP7 (SCL)

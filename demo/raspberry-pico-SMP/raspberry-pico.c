@@ -3,10 +3,10 @@
 
 #include "adc-rp2040.h"
 #include "clock-rp2040.h"
-#include "gpio-sio.h"
+#include "gpio-rp2040_sio.h"
 #include "mux-rp2040.h"
-#include "spi-pl022.h"
-#include "uart-pl011.h"
+#include "spi-arm_pl022.h"
+#include "uart-arm_pl011.h"
 #include "pwm-rp2040.h"
 #include "twi-dw_apb_i2c.h"
 #include "wd-rp2040.h"
@@ -44,10 +44,15 @@ static void raspberry_pico_init_mux(void)
     (void)mux_rp2040_input(&MUX, (size_t)1, MUX_RP2040_F2);     /* UART0 RX */
 
     /* I2C */
+    (void)mux_rp2040_io(&MUX, (size_t)20, MUX_RP2040_F3);   /* I2C0 SDA */
+    (void)mux_rp2040_io(&MUX, (size_t)21, MUX_RP2040_F3);   /* I2C0 SCL */
     (void)mux_rp2040_io(&MUX, (size_t)6, MUX_RP2040_F3);    /* I2C1 SDA */
-    (void)mux_rp2040_pull_up(&MUX, (size_t)6);
     (void)mux_rp2040_io(&MUX, (size_t)7, MUX_RP2040_F3);    /* I2C1 SCL */
+
+    (void)mux_rp2040_pull_up(&MUX, (size_t)6);
     (void)mux_rp2040_pull_up(&MUX, (size_t)7);
+    (void)mux_rp2040_pull_up(&MUX, (size_t)20);
+    (void)mux_rp2040_pull_up(&MUX, (size_t)21);
 
     /* SPI */
     (void)mux_rp2040_output(&MUX, (size_t)9, MUX_RP2040_F1);    /* SPI1 CSn */
@@ -57,19 +62,13 @@ static void raspberry_pico_init_mux(void)
     (void)mux_rp2040_input(&MUX, (size_t)12, MUX_RP2040_F1);    /* SPI1 RX */
 
     /* GPIOs */
-    (void)mux_rp2040_input(&MUX, (size_t)2, MUX_RP2040_F5);
-    (void)mux_rp2040_input(&MUX, (size_t)3, MUX_RP2040_F5);
     (void)mux_rp2040_output(&MUX, (size_t)4, MUX_RP2040_F5);
     (void)mux_rp2040_output(&MUX, (size_t)8, MUX_RP2040_F5);
-    (void)mux_rp2040_output(&MUX, (size_t)13, MUX_RP2040_F5);
-    (void)mux_rp2040_output(&MUX, (size_t)14, MUX_RP2040_F5);
     (void)mux_rp2040_input(&MUX, (size_t)15, MUX_RP2040_F5);
     (void)mux_rp2040_input(&MUX, (size_t)16, MUX_RP2040_F5);
     (void)mux_rp2040_input(&MUX, (size_t)17, MUX_RP2040_F5);
     (void)mux_rp2040_input(&MUX, (size_t)18, MUX_RP2040_F5);
     (void)mux_rp2040_output(&MUX, (size_t)19, MUX_RP2040_F5);
-    (void)mux_rp2040_input(&MUX, (size_t)20, MUX_RP2040_F5);
-    (void)mux_rp2040_output(&MUX, (size_t)21, MUX_RP2040_F5);
 
     /* PWMs */
     (void)mux_rp2040_input(&MUX, (size_t)5, MUX_RP2040_F4);
@@ -93,7 +92,7 @@ static void raspberry_pico_init_uart(/*@partial@*/ struct raspberry_pico *ctx)
         false       /* cstopb */
     };
 
-    (void)uart_pl011_init(&UART, (struct UART_PL011*)ADDR_UART0, CLOCK_RP2040_PERI);
+    (void)uart_arm_pl011_init(&UART, (struct UART_ARM_PL011*)ADDR_UART0, CLOCK_RP2040_PERI);
     (void)uart_setup(&UART, &UART_settings);
 
     ctx->UART = &UART;
@@ -101,17 +100,24 @@ static void raspberry_pico_init_uart(/*@partial@*/ struct raspberry_pico *ctx)
 
 static void raspberry_pico_init_i2c(/*@partial@*/ struct raspberry_pico *ctx)
 {
-    static struct twi I2C;
+    static struct twi I2C0;
+    static struct twi I2C1;
+
     struct twi_settings TWI_settings = {
         TWI_BITRATE_STANDARD,   /* bitrate */
         TWI_MODE_MASTER,        /* mode */
-        (twi_addr_t)0x68        /* slave address */
+        (twi_addr_t)0x55        /* slave address */
     };
 
-    (void)twi_dw_apb_i2c_init(&I2C, (struct TWI_DW_APB_I2C*)ADDR_I2C1, CLOCK_RP2040_SYS);
-    (void)twi_setup(&I2C, &TWI_settings);
+    (void)twi_dw_apb_i2c_init(&I2C0, (struct TWI_DW_APB_I2C*)ADDR_I2C0, CLOCK_RP2040_SYS);
+    (void)twi_setup(&I2C0, &TWI_settings);
 
-    ctx->I2C = &I2C;
+    TWI_settings.mode = TWI_MODE_SLAVE;
+    (void)twi_dw_apb_i2c_init(&I2C1, (struct TWI_DW_APB_I2C*)ADDR_I2C1, CLOCK_RP2040_SYS);
+    (void)twi_setup(&I2C1, &TWI_settings);
+
+    ctx->I2C0 = &I2C0;
+    ctx->I2C1 = &I2C1;
 }
 
 static void raspberry_pico_init_spi(/*@partial@*/ struct raspberry_pico *ctx)
@@ -126,58 +132,40 @@ static void raspberry_pico_init_spi(/*@partial@*/ struct raspberry_pico *ctx)
         (size_t)0,
     };
 
-    (void)spi_pl022_init(&SPI, (struct SPI_PL022*)ADDR_SPI1, CLOCK_RP2040_PERI);
+    (void)spi_arm_pl022_init(&SPI, (struct SPI_ARM_PL022*)ADDR_SPI1, CLOCK_RP2040_PERI);
     (void)spi_setup(&SPI, &SPI_settings);
 
     /* loopback mode for tests */
-    (void)spi_pl022_set_loopback(&SPI, true);
+    (void)spi_arm_pl022_set_loopback(&SPI, true);
 
     ctx->SPI = &SPI;
 }
 
 static void raspberry_pico_init_gpio(/*@partial@*/ struct raspberry_pico *ctx)
 {
-    static struct gpio GPIO2;
-    static struct gpio GPIO3;
     static struct gpio GPIO4;
     static struct gpio GPIO8;
-    static struct gpio GPIO13;
-    static struct gpio GPIO14;
     static struct gpio GPIO15;
     static struct gpio GPIO16;
     static struct gpio GPIO17;
     static struct gpio GPIO18;
     static struct gpio GPIO19;
-    static struct gpio GPIO20;
-    static struct gpio GPIO21;
 
-    (void)gpio_sio_init(&GPIO2, (struct GPIO_SIO*)ADDR_SIO_GPIO, (size_t)2, GPIO_SIO_DIR_INPUT);
-    (void)gpio_sio_init(&GPIO3, (struct GPIO_SIO*)ADDR_SIO_GPIO, (size_t)3, GPIO_SIO_DIR_INPUT);
-    (void)gpio_sio_init(&GPIO4, (struct GPIO_SIO*)ADDR_SIO_GPIO, (size_t)3, GPIO_SIO_DIR_OUTPUT);
-    (void)gpio_sio_init(&GPIO8, (struct GPIO_SIO*)ADDR_SIO_GPIO, (size_t)8, GPIO_SIO_DIR_INPUT);
-    (void)gpio_sio_init(&GPIO13, (struct GPIO_SIO*)ADDR_SIO_GPIO, (size_t)13, GPIO_SIO_DIR_OUTPUT);
-    (void)gpio_sio_init(&GPIO14, (struct GPIO_SIO*)ADDR_SIO_GPIO, (size_t)14, GPIO_SIO_DIR_OUTPUT);
-    (void)gpio_sio_init(&GPIO15, (struct GPIO_SIO*)ADDR_SIO_GPIO, (size_t)15, GPIO_SIO_DIR_INPUT);
-    (void)gpio_sio_init(&GPIO16, (struct GPIO_SIO*)ADDR_SIO_GPIO, (size_t)16, GPIO_SIO_DIR_INPUT);
-    (void)gpio_sio_init(&GPIO17, (struct GPIO_SIO*)ADDR_SIO_GPIO, (size_t)17, GPIO_SIO_DIR_INPUT);
-    (void)gpio_sio_init(&GPIO18, (struct GPIO_SIO*)ADDR_SIO_GPIO, (size_t)18, GPIO_SIO_DIR_INPUT);
-    (void)gpio_sio_init(&GPIO19, (struct GPIO_SIO*)ADDR_SIO_GPIO, (size_t)19, GPIO_SIO_DIR_OUTPUT);
-    (void)gpio_sio_init(&GPIO20, (struct GPIO_SIO*)ADDR_SIO_GPIO, (size_t)20, GPIO_SIO_DIR_INPUT);
-    (void)gpio_sio_init(&GPIO21, (struct GPIO_SIO*)ADDR_SIO_GPIO, (size_t)21, GPIO_SIO_DIR_OUTPUT);
+    (void)gpio_rp2040_sio_init(&GPIO4, (struct GPIO_RP2040_SIO*)ADDR_SIO_GPIO, (size_t)3, GPIO_RP2040_SIO_DIR_OUTPUT);
+    (void)gpio_rp2040_sio_init(&GPIO8, (struct GPIO_RP2040_SIO*)ADDR_SIO_GPIO, (size_t)8, GPIO_RP2040_SIO_DIR_INPUT);
+    (void)gpio_rp2040_sio_init(&GPIO15, (struct GPIO_RP2040_SIO*)ADDR_SIO_GPIO, (size_t)15, GPIO_RP2040_SIO_DIR_INPUT);
+    (void)gpio_rp2040_sio_init(&GPIO16, (struct GPIO_RP2040_SIO*)ADDR_SIO_GPIO, (size_t)16, GPIO_RP2040_SIO_DIR_INPUT);
+    (void)gpio_rp2040_sio_init(&GPIO17, (struct GPIO_RP2040_SIO*)ADDR_SIO_GPIO, (size_t)17, GPIO_RP2040_SIO_DIR_INPUT);
+    (void)gpio_rp2040_sio_init(&GPIO18, (struct GPIO_RP2040_SIO*)ADDR_SIO_GPIO, (size_t)18, GPIO_RP2040_SIO_DIR_INPUT);
+    (void)gpio_rp2040_sio_init(&GPIO19, (struct GPIO_RP2040_SIO*)ADDR_SIO_GPIO, (size_t)19, GPIO_RP2040_SIO_DIR_OUTPUT);
 
-    ctx->GPIO2 = &GPIO2;
-    ctx->GPIO3 = &GPIO3;
     ctx->GPIO4 = &GPIO4;
     ctx->GPIO8 = &GPIO8;
-    ctx->GPIO13 = &GPIO13;
-    ctx->GPIO14 = &GPIO14;
     ctx->GPIO15 = &GPIO15;
     ctx->GPIO16 = &GPIO16;
     ctx->GPIO17 = &GPIO17;
     ctx->GPIO18 = &GPIO18;
     ctx->GPIO19 = &GPIO19;
-    ctx->GPIO20 = &GPIO20;
-    ctx->GPIO21 = &GPIO21;
 }
 
 static void raspberry_pico_init_pwm(/*@partial@*/ struct raspberry_pico *ctx)
@@ -254,6 +242,7 @@ static void raspberry_pico_init_wdt(/*@partial@*/ struct raspberry_pico *ctx)
 
     (void)wd_rp2040_init(&WDT, (struct WD_RP2040*)ADDR_WATCHDOG, CLOCK_RP2040_REF);
     (void)wd_rp2040_setup(&WDT, &WDT_settings);
+    (void)wd_start(&WDT);
 
     ctx->WDT = &WDT;
 }

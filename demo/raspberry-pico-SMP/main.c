@@ -12,31 +12,9 @@
 #include "ipc/picoRTOS_mutex.h"
 #include "ipc/picoRTOS_cond.h"
 
-/* Demo for Raspberry pico + Pico-LCD-1.14 */
-
-/* hardware */
-struct blink {
-    struct raspberry_pico pico;
-    /* IPCs */
-    struct picoRTOS_mutex mutex;
-    struct picoRTOS_cond cond;
-};
-
-static void blink_init(struct blink *ctx)
-{
-    /* board */
-    (void)raspberry_pico_init(&ctx->pico);
-
-    /* IPCs */
-    picoRTOS_mutex_init(&ctx->mutex);
-    picoRTOS_cond_init(&ctx->cond);
-
-    /* turn off backlight */
-    gpio_write(ctx->pico.GPIO13, false);
-
-    /* start WDT */
-    (void)wd_start(ctx->pico.WDT);
-}
+/* IPCs */
+static struct picoRTOS_mutex mutex = PICORTOS_MUTEX_INITIALIZER;
+static struct picoRTOS_cond cond = PICORTOS_COND_INITIALIZER;
 
 static void tick_main(void *priv)
 {
@@ -54,29 +32,29 @@ static void led0_main(void *priv)
 {
     picoRTOS_assert_void(priv != NULL);
 
-    struct blink *ctx = (struct blink*)priv;
+    struct raspberry_pico *ctx = (struct raspberry_pico*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
 
-    (void)pwm_set_period(ctx->pico.PWM4B, (pwm_period_us_t)200);
-    pwm_start(ctx->pico.PWM4B);
+    (void)pwm_set_period(ctx->PWM4B, (pwm_period_us_t)200);
+    pwm_start(ctx->PWM4B);
 
     for (;;) {
 
         size_t n = (size_t)100;
         pwm_duty_cycle_t duty_cycle = 0;
 
-        picoRTOS_mutex_lock(&ctx->mutex);
+        picoRTOS_mutex_lock(&mutex);
 
         /* fade in */
         while (n-- != 0) {
-            (void)pwm_set_duty_cycle(ctx->pico.PWM4B, duty_cycle);
+            (void)pwm_set_duty_cycle(ctx->PWM4B, duty_cycle);
             duty_cycle += PWM_DUTY_CYCLE_PCENT(1);
             picoRTOS_sleep(PICORTOS_DELAY_MSEC(5));
         }
 
         /* ipc */
-        picoRTOS_cond_signal(&ctx->cond);
-        picoRTOS_mutex_unlock(&ctx->mutex);
+        picoRTOS_cond_signal(&cond);
+        picoRTOS_mutex_unlock(&mutex);
 
         picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
     }
@@ -86,24 +64,24 @@ static void led1_main(void *priv)
 {
     picoRTOS_assert_void(priv != NULL);
 
-    struct blink *ctx = (struct blink*)priv;
+    struct raspberry_pico *ctx = (struct raspberry_pico*)priv;
 
     for (;;) {
 
         size_t n = (size_t)99;
         pwm_duty_cycle_t duty_cycle = PWM_DUTY_CYCLE_PCENT(100);
 
-        picoRTOS_mutex_lock(&ctx->mutex);
-        picoRTOS_cond_wait(&ctx->cond, &ctx->mutex);
+        picoRTOS_mutex_lock(&mutex);
+        picoRTOS_cond_wait(&cond, &mutex);
 
         /* fade away */
         while (n-- != 0) {
-            (void)pwm_set_duty_cycle(ctx->pico.PWM4B, duty_cycle);
+            (void)pwm_set_duty_cycle(ctx->PWM4B, duty_cycle);
             duty_cycle -= PWM_DUTY_CYCLE_PCENT(1);
             picoRTOS_sleep(PICORTOS_DELAY_MSEC(5));
         }
 
-        picoRTOS_mutex_unlock(&ctx->mutex);
+        picoRTOS_mutex_unlock(&mutex);
     }
 }
 
@@ -163,27 +141,59 @@ static void adc_main(void *priv)
 }
 
 /*
- * twi_main sends the who_am_i request to the Waveshare Pico-10DOF-IMU
- * and expects 0xea as an answer
+ * This thread tests the i2c master by sending a byte (0xa5) to 0x69 and expecting a
+ * specific answer from a slave (0x5a)
  */
-static void twi_main(void *priv)
+static void twi_master_main(void *priv)
+{
+    picoRTOS_assert_void(priv != NULL);
+
+    struct twi *TWI = (struct twi*)priv;
+    picoRTOS_tick_t ref = picoRTOS_get_tick();
+
+    for (;;) {
+        char c = (char)0xa5;
+        int timeout = (int)PICORTOS_DELAY_MSEC(500);
+
+        while (twi_write(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
+            picoRTOS_schedule();
+
+        picoRTOS_assert_void(timeout != -1);
+
+        while (twi_read(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
+            picoRTOS_schedule();
+
+        picoRTOS_assert_void(timeout != -1);
+        picoRTOS_assert_void(c == (char)0x5a);
+
+        picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
+    }
+}
+
+/*
+ * This thread tests the i2c slave, it reads a byte (0xa5) and send 0x5a back
+ */
+static void twi_slave_main(void *priv)
 {
     picoRTOS_assert_void(priv != NULL);
 
     struct twi *TWI = (struct twi*)priv;
 
     for (;;) {
-        int res;
-        char who_am_i = (char)0;
+        char c = (char)0;
+        int timeout = (int)PICORTOS_DELAY_SEC(2);
 
-        while ((res = twi_write(TWI, &who_am_i, sizeof(who_am_i))) == -EAGAIN)
+        while (twi_read(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
             picoRTOS_schedule();
 
-        while ((res = twi_read(TWI, &who_am_i, sizeof(who_am_i))) == -EAGAIN)
+        picoRTOS_assert_void(timeout != -1);
+        picoRTOS_assert_void(c == (char)0xa5);
+
+        c = (char)0x5a;
+        while (twi_write(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
             picoRTOS_schedule();
 
-        picoRTOS_assert_void(who_am_i == (char)0xea);
-        picoRTOS_sleep(PICORTOS_DELAY_SEC(1));
+        picoRTOS_assert_void(timeout != -1);
     }
 }
 
@@ -201,9 +211,9 @@ static void wd_main(void *priv)
 
 int main(void)
 {
-    static struct blink blink;
+    static struct raspberry_pico pico;
 
-    blink_init(&blink);
+    (void)raspberry_pico_init(&pico);
     picoRTOS_init();
 
     picoRTOS_priority_t prio;
@@ -215,34 +225,36 @@ int main(void)
     static picoRTOS_stack_t stack4[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack5[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack6[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack7[CONFIG_DEFAULT_STACK_COUNT];
 
     /* TICK */
-    picoRTOS_task_init(&task, tick_main, blink.pico.GPIO21, stack0, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_task_init(&task, tick_main, pico.GPIO19, stack0, PICORTOS_STACK_COUNT(stack0));
     picoRTOS_add_task(&task, TASK_TICK_PRIO);
 
-    /* LED0 on core #0 */
+    /* LEDs (strict deadlines, no round-robin) */
     prio = picoRTOS_get_next_available_priority();
-    picoRTOS_task_init(&task, led0_main, &blink, stack1, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-    picoRTOS_SMP_add_task(&task, prio, (picoRTOS_mask_t)(1 << 1));
+    picoRTOS_task_init(&task, led0_main, &pico, stack1, PICORTOS_STACK_COUNT(stack1));
+    picoRTOS_SMP_add_task(&task, prio, (picoRTOS_mask_t)(1 << 0));  /* LED0: core #0 */
+    prio = picoRTOS_get_next_available_priority();
+    picoRTOS_task_init(&task, led1_main, &pico, stack2, PICORTOS_STACK_COUNT(stack2));
+    picoRTOS_SMP_add_task(&task, prio, (picoRTOS_mask_t)(1 << 1));  /* LED1: core #1 */
 
-    /* LED1 on core #1 (round-robin) */
-    picoRTOS_task_init(&task, led1_main, &blink, stack2, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-    picoRTOS_SMP_add_task(&task, prio, (picoRTOS_mask_t)(1 << 0));
+    /* SPI & ADC (round-robin) */
+    prio = picoRTOS_get_next_available_priority();
+    picoRTOS_task_init(&task, spi_main, pico.SPI, stack3, PICORTOS_STACK_COUNT(stack3));
+    (void)picoRTOS_add_task(&task, prio);
+    picoRTOS_task_init(&task, adc_main, pico.ADC0, stack4, PICORTOS_STACK_COUNT(stack4));
+    (void)picoRTOS_add_task(&task, prio);
 
-    /* SPI */
-    picoRTOS_task_init(&task, spi_main, blink.pico.SPI, stack3, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-    (void)picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
-
-    /* ADC */
-    picoRTOS_task_init(&task, adc_main, blink.pico.ADC0, stack4, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-    (void)picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
-
-    /* I2C */
-    picoRTOS_task_init(&task, twi_main, blink.pico.I2C, stack5, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-    (void)picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+    /* I2C (round-robin) */
+    prio = picoRTOS_get_next_available_priority();
+    picoRTOS_task_init(&task, twi_master_main, pico.I2C0, stack5, PICORTOS_STACK_COUNT(stack5));
+    picoRTOS_SMP_add_task(&task, prio, (picoRTOS_mask_t)(1 << 0));  /* I2C0: core #0 */
+    picoRTOS_task_init(&task, twi_slave_main, pico.I2C1, stack6, PICORTOS_STACK_COUNT(stack6));
+    picoRTOS_SMP_add_task(&task, prio, (picoRTOS_mask_t)(1 << 1));  /* I2C1: core #1 */
 
     /* WD, keep last */
-    picoRTOS_task_init(&task, wd_main, blink.pico.WDT, stack6, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_task_init(&task, wd_main, pico.WDT, stack7, PICORTOS_STACK_COUNT(stack7));
     (void)picoRTOS_add_task(&task, picoRTOS_get_last_available_priority());
 
     picoRTOS_start();
