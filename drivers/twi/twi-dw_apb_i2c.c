@@ -296,6 +296,96 @@ static int twi_write_as_master_xfer(struct twi *ctx, const void *buf, size_t n)
     return (int)sent;
 }
 
+static int twi_write_as_master(struct twi *ctx, const void *buf, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+
+    switch (ctx->state) {
+    case TWI_DW_APB_I2C_STATE_IDLE: return twi_write_as_master_idle(ctx);
+    case TWI_DW_APB_I2C_STATE_XFER: return twi_write_as_master_xfer(ctx, buf, n);
+    default: break;
+    }
+
+    picoRTOS_break();
+    /*@notreached@*/
+    return -EIO;
+}
+
+static int twi_write_as_slave_idle(struct twi *ctx)
+{
+    if ((ctx->base->IC_RAW_INTR_STAT & IC_INTR_STAT_R_TX_ABRT) != 0) {
+        ctx->base->IC_CLR_TX_ABRT |= 1;
+        return -EPIPE;
+    }
+
+    if ((ctx->base->IC_RAW_INTR_STAT & IC_INTR_STAT_R_RD_REQ) != 0) {
+        ctx->base->IC_CLR_RD_REQ |= 1;
+        ctx->state = TWI_DW_APB_I2C_STATE_XFER;
+    }
+
+    return -EAGAIN;
+}
+
+static int twi_write_as_slave_xfer(struct twi *ctx, const void *buf, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+
+    size_t sent = 0;
+    const uint8_t *buf8 = (uint8_t*)buf;
+
+    while (n-- != 0) {
+        if ((ctx->base->IC_STATUS & IC_STATUS_TFNF) == 0)
+            break;
+
+        if ((ctx->base->IC_RAW_INTR_STAT & IC_INTR_STAT_R_STOP_DET) != 0) {
+            ctx->base->IC_CLR_STOP_DET |= 1;
+            ctx->state = TWI_DW_APB_I2C_STATE_IDLE;
+            break;
+        }
+
+        ctx->base->IC_DATA_CMD = (uint32_t)buf8[sent++];
+
+        if (n == 0)
+            ctx->state = TWI_DW_APB_I2C_STATE_IDLE;
+    }
+
+    if (sent == 0)
+        return -EAGAIN;
+
+    return (int)sent;
+}
+
+static int twi_write_as_slave(struct twi *ctx, const void *buf, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+
+    switch (ctx->state) {
+    case TWI_DW_APB_I2C_STATE_IDLE: return twi_write_as_slave_idle(ctx);
+    case TWI_DW_APB_I2C_STATE_XFER: return twi_write_as_slave_xfer(ctx, buf, n);
+    default: break;
+    }
+
+    picoRTOS_break();
+    /*@notreached@*/
+    return -EIO;
+}
+
+int twi_write(struct twi *ctx, const void *buf, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+
+    if (ctx->mode == TWI_MODE_MASTER)
+        return twi_write_as_master(ctx, buf, n);
+
+    /* not implemented yet */
+    if (ctx->mode == TWI_MODE_SLAVE)
+        return twi_write_as_slave(ctx, buf, n);
+
+    picoRTOS_break();
+    /*@notreached@*/
+    return -EIO;
+}
+
 static int twi_read_as_master_idle(struct twi *ctx)
 {
     ctx->base->IC_ENABLE &= ~IC_ENABLE_ENABLE;
@@ -328,10 +418,8 @@ static int twi_read_as_master_xfer(struct twi *ctx, void *buf, size_t n)
         if ((ctx->base->IC_STATUS & IC_STATUS_RFNE) == 0)
             break;
 
-        if (n == 0) {
-            ctx->base->IC_DATA_CMD = (uint32_t)IC_DATA_CMD_STOP;
+        if (n == 0)
             ctx->state = TWI_DW_APB_I2C_STATE_IDLE;
-        }
 
         buf8[recv++] = (uint8_t)ctx->base->IC_DATA_CMD;
     }
@@ -340,21 +428,6 @@ static int twi_read_as_master_xfer(struct twi *ctx, void *buf, size_t n)
         return -EAGAIN;
 
     return (int)recv;
-}
-
-static int twi_write_as_master(struct twi *ctx, const void *buf, size_t n)
-{
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-
-    switch (ctx->state) {
-    case TWI_DW_APB_I2C_STATE_IDLE: return twi_write_as_master_idle(ctx);
-    case TWI_DW_APB_I2C_STATE_XFER: return twi_write_as_master_xfer(ctx, buf, n);
-    default: break;
-    }
-
-    picoRTOS_break();
-    /*@notreached@*/
-    return -EIO;
 }
 
 static int twi_read_as_master(struct twi *ctx, void *buf, size_t n)
@@ -372,16 +445,51 @@ static int twi_read_as_master(struct twi *ctx, void *buf, size_t n)
     return -EIO;
 }
 
-int twi_write(struct twi *ctx, const void *buf, size_t n)
+static int twi_read_as_slave_idle(struct twi *ctx)
+{
+    if ((ctx->base->IC_RAW_INTR_STAT & IC_INTR_STAT_R_RX_FULL) != 0)
+        ctx->state = TWI_DW_APB_I2C_STATE_XFER;
+
+    return -EAGAIN;
+}
+
+static int twi_read_as_slave_xfer(struct twi *ctx, void *buf, size_t n)
 {
     if (!picoRTOS_assert(n > 0)) return -EINVAL;
 
-    if (ctx->mode == TWI_MODE_MASTER)
-        return twi_write_as_master(ctx, buf, n);
+    size_t recv = 0;
+    uint8_t *buf8 = (uint8_t*)buf;
 
-    /* not implemented yet */
-    if (ctx->mode == TWI_MODE_SLAVE)
-        return -ENOSYS;
+    while (n-- != 0) {
+        if ((ctx->base->IC_STATUS & IC_STATUS_RFNE) == 0)
+            break;
+
+        buf8[recv++] = (uint8_t)ctx->base->IC_DATA_CMD;
+
+        /* end of xfer */
+        if (n == 0 ||
+            (ctx->base->IC_RAW_INTR_STAT & IC_INTR_STAT_R_STOP_DET) != 0) {
+            ctx->base->IC_CLR_STOP_DET |= 1;
+            ctx->state = TWI_DW_APB_I2C_STATE_IDLE;
+            break;
+        }
+    }
+
+    if (recv == 0)
+        return -EAGAIN;
+
+    return (int)recv;
+}
+
+static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+
+    switch (ctx->state) {
+    case TWI_DW_APB_I2C_STATE_IDLE: return twi_read_as_slave_idle(ctx);
+    case TWI_DW_APB_I2C_STATE_XFER: return twi_read_as_slave_xfer(ctx, buf, n);
+    default: break;
+    }
 
     picoRTOS_break();
     /*@notreached@*/
@@ -395,9 +503,8 @@ int twi_read(struct twi *ctx, void *buf, size_t n)
     if (ctx->mode == TWI_MODE_MASTER)
         return twi_read_as_master(ctx, buf, n);
 
-    /* not implemented yet */
     if (ctx->mode == TWI_MODE_SLAVE)
-        return -ENOSYS;
+        return twi_read_as_slave(ctx, buf, n);
 
     picoRTOS_break();
     /*@notreached@*/
