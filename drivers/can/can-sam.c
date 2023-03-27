@@ -214,6 +214,9 @@ int can_setup(struct can *ctx, struct can_settings *settings)
     if ((res = set_tx_mailboxes(ctx, settings->tx_mailbox_count)) < 0)
         return res;
 
+    ctx->tx_auto_abort = settings->tx_auto_abort;
+    ctx->rx_overwrite = settings->rx_overwrite;
+
     /* ignore loopback */
 
     /* enable */
@@ -235,13 +238,10 @@ static int mailbox_config_mid(struct CAN_SAM_MB *mb, can_id_t id)
     return 0;
 }
 
-static int mailbox_config_mam(struct CAN_SAM_MB *mb, can_id_t id, can_id_t accept_mask)
+static int mailbox_config_mam(struct CAN_SAM_MB *mb, can_id_t id, can_id_t mask)
 {
     if (!picoRTOS_assert(id < (can_id_t)CAN_EXTID_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(accept_mask < (can_id_t)CAN_EXTID_COUNT)) return -EINVAL;
-
-    /* if mask is 0, ignore */
-    uint32_t mask = (uint32_t)(accept_mask != 0 ? accept_mask : (can_id_t)-1);
+    if (!picoRTOS_assert(mask < (can_id_t)CAN_EXTID_COUNT)) return -EINVAL;
 
     if (id < (can_id_t)CAN_ID_COUNT)
         mb->CAN_MAM = (uint32_t)CAN_MIDn_MIDvA(mask);
@@ -389,6 +389,7 @@ static int transfer_rx_mailbox(struct can *ctx, size_t index,
 
     /* get id */
     *id = mailbox_read_mid(mb);
+    n = (size_t)CAN_MCRn_MDLC_GET(mb->CAN_MCR);
 
     /* reset xfer */
     mb->CAN_MCR = (uint32_t)CAN_MCRn_MTRC;
