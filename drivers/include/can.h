@@ -22,6 +22,10 @@ typedef unsigned int can_id_t;
 #define CAN_EXTID_COUNT 536870912   /* 29-bit identifier */
 #define CAN_DATA_COUNT  8
 
+#define CAN_ACCEPT_ANY        0x0
+#define CAN_ACCEPT_STRICT     0x7ff
+#define CAN_ACCEPT_STRICT_EXT 0x1fffffff
+
 struct can_settings {
     unsigned long bitrate;
     size_t tx_mailbox_count; /* how many mbs are dedicated to tx */
@@ -51,9 +55,12 @@ int can_setup(struct can *ctx, struct can_settings *settings);
  *  accept_mask - The acceptance mask for this ID
  *
  * Remarks:
- * 0 as acceptance mask means only the specified ID will be accepted
- * Other acceptance masks act as a logical AND between the received ID, the
+ * CAN_ACCEPT_STRICT(_EXT) as acceptance mask means only the specified ID will be accepted
+ * Acceptance masks act as a logical AND between the received ID, the
  * acceptance mask and the specified id
+ *
+ * CAN_ACCEPT_STRICT(_EXT) will only accept the specified ID
+ * CAN_ACCEPT_ANY will accept any message (mostly for debug purposes)
  *
  * Returns:
  * 0 in case of success, -errno otherwise
