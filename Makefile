@@ -10,4 +10,8 @@ naturaldocs:
 	  -p etc/naturaldocs \
 	  -o HTML docs
 
+cloc:
+	cloc picoRTOS.c
+	cloc picoRTOS-SMP.c
+
 .PHONY: uncrustify naturaldocs
