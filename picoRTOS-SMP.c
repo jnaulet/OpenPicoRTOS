@@ -307,8 +307,8 @@ void picoRTOS_sleep_until(picoRTOS_tick_t *ref, picoRTOS_tick_t period)
         arch_syscall(PICORTOS_SYSCALL_SLEEP, (void*)delay);
     }else{
         /* missed the clock: reset to tick and signal */
-        *ref = tick;
         picoRTOS_break();
+        /*@notreached@*/ *ref = tick;
     }
 }
 
