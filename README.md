@@ -31,6 +31,7 @@ OpenPicoRTOS has been designed with these requirements in mind:
   - High portability
   - Lowest overhead possible
   - Support for SMP
+  - Less than 400 lines of code
 
 More information here: https://github.com/jnaulet/OpenPicoRTOS/blob/main/etc/Requirements.md
 

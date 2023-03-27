@@ -143,3 +143,13 @@ Then any syscall will allow a core to find its next one, excluding tasks current
 
 This adds a bit of overhead, as a core needs to lock the kernel using arch_spin_lock() and arch_spin_unlock() and might temporarily stall the other ones.
 Furthermore, a core might execute more loops to find its next available task.
+
+## 9, Less than 400 lines of code
+
+A study by Cisco Systems showed that engineers lose a lot of efficiency after reviewing more than 400 lines of code.
+
+OpenPicoRTOS' main file should be less than that ot allow a complete review in one session. Use:
+
+    # make cloc
+
+To ensure it's still within limits.
