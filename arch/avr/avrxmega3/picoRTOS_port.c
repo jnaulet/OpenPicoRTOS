@@ -75,6 +75,7 @@ picoRTOS_stack_t *arch_prepare_stack(struct picoRTOS_task *task)
     return sp - 1;                                              /* pop pre-increments */
 }
 
+/* cppcheck-suppress constParameter */
 void arch_idle(void *null)
 {
     picoRTOS_assert_fatal(null == NULL);
