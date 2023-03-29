@@ -1,5 +1,18 @@
 # Release notes
 
+## picoRTOS v1.6.3
+### What's new ?
+
+The system has been partially rewritten to prepare the field for the future support of round-robin scheduling.
+The PIC32MZ series support has been improved, in the scheduler as well as the drivers.
+the can_accept() HAL call and the associated drivers have been improved (no more exceptions for 0).
+
+The following drivers have been added:
+  - Watchdog for SAMD5x/E5x series
+  - ADC for PIC32Mx series
+  - TWI/I2C for PIC32Mx (untested)
+  - CAN for PIC32Mx (untested)
+
 ## picoRTOS v1.6.2
 ### What's new ?
 
