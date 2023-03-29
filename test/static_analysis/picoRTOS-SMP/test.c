@@ -61,6 +61,10 @@ int main(void)
     picoRTOS_SMP_enable_interrupt((picoRTOS_irq_t)0, (picoRTOS_mask_t)0x1);
     picoRTOS_SMP_disable_interrupt((picoRTOS_irq_t)0, (picoRTOS_mask_t)0x1);
 
+    /* dummy internal calls just to force check */
+    (void)picoRTOS_syscall(stack, PICORTOS_SYSCALL_SLEEP, NULL);
+    (void)picoRTOS_tick(stack);
+
     picoRTOS_kill();
     /*@notreached@*/
     return 0;

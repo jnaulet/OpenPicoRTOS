@@ -16,7 +16,7 @@ int main(void)
 {
     int dummy = 0;
     struct picoRTOS_task task;
-    picoRTOS_stack_t stack[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack[CONFIG_DEFAULT_STACK_COUNT];
     picoRTOS_futex_t futex = PICORTOS_FUTEX_INITIALIZER;
     struct picoRTOS_mutex mutex = PICORTOS_MUTEX_INITIALIZER;
     struct picoRTOS_cond cond = PICORTOS_COND_INITIALIZER;
@@ -55,6 +55,10 @@ int main(void)
     PICORTOS_QUEUE_INIT(&queue);
     (void)PICORTOS_QUEUE_WRITE(&queue, 0);
     (void)PICORTOS_QUEUE_READ(&queue, &dummy);
+
+    /* dummy internal calls just to force check */
+    (void)picoRTOS_syscall(stack, PICORTOS_SYSCALL_SLEEP, NULL);
+    (void)picoRTOS_tick(stack);
 
     picoRTOS_kill();
     /*@notreached@*/
