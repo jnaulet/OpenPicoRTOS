@@ -1,13 +1,13 @@
-#ifndef DMA_H
-#define DMA_H
+#ifndef HAL_DMA_H
+#define HAL_DMA_H
 
 #include <errno.h>
 #include <stddef.h>
 #include <stdint.h>
 
-struct dma_channel;
+struct dma;
 
-struct dma_channel_xfer {
+struct dma_xfer {
     intptr_t saddr;     /* source address */
     intptr_t daddr;     /* destination address */
     /* attributes */
@@ -17,7 +17,27 @@ struct dma_channel_xfer {
     size_t byte_count;  /* byte count */
 };
 
-int dma_channel_xfer(struct dma_channel *ctx, struct dma_channel_xfer *xfer);
-int dma_channel_xfer_done(struct dma_channel *ctx);
+/* Function: dma_xfer
+ * Starts a DMA transfer
+ *
+ * Parameters:
+ *  ctx - The DMA channel to operate
+ *  xfer - The transfer parameters
+ *
+ * Returns:
+ * 0 in case of success, -errno otherwise
+ */
+int dma_xfer(struct dma *ctx, struct dma_xfer *xfer);
+
+/* Function: dma_xfer_done
+ * Polls a DMA for end of transfer
+ *
+ * Parameters:
+ *  ctx - The DMA to poll
+ *
+ * Returns:
+ * 0 in case of success, -errno otherwise
+ */
+int dma_xfer_done(struct dma *ctx);
 
 #endif
