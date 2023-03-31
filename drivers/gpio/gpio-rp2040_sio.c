@@ -1,7 +1,7 @@
-#include "gpio-sio.h"
+#include "gpio-rp2040_sio.h"
 #include "picoRTOS.h"
 
-struct GPIO_SIO {
+struct GPIO_RP2040_SIO {
     volatile uint32_t GPIO_IN;
     volatile uint32_t GPIO_HI_IN;
     uint32_t RESERVED0;
@@ -23,7 +23,7 @@ struct GPIO_SIO {
     volatile uint32_t GPIO_HI_OE_XOR;
 };
 
-/* Function: gpio_sio_init
+/* Function: gpio_rp2040_sio_init
  * Initializes a GPIO
  *
  * Parameters:
@@ -35,15 +35,16 @@ struct GPIO_SIO {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int gpio_sio_init(struct gpio *ctx, struct GPIO_SIO *base, size_t pin, gpio_sio_dir_t dir)
+int gpio_rp2040_sio_init(struct gpio *ctx, struct GPIO_RP2040_SIO *base,
+                         size_t pin, gpio_rp2040_sio_dir_t dir)
 {
-    if (!picoRTOS_assert(pin < (size_t)GPIO_SIO_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(dir < GPIO_SIO_DIR_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(pin < (size_t)GPIO_RP2040_SIO_PIN_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(dir < GPIO_RP2040_SIO_DIR_COUNT)) return -EINVAL;
 
     ctx->base = base;
     ctx->mask = (uint32_t)(1 << pin);
 
-    if (dir == GPIO_SIO_DIR_OUTPUT)
+    if (dir == GPIO_RP2040_SIO_DIR_OUTPUT)
         ctx->base->GPIO_OE_SET = ctx->mask;
     else
         ctx->base->GPIO_OE_CLR = ctx->mask;
