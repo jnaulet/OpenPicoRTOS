@@ -1,9 +1,9 @@
-#include "uart-pl011.h"
+#include "uart-arm_pl011.h"
 #include "picoRTOS.h"
 
 #include <stdint.h>
 
-struct UART_PL011 {
+struct UART_ARM_PL011 {
     volatile uint32_t UARTDR;
     volatile uint32_t UARTRSR;
     uint32_t RESERVED0[5];
@@ -83,7 +83,7 @@ struct UART_PL011 {
 #define UARTCR_SIREN  (1 << 1)
 #define UARTCR_UARTEN (1 << 0)
 
-/* Function: uart_pl011_init
+/* Function: uart_arm_pl011_init
  * Initializes an UART
  *
  * Parameters:
@@ -94,7 +94,7 @@ struct UART_PL011 {
  * Returns:
  * Always 0
  */
-int uart_pl011_init(struct uart *ctx, struct UART_PL011 *base, clock_id_t clkid)
+int uart_arm_pl011_init(struct uart *ctx, struct UART_ARM_PL011 *base, clock_id_t clkid)
 {
     ctx->base = base;
     ctx->clkid = clkid;
@@ -108,7 +108,7 @@ int uart_pl011_init(struct uart *ctx, struct UART_PL011 *base, clock_id_t clkid)
     return 0;
 }
 
-/* Function: uart_pl011_set_loopback
+/* Function: uart_arm_pl011_set_loopback
  * Sets UART for loopback mode (test)
  *
  * Parameters:
@@ -118,7 +118,7 @@ int uart_pl011_init(struct uart *ctx, struct UART_PL011 *base, clock_id_t clkid)
  * Returns:
  * Always 0
  */
-int uart_pl011_set_loopback(struct uart *ctx, bool loopback)
+int uart_arm_pl011_set_loopback(struct uart *ctx, bool loopback)
 {
     if (loopback) ctx->base->UARTCR |= UARTCR_LBE;
     else ctx->base->UARTCR &= ~UARTCR_LBE;
@@ -146,8 +146,8 @@ static int set_baudrate(struct uart *ctx, unsigned long baudrate)
 
 static int set_cs(struct uart *ctx, size_t cs)
 {
-    if (!picoRTOS_assert(cs >= (size_t)UART_PL011_CS_MIN)) return -EINVAL;
-    if (!picoRTOS_assert(cs <= (size_t)UART_PL011_CS_MAX)) return -EINVAL;
+    if (!picoRTOS_assert(cs >= (size_t)UART_ARM_PL011_CS_MIN)) return -EINVAL;
+    if (!picoRTOS_assert(cs <= (size_t)UART_ARM_PL011_CS_MAX)) return -EINVAL;
 
     ctx->base->UARTLCR_H &= ~UARTLCR_H_WLEN(UARTLCR_H_WLEN_M);
     ctx->base->UARTLCR_H |= UARTLCR_H_WLEN(cs - (size_t)5);
