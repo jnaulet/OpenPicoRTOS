@@ -64,7 +64,7 @@ struct DMA_RP2040 {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int dma_r2040_init(struct dma_channel *ctx, struct DMA_RP2040 *base, size_t channel)
+int dma_r2040_init(struct dma *ctx, struct DMA_RP2040 *base, size_t channel)
 {
     if (!picoRTOS_assert(channel < (size_t)DMA_RP2040_CHANNEL_COUNT)) return -EINVAL;
 
@@ -80,7 +80,9 @@ int dma_r2040_init(struct dma_channel *ctx, struct DMA_RP2040 *base, size_t chan
     return 0;
 }
 
-int dma_channel_xfer(struct dma_channel *ctx, struct dma_channel_xfer *xfer)
+/* hooks */
+
+int dma_xfer(struct dma *ctx, struct dma_xfer *xfer)
 {
     if (!picoRTOS_assert(xfer->size > 0)) return -EINVAL;
     if (!picoRTOS_assert(xfer->size != (size_t)3)) return -EINVAL;
@@ -105,7 +107,7 @@ int dma_channel_xfer(struct dma_channel *ctx, struct dma_channel_xfer *xfer)
     return 0;
 }
 
-int dma_channel_xfer_done(struct dma_channel *ctx)
+int dma_xfer_done(struct dma *ctx)
 {
     if ((ctx->ch->CTRL_TRIG & CTRL_TRIG_BUSY) != 0)
         return -EAGAIN;
