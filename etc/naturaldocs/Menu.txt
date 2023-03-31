@@ -57,8 +57,13 @@ Group: hw-specific  {
       File: GPIO  (no auto-title, drivers/gpio/gpio-avr.c)
       File: MUX  (no auto-title, drivers/mux/mux-avr.c)
       File: PWM  (no auto-title, drivers/pwm/pwm-avr.c)
-      File: SPI  (no auto-title, drivers/spi/spi-avr.c)
-      File: SPI / USART  (no auto-title, drivers/spi/spi-avr_usart.c)
+
+      Group: Spi  {
+
+         File: SPI  (no auto-title, drivers/spi/spi-avr.c)
+         File: SPI / USART  (no auto-title, drivers/spi/spi-avr_usart.c)
+         }  # Group: Spi
+
       File: TWI  (no auto-title, drivers/twi/twi-avr.c)
       File: UART  (no auto-title, drivers/uart/uart-avr.c)
       File: Watchdog  (no auto-title, drivers/wd/wd-avr.c)
@@ -66,12 +71,15 @@ Group: hw-specific  {
 
    Group: PIC32MX  {
 
+      File: ADC  (no auto-title, drivers/adc/adc-pic32mx.c)
+      File: CAN  (no auto-title, drivers/can/can-pic32mx.c)
       File: Clocks  (no auto-title, drivers/clock/clock-pic32mx.c)
       File: GPIO  (no auto-title, drivers/gpio/gpio-pic32mx.c)
       File: Misc.  (no auto-title, drivers/misc/misc-pic32mx.c)
       File: MUX  (no auto-title, drivers/mux/mux-pic32mx.c)
       File: PWM  (no auto-title, drivers/pwm/pwm-pic32mx.c)
       File: SPI  (no auto-title, drivers/spi/spi-pic32mx.c)
+      File: TWI  (no auto-title, drivers/twi/twi-pic32mx.c)
       File: UART  (no auto-title, drivers/uart/uart-pic32mx.c)
       File: Watchdog  (no auto-title, drivers/wd/wd-pic32mx.c)
       }  # Group: PIC32MX
@@ -93,12 +101,12 @@ Group: hw-specific  {
       File: ADC  (no auto-title, drivers/adc/adc-rp2040.c)
       File: Clocks  (no auto-title, drivers/clock/clock-rp2040.c)
       File: DMA  (no auto-title, drivers/dma/dma-rp2040.c)
-      File: GPIO  (no auto-title, drivers/gpio/gpio-sio.c)
+      File: GPIO  (no auto-title, drivers/gpio/gpio-rp2040_sio.c)
       File: MUX  (no auto-title, drivers/mux/mux-rp2040.c)
       File: PWM  (no auto-title, drivers/pwm/pwm-rp2040.c)
-      File: SPI  (no auto-title, drivers/spi/spi-pl022.c)
+      File: SPI  (no auto-title, drivers/spi/spi-arm_pl022.c)
       File: TWI  (no auto-title, drivers/twi/twi-dw_apb_i2c.c)
-      File: UART  (no auto-title, drivers/uart/uart-pl011.c)
+      File: UART  (no auto-title, drivers/uart/uart-arm_pl011.c)
       File: Watchdog  (no auto-title, drivers/wd/wd-rp2040.c)
       }  # Group: RP2040
 
@@ -159,6 +167,7 @@ Group: picoRTOS-Runtime-HAL  {
    File: ADC  (no auto-title, drivers/include/adc.h)
    File: CAN  (no auto-title, drivers/include/can.h)
    File: Clock  (no auto-title, drivers/include/clock.h)
+   File: DMA  (no auto-title, drivers/include/dma.h)
    File: EEPROM  (no auto-title, drivers/include/eeprom.h)
    File: Flash  (no auto-title, drivers/include/flash.h)
    File: GPIO  (no auto-title, drivers/include/gpio.h)
