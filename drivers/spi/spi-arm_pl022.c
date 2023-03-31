@@ -1,9 +1,9 @@
-#include "spi-pl022.h"
+#include "spi-arm_pl022.h"
 #include "picoRTOS.h"
 
 #include <stdint.h>
 
-struct SPI_PL022 {
+struct SPI_ARM_PL022 {
     volatile uint32_t SSPCR0;
     volatile uint32_t SSPCR1;
     volatile uint32_t SSPDR;
@@ -50,7 +50,7 @@ struct SPI_PL022 {
 #define SSPCPSR_CPSDVSR_M  0xffu
 #define SSPCPSR_CPSDVSR(x) ((x) & SSPCPSR_CPSDVSR_M)
 
-/* Function: spi_pl022_init
+/* Function: spi_arm_pl022_init
  * Initializes a SPI
  *
  * Parameters:
@@ -61,7 +61,7 @@ struct SPI_PL022 {
  * Returns:
  * Always 0
  */
-int spi_pl022_init(struct spi *ctx, struct SPI_PL022 *base, clock_id_t clkid)
+int spi_arm_pl022_init(struct spi *ctx, struct SPI_ARM_PL022 *base, clock_id_t clkid)
 {
     ctx->base = base;
     ctx->clkid = clkid;
@@ -74,7 +74,7 @@ int spi_pl022_init(struct spi *ctx, struct SPI_PL022 *base, clock_id_t clkid)
     return 0;
 }
 
-/* Function: spi_pl022_set_loopback
+/* Function: spi_arm_pl022_set_loopback
  * Sets the SPI in loopback mode (for tests)
  *
  * Parameters:
@@ -84,7 +84,7 @@ int spi_pl022_init(struct spi *ctx, struct SPI_PL022 *base, clock_id_t clkid)
  * Returns:
  * Always 0
  */
-int spi_pl022_set_loopback(struct spi *ctx, bool loopback)
+int spi_arm_pl022_set_loopback(struct spi *ctx, bool loopback)
 {
     /* disable SSP */
     ctx->base->SSPCR1 &= ~SSPCR1_SSE;
@@ -188,8 +188,8 @@ static int set_clkmode(struct spi *ctx, spi_clock_mode_t clkmode)
 
 static int set_frame_size(struct spi *ctx, size_t frame_size)
 {
-    if (!picoRTOS_assert(frame_size >= (size_t)SPI_PL022_FRAME_SIZE_MIN)) return -EINVAL;
-    if (!picoRTOS_assert(frame_size <= (size_t)SPI_PL022_FRAME_SIZE_MAX)) return -EINVAL;
+    if (!picoRTOS_assert(frame_size >= (size_t)SPI_ARM_PL022_FRAME_SIZE_MIN)) return -EINVAL;
+    if (!picoRTOS_assert(frame_size <= (size_t)SPI_ARM_PL022_FRAME_SIZE_MAX)) return -EINVAL;
 
     ctx->base->SSPCR0 &= ~SSPCR0_DSS(SSPCR0_DSS_M);
     ctx->base->SSPCR0 |= SSPCR0_DSS(frame_size - 1);
