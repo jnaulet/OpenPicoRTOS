@@ -7,6 +7,7 @@ set(PICORTOS_SRC_FILES
     ${PICORTOS_PATH}/picoRTOS.c
     ${PICORTOS_PATH}/arch/arm/cm0+/picoRTOS_port.c
     ${PICORTOS_PATH}/arch/arm/cm0+/picoRTOS_portasm.S
+    ${PICORTOS_PATH}/devices/raspberry/rp2040/startup.S
     )
 
 set(PICORTOS_INCLUDE_DIRS

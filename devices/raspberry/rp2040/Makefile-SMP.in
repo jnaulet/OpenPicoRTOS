@@ -1,7 +1,7 @@
 # Device configuration file for Raspberry RP2040 SMP
 ARCH_DIR := $(PICORTOS_DIR)/arch/arm/cm0+
 ARCH_SMP_DIR := $(ARCH_DIR)/rp2040
-DEVICE_DIR := $(PICORTOS_DIR)/devices/raspberry/rp2040
+DEVICE_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
 DEFINE := -D__RP2040__
 
@@ -12,5 +12,8 @@ SRC_C := $(PICORTOS_DIR)/picoRTOS-SMP.c
 SRC_C += $(ARCH_DIR)/picoRTOS_port.c
 SRC_C += $(ARCH_SMP_DIR)/picoRTOS-SMP_port.c
 
-SRC_S := $(ARCH_DIR)/picoRTOS_portasm.S
+SRC_S := $(DEVICE_DIR)/startup.S
 SRC_S += $(ARCH_SMP_DIR)/picoRTOS-SMP_portasm.S
+
+LDRAM := $(DEVICE_DIR)/gcc/rp2040_ram.ld
+LDFLASH := $(DEVICE_DIR)/gcc/rp2040_rom.ld
