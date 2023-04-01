@@ -11,9 +11,9 @@ typedef unsigned long picoRTOS_mask_t;
 typedef unsigned long picoRTOS_core_t;
 typedef unsigned long picoRTOS_cycles_t;
 
-#define ARCH_INITIAL_STACK_COUNT 16
-#define ARCH_MIN_STACK_COUNT (ARCH_INITIAL_STACK_COUNT + 8) /* must be 8-bytes "aligned" */
-#define ARCH_SMP_MIN_STACK_COUNT 32
+#define ARCH_INITIAL_STACK_COUNT (16 + 1)                       /* +1 for aligner */
+#define ARCH_MIN_STACK_COUNT     (ARCH_INITIAL_STACK_COUNT + 4) /* in -O0 */
+#define ARCH_SMP_MIN_STACK_COUNT 0
 
 /* splint doesn't like inline assembly */
 #ifdef S_SPLINT_S

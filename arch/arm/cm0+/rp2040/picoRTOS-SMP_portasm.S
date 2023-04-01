@@ -1,7 +1,5 @@
 	.syntax unified
-
-	/* Declarations */
-	.global arch_SIO_PROC1
+	.cpu cortex-m0plus
 
 	#include "picoRTOS_device.h"
 	#include "../picoRTOS_portasm.S"
@@ -11,12 +9,12 @@
 
 	.text
 
-	.align 1
 	.thumb_func
 	.type arch_SIO_PROC1, %function
+	.global arch_SIO_PROC1
 arch_SIO_PROC1:
-	push {lr}	/* store lr for interrupt return */
-	SAVE_CONTEXT r0
+	pop {r0}	/* get task sp */
+	push {lr}	/* store lr for return */
 
 	/* reset local timer */
 	ldr r3, =SYSTICK_CVR
@@ -28,5 +26,7 @@ arch_SIO_PROC1:
 
 	bl picoRTOS_tick
 
-	RESTORE_CONTEXT r0
-	pop {pc}	/* return */
+	/* return */
+	pop {r1}
+	push {r0}	/* send back new sp */
+	bx r1
