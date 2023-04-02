@@ -4,7 +4,7 @@
   <defaultConf>0</defaultConf>
   <confs>
     <conf name="default" type="2">
-      <platformToolSN>noToolString</platformToolSN>
+      <platformToolSN>:=MPLABComm-USB-Microchip:=&lt;vid>03EB:=&lt;pid>2141:=&lt;rev>0101:=&lt;man>Atmel Corp.:=&lt;prod>Atmel-ICE CMSIS-DAP:=&lt;sn>J42700033879:=&lt;drv>x:=&lt;xpt>h:=end</platformToolSN>
       <languageToolchainDir>/opt/gcc-arm-none-eabi-10-2020-q4-major/bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>

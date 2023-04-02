@@ -1,20 +1,23 @@
+# Build file for Arduino (no probe required)
+ELF_RAM := adafruit-itsybitsy_ram.elf
+ELF_FLASH := adafruit-itsybitsy_flash.elf
+
+CC := gcc
+OBJCOPY := objcopy
+CROSS := arm-none-eabi-
+BUILD := build
+
 # Configure system
 PICORTOS_DIR := $(abspath ../..)
--include $(PICORTOS_DIR)/devices/atmel/atsame5x/Makefile.in
+-include $(PICORTOS_DIR)/devices/atmel/atsamd51/Makefile.in
 
 INCLUDE += -I.
 SPLINTFLAGS += -checks +unixlib
 
-# directories
-SKETCH := adafruit-itsybitsy-m4
-SKETCH_DIR := sketch/$(SKETCH)
-
-# Required for sketch
-SRC_H += $(PICORTOS_DIR)/picoRTOS.h
-SRC_H += $(PICORTOS_DIR)/arch/include/picoRTOS_port.h
-SRC_H += $(ARCH_DIR)/picoRTOS_types.h
-SRC_H += $(DEVICE_DIR)/picoRTOS_device.h
-SRC_H += picoRTOSConfig.h
+CFLAGS += -Wall -Wextra -std=c99 $(INCLUDE) -O0 -g3 $(DEFINE)
+CFLAGS += -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16
+SFLAGS += -x assembler-with-cpp -g3 $(DEFINE) $(INCLUDE)
+SFLAGS += -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16
 
 INCLUDE += -I$(PICORTOS_DIR)/arch/include
 INCLUDE += -I$(PICORTOS_DIR)/drivers/include
@@ -37,45 +40,46 @@ SRC_C += $(PICORTOS_DIR)/drivers/spi/spi-sercom.c
 SRC_C += $(PICORTOS_DIR)/drivers/uart/uart-sercom.c
 SRC_C += $(PICORTOS_DIR)/drivers/wd/wd-same5x.c
 
-# sketch files
-SRC_H += $(PICORTOS_DIR)/drivers/include/adc.h
-SRC_H += $(PICORTOS_DIR)/drivers/adc/adc-same5x.h
-SRC_H += $(PICORTOS_DIR)/drivers/include/clock.h
-SRC_H += $(PICORTOS_DIR)/drivers/clock/clock-same5x.h
-SRC_H += $(PICORTOS_DIR)/drivers/include/gpio.h
-SRC_H += $(PICORTOS_DIR)/drivers/gpio/gpio-same5x.h
-SRC_H += $(PICORTOS_DIR)/drivers/include/mux.h
-SRC_H += $(PICORTOS_DIR)/drivers/mux/mux-same5x.h
-SRC_H += $(PICORTOS_DIR)/drivers/include/pwm.h
-SRC_H += $(PICORTOS_DIR)/drivers/pwm/pwm-same5x_tc.h
-SRC_H += $(PICORTOS_DIR)/drivers/include/spi.h
-SRC_H += $(PICORTOS_DIR)/drivers/spi/spi-sercom.h
-SRC_H += $(PICORTOS_DIR)/drivers/include/uart.h
-SRC_H += $(PICORTOS_DIR)/drivers/uart/uart-sercom.h
-SRC_H += $(PICORTOS_DIR)/drivers/include/wd.h
-SRC_H += $(PICORTOS_DIR)/drivers/wd/wd-same5x.h
-
 # demo
 SRC_C += main.c
 SRC_C += adafruit-itsybitsy-m4.c
-SRC_H += adafruit-itsybitsy-m4.h
 
-SFLAGS += --build-property "compiler.S.extra_flags=-mcpu={build.mcu}"
+OBJ := $(SRC_C:%.c=$(BUILD)/%.o)
+OBJ += $(SRC_S:%.S=$(BUILD)/%.o)
 
-all:
-	mkdir -p $(SKETCH_DIR)
-	cp $(SKETCH).ino $(SRC_C) $(SRC_S) $(SRC_H) $(SKETCH_DIR)
-	arduino-cli compile -b adafruit:samd:adafruit_itsybitsy_m4 \
-	 $(SFLAGS) --export-binaries $(SKETCH_DIR)
+# custom linker scripts for arduino-cli (bootloader)
+# Original files are in devices/atmel/atsame5x/gcc/samd51g_xxx.ld
+LDRAM := gcc/adafruit-arduino_ram.ld
+LDFLASH := gcc/adafruit-arduino_rom.ld
+
+all: $(ELF_RAM) $(ELF_FLASH)
+
+$(ELF_RAM): $(OBJ)
+	-mkdir -p $(@D)
+	$(CROSS)$(CC) $^ -T$(LDRAM) $(LDFLAGS) -o $@
+
+$(ELF_FLASH): $(OBJ)
+	-mkdir -p $(@D)
+	$(CROSS)$(CC) $^ -T$(LDFLASH) $(LDFLAGS) -o $@
+
+$(BUILD)/%.o: %.c
+	-mkdir -p $(@D)
+	$(CROSS)$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD)/%.o: %.S
+	-mkdir -p $(@D)
+	$(CROSS)$(CC) $(SFLAGS) -c $< -o $@
 
 upload:
+	$(CROSS)$(OBJCOPY) -O binary $(ELF_RAM) $(ELF_RAM).bin
 	arduino-cli upload -b adafruit:samd:adafruit_itsybitsy_m4 -p /dev/ttyACM0 \
-	  -l serial $(SKETCH_DIR)
+	  -l serial -i $(ELF_RAM).bin
 
 splint:
 	splint $(SPLINTFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
 
 clean:
-	-rm -rf sketch
+	-rm -rf $(BUILD)
+	-rm -f *.elf
 
 .PHONY: clean splint

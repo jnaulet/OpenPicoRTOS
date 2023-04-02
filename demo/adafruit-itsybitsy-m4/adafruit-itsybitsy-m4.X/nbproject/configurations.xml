@@ -8,15 +8,12 @@
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
                    projectFiles="true">
-      <itemPath>samd51g19a_flash.ld</itemPath>
+      <itemPath>../../../devices/atmel/atsame5x/gcc/atsamd51g_ram.ld</itemPath>
+      <itemPath>../../../devices/atmel/atsame5x/gcc/atsamd51g_rom.ld</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <logicalFolder name="cm4f" displayName="cm4f" projectFiles="true">
-        <itemPath>../../../arch/arm/cm4f/picoRTOS_port.c</itemPath>
-        <itemPath>../../../arch/arm/cm4f/picoRTOS_portasm.S</itemPath>
-      </logicalFolder>
       <logicalFolder name="f1" displayName="demo" projectFiles="true">
         <itemPath>../adafruit-itsybitsy-m4.c</itemPath>
         <itemPath>../main.c</itemPath>
@@ -34,10 +31,15 @@
         <itemPath>../../../drivers/wd/wd-same5x.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f2" displayName="picoRTOS" projectFiles="true">
+        <logicalFolder name="f1" displayName="cm4f" projectFiles="true">
+          <itemPath>../../../arch/arm/cm4f/picoRTOS_port.c</itemPath>
+          <itemPath>../../../arch/arm/cm4f/picoRTOS_portasm.S</itemPath>
+        </logicalFolder>
+        <logicalFolder name="f2" displayName="startup" projectFiles="true">
+          <itemPath>../../../devices/atmel/atsame5x/startup.S</itemPath>
+        </logicalFolder>
         <itemPath>../../../picoRTOS.c</itemPath>
       </logicalFolder>
-      <itemPath>startup_samd51g19a.c</itemPath>
-      <itemPath>system_samd51g19a.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -56,14 +58,14 @@
         <targetDevice>ATSAMD51G19A</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>noID</platformTool>
+        <platformTool>AtmelIceTool</platformTool>
         <languageToolchain>ARM</languageToolchain>
         <languageToolchainVersion>10.2.1</languageToolchainVersion>
         <platform>2</platform>
       </toolsSet>
       <packs>
-        <pack name="SAMD51_DFP" vendor="Microchip" version="3.6.120"/>
         <pack name="CMSIS" vendor="ARM" version="5.8.0"/>
+        <pack name="SAMD51_DFP" vendor="Microchip" version="3.6.120"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -92,6 +94,10 @@
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
+      <item path="../../../devices/atmel/atsame5x/gcc/atsamd51g_rom.ld"
+            ex="true"
+            overriding="false">
+      </item>
       <ARM-AR>
         <property key="archiver-flags" value="-r"/>
       </ARM-AR>
@@ -163,7 +169,7 @@
       <ARM-Global>
         <property key="bin" value="false"/>
         <property key="common-include-directories"
-                  value="../;../../..;../../../arch/include;../../../arch/arm/cm4f;../../../drivers/include;../../../drivers/clock;../../../devices/atmel/atsame5x;../../../drivers/mux;../../../drivers/gpio;../../../drivers/spi;../../../drivers/uart;../../../drivers/pwm;../../../drivers/usart;../../../drivers/adc;../../../drivers/wd"/>
+                  value="../;../../..;../../../arch/include;../../../arch/arm/cm4f;../../../drivers/include;../../../drivers/clock;../../../devices/atmel/atsame5x;../../../drivers/mux;../../../drivers/gpio;../../../drivers/spi;../../../drivers/uart;../../../drivers/pwm;../../../drivers/usart;../../../drivers/adc;../../../drivers/wd;../../../devices"/>
         <property key="eep" value="false"/>
         <property key="hex" value="true"/>
         <property key="lss" value="false"/>
@@ -174,16 +180,16 @@
         <appendMe value="-mfpu=fpv4-sp-d16 -g -O0"/>
       </ARM-Global>
       <ARM-LD>
-        <property key="additional-specs" value="--specs=nosys.specs"/>
-        <property key="exclude-standard-libraries" value="false"/>
+        <property key="additional-specs" value=""/>
+        <property key="exclude-standard-libraries" value="true"/>
         <property key="extra-lib-directories" value=""/>
         <property key="fast-math" value="false"/>
         <property key="flash-segment" value=""/>
         <property key="generate-map-file" value="true"/>
         <property key="input-libraries" value=""/>
-        <property key="no-default-libs" value="false"/>
-        <property key="no-shared-libraries" value="false"/>
-        <property key="no-startup-files" value="false"/>
+        <property key="no-default-libs" value="true"/>
+        <property key="no-shared-libraries" value="true"/>
+        <property key="no-startup-files" value="true"/>
         <property key="omit-symbol-information" value="false"/>
         <property key="other-options" value=""/>
         <property key="position-independent" value="false"/>
@@ -199,9 +205,9 @@
         <property key="communication.activationmode" value="nohv"/>
         <property key="communication.interface" value="swd"/>
         <property key="communication.speed" value="2.000"/>
-        <property key="debugoptions.debug-startup" value="Halt at main"/>
+        <property key="debugoptions.debug-startup" value="Halt at Reset vector"/>
         <property key="debugoptions.reset-behaviour" value="Reset Vector"/>
-        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="debugoptions.useswbreakpoints" value="true"/>
         <property key="firmware.path"
                   value="Press to browse for a specific firmware version"/>
         <property key="firmware.toolpack"
@@ -224,6 +230,8 @@
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="0-3ffff"/>
         <property key="poweroptions.powerenable" value="false"/>
+        <property key="programmerToGoFilePath"
+                  value="/home/jnaulet/Documents/dev/OpenPicoRTOS/demo/adafruit-itsybitsy-m4/adafruit-itsybitsy-m4.X/debug/default/adafruit-itsybitsy-m4_ptg"/>
         <property key="programoptions.eraseb4program" value="true"/>
         <property key="programoptions.preservedataflash" value="false"/>
         <property key="programoptions.preservedataflash.ranges"
@@ -252,9 +260,9 @@
         <property key="communication.activationmode" value="nohv"/>
         <property key="communication.interface" value="swd"/>
         <property key="communication.speed" value="2.000"/>
-        <property key="debugoptions.debug-startup" value="Halt at main"/>
+        <property key="debugoptions.debug-startup" value="Halt at Reset vector"/>
         <property key="debugoptions.reset-behaviour" value="Reset Vector"/>
-        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="debugoptions.useswbreakpoints" value="true"/>
         <property key="firmware.path"
                   value="Press to browse for a specific firmware version"/>
         <property key="firmware.toolpack"

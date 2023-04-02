@@ -33,5 +33,5 @@ MP_CPPC_DIR="/opt/gcc-arm-none-eabi-10-2020-q4-major/bin"
 MP_AS_DIR="/opt/gcc-arm-none-eabi-10-2020-q4-major/bin"
 MP_LD_DIR="/opt/gcc-arm-none-eabi-10-2020-q4-major/bin"
 MP_AR_DIR="/opt/gcc-arm-none-eabi-10-2020-q4-major/bin"
-DFP_DIR=/home/jnaulet/.mchp_packs/Microchip/SAMD51_DFP/3.6.120
 CMSIS_DIR=/home/jnaulet/.mchp_packs/ARM/CMSIS/5.8.0
+DFP_DIR=/home/jnaulet/.mchp_packs/Microchip/SAMD51_DFP/3.6.120
