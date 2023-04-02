@@ -9,8 +9,8 @@ typedef unsigned long picoRTOS_atomic_t;
 typedef unsigned long picoRTOS_irq_t;
 typedef unsigned long picoRTOS_cycles_t;
 
-#define ARCH_INITIAL_STACK_COUNT 16
-#define ARCH_MIN_STACK_COUNT (ARCH_INITIAL_STACK_COUNT + 8) /* must be 8-bytes "aligned" */
+#define ARCH_INITIAL_STACK_COUNT (16 + 1)                       /* +1 for aligner */
+#define ARCH_MIN_STACK_COUNT     (ARCH_INITIAL_STACK_COUNT + 4) /* in -O0 */
 
 /* splint doesn't like inline assembly */
 #ifdef S_SPLINT_S
