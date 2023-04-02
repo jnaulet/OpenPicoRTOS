@@ -49,6 +49,21 @@
 	bne 1b
 	.endm
 
+	.equ CPACR, 0xe000ed88
+	.equ FPCCR, 0xe000ef34
+
+	.macro ENABLE_VFP
+	/* enable CP10 & CP11 */
+	ldr.w r0, =CPACR
+	ldr r1, [r0]
+	orr r1, r1, #0xf00000
+	str r1, [r0]
+	/* extended FPU frame stacking (no lazy frame) */
+	ldr.w r0, =FPCCR
+	movs r1, #0x80000000
+	str r1, [r0]
+	.endm
+
 	/* def_irq_handler */
 	.macro def_irq_handler handler_name
 	.thumb_func

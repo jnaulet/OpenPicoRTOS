@@ -1,6 +1,6 @@
-# Device configuration file for ATSAMD5X/E5X
+# Device configuration file for ATSAMD51
 ARCH_DIR := $(PICORTOS_DIR)/arch/arm/cm4f
-DEVICE_DIR := $(PICORTOS_DIR)/devices/atmel/atsame5x
+DEVICE_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
 DEFINE := -DATSAME5X
 
@@ -11,3 +11,4 @@ SRC_C := $(PICORTOS_DIR)/picoRTOS.c
 SRC_C += $(ARCH_DIR)/picoRTOS_port.c
 
 SRC_S := $(ARCH_DIR)/picoRTOS_portasm.S
+SRC_S += $(DEVICE_DIR)/startup.S

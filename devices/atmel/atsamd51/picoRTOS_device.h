@@ -40,8 +40,6 @@
 #define ADDR_RAMECC     0x41020000
 
 /* APBC PERIPHERALS */
-#define ADDR_CAN0       0x42000000
-#define ADDR_CAN1       0x42000400
 #define ADDR_GMAC       0x42000800
 #define ADDR_TCC2       0x42000c00
 #define ADDR_TCC3       0x42001000
@@ -80,8 +78,6 @@
 
 /* DEVICE */
 
-#define DEVICE_ENABLE_CMCC
-#define DEVICE_MOVE_VTABLE_TO_RAM
 #define DEVICE_INTERRUPT_VECTOR_COUNT 137
 
 #endif
