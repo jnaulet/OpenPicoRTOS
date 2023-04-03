@@ -210,7 +210,7 @@ static void pwm_main(void *priv)
  */
 static void twi_master_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     struct twi *TWI = (struct twi*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -222,13 +222,13 @@ static void twi_master_main(void *priv)
         while (twi_write(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
             picoRTOS_schedule();
 
-        picoRTOS_assert_fatal(timeout != -1);
+        picoRTOS_assert_void(timeout != -1);
 
         while (twi_read(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
             picoRTOS_schedule();
 
-        picoRTOS_assert_fatal(timeout != -1);
-        picoRTOS_assert_fatal(c == (char)0x5a);
+        picoRTOS_assert_void(timeout != -1);
+        picoRTOS_assert_void(c == (char)0x5a);
 
         picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
     }
@@ -239,7 +239,7 @@ static void twi_master_main(void *priv)
  */
 static void twi_slave_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     struct twi *TWI = (struct twi*)priv;
 
@@ -250,21 +250,21 @@ static void twi_slave_main(void *priv)
         while (twi_read(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
             picoRTOS_schedule();
 
-        picoRTOS_assert_fatal(timeout != -1);
-        picoRTOS_assert_fatal(c == (char)0xa5);
+        picoRTOS_assert_void(timeout != -1);
+        picoRTOS_assert_void(c == (char)0xa5);
 
         c = (char)0x5a;
         while (twi_write(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
             picoRTOS_schedule();
 
-        picoRTOS_assert_fatal(timeout != -1);
+        picoRTOS_assert_void(timeout != -1);
     }
 }
 
 /* ADC test. Not much for the moment */
 static void adc_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     struct adc *IVtemp = (struct adc*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -279,9 +279,9 @@ static void adc_main(void *priv)
         while ((res = adc_read(IVtemp, &temp)) == -EAGAIN && timeout-- != 0)
             picoRTOS_schedule();
 
-        picoRTOS_assert_fatal(timeout != -1);
-        picoRTOS_assert_fatal(temp > 100);
-        picoRTOS_assert_fatal(temp < 800);
+        picoRTOS_assert_void(timeout != -1);
+        picoRTOS_assert_void(temp > 100);
+        picoRTOS_assert_void(temp < 800);
     }
 }
 
@@ -292,7 +292,7 @@ static void can_main(void *priv)
 {
 #define CAN_TEST_ID (can_id_t)0x7
 
-    picoRTOS_assert_fatal(priv != NULL);
+    picoRTOS_assert_void(priv != NULL);
 
     static const char data[] = { "PINGPONG" };
 
@@ -318,10 +318,10 @@ static void can_main(void *priv)
         while (((res = can_read(CAN, &id, rx, sizeof(rx)))) == -EAGAIN && loop-- != 0)
             picoRTOS_schedule();
 
-        //picoRTOS_assert_fatal(res == (int)sizeof(rx));
-        picoRTOS_assert_fatal(loop != -1);
-        //picoRTOS_assert_fatal(id == CAN_TEST_ID);
-        //picoRTOS_assert_fatal(rx[7] == 'G');
+        //picoRTOS_assert_void(res == (int)sizeof(rx));
+        picoRTOS_assert_void(loop != -1);
+        //picoRTOS_assert_void(id == CAN_TEST_ID);
+        //picoRTOS_assert_void(rx[7] == 'G');
     }
 }
 
@@ -330,8 +330,12 @@ int main(void)
     static struct curiosity_20_pic32mz_ef board;
 
     /* Init the system */
+    if (curiosity_20_pic32mz_ef_init(&board) < 0) {
+        picoRTOS_assert_void_fatal(false);
+        return -1;
+    }
+
     picoRTOS_init();
-    (void)curiosity_20_pic32mz_ef_init(&board);
 
     struct picoRTOS_task task;
     static picoRTOS_stack_t stack0[CONFIG_DEFAULT_STACK_COUNT];
@@ -366,12 +370,10 @@ int main(void)
     picoRTOS_task_init(&task, pwm_main, &board.PWM1, stack6, PICORTOS_STACK_COUNT(stack6));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
     /* i2c */
-    /*
-     * picoRTOS_task_init(&task, twi_master_main, &board.I2C1, stack7, PICORTOS_STACK_COUNT(stack7));
-     * picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
-     * picoRTOS_task_init(&task, twi_slave_main, &board.I2C2, stack8, PICORTOS_STACK_COUNT(stack8));
-     * picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
-     */
+    picoRTOS_task_init(&task, twi_master_main, &board.I2C1, stack7, PICORTOS_STACK_COUNT(stack7));
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+    picoRTOS_task_init(&task, twi_slave_main, &board.I2C2, stack8, PICORTOS_STACK_COUNT(stack8));
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
     /* adc */
     picoRTOS_task_init(&task, adc_main, &board.IVtemp, stack9, PICORTOS_STACK_COUNT(stack9));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());

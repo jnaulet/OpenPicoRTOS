@@ -8,6 +8,8 @@
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
                    projectFiles="true">
+      <itemPath>../../../devices/microchip/pic32mz-ef/gcc/pic32mz-efm_2048_rom.ld</itemPath>
+      <itemPath>../../../devices/microchip/pic32mz-ef/gcc/pic32mz-efm_2048_ram.ld</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
@@ -16,6 +18,7 @@
         <itemPath>../curiosity-2.0-pic32mz-ef.c</itemPath>
         <itemPath>../main.c</itemPath>
         <itemPath>../picoRTOSConfig.h</itemPath>
+        <itemPath>../config.S</itemPath>
       </logicalFolder>
       <logicalFolder name="f3" displayName="drivers" projectFiles="true">
         <itemPath>../../../drivers/clock/clock-pic32mx.c</itemPath>
@@ -43,6 +46,9 @@
         <itemPath>../../../picoRTOS.c</itemPath>
         <itemPath>../../../picoRTOS.h</itemPath>
         <itemPath>../../../devices/microchip/pic32mz-ef/picoRTOS_device.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f1" displayName="startup" projectFiles="true">
+        <itemPath>../../../devices/microchip/pic32mz-ef/startup.S</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
@@ -97,6 +103,42 @@
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
+      <item path="../../../devices/microchip/pic32mz-ef/gcc/pic32mz-efm_2048_ram.ld"
+            ex="false"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
+      </item>
+      <item path="../../../devices/microchip/pic32mz-ef/gcc/pic32mz-efm_2048_rom.ld"
+            ex="true"
+            overriding="false">
+        <C32>
+        </C32>
+        <C32-AR>
+        </C32-AR>
+        <C32-AS>
+        </C32-AS>
+        <C32-CO>
+        </C32-CO>
+        <C32-LD>
+        </C32-LD>
+        <C32CPP>
+        </C32CPP>
+        <C32Global>
+        </C32Global>
+      </item>
       <C32>
         <property key="additional-warnings" value="false"/>
         <property key="addresss-attribute-use" value="false"/>
@@ -159,7 +201,7 @@
         <property key="ebase-addr" value=""/>
         <property key="enable-check-sections" value="false"/>
         <property key="exclude-floating-point-library" value="false"/>
-        <property key="exclude-standard-libraries" value="false"/>
+        <property key="exclude-standard-libraries" value="true"/>
         <property key="extra-lib-directories" value=""/>
         <property key="fill-flash-options-addr" value=""/>
         <property key="fill-flash-options-const" value=""/>
@@ -178,12 +220,12 @@
         <property key="linker-symbols" value=""/>
         <property key="map-file" value="${DISTDIR}/${PROJECTNAME}.${IMAGE_TYPE}.map"/>
         <property key="no-device-startup-code" value="false"/>
-        <property key="no-startup-files" value="false"/>
+        <property key="no-startup-files" value="true"/>
         <property key="oXC32ld-extra-opts" value=""/>
         <property key="optimization-level" value=""/>
         <property key="preprocessor-macros" value=""/>
         <property key="remove-unused-sections" value="false"/>
-        <property key="report-memory-usage" value="false"/>
+        <property key="report-memory-usage" value="true"/>
         <property key="serial-length" value=""/>
         <property key="serial-origin" value=""/>
         <property key="stack-size" value=""/>
@@ -228,7 +270,7 @@
         <property key="mdtcm" value=""/>
         <property key="mitcm" value=""/>
         <property key="mstacktcm" value="false"/>
-        <property key="omit-pack-options" value="1"/>
+        <property key="omit-pack-options" value="2"/>
         <property key="relaxed-math" value="false"/>
         <property key="save-temps" value="false"/>
         <property key="stack-smashing" value=""/>
@@ -828,8 +870,8 @@
         <property key="freeze.timers" value="false"/>
         <property key="lastid" value=""/>
         <property key="memories.aux" value="false"/>
-        <property key="memories.bootflash" value="true"/>
-        <property key="memories.configurationmemory" value="true"/>
+        <property key="memories.bootflash" value="false"/>
+        <property key="memories.configurationmemory" value="false"/>
         <property key="memories.configurationmemory2" value="true"/>
         <property key="memories.dataflash" value="true"/>
         <property key="memories.eeprom" value="true"/>
@@ -839,7 +881,7 @@
         <property key="memories.instruction.ram" value="true"/>
         <property key="memories.instruction.ram.ranges"
                   value="${memories.instruction.ram.ranges}"/>
-        <property key="memories.programmemory" value="true"/>
+        <property key="memories.programmemory" value="false"/>
         <property key="memories.programmemory.ranges" value="1d000000-1d1fffff"/>
         <property key="memories.userotp" value="true"/>
         <property key="oscillator.auxfrequency" value="120"/>
@@ -879,7 +921,7 @@
         <property key="programoptions.preserveeeprom" value="false"/>
         <property key="programoptions.preserveeeprom.ranges"
                   value="${memories.eedata.default}"/>
-        <property key="programoptions.preserveprogram.ranges" value=""/>
+        <property key="programoptions.preserveprogram.ranges" value="1d000000-1d1fffff"/>
         <property key="programoptions.preserveprogrammemory" value="false"/>
         <property key="programoptions.preserveprogramrange" value="false"/>
         <property key="programoptions.preserveprogramrange.ranges"
@@ -1557,8 +1599,8 @@
         <property key="debugoptions.useswbreakpoints" value="false"/>
         <property key="freeze.timers" value="false"/>
         <property key="memories.aux" value="false"/>
-        <property key="memories.bootflash" value="true"/>
-        <property key="memories.configurationmemory" value="true"/>
+        <property key="memories.bootflash" value="false"/>
+        <property key="memories.configurationmemory" value="false"/>
         <property key="memories.configurationmemory2" value="true"/>
         <property key="memories.dataflash" value="true"/>
         <property key="memories.eeprom" value="true"/>
@@ -1567,7 +1609,7 @@
         <property key="memories.id" value="true"/>
         <property key="memories.instruction.ram.ranges"
                   value="${memories.instruction.ram.ranges}"/>
-        <property key="memories.programmemory" value="true"/>
+        <property key="memories.programmemory" value="false"/>
         <property key="memories.programmemory.ranges" value="1d000000-1d1fffff"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>
@@ -1578,7 +1620,7 @@
         <property key="programoptions.preserveeeprom" value="false"/>
         <property key="programoptions.preserveeeprom.ranges"
                   value="${memories.eedata.default}"/>
-        <property key="programoptions.preserveprogram.ranges" value=""/>
+        <property key="programoptions.preserveprogram.ranges" value="1d000000-1d1fffff"/>
         <property key="programoptions.preserveprogramrange" value="false"/>
         <property key="programoptions.preserveuserid" value="false"/>
         <property key="programoptions.program.otpconfig" value="false"/>

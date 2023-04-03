@@ -69,10 +69,6 @@ static void mux_init(void)
     (void)mux_pic32mx_peripheral_pin_select_output(MUX_PIC32MX_PPSO_RPB8R, (size_t)0xc);    /* LED_G */
     (void)mux_pic32mx_peripheral_pin_select_output(MUX_PIC32MX_PPSO_RPB9R, (size_t)0xb);    /* LED_B */
 
-    /* I2Cs */
-    (void)mux_pic32mx_pull_up(&PORTA, (size_t)2);
-    (void)mux_pic32mx_pull_up(&PORTA, (size_t)3);
-
     /* ANALOG */
     (void)mux_pic32mx_analog(&PORTB, (size_t)4); /* A0 */
 }
@@ -126,15 +122,11 @@ static int spi_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
 
 static int wd_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
 {
-    struct wd_pic32mx_settings WD_settings = {
-        WD_PIC32MX_PERIOD_1MS,
-        false, /* !enable_windowed */
-    };
-
+    /* already init by config.S */
     (void)wd_pic32mx_init(&ctx->WDT, (struct WD_PIC32MX*)ADDR_WATCHDOG_TIMER);
-    (void)wd_pic32mx_setup(&ctx->WDT, &WD_settings);
 
-    return wd_start(&ctx->WDT);
+    wd_refresh(&ctx->WDT);
+    return 0;
 }
 
 static int pwm_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
@@ -188,7 +180,7 @@ static int twi_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
     struct twi_settings TWI_settings = {
         TWI_BITRATE_STANDARD,
         TWI_MODE_MASTER,
-        (twi_addr_t)0x69,
+        (twi_addr_t)0x55,
     };
 
     (void)twi_pic32mx_init(&ctx->I2C1, (struct TWI_PIC32MX*)ADDR_I2C1, CLOCK_PIC32MX_PBCLK2);
@@ -257,13 +249,15 @@ static int can_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
 
 int curiosity_20_pic32mz_ef_init(struct curiosity_20_pic32mz_ef *ctx)
 {
+    /* watchdog first */
+    (void)wd_init(ctx);
+
     clock_init();
     mux_init();
 
     (void)gpio_init(ctx);
     (void)uart_init(ctx);
     (void)spi_init(ctx);
-    (void)wd_init(ctx);
     (void)pwm_init(ctx);
     (void)twi_init(ctx);
     (void)adc_init(ctx);
