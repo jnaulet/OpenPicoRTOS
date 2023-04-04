@@ -22,6 +22,7 @@ struct CLK {
     volatile uint32_t CLK_SYS_DIV;
     volatile uint32_t CLK_SYS_SELECTED;
     volatile uint32_t CLK_PERI_CTRL;
+    uint32_t RESERVED0;
     volatile uint32_t CLK_PERI_SELECTED;
     volatile uint32_t CLK_USB_CTRL;
     volatile uint32_t CLK_USB_DIV;
@@ -182,15 +183,17 @@ static struct {
 
 static int xosc_config(unsigned long hz)
 {
-#define XOSC_STATUP_DELAY 47
-#define XOSC_ENABLE 0xfab
+#define XOSC_DELAY         47
+#define XOSC_ENABLE        0xfab
+#define XOSC_FREQ_RANGE    0xaa0
 
     if (!picoRTOS_assert(hz <= 15000000ul)) return -EINVAL;
 
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    XOSC->STARTUP = (uint32_t)XOSC_STARTUP_DELAY(XOSC_STATUP_DELAY);
-    XOSC->CTRL = (uint32_t)XOSC_CTRL_ENABLE(XOSC_ENABLE);
+    XOSC->STARTUP = (uint32_t)XOSC_STARTUP_DELAY(XOSC_DELAY);
+    XOSC->CTRL = (uint32_t)(XOSC_CTRL_ENABLE(XOSC_ENABLE) |
+                            XOSC_CTRL_FREQ_RANGE(XOSC_FREQ_RANGE));
 
     /* wait */
     while ((XOSC->STATUS & XOSC_STATUS_STABLE) == 0 &&
@@ -327,7 +330,8 @@ static int sys_config(unsigned long sys_div)
 
     /* force pll as src */
     CLK->CLK_SYS_DIV = (uint32_t)CLK_SYS_DIV_INT(sys_div);
-    CLK->CLK_SYS_CTRL = (uint32_t)(CLK_SYS_CTRL_AUXSRC(0) | CLK_SYS_CTRL_SRC);
+    CLK->CLK_SYS_CTRL = (uint32_t)CLK_SYS_CTRL_AUXSRC(0);
+    CLK->CLK_SYS_CTRL |= CLK_SYS_CTRL_SRC;
 
     while ((CLK->CLK_SYS_SELECTED & (1 << 1)) == 0 &&
            deadlock-- != 0) {
