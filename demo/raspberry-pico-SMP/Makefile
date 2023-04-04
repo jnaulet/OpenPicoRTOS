@@ -1,9 +1,10 @@
 ELF_RAM := raspberry-pico-SMP_ram.elf
-ELF_FLASH := raspberry-pico-SMP_flash.elf
+# No flash, as SMP can only run in RAM on RP2040
 
 CC := gcc
 CROSS := arm-none-eabi-
 BUILD := build
+ELF2UF2 := $(BUILD)/elf2uf2
 
 # picoRTOS
 PICORTOS_DIR := $(abspath ../..)
@@ -11,8 +12,13 @@ PICORTOS_DIR := $(abspath ../..)
 
 SPLINTFLAGS := -checks +unixlib
 
-CFLAGS += -Wall -Wextra -std=c99 $(INCLUDE) -O0 -g3 $(DEFINE) -mcpu=cortex-m0plus
-SFLAGS += -x assembler-with-cpp -g3 $(DEFINE) $(INCLUDE) -mcpu=cortex-m0plus
+CFLAGS += -Wall -Wextra -std=c99 $(INCLUDE) -O0 -g3 $(DEFINE)
+CFLAGS += -mcpu=cortex-m0plus
+
+SFLAGS += -x assembler-with-cpp -g3 $(DEFINE) $(INCLUDE)
+SFLAGS += -mcpu=cortex-m0plus
+
+LDFLAGS += -mcpu=cortex-m0plus
 
 INCLUDE += -I.
 
@@ -22,6 +28,7 @@ INCLUDE += -I$(PICORTOS_DIR)/drivers/adc
 INCLUDE += -I$(PICORTOS_DIR)/drivers/clock
 INCLUDE += -I$(PICORTOS_DIR)/drivers/dma
 INCLUDE += -I$(PICORTOS_DIR)/drivers/gpio
+INCLUDE += -I$(PICORTOS_DIR)/drivers/misc
 INCLUDE += -I$(PICORTOS_DIR)/drivers/mux
 INCLUDE += -I$(PICORTOS_DIR)/drivers/pwm
 INCLUDE += -I$(PICORTOS_DIR)/drivers/spi
@@ -33,6 +40,7 @@ SRC_C += $(PICORTOS_DIR)/drivers/adc/adc-rp2040.c
 SRC_C += $(PICORTOS_DIR)/drivers/clock/clock-rp2040.c
 SRC_C += $(PICORTOS_DIR)/drivers/dma/dma-rp2040.c
 SRC_C += $(PICORTOS_DIR)/drivers/gpio/gpio-rp2040_sio.c
+SRC_C += $(PICORTOS_DIR)/drivers/misc/misc-rp2040_reset.c
 SRC_C += $(PICORTOS_DIR)/drivers/mux/mux-rp2040.c
 SRC_C += $(PICORTOS_DIR)/drivers/pwm/pwm-rp2040.c
 SRC_C += $(PICORTOS_DIR)/drivers/spi/spi-arm_pl022.c
@@ -51,15 +59,14 @@ SRC_C += raspberry-pico.c
 OBJ := $(SRC_C:%.c=$(BUILD)/%.o)
 OBJ += $(SRC_S:%.S=$(BUILD)/%.o)
 
-all: $(ELF_RAM) $(ELF_FLASH)
+UF2_RAM := $(ELF_RAM:%.elf=%.uf2)
+UF2_FLASH := $(ELF_FLASH:%.elf=%.uf2)
+
+all: $(UF2_RAM)
 
 $(ELF_RAM): $(OBJ)
 	-mkdir -p $(@D)
-	$(CROSS)$(CC) $^ -T$(LDRAM) $(LDFLAGS) -o $@
-
-$(ELF_FLASH): $(OBJ)
-	-mkdir -p $(@D)
-	$(CROSS)$(CC) $^ -T$(LDFLASH) $(LDFLAGS) -o $@
+	$(CROSS)$(CC) $^ -T$(LDRAM) $(LDFLAGS) -o $@ -Wl,-Map=$@.map
 
 $(BUILD)/%.o: %.c
 	-mkdir -p $(@D)
@@ -68,6 +75,12 @@ $(BUILD)/%.o: %.c
 $(BUILD)/%.o: %.S
 	-mkdir -p $(@D)
 	$(CROSS)$(CC) $(SFLAGS) -c $< -o $@
+
+%.uf2: %.elf $(ELF2UF2)
+	$(ELF2UF2) $< $@
+
+$(ELF2UF2):
+	g++ elf2uf2/main.cpp -o $@
 
 splint:
 	splint $(SPLINTFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
