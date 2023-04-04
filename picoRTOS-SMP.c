@@ -16,7 +16,8 @@
 typedef enum {
     PICORTOS_TASK_STATE_EMPTY,
     PICORTOS_TASK_STATE_READY,
-    PICORTOS_TASK_STATE_RUNNING,
+    PICORTOS_TASK_STATE_BUSY,
+    PICORTOS_TASK_STATE_DONE,
     PICORTOS_TASK_STATE_SLEEP
 } picoRTOS_task_state_t;
 
@@ -25,7 +26,7 @@ struct picoRTOS_task_core {
     /*@temp@*/ picoRTOS_stack_t *sp;
     picoRTOS_task_state_t state;
     picoRTOS_tick_t tick;
-    picoRTOS_mask_t core;
+    picoRTOS_mask_t core_mask;
     /* checks */
     /*@temp@*/ picoRTOS_stack_t *stack;
     size_t stack_count;
@@ -46,8 +47,9 @@ struct picoRTOS_task_core {
 #define TASK_IDLE_PRIO CONFIG_TASK_COUNT
 #define TASK_IDLE_PID  CONFIG_TASK_COUNT
 /* shortcut for current task */
-#define TASK_CURRENT() (picoRTOS.task[picoRTOS.index[arch_core()]])
-#define TASK_BY_PID(x) (picoRTOS.task[(x)])
+#define TASK_CURRENT()       (picoRTOS.task[picoRTOS.index[arch_core()]])
+#define TASK_CURRENT_CORE(x) (picoRTOS.task[picoRTOS.index[x]])
+#define TASK_BY_PID(x)       (picoRTOS.task[(x)])
 
 struct picoRTOS_SMP_core {
     bool is_running;
@@ -75,7 +77,7 @@ static void task_core_init(/*@out@*/ struct picoRTOS_task_core *task)
     task->sp = NULL;
     task->state = PICORTOS_TASK_STATE_EMPTY;
     task->tick = 0;
-    task->core = 0;
+    task->core_mask = 0;
     /* checks */
     task->stack = NULL;
     task->stack_count = 0;
@@ -90,11 +92,11 @@ static void task_core_init(/*@out@*/ struct picoRTOS_task_core *task)
 }
 
 static bool task_core_is_available(struct picoRTOS_task_core *task,
-                                   picoRTOS_mask_t core)
+                                   picoRTOS_mask_t core_mask)
 {
     /* task is ready and it's its turn */
-    return (task->core & core) != 0 &&
-           (task->state == PICORTOS_TASK_STATE_READY) &&
+    return (task->core_mask & core_mask) != 0 &&
+           task->state == PICORTOS_TASK_STATE_READY &&
            ((size_t)picoRTOS.tick % task->sub_count) == (size_t)task->sub;
 }
 
@@ -104,7 +106,7 @@ static void task_core_quickcpy(/*@out@*/ struct picoRTOS_task_core *dst,
     /* state machine */
     dst->sp = src->sp;
     dst->state = src->state;
-    dst->core = src->core;
+    dst->core_mask = src->core_mask;
     /* checks */
     dst->stack = src->stack;
     dst->stack_count = src->stack_count;
@@ -167,7 +169,7 @@ static void task_idle_init(void)
         /* similar to picoRTOS_add_task, but without count limit */
         TASK_BY_PID(pid).sp = arch_prepare_stack(&idle);
         TASK_BY_PID(pid).state = PICORTOS_TASK_STATE_READY;
-        TASK_BY_PID(pid).core = (picoRTOS_mask_t)(1u << i);
+        TASK_BY_PID(pid).core_mask = (picoRTOS_mask_t)(1u << i);
         /* checks */
         TASK_BY_PID(pid).stack = picoRTOS_SMP_stack[i].idle;
         TASK_BY_PID(pid).stack_count = idle.stack_count;
@@ -298,7 +300,7 @@ void picoRTOS_SMP_add_task(struct picoRTOS_task *task,
     /* state machine */
     TASK_BY_PID(pid).sp = arch_prepare_stack(task);
     TASK_BY_PID(pid).state = PICORTOS_TASK_STATE_READY;
-    TASK_BY_PID(pid).core = core_mask;
+    TASK_BY_PID(pid).core_mask = core_mask;
     /* checks */
     TASK_BY_PID(pid).stack = task->stack;
     TASK_BY_PID(pid).stack_count = task->stack_count;
@@ -386,7 +388,7 @@ void picoRTOS_resume()
 
 void picoRTOS_schedule(void)
 {
-    if (!picoRTOS_assert_fatal(TASK_CURRENT().state == PICORTOS_TASK_STATE_RUNNING))
+    if (!picoRTOS_assert_fatal(TASK_CURRENT().state == PICORTOS_TASK_STATE_BUSY))
         return;
 
     arch_syscall(PICORTOS_SYSCALL_SWITCH_CONTEXT, NULL);
@@ -394,7 +396,7 @@ void picoRTOS_schedule(void)
 
 void picoRTOS_sleep(picoRTOS_tick_t delay)
 {
-    if (!picoRTOS_assert_fatal(TASK_CURRENT().state == PICORTOS_TASK_STATE_RUNNING))
+    if (!picoRTOS_assert_fatal(TASK_CURRENT().state == PICORTOS_TASK_STATE_BUSY))
         return;
 
     arch_syscall(PICORTOS_SYSCALL_SLEEP, (void*)delay);
@@ -403,7 +405,7 @@ void picoRTOS_sleep(picoRTOS_tick_t delay)
 void picoRTOS_sleep_until(picoRTOS_tick_t *ref, picoRTOS_tick_t period)
 {
     if (!picoRTOS_assert_fatal(period > 0)) return;
-    if (!picoRTOS_assert_fatal(TASK_CURRENT().state == PICORTOS_TASK_STATE_RUNNING))
+    if (!picoRTOS_assert_fatal(TASK_CURRENT().state == PICORTOS_TASK_STATE_BUSY))
         return;
 
     picoRTOS_tick_t tick = picoRTOS_get_tick();
@@ -423,7 +425,7 @@ void picoRTOS_sleep_until(picoRTOS_tick_t *ref, picoRTOS_tick_t period)
 
 void picoRTOS_kill(void)
 {
-    if (!picoRTOS_assert_fatal(TASK_CURRENT().state == PICORTOS_TASK_STATE_RUNNING))
+    if (!picoRTOS_assert_fatal(TASK_CURRENT().state == PICORTOS_TASK_STATE_BUSY))
         return;
 
     arch_syscall(PICORTOS_SYSCALL_KILL, NULL);
@@ -431,7 +433,7 @@ void picoRTOS_kill(void)
 
 picoRTOS_priority_t picoRTOS_self(void)
 {
-    if (!picoRTOS_assert_fatal(TASK_CURRENT().state == PICORTOS_TASK_STATE_RUNNING))
+    if (!picoRTOS_assert_fatal(TASK_CURRENT().state == PICORTOS_TASK_STATE_BUSY))
         return (picoRTOS_pid_t)-1;
 
     return (picoRTOS_priority_t)picoRTOS.index[arch_core()];
@@ -439,7 +441,7 @@ picoRTOS_priority_t picoRTOS_self(void)
 
 picoRTOS_tick_t picoRTOS_get_tick(void)
 {
-    if (!picoRTOS_assert_fatal(TASK_CURRENT().state == PICORTOS_TASK_STATE_RUNNING))
+    if (!picoRTOS_assert_fatal(TASK_CURRENT().state == PICORTOS_TASK_STATE_BUSY))
         return (picoRTOS_tick_t)-1;
 
     return picoRTOS.tick;
@@ -465,10 +467,9 @@ static void syscall_kill(void)
 static picoRTOS_stack_t *syscall_switch_context(picoRTOS_stack_t *sp)
 {
     picoRTOS_core_t core = arch_core();
-    picoRTOS_pid_t index = picoRTOS.index[core];
     picoRTOS_mask_t mask = (picoRTOS_mask_t)(1u << core);
 
-    struct picoRTOS_task_core *task = &TASK_BY_PID(index);
+    struct picoRTOS_task_core *task = &TASK_CURRENT_CORE(core);
 
     if (!picoRTOS_assert_fatal(sp >= task->stack)) return NULL;
     if (!picoRTOS_assert_fatal(sp < (task->stack + task->stack_count))) return NULL;
@@ -479,24 +480,18 @@ static picoRTOS_stack_t *syscall_switch_context(picoRTOS_stack_t *sp)
     /* store current sp */
     task->sp = sp;
 
-    do {
-        index++;
-        /* ignore tasks ran by other cores or not available */
-        if (task_core_is_available(&TASK_BY_PID(index), mask))
-            break;
-        /* jump out on idle anyway */
-    } while (index < (picoRTOS_pid_t)(TASK_IDLE_PID + (int)core));
+    /* mark non-sleeping task as done */
+    if (task->state == PICORTOS_TASK_STATE_BUSY)
+        task->state = PICORTOS_TASK_STATE_DONE;
 
-    /* make previous task available for other cores */
-    if (task->state == PICORTOS_TASK_STATE_RUNNING)
-        task->state = PICORTOS_TASK_STATE_READY;
+    do
+        picoRTOS.index[core]++;
+    /* ignore sleeping, empty tasks & out-of-round sub-tasks */
+    while (!task_core_is_available(&TASK_CURRENT_CORE(core), mask));
 
-    /* refresh current task pointer */
-    picoRTOS.index[core] = index;
-    task = &TASK_BY_PID(index);
-
-    /* state machine */
-    task->state = PICORTOS_TASK_STATE_RUNNING;
+    /* refresh current task pointer & state */
+    task = &TASK_CURRENT_CORE(core);
+    task->state = PICORTOS_TASK_STATE_BUSY;
 
     /* stats */
     task_core_stat_begin(task);
@@ -521,68 +516,92 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, picoRTOS_syscall_t sysc
     ret = syscall_switch_context(sp);
 
     arch_spin_unlock();
-
     return ret;
 }
 
 /* TICK */
 
-picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
+static picoRTOS_pid_t picoRTOS_rewind_as_main(picoRTOS_core_t core)
 {
-    picoRTOS_core_t core = arch_core();
-    picoRTOS_pid_t index = picoRTOS.index[core];
+    if (!picoRTOS_assert_fatal(core == picoRTOS.main_core))
+        return (picoRTOS_pid_t)(TASK_IDLE_PID + (int)core);
+
+    /* aux cores will take care of their own idle */
+    picoRTOS_pid_t pid = (picoRTOS_pid_t)(TASK_IDLE_PID + 1);
     picoRTOS_mask_t mask = (picoRTOS_mask_t)(1u << core);
 
-    struct picoRTOS_task_core *task = &TASK_BY_PID(index);
+    /* rewind tasks for all cores */
+    while (pid-- != 0) {
+
+        struct picoRTOS_task_core *task = &TASK_BY_PID(pid);
+
+        if (task->state == PICORTOS_TASK_STATE_SLEEP &&
+            task->tick == picoRTOS.tick)
+            /* task is ready to rumble */
+            task->state = PICORTOS_TASK_STATE_READY;
+
+        /* reset done tasks */
+        if (task->state == PICORTOS_TASK_STATE_DONE)
+            task->state = PICORTOS_TASK_STATE_READY;
+
+        /* select highest priority ready task */
+        if (task_core_is_available(task, mask))
+            picoRTOS.index[core] = pid;
+
+        /* reset task counter */
+        task->stat.counter = (picoRTOS_cycles_t)0;
+    }
+
+    return picoRTOS.index[core];
+}
+
+static picoRTOS_pid_t picoRTOS_rewind_as_aux(picoRTOS_core_t core)
+{
+    if (!picoRTOS_assert_fatal(core != picoRTOS.main_core))
+        return (picoRTOS_pid_t)(TASK_IDLE_PID + (int)core);
+
+    /* we can make a quick pass as an auxiliary core */
+    picoRTOS_pid_t pid = (picoRTOS_pid_t)TASK_COUNT;
+    picoRTOS_mask_t mask = (picoRTOS_mask_t)(1u << core);
+
+    while (pid-- != 0) {
+        /* select highest priority ready task, no state alteration */
+        if (task_core_is_available(&TASK_BY_PID(pid), mask))
+            picoRTOS.index[core] = pid;
+    }
+
+    return picoRTOS.index[core];
+}
+
+picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
+{
+    picoRTOS_pid_t pid;
+    picoRTOS_core_t core = arch_core();
+    struct picoRTOS_task_core *task = &TASK_CURRENT_CORE(core);
 
     if (!picoRTOS_assert_fatal(sp >= task->stack)) return NULL;
     if (!picoRTOS_assert_fatal(sp < (task->stack + task->stack_count))) return NULL;
 
     arch_spin_lock();
-
-    /* stats */
     task_core_stat_preempt(task);
 
-    /* store current sp */
+    /* store current sp & mark task as immediately ready (preempted) */
     task->sp = sp;
-
-    /* make preempted task available to other cores */
-    if (task->state == PICORTOS_TASK_STATE_RUNNING)
-        task->state = PICORTOS_TASK_STATE_READY;
+    task->state = PICORTOS_TASK_STATE_READY;
 
     /* advance tick & propagate to auxiliary cores */
     if (core == picoRTOS.main_core) {
         picoRTOS.tick++;
         arch_propagate_tick();
-    }
-
-    /* quick pass on sleeping tasks + idle */
-    picoRTOS_pid_t pid = (picoRTOS_pid_t)TASK_COUNT;
-
-    while (pid-- != 0) {
-        if (TASK_BY_PID(pid).state == PICORTOS_TASK_STATE_SLEEP &&
-            TASK_BY_PID(pid).tick == picoRTOS.tick)
-            /* task is ready to rumble */
-            TASK_BY_PID(pid).state = PICORTOS_TASK_STATE_READY;
-
-        /* select highest priority ready task */
-        if (task_core_is_available(&TASK_BY_PID(pid), mask))
-            index = pid;
-
-        /* reset task counter */
-        TASK_BY_PID(pid).stat.counter = (picoRTOS_cycles_t)0;
-    }
+        pid = picoRTOS_rewind_as_main(core);
+    }else
+        pid = picoRTOS_rewind_as_aux(core);
 
     /* refresh current task pointer */
-    picoRTOS.index[core] = index;
-    task = &TASK_BY_PID(index);
+    task = &TASK_BY_PID(pid);
+    task->state = PICORTOS_TASK_STATE_BUSY;
 
-    /* state machine */
-    task->state = PICORTOS_TASK_STATE_RUNNING;
-
-    /* stats */
     task_core_stat_begin(task);
-
     arch_spin_unlock();
 
     return task->sp;
