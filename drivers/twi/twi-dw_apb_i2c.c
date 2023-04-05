@@ -254,6 +254,10 @@ static int twi_rw_as_master_check_abort(struct twi *ctx)
 
 static int twi_write_as_master_idle(struct twi *ctx)
 {
+    /* check for activity first */
+    if ((ctx->base->IC_STATUS & IC_STATUS_MST_ACTIVITY) != 0)
+        return -EAGAIN;
+
     ctx->base->IC_ENABLE &= ~IC_ENABLE_ENABLE;
     ctx->base->IC_TAR = (uint32_t)ctx->slave_addr;
     ctx->base->IC_ENABLE |= IC_ENABLE_ENABLE;
@@ -268,15 +272,18 @@ static int twi_write_as_master_xfer(struct twi *ctx, const void *buf, size_t n)
 {
     if (!picoRTOS_assert(n > 0)) return -EINVAL;
 
-    if (twi_rw_as_master_check_abort(ctx) < 0)
-        return -EAGAIN;
-
     size_t sent = 0;
     const uint8_t *buf8 = (uint8_t*)buf;
 
     while (n-- != 0) {
 
+        int res;
         uint32_t stop = 0;
+
+        if ((res = twi_rw_as_master_check_abort(ctx)) < 0) {
+            ctx->state = TWI_DW_APB_I2C_STATE_IDLE;
+            return res;
+        }
 
         if ((ctx->base->IC_STATUS & IC_STATUS_TFNF) == 0)
             break;
@@ -334,8 +341,16 @@ static int twi_write_as_slave_xfer(struct twi *ctx, const void *buf, size_t n)
     const uint8_t *buf8 = (uint8_t*)buf;
 
     while (n-- != 0) {
+
+        int res;
+
         if ((ctx->base->IC_STATUS & IC_STATUS_TFNF) == 0)
             break;
+
+        if ((res = twi_rw_as_master_check_abort(ctx)) < 0) {
+            ctx->state = TWI_DW_APB_I2C_STATE_IDLE;
+            return res;
+        }
 
         if ((ctx->base->IC_RAW_INTR_STAT & IC_INTR_STAT_R_STOP_DET) != 0) {
             ctx->base->IC_CLR_STOP_DET |= 1;
@@ -388,46 +403,60 @@ int twi_write(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_read_as_master_idle(struct twi *ctx)
 {
+    /* check for activity first */
+    if ((ctx->base->IC_STATUS & IC_STATUS_MST_ACTIVITY) != 0)
+        return -EAGAIN;
+
     ctx->base->IC_ENABLE &= ~IC_ENABLE_ENABLE;
     ctx->base->IC_TAR = (uint32_t)ctx->slave_addr;
     ctx->base->IC_ENABLE |= IC_ENABLE_ENABLE;
 
-    if ((ctx->base->IC_STATUS & IC_STATUS_TFNF) != 0) {
-        /* write start to fifo */
-        ctx->base->IC_DATA_CMD = (uint32_t)IC_DATA_CMD_CMD;
-        ctx->state = TWI_DW_APB_I2C_STATE_XFER;
+    ctx->state = TWI_DW_APB_I2C_STATE_REQ;
+    return -EAGAIN;
+}
+
+static int twi_read_as_master_req(struct twi *ctx, size_t n)
+{
+    if ((ctx->base->IC_STATUS & IC_STATUS_TFNF) == 0)
+        return -EAGAIN;
+
+    int res;
+    uint32_t stop = 0;
+
+    if ((res = twi_rw_as_master_check_abort(ctx)) < 0) {
+        ctx->state = TWI_DW_APB_I2C_STATE_IDLE;
+        return res;
     }
 
+    /* last byte */
+    if (n == (size_t)1)
+        stop = (uint32_t)IC_DATA_CMD_STOP;
+
+    ctx->base->IC_DATA_CMD = (uint32_t)IC_DATA_CMD_CMD | stop;
+
+    ctx->state = TWI_DW_APB_I2C_STATE_XFER;
     return -EAGAIN;
 }
 
 static int twi_read_as_master_xfer(struct twi *ctx, void *buf, size_t n)
 {
     int res;
-
-    if ((res = twi_rw_as_master_check_abort(ctx)) < 0) {
-        /* end of available data */
-        ctx->state = TWI_DW_APB_I2C_STATE_IDLE;
-        return -EAGAIN;
-    }
-
-    size_t recv = 0;
     uint8_t *buf8 = (uint8_t*)buf;
 
-    while (n-- != 0) {
-        if ((ctx->base->IC_STATUS & IC_STATUS_RFNE) == 0)
-            break;
-
-        if (n == 0)
-            ctx->state = TWI_DW_APB_I2C_STATE_IDLE;
-
-        buf8[recv++] = (uint8_t)ctx->base->IC_DATA_CMD;
+    if ((res = twi_rw_as_master_check_abort(ctx)) < 0) {
+        ctx->state = TWI_DW_APB_I2C_STATE_IDLE;
+        return res;
     }
 
-    if (recv == 0)
+    if ((ctx->base->IC_STATUS & IC_STATUS_RFNE) == 0)
         return -EAGAIN;
 
-    return (int)recv;
+    *buf8 = (uint8_t)ctx->base->IC_DATA_CMD;
+
+    if (n > (size_t)1) ctx->state = TWI_DW_APB_I2C_STATE_REQ;
+    else ctx->state = TWI_DW_APB_I2C_STATE_IDLE;
+
+    return 1;
 }
 
 static int twi_read_as_master(struct twi *ctx, void *buf, size_t n)
@@ -436,6 +465,7 @@ static int twi_read_as_master(struct twi *ctx, void *buf, size_t n)
 
     switch (ctx->state) {
     case TWI_DW_APB_I2C_STATE_IDLE: return twi_read_as_master_idle(ctx);
+    case TWI_DW_APB_I2C_STATE_REQ: return twi_read_as_master_req(ctx, n);
     case TWI_DW_APB_I2C_STATE_XFER: return twi_read_as_master_xfer(ctx, buf, n);
     default: break;
     }
