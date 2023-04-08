@@ -60,5 +60,9 @@ dkms.conf
 # html and js files
 *.html
 *.js
+
+# demo files
 /demo/curiosity-2.0-pic32mz-ef/curiosity-2.0-pic32mz-ef.X/build/
 /demo/curiosity-2.0-pic32mz-ef/curiosity-2.0-pic32mz-ef.X/dist/
+*.uf2
+*.d_raw
