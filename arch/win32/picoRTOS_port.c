@@ -77,7 +77,7 @@ void arch_syscall(picoRTOS_syscall_t syscall, void *priv)
     SuspendThread(t->wthread);
 }
 
-void arch_idle(void *null)
+void __attribute__((weak)) arch_idle(void *null)
 {
     picoRTOS_assert_fatal(null == NULL);
 

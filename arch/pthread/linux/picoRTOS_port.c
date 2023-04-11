@@ -169,7 +169,7 @@ void arch_syscall(picoRTOS_syscall_t syscall, void *priv)
     wait_for_sigusr1(t);
 }
 
-void arch_idle(void *null)
+void __attribute__((weak)) arch_idle(void *null)
 {
     picoRTOS_assert_fatal(null == NULL);
 

@@ -76,7 +76,7 @@ picoRTOS_stack_t *arch_prepare_stack(struct picoRTOS_task *task)
 }
 
 /* cppcheck-suppress constParameter */
-void arch_idle(void *null)
+void __attribute__((weak)) arch_idle(void *null)
 {
     if (!picoRTOS_assert_fatal(null == NULL)) return;
 
