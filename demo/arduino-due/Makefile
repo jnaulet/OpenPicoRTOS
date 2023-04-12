@@ -1,8 +1,10 @@
-ELF_RAM := arduino-due.elf
+ELF_RAM := arduino-due_ram.elf
+ELF_FLASH := arduino-due_flash.elf
 
 CC := gcc
+OBJCOPY := objcopy
 CROSS := arm-none-eabi-
-BUILD_DIR := build
+BUILD := build
 
 # Configure system
 PICORTOS_DIR := $(abspath ../..)
@@ -11,9 +13,10 @@ PICORTOS_DIR := $(abspath ../..)
 INCLUDE += -I.
 SPLINTFLAGS += -checks +unixlib
 
-# directories
-SKETCH := arduino-due
-SKETCH_DIR := sketch/$(SKETCH)
+CFLAGS += -Wall -Wextra -std=c99 $(INCLUDE) -O0 -g3 $(DEFINE)
+CFLAGS += -mcpu=cortex-m3 -mthumb
+SFLAGS += -x assembler-with-cpp -g3 $(DEFINE) $(INCLUDE)
+SFLAGS += -mcpu=cortex-m3 -mthumb
 
 # IPCs
 SRC_C += $(PICORTOS_DIR)/ipc/picoRTOS_futex.c
@@ -34,16 +37,6 @@ INCLUDE += -I$(PICORTOS_DIR)/drivers/twi
 INCLUDE += -I$(PICORTOS_DIR)/drivers/uart
 INCLUDE += -I$(PICORTOS_DIR)/drivers/wd
 
-# Required for sketch
-SRC_H += $(PICORTOS_DIR)/picoRTOS.h
-SRC_H += $(PICORTOS_DIR)/arch/include/picoRTOS_port.h
-SRC_H += $(ARCH_DIR)/picoRTOS_types.h
-SRC_H += $(DEVICE_DIR)/picoRTOS_device.h
-SRC_H += $(PICORTOS_DIR)/ipc/picoRTOS_futex.h
-SRC_H += $(PICORTOS_DIR)/ipc/picoRTOS_mutex.h
-SRC_H += $(PICORTOS_DIR)/ipc/picoRTOS_cond.h
-SRC_H += picoRTOSConfig.h
-
 # drivers
 SRC_C += $(PICORTOS_DIR)/drivers/adc/adc-sam.c
 SRC_C += $(PICORTOS_DIR)/drivers/can/can-sam.c
@@ -56,50 +49,45 @@ SRC_C += $(PICORTOS_DIR)/drivers/twi/twi-sam.c
 SRC_C += $(PICORTOS_DIR)/drivers/uart/uart-sam.c
 SRC_C += $(PICORTOS_DIR)/drivers/wd/wd-sam.c
 
-# sketch files
-SRC_H += $(PICORTOS_DIR)/drivers/include/adc.h
-SRC_H += $(PICORTOS_DIR)/drivers/adc/adc-sam.h
-SRC_H += $(PICORTOS_DIR)/drivers/include/can.h
-SRC_H += $(PICORTOS_DIR)/drivers/can/can-sam.h
-SRC_H += $(PICORTOS_DIR)/drivers/include/clock.h
-SRC_H += $(PICORTOS_DIR)/drivers/clock/clock-sam_pmc.h
-SRC_H += $(PICORTOS_DIR)/drivers/include/gpio.h
-SRC_H += $(PICORTOS_DIR)/drivers/gpio/gpio-sam_pio.h
-SRC_H += $(PICORTOS_DIR)/drivers/include/mux.h
-SRC_H += $(PICORTOS_DIR)/drivers/mux/mux-sam_pio.h
-SRC_H += $(PICORTOS_DIR)/drivers/include/pwm.h
-SRC_H += $(PICORTOS_DIR)/drivers/include/ipwm.h
-SRC_H += $(PICORTOS_DIR)/drivers/pwm/pwm-sam_tc.h
-SRC_H += $(PICORTOS_DIR)/drivers/include/spi.h
-SRC_H += $(PICORTOS_DIR)/drivers/spi/spi-sam.h
-SRC_H += $(PICORTOS_DIR)/drivers/include/twi.h
-SRC_H += $(PICORTOS_DIR)/drivers/twi/twi-sam.h
-SRC_H += $(PICORTOS_DIR)/drivers/include/uart.h
-SRC_H += $(PICORTOS_DIR)/drivers/uart/uart-sam.h
-SRC_H += $(PICORTOS_DIR)/drivers/include/wd.h
-SRC_H += $(PICORTOS_DIR)/drivers/wd/wd-sam.h
-
 # demo
 SRC_C += main.c
 SRC_C += arduino-due.c
-SRC_H += arduino-due.h
 
-CFLAGS := "compiler.c.flags=-c -g -O0 {compiler.warning_flags} -std=gnu11 -ffunction-sections -fdata-sections -nostdlib --param max-inline-insns-single=500 -Dprintf=iprintf -MMD"
+OBJ := $(SRC_C:%.c=$(BUILD)/%.o)
+OBJ += $(SRC_S:%.S=$(BUILD)/%.o)
 
-all:
-	mkdir -p $(SKETCH_DIR)
-	cp $(SKETCH).ino $(SRC_C) $(SRC_S) $(SRC_H) $(SKETCH_DIR)
-	arduino-cli compile -b arduino:sam:arduino_due_x \
-	  --build-property $(CFLAGS) --export-binaries $(SKETCH_DIR)
+# custom linker scripts for arduino-cli (bootloader)
+LDRAM := $(DEVICE_DIR)/gcc/atsam3x8e_ram.ld
+LDFLASH := $(DEVICE_DIR)/gcc/atsam3x8e_rom.ld
+
+all: $(ELF_RAM) $(ELF_FLASH)
+
+$(ELF_RAM): $(OBJ)
+	-mkdir -p $(@D)
+	$(CROSS)$(CC) $^ -T$(LDRAM) $(LDFLAGS) -o $@
+
+$(ELF_FLASH): $(OBJ)
+	-mkdir -p $(@D)
+	$(CROSS)$(CC) $^ -T$(LDFLASH) $(LDFLAGS) -o $@
+
+$(BUILD)/%.o: %.c
+	-mkdir -p $(@D)
+	$(CROSS)$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD)/%.o: %.S
+	-mkdir -p $(@D)
+	$(CROSS)$(CC) $(SFLAGS) -c $< -o $@
 
 upload:
+	$(CROSS)$(OBJCOPY) -O binary $(ELF_RAM) $(ELF_RAM).bin
 	arduino-cli upload -b arduino:sam:arduino_due_x -p /dev/ttyACM0 \
-	  -l serial $(SKETCH_DIR)
+	  -l serial -i $(ELF_RAM).bin
 
 splint:
 	splint $(SPLINTFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
 
 clean:
-	-rm -rf sketch
+	-rm -rf $(BUILD)
+	-rm -f *.elf
 
 .PHONY: clean splint

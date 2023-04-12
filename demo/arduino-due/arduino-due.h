@@ -20,6 +20,7 @@
 #include "can.h"
 #include "gpio.h"
 #include "pwm.h"
+#include "ipwm.h"
 #include "spi.h"
 #include "twi.h"
 #include "uart.h"
