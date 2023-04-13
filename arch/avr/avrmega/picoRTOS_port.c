@@ -3,6 +3,11 @@
 #include "picoRTOS_device.h"
 
 /* ASM */
+/*@external@*/ extern /*@temp@*/
+picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
+                                          picoRTOS_task_fn_t fn,
+                                          void *priv);
+
 /*@external@*/ extern void arch_start_first_task(picoRTOS_stack_t *sp);
 /*@external@*/ extern void arch_SYSTICK(void *priv);
 
@@ -81,21 +86,9 @@ void arch_resume(void)
 
 picoRTOS_stack_t *arch_prepare_stack(struct picoRTOS_task *task)
 {
-    /* stack is decrementing */
-    picoRTOS_stack_t *sp = task->stack + task->stack_count;
-
-    sp -= ARCH_INTIAL_STACK_COUNT;
-
-    sp[34] = (picoRTOS_stack_t)(unsigned int)task->fn;
-    sp[33] = (picoRTOS_stack_t)((unsigned int)task->fn >> 8);   /* ret pc */
-
-    sp[30] = (unsigned char)0x0;                                /* r0 */
-    sp[29] = (picoRTOS_stack_t)(1u << 7);                       /* sreg (int enable) */
-
-    sp[5] = (picoRTOS_stack_t)(unsigned int)task->priv;         /* r24 */
-    sp[4] = (picoRTOS_stack_t)((unsigned int)task->priv >> 8);  /* r25 */
-
-    return sp - 1;                                              /* pop pre-increments */
+    /* AVRs have a decrementing stack */
+    return arch_save_first_context(task->stack + task->stack_count,
+                                   task->fn, task->priv);
 }
 
 /* cppcheck-suppress constParameter */
