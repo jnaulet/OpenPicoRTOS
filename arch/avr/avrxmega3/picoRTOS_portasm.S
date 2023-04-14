@@ -1,36 +1,32 @@
 	/* Declarations */
-	.global arch_start_first_task
-	.global arch_SYSTICK
-	.global arch_syscall
-
 	.extern picoRTOS_tick
 	.extern picoRTOS_syscall
 
+	.equ GPIOR1, 0x2a
+	.equ GPIOR2, 0x2b
+	.equ SPL, 0x3d
+	.equ SPH, 0x3e
+	.equ SREG, 0x3f
+
 	#include "picoRTOS_device.h"
 
-	.equ GPIOR1, ADDR_GPIO + 0x1
-	.equ GPIOR2, ADDR_GPIO + 0x2
-	.equ SPL, ADDR_CPU + 0xd
-	.equ SPH, ADDR_CPU + 0xe
-	.equ SREG, ADDR_CPU + 0xf
+	.macro SWAP_STACK
+	in r23, GPIOR2
+	in r22, GPIOR1
+	in r25, SPH
+	in r24, SPL
+	out GPIOR2, r25
+	out GPIOR1, r24
+	out SPH, r23
+	out SPL, r22
+	.endm
 
-	.macro PRESAVE_CONTEXT
+	.macro SAVE_CONTEXT_IRQ_STEP1
 	push r28
 	push r29
 	.endm
 
-	.macro SWAP_STACK
-	in r21, GPIOR2
-	in r20, GPIOR1
-	in r23, SPH
-	in r22, SPL
-	out GPIOR2, r23
-	out GPIOR1, r22
-	out SPH, r21
-	out SPL, r20
-	.endm
-
-	.macro SAVE_CONTEXT
+	.macro SAVE_CONTEXT_IRQ_STEP2
 	push r0
 	in r0, SREG
 	push r0
@@ -64,6 +60,11 @@
 	push r30
 	push r31
 	SWAP_STACK
+	.endm
+
+	.macro SAVE_CONTEXT
+	SAVE_CONTEXT_IRQ_STEP1
+	SAVE_CONTEXT_IRQ_STEP2
 	.endm
 
 	.macro RESTORE_CONTEXT
@@ -106,7 +107,38 @@
 
 	.text
 
+	.type arch_save_first_context, %function
+	.global arch_save_first_context
+arch_save_first_context:
+	push r19
+	push r18
+	/* switch to task sp */
+	out GPIOR2, r25
+	out GPIOR1, r24
+	/* preserve r23:r22 */
+	mov r19, r23
+	mov r18, r22
+	SWAP_STACK
+	/* ret pc (fn) */
+	push r18
+	push r19
+#ifdef __AVR_3_BYTE_PC__
+	ldi r19, 0
+	push r19
+#endif
+	/* priv */
+	mov r25, r21
+	mov r24, r20
+	SAVE_CONTEXT
+	/* ret */
+	in r25, GPIOR2
+	in r24, GPIOR1
+	pop r18
+	pop r19
+	ret
+
 	.type arch_start_first_task, %function
+	.global arch_start_first_task
 arch_start_first_task:
 	/* prepare stack sp */
 	out GPIOR2, r25
@@ -115,6 +147,7 @@ arch_start_first_task:
 	reti	/* auto-enable interrupts */
 
 	.type arch_SYSTICK, %function
+	.global arch_SYSTICK
 arch_SYSTICK:
 	/* ack RTC OVF */
 	ldi r24, 0x1
@@ -130,9 +163,9 @@ arch_SYSTICK:
 	ret
 
 	.type arch_syscall, %function
+	.global arch_syscall
 arch_syscall:
 	cli	/* mimic interrupt entry behavior */
-	PRESAVE_CONTEXT
 	SAVE_CONTEXT
 	/* set task sp to Y */
 	in r29, GPIOR2
@@ -159,7 +192,7 @@ arch_syscall:
 	.comm ISR_TABLE, DEVICE_INTERRUPT_VECTOR_COUNT, 4
 
 vector_isr_handler:
-	SAVE_CONTEXT
+	SAVE_CONTEXT_IRQ_STEP2
 	ld  r30, Y
 	ldd r31, Y+1
 	ldd r24, Y+2
@@ -182,7 +215,7 @@ vector_isr_handler:
 	EXPORT__VECTOR_ %i+1
 __VECTOR_ %i+1
 	.noaltmacro
-	PRESAVE_CONTEXT
+	SAVE_CONTEXT_IRQ_STEP1
 	ldi r28, lo8(ISR_TABLE+(i*4))
 	ldi r29, hi8(ISR_TABLE+(i*4))
 	rjmp vector_isr_handler
