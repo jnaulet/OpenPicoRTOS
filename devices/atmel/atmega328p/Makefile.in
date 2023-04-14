@@ -1,5 +1,5 @@
 # Device configuration file for ATMega328P
-ARCH_DIR := $(PICORTOS_DIR)/arch/avr/avr5
+ARCH_DIR := $(PICORTOS_DIR)/arch/avr/avrmega
 DEVICE_DIR := $(PICORTOS_DIR)/devices/atmel/atmega328p
 
 DEFINE := -D__AVR_ATmega328P__

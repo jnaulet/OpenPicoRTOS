@@ -1,5 +1,5 @@
 # Device configuration file for ATMega2560
-ARCH_DIR := $(PICORTOS_DIR)/arch/avr/avr6
+ARCH_DIR := $(PICORTOS_DIR)/arch/avr/avrmega
 DEVICE_DIR := $(PICORTOS_DIR)/devices/atmel/atmega2560
 
 DEFINE := -D__AVR_ATmega2560__

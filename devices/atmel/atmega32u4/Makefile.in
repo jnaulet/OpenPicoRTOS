@@ -1,5 +1,5 @@
 # Device configuration file for ATMega32u4
-ARCH_DIR := $(PICORTOS_DIR)/arch/avr/avr5
+ARCH_DIR := $(PICORTOS_DIR)/arch/avr/avrmega
 DEVICE_DIR := $(PICORTOS_DIR)/devices/atmel/atmega32u4
 
 DEFINE := -D__AVR_ATmega32U4__
