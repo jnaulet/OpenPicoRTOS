@@ -1,7 +1,5 @@
 	.syntax unified
-
-	/* Declarations */
-	.global arch_SIO_PROC1
+	.cpu cortex-m0plus
 
 	#include "picoRTOS_device.h"
 	#include "../picoRTOS_portasm.S"
@@ -11,9 +9,9 @@
 
 	.text
 
-	.align 1
 	.thumb_func
 	.type arch_SIO_PROC1, %function
+	.global arch_SIO_PROC1
 arch_SIO_PROC1:
 	push {lr}	/* store lr for interrupt return */
 	SAVE_CONTEXT r0

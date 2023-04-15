@@ -1,13 +1,8 @@
 	.syntax unified
-
-	/* Declarations */
-	.global arch_start_first_task
-	.global arch_syscall
-	.global arch_SYSTICK
-	.global arch_PENDSV
+	.cpu cortex-m0plus
 
 	.extern picoRTOS_tick
-	.extern picoRTOS_switch_context
+	.extern picoRTOS_syscall
 
 	#include "picoRTOS_device.h"
 
@@ -36,9 +31,34 @@
 	msr psp, \rS
 	.endm
 
-	.align 1
+	.thumb_func
+	.type arch_save_first_context, %function
+	.global arch_save_first_context
+arch_save_first_context:
+	push {r4-r7, lr}
+	/* auto-save */
+	subs r0, r0, #32
+	mov r4, r2		/* r0 (priv) */
+	movs r5, #0		/* r1 */
+	movs r6, #0		/* r2 */
+	movs r7, #0		/* r3 */
+	stmia r0!, {r4-r7}
+	mov r4, r12		/* r12 */
+	mov r5, lr		/* lr (r14) */
+	mov r6, r1		/* return address (fn) */
+	ldr r7, =0x1000000	/* xspr */
+	stmia r0!, {r4-r7}
+	/* user context */
+	subs r0, r0, #32
+	msr psp, r0
+	SAVE_CONTEXT r0
+	pop {r4-r7, pc}
+
+	.equ SYSTICK_CSR, 0xe000e010
+
 	.thumb_func
 	.type arch_start_first_task, %function
+	.global arch_start_first_task
 arch_start_first_task:
 	RESTORE_CONTEXT r0
 	/* switch to psp stack */
@@ -46,15 +66,24 @@ arch_start_first_task:
 	msr CONTROL, r0
 	isb
 
-	pop {r0-r5}	/* pop the registers that are saved automatically */
-	mov lr, r5	/* lr is copied from r5 */
-	pop {r2, r3}	/* return address + xspr */
-	cpsie i	/* enable interrupts */
-	bx r2		/* finally, jump to the user defined task code */
+	/* pop auto-save by hand */
+	pop {r0-r7}
+	mov r12, r4
+	mov lr, r5
 
-	.align 1
+	/* start systick */
+	movs r1, #1
+	ldr r2, =SYSTICK_CSR
+	ldr r3, [r2]
+	orrs r1, r1, r3
+	str r1, [r2]
+
+	cpsie i		/* enable interrupts */
+	bx r6
+
 	.thumb_func
 	.type arch_syscall, %function
+	.global arch_syscall
 arch_syscall:
 	push {lr}
 	/* call arch_PENDSV directly (values will be auto-stacked) */
@@ -64,9 +93,9 @@ arch_syscall:
 	str r2, [r3]
 	pop {pc}
 
-	.align 1
 	.thumb_func
 	.type arch_SYSTICK, %function
+	.global arch_SYSTICK
 arch_SYSTICK:
 	push {lr}	/* store lr for interrupt return */
 	SAVE_CONTEXT r0
@@ -74,9 +103,9 @@ arch_SYSTICK:
 	RESTORE_CONTEXT r0
 	pop {pc}	/* return */
 
-	.align 1
 	.thumb_func
 	.type arch_PENDSV, %function
+	.global arch_PENDSV
 arch_PENDSV:
 	push {lr}	/* store lr (interrupt return) */
 	SAVE_CONTEXT r0
@@ -86,13 +115,9 @@ arch_PENDSV:
 	RESTORE_CONTEXT r0
 	pop {pc}	/* return */
 
-	/* INTERRUPTS */
-	.global arch_NVIC_handler
-	.global ISR_TABLE
-
-	.align 1
 	.thumb_func
 	.type arch_NVIC_handler, %function
+	.global arch_NVIC_handler
 arch_NVIC_handler:
 	push {lr}
 	SAVE_CONTEXT r0
@@ -105,7 +130,7 @@ arch_NVIC_handler:
 	subs r0, #16
 	ldr r3, =ISR_TABLE
 	lsls r0, r0, #3	/* x8 to get the right isr table index */
-	adds r3, r3, r0
+	add r3, r3, r0
 	ldr r1, [r3]
 	ldr r0, [r3, #4]
 	blx r1
@@ -116,6 +141,7 @@ arch_NVIC_handler:
 	.bss
 	.align 2
 	.type ISR_TABLE, %object
+	.global ISR_TABLE
 ISR_TABLE:
 	.rept DEVICE_INTERRUPT_VECTOR_COUNT
 	.long 0
