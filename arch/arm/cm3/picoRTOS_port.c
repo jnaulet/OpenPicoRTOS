@@ -11,13 +11,17 @@
 
 /* NVIC */
 #define NVIC_ISER         ((volatile unsigned long*)0xe000e100)
-#define NVIC_ICSR         ((volatile unsigned long*)0xe000ed04)
 #define NVIC_SHPR3        ((volatile unsigned long*)0xe000ed20)
 
 /* VTOR */
 #define VTOR ((volatile unsigned long*)0xe000ed08)
 
 /* ASM */
+/*@external@*/ extern /*@temp@*/
+picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
+                                          picoRTOS_task_fn_t fn,
+                                          void *priv);
+
 /*@external@*/ extern void arch_SYSTICK(void);
 /*@external@*/ extern void arch_PENDSV(void);
 /*@external@*/ extern void arch_start_first_task(picoRTOS_stack_t *sp);
@@ -64,10 +68,9 @@ void arch_init(void)
     *NVIC_SHPR3 |= 0xffff0000ul;
 
     /* SYSTICK */
-    *SYSTICK_CSR &= ~1ul;                                       /* stop systick */
-    *SYSTICK_CVR = 0ul;                                         /* reset */
-    *SYSTICK_RVR = (unsigned long)SYSTICK_RVR_VALUE;            /* set period */
-    *SYSTICK_CSR |= 0x7ul;                                      /* enable interrupt & start */
+    *SYSTICK_CSR = 0x6ul;                                   /* stop systick */
+    *SYSTICK_CVR = 0;                                       /* reset */
+    *SYSTICK_RVR = (unsigned long)SYSTICK_RVR_VALUE;        /* set period */
 }
 
 void arch_suspend(void)
@@ -85,19 +88,8 @@ void arch_resume(void)
 picoRTOS_stack_t *arch_prepare_stack(struct picoRTOS_task *task)
 {
     /* ARMs have a decrementing stack */
-    picoRTOS_stack_t *sp = task->stack + task->stack_count;
-
-    /* ARM v6 reference manual, section B1.5.6 */
-    sp -= ARCH_INITIAL_STACK_COUNT;
-
-    sp[15] = (picoRTOS_stack_t)0x1000000;       /* xspr */
-    sp[14] = (picoRTOS_stack_t)task->fn;        /* return address */
-    sp[13] = (picoRTOS_stack_t)picoRTOS_start;  /* lr (r14) */
-    /* sp[12-9] = r12, r3, r2 and r1 and */
-    sp[8] = (picoRTOS_stack_t)task->priv;       /* r0 */
-    /* sp[7-0] = r11..r4 */
-
-    return sp;
+    return arch_save_first_context(task->stack + task->stack_count,
+                                   task->fn, task->priv);
 }
 
 /* cppcheck-suppress constParameter */
