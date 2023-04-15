@@ -105,6 +105,8 @@ static int set_mode(struct twi *ctx, twi_mode_t mode)
 
     if (mode == TWI_MODE_SLAVE)
         ctx->base->I2CxCON.SET = (uint32_t)I2CxCON_STREN;
+    else
+        ctx->base->I2CxCON.CLR = (uint32_t)I2CxCON_STREN;
 
     return 0;
 }
@@ -136,7 +138,7 @@ int twi_setup(struct twi *ctx, struct twi_settings *settings)
 static int twi_rw_as_master_idle(struct twi *ctx)
 {
     /* check if bus is idle */
-    if ((ctx->base->I2CxSTAT.REG & I2CxSTAT_P) != 0)
+    if ((ctx->base->I2CxCON.REG & I2CxCON_PEN) != 0)
         return -EAGAIN;
 
     /* send start condition */
@@ -148,13 +150,13 @@ static int twi_rw_as_master_idle(struct twi *ctx)
     return -EAGAIN;
 }
 
-static int twi_rw_as_master_sla(struct twi *ctx, bool r)
+static int twi_write_as_master_sla(struct twi *ctx)
 {
     if ((ctx->base->I2CxCON.REG & I2CxCON_SEN) != 0)
         return -EAGAIN;
 
-    /* send address + w */
-    ctx->base->I2CxTRN.REG = (uint32_t)(ctx->slave_addr << 1) | (uint32_t)r;
+    /* send address + r */
+    ctx->base->I2CxTRN.REG = (uint32_t)(ctx->slave_addr << 1);
 
     ctx->state = TWI_PIC32MX_STATE_DATA;
     return -EAGAIN;
@@ -190,6 +192,15 @@ static int twi_write_as_master_data(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_rw_as_master_stop(struct twi *ctx)
 {
+    /* check status */
+    uint32_t mask = (uint32_t)(I2CxCON_ACKEN | I2CxCON_RCEN |
+                               I2CxCON_PEN | I2CxCON_RSEN | I2CxCON_SEN);
+
+    /* no pending transmission */
+    if ((ctx->base->I2CxSTAT.REG & I2CxSTAT_TRSTAT) != 0 ||
+        (ctx->base->I2CxCON.REG & mask) != 0)
+        return -EAGAIN;
+
     /* send stop condition */
     ctx->base->I2CxCON.SET = (uint32_t)I2CxCON_PEN;
 
@@ -203,7 +214,7 @@ static int twi_write_as_master(struct twi *ctx, const void *buf, size_t n)
 
     switch (ctx->state) {
     case TWI_PIC32MX_STATE_IDLE: return twi_rw_as_master_idle(ctx);
-    case TWI_PIC32MX_STATE_SLA: return twi_rw_as_master_sla(ctx, false);
+    case TWI_PIC32MX_STATE_SLA: return twi_write_as_master_sla(ctx);
     case TWI_PIC32MX_STATE_DATA: return twi_write_as_master_data(ctx, buf, n);
     case TWI_PIC32MX_STATE_STOP: return twi_rw_as_master_stop(ctx);
     default: break;
@@ -216,21 +227,30 @@ static int twi_write_as_master(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_write_as_slave_idle(struct twi *ctx)
 {
-    if ((ctx->base->I2CxSTAT.REG & I2CxSTAT_R_W) != 0)
+    /* addr */
+    if ((ctx->base->I2CxSTAT.REG & I2CxSTAT_D_A) == 0 &&
+        (ctx->base->I2CxSTAT.REG & I2CxSTAT_R_W) != 0) {
+        /*@unused@*/ volatile uint8_t addr = (uint8_t)ctx->base->I2CxRCV.REG;
         ctx->state = TWI_PIC32MX_STATE_DATA;
+    }
 
     return -EAGAIN;
 }
 
 static int twi_write_as_slave_data(struct twi *ctx, const void *buf, size_t n)
 {
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+
     /* check if tx buf is available */
-    if ((ctx->base->I2CxSTAT.REG & I2CxSTAT_TRSTAT) != 0)
+    if ((ctx->base->I2CxSTAT.REG & I2CxSTAT_TRSTAT) != 0 ||
+        (ctx->base->I2CxSTAT.REG & I2CxSTAT_TBF) != 0)
         return -EAGAIN;
 
     /* load data */
     ctx->base->I2CxTRN.REG = (uint32_t)*(uint8_t*)buf;
+    ctx->base->I2CxCON.SET = (uint32_t)I2CxCON_SCLREL;
 
+    /* end of transmission */
     if (n == (size_t)1)
         ctx->state = TWI_PIC32MX_STATE_IDLE;
 
@@ -267,18 +287,22 @@ int twi_write(struct twi *ctx, const void *buf, size_t n)
     return -EIO;
 }
 
-static int twi_read_as_master_ack(struct twi *ctx)
+static int twi_read_as_master_sla(struct twi *ctx, size_t n)
 {
-    /* check ack */
-    if ((ctx->base->I2CxSTAT.REG & I2CxSTAT_ACKSTAT) != 0) {
-        /* NACK recv */
-        ctx->state = TWI_PIC32MX_STATE_STOP;
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+
+    if ((ctx->base->I2CxCON.REG & I2CxCON_SEN) != 0)
         return -EAGAIN;
-    }
 
+    /* send address + r */
     ctx->base->I2CxCON.SET = (uint32_t)(I2CxCON_RCEN | I2CxCON_ACKEN);
-    ctx->state = TWI_PIC32MX_STATE_DATA;
+    ctx->base->I2CxTRN.REG = (uint32_t)((ctx->slave_addr << 1) | 0x1);
 
+    /* if only 1 char */
+    if (n == (size_t)1)
+        ctx->base->I2CxCON.SET = (uint32_t)I2CxCON_ACKDT;
+
+    ctx->state = TWI_PIC32MX_STATE_DATA;
     return -EAGAIN;
 }
 
@@ -289,6 +313,10 @@ static int twi_read_as_master_data(struct twi *ctx, void *buf, size_t n)
     /* check if rx buf is available */
     if ((ctx->base->I2CxSTAT.REG & I2CxSTAT_RBF) == 0)
         return -EAGAIN;
+
+    /* one to last byte */
+    if (n == (size_t)2)
+        ctx->base->I2CxCON.SET = (uint32_t)I2CxCON_ACKDT;
 
     /* read data */
     *(uint8_t*)buf = (uint8_t)ctx->base->I2CxRCV.REG;
@@ -311,8 +339,7 @@ static int twi_read_as_master(struct twi *ctx, void *buf, size_t n)
 
     switch (ctx->state) {
     case TWI_PIC32MX_STATE_IDLE: return twi_rw_as_master_idle(ctx);
-    case TWI_PIC32MX_STATE_SLA: return twi_rw_as_master_sla(ctx, true);
-    case TWI_PIC32MX_STATE_ACK: return twi_read_as_master_ack(ctx);
+    case TWI_PIC32MX_STATE_SLA: return twi_read_as_master_sla(ctx, n);
     case TWI_PIC32MX_STATE_DATA: return twi_read_as_master_data(ctx, buf, n);
     case TWI_PIC32MX_STATE_STOP: return twi_rw_as_master_stop(ctx);
     default: break;
@@ -332,12 +359,14 @@ static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
 
     /* drop addr byte */
     if ((ctx->base->I2CxSTAT.REG & I2CxSTAT_D_A) == 0) {
-        /*@unused@*/
-        volatile uint8_t addr = (uint8_t)ctx->base->I2CxRCV.REG;
+        /*@unused@*/ volatile uint8_t addr = (uint8_t)ctx->base->I2CxRCV.REG;
+        ctx->base->I2CxCON.SET = (uint32_t)I2CxCON_SCLREL;
         return -EAGAIN;
     }
 
     *(uint8_t*)buf = (uint8_t)ctx->base->I2CxRCV.REG;
+    ctx->base->I2CxCON.SET = (uint32_t)I2CxCON_SCLREL;
+
     return 1;
 }
 
