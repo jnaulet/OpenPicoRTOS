@@ -39,10 +39,10 @@ struct raspberry_pico {
     /*@shared@*/ struct gpio *GPIO19;
     /* PWM */
     /*@shared@*/ struct ipwm *PWM2B;    /* GP5 */
-    /*@shared@*/ struct pwm *PWM3A;     /* GP22 */
-    /*@shared@*/ struct pwm *PWM3B;     /* GP23 */
     /*@shared@*/ struct pwm *PWM4A;     /* GP24 */
     /*@shared@*/ struct pwm *PWM4B;     /* GP25 */
+    /*@shared@*/ struct pwm *PWM5A;     /* GP26 */
+    /*@shared@*/ struct pwm *PWM5B;     /* GP27 */
     /* ADCs */
     /*@shared@*/ struct adc *ADC0;      /* GP26 */
     /*@shared@*/ struct adc *ADC1;      /* GP27 */
