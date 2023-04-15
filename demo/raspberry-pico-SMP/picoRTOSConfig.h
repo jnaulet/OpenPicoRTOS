@@ -3,10 +3,10 @@
 
 /* CLOCKS */
 #define CONFIG_SYSCLK_HZ        125000000
-#define CONFIG_TICK_HZ          1000
+#define CONFIG_TICK_HZ          5000
 
 /* TASKS */
-#define CONFIG_TASK_COUNT      8
+#define CONFIG_TASK_COUNT      10
 #define TASK_TICK_PRIO         0
 #define TASK_WD_PRIO           (CONFIG_TASK_COUNT - 1)
 

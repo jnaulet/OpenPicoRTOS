@@ -18,3 +18,5 @@ Some wiring is required to perform this standalone test:
 
   - GP20 to GP6 (SDA)
   - GP21 to GP7 (SCL)
+  - GP27 to GP5 (IPWM)
+

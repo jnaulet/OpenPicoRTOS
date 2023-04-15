@@ -71,11 +71,11 @@ static void raspberry_pico_init_mux(void)
     (void)mux_rp2040_output(&MUX, (size_t)19, MUX_RP2040_F5);
 
     /* PWMs */
-    (void)mux_rp2040_input(&MUX, (size_t)5, MUX_RP2040_F4);
-    (void)mux_rp2040_output(&MUX, (size_t)22, MUX_RP2040_F4);
-    (void)mux_rp2040_output(&MUX, (size_t)23, MUX_RP2040_F4);
-    (void)mux_rp2040_output(&MUX, (size_t)24, MUX_RP2040_F4);
-    (void)mux_rp2040_output(&MUX, (size_t)25, MUX_RP2040_F4);
+    (void)mux_rp2040_input(&MUX, (size_t)5, MUX_RP2040_F4);     /* PWM2B */
+    (void)mux_rp2040_output(&MUX, (size_t)24, MUX_RP2040_F4);   /* PWM4A */
+    (void)mux_rp2040_output(&MUX, (size_t)25, MUX_RP2040_F4);   /* PWM4B */
+    (void)mux_rp2040_output(&MUX, (size_t)26, MUX_RP2040_F4);   /* PWM5A */
+    (void)mux_rp2040_output(&MUX, (size_t)27, MUX_RP2040_F4);   /* PWM5B */
 
     /* ADCs */
     /* NOthing to do */
@@ -102,7 +102,6 @@ static void raspberry_pico_init_i2c(/*@partial@*/ struct raspberry_pico *ctx)
 {
     static struct twi I2C0;
     static struct twi I2C1;
-
     struct twi_settings TWI_settings = {
         TWI_BITRATE_STANDARD,   /* bitrate */
         TWI_MODE_MASTER,        /* mode */
@@ -172,10 +171,10 @@ static void raspberry_pico_init_pwm(/*@partial@*/ struct raspberry_pico *ctx)
 {
     static struct pwm_rp2040 PWM;
 
-    static struct pwm PWM3A;
-    static struct pwm PWM3B;
     static struct pwm PWM4A;
     static struct pwm PWM4B;
+    static struct pwm PWM5A;
+    static struct pwm PWM5B;
     static struct ipwm PWM2B;
 
     struct pwm_rp2040_ipwm_settings IPWM_settings = {
@@ -186,19 +185,24 @@ static void raspberry_pico_init_pwm(/*@partial@*/ struct raspberry_pico *ctx)
     (void)pwm_rp2040_init(&PWM, (struct PWM_RP2040*)ADDR_PWM, CLOCK_RP2040_PERI);
 
     /* PWMs */
-    (void)pwm_rp2040_pwm_init(&PWM3A, &PWM, (size_t)3, PWM_RP2040_PWM_OUTPUT_A);
-    (void)pwm_rp2040_pwm_init(&PWM3B, &PWM, (size_t)3, PWM_RP2040_PWM_OUTPUT_B);
     (void)pwm_rp2040_pwm_init(&PWM4A, &PWM, (size_t)4, PWM_RP2040_PWM_OUTPUT_A);
     (void)pwm_rp2040_pwm_init(&PWM4B, &PWM, (size_t)4, PWM_RP2040_PWM_OUTPUT_B);
+    (void)pwm_rp2040_pwm_init(&PWM5A, &PWM, (size_t)5, PWM_RP2040_PWM_OUTPUT_A);
+    (void)pwm_rp2040_pwm_init(&PWM5B, &PWM, (size_t)5, PWM_RP2040_PWM_OUTPUT_B);
 
     /* IPWMs */
     (void)pwm_rp2040_ipwm_init(&PWM2B, &PWM, (size_t)2);
     (void)pwm_rp2040_ipwm_setup(&PWM2B, &IPWM_settings);
 
-    ctx->PWM3A = &PWM3A;
-    ctx->PWM3B = &PWM3B;
+    /* force period to 100us & duty cycle to 40% on PWM3B for ipwm tests */
+    (void)pwm_set_period(&PWM5B, (pwm_period_us_t)100);
+    (void)pwm_set_duty_cycle(&PWM5B, PWM_DUTY_CYCLE_PCENT(40));
+    pwm_start(&PWM5B);
+
     ctx->PWM4A = &PWM4A;
     ctx->PWM4B = &PWM4B;
+    ctx->PWM5A = &PWM5A;
+    ctx->PWM5B = &PWM5B;
     ctx->PWM2B = &PWM2B;
 }
 

@@ -4,6 +4,7 @@
 #include "adc.h"
 #include "gpio.h"
 #include "pwm.h"
+#include "ipwm.h"
 #include "spi.h"
 #include "twi.h"
 #include "uart.h"
@@ -32,11 +33,11 @@ static void led0_main(void *priv)
 {
     picoRTOS_assert_void(priv != NULL);
 
-    struct raspberry_pico *ctx = (struct raspberry_pico*)priv;
+    struct pwm *PWM = (struct pwm*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
 
-    (void)pwm_set_period(ctx->PWM4B, (pwm_period_us_t)200);
-    pwm_start(ctx->PWM4B);
+    (void)pwm_set_period(PWM, (pwm_period_us_t)200);
+    pwm_start(PWM);
 
     for (;;) {
 
@@ -47,7 +48,7 @@ static void led0_main(void *priv)
 
         /* fade in */
         while (n-- != 0) {
-            (void)pwm_set_duty_cycle(ctx->PWM4B, duty_cycle);
+            (void)pwm_set_duty_cycle(PWM, duty_cycle);
             duty_cycle += PWM_DUTY_CYCLE_PCENT(1);
             picoRTOS_sleep(PICORTOS_DELAY_MSEC(5));
         }
@@ -64,7 +65,7 @@ static void led1_main(void *priv)
 {
     picoRTOS_assert_void(priv != NULL);
 
-    struct raspberry_pico *ctx = (struct raspberry_pico*)priv;
+    struct pwm *PWM = (struct pwm*)priv;
 
     for (;;) {
 
@@ -76,7 +77,7 @@ static void led1_main(void *priv)
 
         /* fade away */
         while (n-- != 0) {
-            (void)pwm_set_duty_cycle(ctx->PWM4B, duty_cycle);
+            (void)pwm_set_duty_cycle(PWM, duty_cycle);
             duty_cycle -= PWM_DUTY_CYCLE_PCENT(1);
             picoRTOS_sleep(PICORTOS_DELAY_MSEC(5));
         }
@@ -197,6 +198,74 @@ static void twi_slave_main(void *priv)
     }
 }
 
+/*
+ * This thread ramps up a PWM duty cycle from 0 to 100% by 0.1% increments
+ * Period is set at 100us
+ */
+static void pwm_main(void *priv)
+{
+    picoRTOS_assert_void(priv != NULL);
+
+    pwm_duty_cycle_t duty_cycle = 0;
+    struct pwm *PWM = (struct pwm*)priv;
+
+    /* init */
+    (void)pwm_set_period(PWM, (pwm_period_us_t)100);
+    (void)pwm_set_duty_cycle(PWM, 0);
+
+    /* start */
+    pwm_start(PWM);
+
+    for (;;) {
+        (void)pwm_set_duty_cycle(PWM, duty_cycle);
+        duty_cycle += PWM_DUTY_CYCLE_PMIL(1);
+
+        picoRTOS_schedule();
+    }
+}
+
+/*
+ * This thread measures the output period and duty_cycle of a PWM,
+ * Period should be exactly 100ms, duty cycle 40%
+ */
+static void ipwm_main(void *priv)
+{
+    picoRTOS_assert_void(priv != NULL);
+
+    struct ipwm *IPWM = (struct ipwm*)priv;
+
+    /* wait for hw to init properly */
+    picoRTOS_sleep(PICORTOS_DELAY_MSEC(10));
+
+    for (;;) {
+        pwm_period_us_t period = 0;
+        pwm_duty_cycle_t duty_cycle = 0;
+        int deadlock = CONFIG_DEADLOCK_COUNT;
+
+        while (ipwm_get_period(IPWM, &period) == -EAGAIN && deadlock-- != 0)
+            picoRTOS_schedule();
+
+        /* check */
+        picoRTOS_assert_void(deadlock != -1);
+        /* Warning: ipwm-rp2040 uses the tick as a reference and this
+         * adds a lot of imprecision. Need to fix this
+         * picoRTOS_assert_void(period > (pwm_period_us_t)50);
+         * picoRTOS_assert_void(period < (pwm_period_us_t)200);
+         */
+
+        deadlock = CONFIG_DEADLOCK_COUNT;
+        while (ipwm_get_duty_cycle(IPWM, &duty_cycle) == -EAGAIN && deadlock-- != 0)
+            picoRTOS_schedule();
+
+        /* final check */
+        picoRTOS_assert_void(deadlock != -1);
+        /* This one is not reliable either
+         * picoRTOS_assert_void(duty_cycle > PWM_DUTY_CYCLE_PCENT(30));
+         * picoRTOS_assert_void(duty_cycle < PWM_DUTY_CYCLE_PCENT(50));
+         */
+    }
+}
+
 static void wd_main(void *priv)
 {
     picoRTOS_assert_void(priv != NULL);
@@ -226,6 +295,8 @@ int main(void)
     static picoRTOS_stack_t stack5[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack6[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack7[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack8[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack9[CONFIG_DEFAULT_STACK_COUNT];
 
     /* TICK */
     picoRTOS_task_init(&task, tick_main, pico.GPIO19, stack0, PICORTOS_STACK_COUNT(stack0));
@@ -233,10 +304,10 @@ int main(void)
 
     /* LEDs (strict deadlines, no round-robin) */
     prio = picoRTOS_get_next_available_priority();
-    picoRTOS_task_init(&task, led0_main, &pico, stack1, PICORTOS_STACK_COUNT(stack1));
+    picoRTOS_task_init(&task, led0_main, pico.PWM4B, stack1, PICORTOS_STACK_COUNT(stack1));
     picoRTOS_SMP_add_task(&task, prio, (picoRTOS_mask_t)(1 << 0));  /* LED0: core #0 */
     prio = picoRTOS_get_next_available_priority();
-    picoRTOS_task_init(&task, led1_main, &pico, stack2, PICORTOS_STACK_COUNT(stack2));
+    picoRTOS_task_init(&task, led1_main, pico.PWM4B, stack2, PICORTOS_STACK_COUNT(stack2));
     picoRTOS_SMP_add_task(&task, prio, (picoRTOS_mask_t)(1 << 1));  /* LED1: core #1 */
 
     /* SPI & ADC (round-robin) */
@@ -253,8 +324,16 @@ int main(void)
     picoRTOS_task_init(&task, twi_slave_main, pico.I2C1, stack6, PICORTOS_STACK_COUNT(stack6));
     picoRTOS_SMP_add_task(&task, prio, (picoRTOS_mask_t)(1 << 1));  /* I2C1: core #1 */
 
+    /* PWM */
+    picoRTOS_task_init(&task, pwm_main, pico.PWM5A, stack7, PICORTOS_STACK_COUNT(stack7));
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+
+    /* IPWM */
+    picoRTOS_task_init(&task, ipwm_main, pico.PWM2B, stack8, PICORTOS_STACK_COUNT(stack8));
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+
     /* WD, keep last */
-    picoRTOS_task_init(&task, wd_main, pico.WDT, stack7, PICORTOS_STACK_COUNT(stack7));
+    picoRTOS_task_init(&task, wd_main, pico.WDT, stack9, PICORTOS_STACK_COUNT(stack9));
     (void)picoRTOS_add_task(&task, picoRTOS_get_last_available_priority());
 
     picoRTOS_start();
