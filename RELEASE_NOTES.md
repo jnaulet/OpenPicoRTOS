@@ -1,5 +1,22 @@
 # Release notes
 
+## picoRTOS v1.7.1
+### What's new ?
+
+Branch v1.7.x is now a backports branch (called v1.7.x-backports to make it clear).
+All the development goes now into v1.8.x, which provides boot & linker files, which makes
+developing the system as a standalone kernel so much more convienient.
+
+It's quite difficult to make ports that always have to work around the suppliers' SDK.
+
+It is now solved, picoRTOS v1.8.x will provide everything you need to build a system from scratch on the supported devices.
+Ports to devices of the same families should be quite easy as picoRTOS provides a library of macros for the boot.
+
+But nobody will be left behind as most of the improvements will be backported to the v1.7.x series when possible,
+as some projects already use an external BSP/SDK & are happy with it.
+
+This v1.7.1 contains a lot of improvements already present on v1.8.x, such as better stability and cleaner asm code.
+
 ## picoRTOS v1.7.0
 ### What's new ?
 
