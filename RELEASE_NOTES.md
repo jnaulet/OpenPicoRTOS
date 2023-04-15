@@ -1,5 +1,23 @@
 # Release notes
 
+## picoRTOS v1.7.0
+### What's new ?
+
+Round-robin scheduling ! This is the new feature provided in the v1.7.x series.
+Works in SMP & single core modes.
+
+Some drivers have been moved around:
+  - spi-pl022 -> spi-arm_pl022
+  - uart-pl011 -> uart-arm_pl011
+  - gpio-sio -> gpio-rp2040_sio
+
+Asserts have changed a bit for testing purposes, you get now:
+ - assert_fatal (returns)
+ - assert_void (only in debug)
+ - assert_void_fatal (doesn't return)
+
+Unit tests have been added to ensure single-core & SMP versions get the same behaviour.
+
 ## picoRTOS v1.6.3
 ### What's new ?
 
