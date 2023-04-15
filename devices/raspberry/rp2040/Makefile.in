@@ -1,4 +1,4 @@
-# Device configuration file for ATMega2560
+# Device configuration file for RPi Pico / RP2040
 ARCH_DIR := $(PICORTOS_DIR)/arch/arm/cm0+
 DEVICE_DIR := $(PICORTOS_DIR)/devices/raspberry/rp2040
 
