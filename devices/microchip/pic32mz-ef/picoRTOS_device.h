@@ -105,6 +105,81 @@
 #define ADDR_OSCILLATOR       0xbf801200
 #define ADDR_PPS              0xbf801400
 
+/* CONFIGURATION */
+
+/* initial values */
+#define DEVCP0  0xefffffff
+#define DEVCFG0 0xbfc00080
+#define DEVCFG1 0x00007000
+#define DEVCFG2 0xbff88008
+#define DEVCFG3 0x84ff0000
+
+/* flags */
+
+/* CP */
+#define CP (1 << 28)
+/* DEVCFG0 */
+#define C99_EJTAGBEN (1 << 30)
+#define POSCBOOST    (1 << 21)
+#define POSCGAIN_M   0x3u
+#define POSCGAIN(x)  (((x) & POSCGAIN_M) << 19)
+#define SOSCBOOST    (1 << 18)
+#define SOSCGAIN_M   0x3u
+#define SOSCGAIN(x)  (((x) & SOSCGAIN_M) << 16)
+#define SMCLR        (1 << 15)
+#define FSLEEP       (1 << 10)
+#define FECCCON_M    0x3u
+#define FECCCON(x)   (((x) & FECCCON_M) << 8)
+#define BOOTISA      (1 << 6)
+#define TRCEN        (1 << 5)
+#define ICESEL_M     0x3u
+#define ICESEL(x)    (((x) & ICESEL_M) << 3)
+#define JTAGEN       (1 << 2)
+#define DEBUG_M      0x3u
+#define DEBUG(x)     ((x) & DEBUG_M)
+/* DEVCFG1 */
+#define FDMTEN      (1 << 31)
+#define DMTCNT_M    0x1fu
+#define DMTCNT(x)   (((x) & DMTCNT_M) << 26)
+#define FWDTWINZ_M  0x3u
+#define FWDTWINZ(x) (((x) & FWDTWINZ_M) << 24)
+#define FWDTEN      (1 << 23)
+#define WINDIS      (1 << 22)
+#define WDTSPGM     (1 << 21)
+#define WDTPS_M     0x1fu
+#define WDTPS(x)    (((x) & WDTPS_M) << 16)
+#define FCKSM_M     0x3u
+#define FCKSM(x)    (((x) & FCKSM_M) << 14)
+#define OSCIOFNC    (1 << 10)
+#define POSCMOD_M   0x3u
+#define POSCMOD(x)  (((x) & POSCMOD_M) << 8)
+#define IESO        (1 << 7)
+#define FSOSCEN     (1 << 6)
+#define DMTINTV_M   0x7u
+#define DMTINTV(x)  (((x) & DMTINTV_M) << 3)
+#define FNOSC_M     0x7u
+#define FNOSC(x)    ((x) & FNOSC_M)
+/* DEVCFG2 */
+#define UPLLFSEL    (1 << 30)
+#define FPLLODIV_M  0x7u
+#define FPLLODIV(x) (((x) & FPLLODIV_M) << 16)
+#define FPLLMULT_M  0x3fu
+#define FPLLMULT(x) (((x) & FPLLMULT_M) << 8)
+#define FPLLICLK    (1 << 7)
+#define FPLLRNG_M   0x7u
+#define FPLLRNG(x)  (((x) & FPLLRNG_M) << 4)
+#define FPLLIDIV_M  0x7u
+#define FPLLIDIV(x) ((x) & FPLLIDIV_M)
+/* DEVCFG3 */
+#define FUSBIDIO  (1 << 30)
+#define IOL1WAY   (1 << 29)
+#define PMDL1WAY  (1 << 28)
+#define PGL1WAY   (1 << 27)
+#define FETHIO    (1 << 25)
+#define FMIIEN    (1 << 24)
+#define USERID_M  0xffffu
+#define USERID(x) ((x) & USERID_M)
+
 /* Factory programmed flash */
 
 #define ADDR_DEVADCx 0xbfc54000
@@ -113,8 +188,17 @@
 /* DEVICE */
 
 #define DEVICE_INTERRUPT_VECTOR_COUNT   213
+
+#define DEVICE_ICACHE_SIZE 16384
+#define DEVICE_DCACHE_SIZE 4096
+
 #define DEVICE_ADC_DEDICATED_SAR_COUNT  5
 #define DEVICE_ADC_SHARED_CL2_SAR_COUNT 7
 #define DEVICE_ADC_SHARED_CL3_SAR_COUNT 33
+
+/* COPROCESSORS */
+
+#define MIPS32_M51XX_HAS_FPU64
+#define MIPS32_M51XX_HAS_DSP
 
 #endif
