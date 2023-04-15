@@ -11,7 +11,6 @@
 
 /* NVIC */
 #define NVIC_ISER         ((volatile unsigned long*)0xe000e100)
-#define NVIC_ICSR         ((volatile unsigned long*)0xe000ed04)
 #define NVIC_SHPR3        ((volatile unsigned long*)0xe000ed20)
 
 /* VTOR */
@@ -21,6 +20,12 @@
 #ifdef ADDR_CMCC
 # define CMCC_CTRL ((volatile unsigned long*)(ADDR_CMCC + 0x8))
 #endif
+
+/* ASM */
+/*@external@*/ extern /*@temp@*/
+picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
+                                          picoRTOS_task_fn_t fn,
+                                          void *priv);
 
 /* ASM */
 /*@external@*/ extern void arch_SYSTICK(void);
@@ -78,10 +83,9 @@ void arch_init(void)
     *NVIC_SHPR3 |= 0xffff0000ul;
 
     /* SYSTICK */
-    *SYSTICK_CSR &= ~1ul;                                       /* stop systick */
-    *SYSTICK_CVR = 0ul;                                         /* reset */
-    *SYSTICK_RVR = (unsigned long)SYSTICK_RVR_VALUE;            /* set period */
-    *SYSTICK_CSR |= 0x7ul;                                      /* enable interrupt & start */
+    *SYSTICK_CSR = 0x6ul;                                   /* stop systick */
+    *SYSTICK_CVR = 0;                                       /* reset */
+    *SYSTICK_RVR = (unsigned long)SYSTICK_RVR_VALUE;        /* set period */
 }
 
 void arch_suspend(void)
@@ -99,25 +103,8 @@ void arch_resume(void)
 picoRTOS_stack_t *arch_prepare_stack(struct picoRTOS_task *task)
 {
     /* ARMs have a decrementing stack */
-    picoRTOS_stack_t *sp = task->stack + task->stack_count;
-
-    /* ARM v6 reference manual, section B1.5.6 */
-    sp -= ARCH_INITIAL_STACK_COUNT;
-
-    /* sp[49] = reserved */
-    /* sp[48] = fpscr */
-    /* sp[47-32] = s15...s0 */
-
-    sp[31] = (picoRTOS_stack_t)0x1000000;       /* xspr */
-    sp[30] = (picoRTOS_stack_t)task->fn;        /* return address */
-    sp[29] = (picoRTOS_stack_t)picoRTOS_start;  /* lr (r14) */
-    /* sp[28-25] = r12, r3, r2 and r1 and */
-    sp[24] = (picoRTOS_stack_t)task->priv;      /* r0 */
-
-    /* sp[23-16] = r11..r4 */
-    /* sp[15-0] = fpu s16...s31 */
-
-    return sp;
+    return arch_save_first_context(task->stack + task->stack_count,
+                                   task->fn, task->priv);
 }
 
 /* cppcheck-suppress constParameter */
