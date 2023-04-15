@@ -8,6 +8,11 @@
 #define INTC_IPCn   ((volatile unsigned long*)(ADDR_INTC + 0x140))
 #define INTC_OFFn   ((volatile unsigned long*)(ADDR_INTC + 0x540))
 
+/*@external@*/ extern /*@temp@*/
+picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
+                                          picoRTOS_task_fn_t fn,
+                                          void *priv);
+
 /*@external@*/ extern void arch_start_first_task(picoRTOS_stack_t *sp);
 /*@external@*/ extern void arch_syscall(picoRTOS_syscall_t syscall, void *priv);
 /*@external@*/ extern picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *var,
@@ -33,7 +38,7 @@ void arch_init(void)
     INTC_OFFn[1] = (unsigned long)arch_SYSCALL;
 
     /* set multi-vector mode */
-    *INTC_INTCON |= (1ul << 12);
+    *INTC_INTCON |= (1 << 12);
 
     /* enable interrupts */
     INTC_IFSn[0] &= ~0x3;
@@ -56,15 +61,8 @@ void arch_resume(void)
 picoRTOS_stack_t *arch_prepare_stack(struct picoRTOS_task *task)
 {
     /* MPIS32s have a decrementing stack */
-    picoRTOS_stack_t *sp = task->stack + task->stack_count;
-
-    sp -= ARCH_INITIAL_STACK_COUNT;
-
-    sp[2] = (picoRTOS_stack_t)task->priv;           /* A0 */
-    sp[25] = (picoRTOS_stack_t)picoRTOS_start;      /* RA */
-    sp[28] = (picoRTOS_stack_t)task->fn;            /* EPC */
-
-    return sp;
+    return arch_save_first_context(task->stack + task->stack_count,
+                                   task->fn, task->priv);
 }
 
 /* cppcheck-suppress constParameter */
