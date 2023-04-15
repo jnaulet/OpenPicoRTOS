@@ -3,7 +3,7 @@
 
 /* CLOCKS */
 #define CONFIG_SYSCLK_HZ        160000000
-#define CONFIG_TICK_HZ          30000
+#define CONFIG_TICK_HZ          10000
 
 /* TASKS */
 #define CONFIG_TASK_COUNT 12
