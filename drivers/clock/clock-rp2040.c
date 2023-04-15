@@ -123,7 +123,7 @@ struct XOSC {
 #define XOSC_CTRL_FREQ_RANGE_M  0xfffu
 #define XOSC_CTRL_FREQ_RANGE(x) ((x) & XOSC_CTRL_FREQ_RANGE_M)
 
-#define XOSC_STATUS_STABLE   (1 << 31)
+#define XOSC_STATUS_STABLE   (1u << 31)
 #define XOSC_STATUS_BADWRITE (1 << 24)
 
 #define XOSC_STARTUP_X4       (1 << 20)
@@ -142,7 +142,7 @@ struct PLL {
     volatile uint32_t PRIM;
 };
 
-#define PLL_CS_LOCK      (1 << 31)
+#define PLL_CS_LOCK      (1u << 31)
 #define PLL_CS_BYPASS    (1 << 8)
 #define PLL_CS_REFDIV_M  0x1fu
 #define PLL_CS_REFDIV(x) ((x) & PLL_CS_REFDIV_M)

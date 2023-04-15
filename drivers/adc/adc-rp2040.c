@@ -70,17 +70,17 @@ int adc_rp2040_init(struct adc_rp2040 *ctx,  struct ADC_RP2040 *base)
  *
  * Parameters:
  *  ctx - The ADC channel to init
- *  adc - The parent ADC block
+ *  parent - The parent ADC block
  *  channel - The selected channel
  *
  * Returns:
  * 0 in case of success, -errno otherwise
  */
-int adc_rp2040_adc_init(struct adc *ctx, struct adc_rp2040 *adc, size_t channel)
+int adc_rp2040_adc_init(struct adc *ctx, struct adc_rp2040 *parent, size_t channel)
 {
     if (!picoRTOS_assert(channel < (size_t)ADC_RP2040_CHANNEL_COUNT)) return -EINVAL;
 
-    ctx->adc = adc;
+    ctx->parent = parent;
     ctx->channel = channel;
     ctx->state = ADC_RP2040_ADC_STATE_IDLE;
     ctx->multiplier = 1;
@@ -89,7 +89,7 @@ int adc_rp2040_adc_init(struct adc *ctx, struct adc_rp2040 *adc, size_t channel)
 
     /* turn on temp sensor if requested */
     if (channel == (size_t)ADC_RP2040_CHANNEL_TEMP_SENSOR)
-        adc->base->CS |= CS_TS_EN;
+        parent->base->CS |= CS_TS_EN;
 
     return 0;
 }
@@ -105,12 +105,11 @@ int adc_setup(struct adc *ctx, struct adc_settings *settings)
 
 static int adc_read_idle(struct adc *ctx)
 {
-    struct adc_rp2040 *adc = ctx->adc;
+    struct adc_rp2040 *parent = ctx->parent;
 
-    adc->base->CS &= ~CS_AINSEL(CS_AINSEL_M);
-    adc->base->CS |= CS_AINSEL(ctx->channel);
-
-    adc->base->CS |= CS_START_ONCE;
+    parent->base->CS &= ~CS_AINSEL(CS_AINSEL_M);
+    parent->base->CS |= CS_AINSEL(ctx->channel);
+    parent->base->CS |= CS_START_ONCE;
 
     ctx->state = ADC_RP2040_ADC_STATE_ACQ;
     return -EAGAIN;
@@ -118,13 +117,13 @@ static int adc_read_idle(struct adc *ctx)
 
 static int adc_read_acq(struct adc *ctx, int *data)
 {
-    struct adc_rp2040 *adc = ctx->adc;
+    struct adc_rp2040 *parent = ctx->parent;
 
-    if ((adc->base->CS & CS_READY) == 0)
+    if ((parent->base->CS & CS_READY) == 0)
         return -EAGAIN;
 
     /* get data */
-    uint32_t result = adc->base->RESULT;
+    uint32_t result = parent->base->RESULT;
 
     /* apply calibration */
     *data = ((int)result * ctx->multiplier) / ctx->divider + ctx->offset;

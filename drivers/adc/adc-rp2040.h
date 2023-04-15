@@ -22,7 +22,7 @@ typedef enum {
 } adc_rp2040_adc_state_t;
 
 struct adc {
-    /*@temp@*/ struct adc_rp2040 *adc;
+    /*@temp@*/ struct adc_rp2040 *parent;
     size_t channel;
     adc_rp2040_adc_state_t state;
     /* calibration */
@@ -31,9 +31,10 @@ struct adc {
     int offset;
 };
 
-int adc_rp2040_adc_init(/*@out@*/ struct adc *ctx, struct adc_rp2040 *adc, size_t channel);
+int adc_rp2040_adc_init(/*@out@*/ struct adc *ctx, struct adc_rp2040 *parent, size_t channel);
 
 /* Runtime calls:
+ * int adc_setup(struct adc *ctx, struct adc_settings *settings);
  * int adc_read(struct adc *ctx, adc_sample_t *data);
  * int adc_read_multiple(struct adc *ctx, adc_sample_t *data, size_t n);
  */
