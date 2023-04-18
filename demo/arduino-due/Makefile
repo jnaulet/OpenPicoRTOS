@@ -12,6 +12,10 @@ PICORTOS_DIR := $(abspath ../..)
 
 INCLUDE += -I.
 SPLINTFLAGS += -checks +unixlib
+CPPCHECKFLAGS += --enable=all --inline-suppr -DNDEBUG
+CPPCHECKFLAGS += --suppress=missingIncludeSystem
+CPPCHECKFLAGS += --suppress=unusedFunction
+CPPCHECKFLAGS += --suppress=unusedStructMember
 
 CFLAGS += -Wall -Wextra -std=c99 $(INCLUDE) -O0 -g3 $(DEFINE)
 CFLAGS += -mcpu=cortex-m3 -mthumb
@@ -85,6 +89,9 @@ upload:
 
 splint:
 	splint $(SPLINTFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
+
+cppcheck:
+	cppcheck $(CPPCHECKFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
 
 clean:
 	-rm -rf $(BUILD)
