@@ -4,6 +4,10 @@ PICORTOS_DIR := $(abspath ../..)
 
 # static anaylyzer
 SPLINTFLAGS := -D__PIC32MZ_EF__ -checks +unixlib
+CPPCHECKFLAGS += --enable=all --inline-suppr -DNDEBUG
+CPPCHECKFLAGS += --suppress=missingIncludeSystem
+CPPCHECKFLAGS += --suppress=unusedFunction
+CPPCHECKFLAGS += --suppress=unusedStructMember
 
 INCLUDE += -I.
 
@@ -45,5 +49,8 @@ SRC_C += main.c
 
 splint:
 	splint $(SPLINTFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
+
+cppcheck:
+	cppcheck $(CPPCHECKFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
 
 .PHONY: splint

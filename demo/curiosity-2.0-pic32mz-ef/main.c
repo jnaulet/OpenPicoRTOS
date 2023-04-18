@@ -288,6 +288,8 @@ static void adc_main(void *priv)
 /*
  * This thread is a CAN loopback test. Not 100% effective but that will do
  */
+
+/*@unused@*/
 static void can_main(void *priv)
 {
 #define CAN_TEST_ID (can_id_t)0x7
@@ -348,7 +350,7 @@ int main(void)
     static picoRTOS_stack_t stack7[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack8[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack9[CONFIG_DEFAULT_STACK_COUNT];
-    static picoRTOS_stack_t stack10[CONFIG_DEFAULT_STACK_COUNT];
+    /* static picoRTOS_stack_t stack10[CONFIG_DEFAULT_STACK_COUNT]; */
     static picoRTOS_stack_t stack11[CONFIG_DEFAULT_STACK_COUNT];
 
     /* leds */
