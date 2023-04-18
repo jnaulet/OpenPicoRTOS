@@ -54,7 +54,7 @@ struct ADC_PIC32MX {
     volatile uint32_t ADCDATAx[64]; /* only 45 on pic32mz */
 };
 
-#define ADCCON1_TRBEN      (1 << 31)
+#define ADCCON1_TRBEN      (1u << 31)
 #define ADCCON1_TRBERR     (1 << 30)
 #define ADCCON1_TRBMST_M   0x7u
 #define ADCCON1_TRBMST(x)  (((x) & ADCCON1_TRBMST_M) << 27)
@@ -75,7 +75,7 @@ struct ADC_PIC32MX {
 #define ADCCON1_IRQVS(x)   (((x) & ADCCON1_IRQVS_M) << 4)
 #define ADCCON1_STRGLVL    (1 << 3)
 
-#define ADCCON2_BGVRRDY   (1 << 31)
+#define ADCCON2_BGVRRDY   (1u << 31)
 #define ADCCON2_REFFLT    (1 << 30)
 #define ADCCON2_EOSRDY    (1 << 29)
 #define ADCCON2_CVDCPL_M  0x7u
@@ -135,7 +135,7 @@ struct ADC_PIC32MX {
 #define ADCTRGMODE_SSAMPEN1  (1 << 1)
 #define ADCTRGMODE_SSAMPEN0  (1 << 0)
 
-#define ADCFLTRx_AFEN        (1 << 31)
+#define ADCFLTRx_AFEN        (1u << 31)
 #define ADCFLTRx_DATA16EN    (1 << 30)
 #define ADCFLTRx_DFMODE      (1 << 29)
 #define ADCFLTRx_OVRSAM_M    0x7u
@@ -174,7 +174,7 @@ struct ADC_PIC32MX {
 #define ADCTRG_TRGSRC0_M  0x1fu
 #define ADCTRG_TRGSRC0(x) ((x) & ADCTRG_TRGSRC0_M)
 
-#define ADCFSTAT_FEN      (1 << 31)
+#define ADCFSTAT_FEN      (1u << 31)
 #define ADCFSTAT_ADC4EN   (1 << 28)
 #define ADCFSTAT_ADC3EN   (1 << 27)
 #define ADCFSTAT_ADC2EN   (1 << 26)
@@ -537,7 +537,7 @@ static bool adc_data_is_ready(struct adc *ctx)
     size_t index = ctx->channel >> 5;
 
     /* reset scan */
-    /*@unused@*/ volatile uint32_t adccon2 = adc->base->ADCCON2;
+    /*@i@*/ (void)adc->base->ADCCON2;
 
     return (adc->base->ADCDSTAT[index] & (1 << shift)) != 0;
 }
