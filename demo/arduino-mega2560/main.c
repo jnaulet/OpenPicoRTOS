@@ -206,7 +206,7 @@ static void twi_main(void *priv)
         int timeout = (int)PICORTOS_DELAY_SEC(2);
 
         /* no timeout on rx */
-        while (twi_read(TWI, &c, sizeof(c)) == -EAGAIN)
+        while (twi_read(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
             picoRTOS_schedule();
 
         picoRTOS_assert_void(timeout != -1);

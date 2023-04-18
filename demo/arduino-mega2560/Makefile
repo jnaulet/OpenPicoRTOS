@@ -4,6 +4,9 @@ PICORTOS_DIR := $(abspath ../..)
 
 INCLUDE += -I.
 SPLINTFLAGS += -checks +unixlib
+CPPCHECKFLAGS += --enable=all --inline-suppr -DNDEBUG
+CPPCHECKFLAGS += --suppress=missingIncludeSystem
+CPPCHECKFLAGS += --suppress=unusedFunction
 
 # directories
 SKETCH := arduino-mega2560
@@ -17,7 +20,6 @@ SRC_H += $(DEVICE_DIR)/picoRTOS_device.h
 SRC_H += picoRTOSConfig.h
 
 INCLUDE += -I$(PICORTOS_DIR)/arch/include
-INCLUDE += -I$(PICORTOS_DIR)/drivers/devices
 INCLUDE += -I$(PICORTOS_DIR)/drivers/include
 INCLUDE += -I$(PICORTOS_DIR)/drivers/adc
 INCLUDE += -I$(PICORTOS_DIR)/drivers/clock
@@ -83,6 +85,9 @@ upload:
 
 splint:
 	splint $(SPLINTFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
+
+cppcheck:
+	cppcheck $(CPPCHECKFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
 
 clean:
 	-rm -rf sketch
