@@ -138,11 +138,11 @@ static int configure_pll_input(clock_pic32mx_plliclk_t iclk)
     }
 
     /* default: range has to be computed */
-    if (clocks.posc < (clock_freq_t)64000000) range = 5;
-    else if (clocks.posc < (clock_freq_t)42000000) range = 4;
-    else if (clocks.posc < (clock_freq_t)26000000) range = 3;
+    if (clocks.posc < (clock_freq_t)10000000) range = 1;
     else if (clocks.posc < (clock_freq_t)16000000) range = 2;
-    else if (clocks.posc < (clock_freq_t)10000000) range = 1;
+    else if (clocks.posc < (clock_freq_t)26000000) range = 3;
+    else if (clocks.posc < (clock_freq_t)42000000) range = 4;
+    else if (clocks.posc < (clock_freq_t)64000000) range = 5;
     else{
         picoRTOS_break();
         /*@notreached@*/
