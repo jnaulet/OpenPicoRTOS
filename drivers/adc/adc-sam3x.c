@@ -1,9 +1,9 @@
-#include "adc-sam.h"
+#include "adc-sam3x.h"
 #include "picoRTOS.h"
 
 #include <stdint.h>
 
-struct ADC_SAM {
+struct ADC_SAM3X {
     volatile uint32_t ADC_CR;
     volatile uint32_t ADC_MR;
     volatile uint32_t ADC_SEQR1;
@@ -23,7 +23,7 @@ struct ADC_SAM {
     volatile uint32_t ADC_CWR;
     volatile uint32_t ADC_CGR;
     volatile uint32_t ADC_COR;
-    volatile uint32_t ADC_CDR[ADC_SAM_CHANNEL_COUNT];
+    volatile uint32_t ADC_CDR[ADC_SAM3X_CHANNEL_COUNT];
     uint32_t RESERVED2;
     volatile uint32_t ADC_ACR;
     uint32_t RESERVED3[19];
@@ -54,7 +54,7 @@ struct ADC_SAM {
 #define ADC_MR_TRGSEL(x)   (((x) & ADC_MR_TRGSEL_M) << 1)
 #define ADC_MR_TRGEN       (1 << 0)
 
-/* Function: adc_sam_init
+/* Function: adc_sam3x_init
  * Initializes an ADC block
  *
  * Parameters:
@@ -64,7 +64,7 @@ struct ADC_SAM {
  * Returns:
  * Always 0
  */
-int adc_sam_init(struct adc_sam *ctx, struct ADC_SAM *base)
+int adc_sam3x_init(struct adc_sam3x *ctx, struct ADC_SAM3X *base)
 {
     ctx->base = base;
 
@@ -75,7 +75,7 @@ int adc_sam_init(struct adc_sam *ctx, struct ADC_SAM *base)
     return 0;
 }
 
-/* Function: adc_sam_adc_init
+/* Function: adc_sam3x_adc_init
  * Initializes an ADC channel
  *
  * Parameters:
@@ -86,9 +86,9 @@ int adc_sam_init(struct adc_sam *ctx, struct ADC_SAM *base)
  * Returns:
  * 0 in case of success, -errno otherwise
  */
-int adc_sam_adc_init(struct adc *ctx, struct adc_sam *adc, size_t channel)
+int adc_sam3x_adc_init(struct adc *ctx, struct adc_sam3x *adc, size_t channel)
 {
-    if (!picoRTOS_assert(channel < (size_t)ADC_SAM_CHANNEL_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(channel < (size_t)ADC_SAM3X_CHANNEL_COUNT)) return -EINVAL;
 
     ctx->adc = adc;
     ctx->channel = channel;
@@ -113,7 +113,7 @@ int adc_setup(struct adc *ctx, struct adc_settings *settings)
 
 int adc_read(struct adc *ctx, int *data)
 {
-    struct adc_sam *adc = ctx->adc;
+    struct adc_sam3x *adc = ctx->adc;
 
     uint32_t cdr = adc->base->ADC_CDR[ctx->channel];
 

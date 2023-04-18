@@ -1,7 +1,7 @@
-#include "gpio-sam_pio.h"
+#include "gpio-sam3x_pio.h"
 #include "picoRTOS.h"
 
-struct GPIO_SAM_PIO {
+struct GPIO_SAM3X_PIO {
     volatile uint32_t PIO_PER;
     volatile uint32_t PIO_PDR;
     volatile uint32_t PIO_PSR;
@@ -58,7 +58,7 @@ struct GPIO_SAM_PIO {
     volatile uint32_t PIO_WPSR;
 };
 
-/* Function: gpio_sam_pio_init
+/* Function: gpio_sam3x_pio_init
  * Initializes a GPIO
  *
  * Parameters:
@@ -69,9 +69,9 @@ struct GPIO_SAM_PIO {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int gpio_sam_pio_init(struct gpio *ctx, struct GPIO_SAM_PIO *base, size_t pin)
+int gpio_sam3x_pio_init(struct gpio *ctx, struct GPIO_SAM3X_PIO *base, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)GPIO_SAM_PIO_PIN_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(pin < (size_t)GPIO_SAM3X_PIO_PIN_COUNT)) return -EINVAL;
 
     ctx->base = base;
     ctx->mask = (uint32_t)(1 << pin);

@@ -1,21 +1,21 @@
-#ifndef ADC_SAM_H
-#define ADC_SAM_H
+#ifndef ADC_SAM3X_H
+#define ADC_SAM3X_H
 
 #include "adc.h"
 #include <stddef.h>
 
-struct ADC_SAM;
+struct ADC_SAM3X;
 
-#define ADC_SAM_CHANNEL_COUNT 16
+#define ADC_SAM3X_CHANNEL_COUNT 16
 
-struct adc_sam {
-    /*@temp@*/ struct ADC_SAM *base;
+struct adc_sam3x {
+    /*@temp@*/ struct ADC_SAM3X *base;
 };
 
-int adc_sam_init(/*@out@*/ struct adc_sam *ctx, struct ADC_SAM *base);
+int adc_sam3x_init(/*@out@*/ struct adc_sam3x *ctx, struct ADC_SAM3X *base);
 
 struct adc {
-    /*@temp@*/ struct adc_sam *adc;
+    /*@temp@*/ struct adc_sam3x *adc;
     size_t channel;
     /* calibration */
     int multiplier;
@@ -23,7 +23,7 @@ struct adc {
     int offset;
 };
 
-int adc_sam_adc_init(/*@out@*/ struct adc *ctx, struct adc_sam *adc, size_t channel);
+int adc_sam3x_adc_init(/*@out@*/ struct adc *ctx, struct adc_sam3x *adc, size_t channel);
 
 /* Runtime calls:
  * int adc_setup(struct adc *ctx, struct adc_settings *settings);

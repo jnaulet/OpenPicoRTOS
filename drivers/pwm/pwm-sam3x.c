@@ -1,9 +1,9 @@
-#include "pwm-sam.h"
+#include "pwm-sam3x.h"
 #include "picoRTOS.h"
 
 #include <stdint.h>
 
-struct PWM_SAM {
+struct PWM_SAM3X {
     volatile uint32_t PWM_CLK;
     volatile uint32_t PWM_ENA;
     volatile uint32_t PWM_DIS;
@@ -75,7 +75,7 @@ struct PWM_SAM {
     volatile uint32_t PWM_CMPM7;
     volatile uint32_t PWM_CMPMUPD7;
     uint32_t RESERVED5[20];
-    struct PWM_SAM_CH {
+    struct PWM_SAM3X_CH {
         volatile uint32_t PWM_CMR;
         volatile uint32_t PWM_CDTY;
         volatile uint32_t PWM_CDTYUPD;
@@ -84,7 +84,7 @@ struct PWM_SAM {
         volatile uint32_t PWM_CCNT;
         volatile uint32_t PWM_DT;
         volatile uint32_t PWM_DTUPD;
-    } PWM_CH[PWM_SAM_CHANNEL_COUNT];
+    } PWM_CH[PWM_SAM3X_CHANNEL_COUNT];
 };
 
 #define PWM_CLK_PREB_M  0xfu
@@ -111,7 +111,7 @@ struct PWM_SAM {
 #define PWM_CPRDn_CPRD_M  0xffffffu
 #define PWM_CPRDn_CPRD(x) ((x) & PWM_CPRDn_CPRD_M)
 
-/* Function: pwm_sam_init
+/* Function: pwm_sam3x_init
  * Initializes a PWM block
  *
  * Parameters:
@@ -122,7 +122,7 @@ struct PWM_SAM {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_sam_init(struct pwm_sam *ctx, struct PWM_SAM *base, clock_id_t clkid)
+int pwm_sam3x_init(struct pwm_sam *ctx, struct PWM_SAM3X *base, clock_id_t clkid)
 {
     ctx->base = base;
     ctx->freq = clock_get_freq(clkid);
@@ -133,7 +133,7 @@ int pwm_sam_init(struct pwm_sam *ctx, struct PWM_SAM *base, clock_id_t clkid)
     return 0;
 }
 
-/* Function: pwm_sam_setup
+/* Function: pwm_sam3x_setup
  * Configures a PWM block
  *
  * Parameters:
@@ -143,12 +143,12 @@ int pwm_sam_init(struct pwm_sam *ctx, struct PWM_SAM *base, clock_id_t clkid)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_sam_setup(struct pwm_sam *ctx, struct pwm_sam_settings *settings)
+int pwm_sam3x_setup(struct pwm_sam *ctx, struct pwm_sam_settings *settings)
 {
-    if (!picoRTOS_assert(settings->clock_a_pre < PWM_SAM_CLOCK_PRE_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->clock_a_div < PWM_SAM_CLOCK_DIV_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->clock_b_pre < PWM_SAM_CLOCK_PRE_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->clock_b_div < PWM_SAM_CLOCK_DIV_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(settings->clock_a_pre < PWM_SAM3X_CLOCK_PRE_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(settings->clock_a_div < PWM_SAM3X_CLOCK_DIV_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(settings->clock_b_pre < PWM_SAM3X_CLOCK_PRE_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(settings->clock_b_div < PWM_SAM3X_CLOCK_DIV_COUNT)) return -EINVAL;
 
     ctx->base->PWM_CLK = (uint32_t)(PWM_CLK_PREB(settings->clock_b_pre) |
                                     PWM_CLK_DIVB(settings->clock_b_div) |
@@ -161,32 +161,32 @@ int pwm_sam_setup(struct pwm_sam *ctx, struct pwm_sam_settings *settings)
     return 0;
 }
 
-static clock_freq_t pwm_sam_get_freq(struct pwm_sam *ctx, pwm_sam_pwm_cpre_t cpre)
+static clock_freq_t pwm_sam3x_get_freq(struct pwm_sam *ctx, pwm_sam_pwm_cpre_t cpre)
 {
-    if (!picoRTOS_assert(cpre < PWM_SAM_PWM_CPRE_COUNT)) return (clock_freq_t)-EINVAL;
+    if (!picoRTOS_assert(cpre < PWM_SAM3X_PWM_CPRE_COUNT)) return (clock_freq_t)-EINVAL;
 
     clock_freq_t ret;
 
     switch (cpre) {
-    case PWM_SAM_PWM_CPRE_MCK:          /*@fallthrough@*/
-    case PWM_SAM_PWM_CPRE_MCK_DIV_2:    /*@fallthrough@*/
-    case PWM_SAM_PWM_CPRE_MCK_DIV_4:    /*@fallthrough@*/
-    case PWM_SAM_PWM_CPRE_MCK_DIV_8:    /*@fallthrough@*/
-    case PWM_SAM_PWM_CPRE_MCK_DIV_16:   /*@fallthrough@*/
-    case PWM_SAM_PWM_CPRE_MCK_DIV_32:   /*@fallthrough@*/
-    case PWM_SAM_PWM_CPRE_MCK_DIV_64:   /*@fallthrough@*/
-    case PWM_SAM_PWM_CPRE_MCK_DIV_128:  /*@fallthrough@*/
-    case PWM_SAM_PWM_CPRE_MCK_DIV_256:  /*@fallthrough@*/
-    case PWM_SAM_PWM_CPRE_MCK_DIV_512:  /*@fallthrough@*/
-    case PWM_SAM_PWM_CPRE_MCK_DIV_1024:
+    case PWM_SAM3X_PWM_CPRE_MCK:            /*@fallthrough@*/
+    case PWM_SAM3X_PWM_CPRE_MCK_DIV_2:      /*@fallthrough@*/
+    case PWM_SAM3X_PWM_CPRE_MCK_DIV_4:      /*@fallthrough@*/
+    case PWM_SAM3X_PWM_CPRE_MCK_DIV_8:      /*@fallthrough@*/
+    case PWM_SAM3X_PWM_CPRE_MCK_DIV_16:     /*@fallthrough@*/
+    case PWM_SAM3X_PWM_CPRE_MCK_DIV_32:     /*@fallthrough@*/
+    case PWM_SAM3X_PWM_CPRE_MCK_DIV_64:     /*@fallthrough@*/
+    case PWM_SAM3X_PWM_CPRE_MCK_DIV_128:    /*@fallthrough@*/
+    case PWM_SAM3X_PWM_CPRE_MCK_DIV_256:    /*@fallthrough@*/
+    case PWM_SAM3X_PWM_CPRE_MCK_DIV_512:    /*@fallthrough@*/
+    case PWM_SAM3X_PWM_CPRE_MCK_DIV_1024:
         ret = (clock_freq_t)((size_t)ctx->freq >> cpre);
         break;
 
-    case PWM_SAM_PWM_CPRE_CLKA:
+    case PWM_SAM3X_PWM_CPRE_CLKA:
         ret = ctx->freq / (clock_freq_t)ctx->clock_a_fact;
         break;
 
-    case PWM_SAM_PWM_CPRE_CLKB:
+    case PWM_SAM3X_PWM_CPRE_CLKB:
         ret = ctx->freq / (clock_freq_t)ctx->clock_b_fact;
         break;
 
@@ -201,7 +201,7 @@ static clock_freq_t pwm_sam_get_freq(struct pwm_sam *ctx, pwm_sam_pwm_cpre_t cpr
 
 /* channels */
 
-/* Function: pwm_sam_pwm_init
+/* Function: pwm_sam3x_pwm_init
  * Initializes a PWM output
  *
  * Parameters:
@@ -212,20 +212,20 @@ static clock_freq_t pwm_sam_get_freq(struct pwm_sam *ctx, pwm_sam_pwm_cpre_t cpr
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_sam_pwm_init(struct pwm *ctx, struct pwm_sam *pwm, size_t channel)
+int pwm_sam3x_pwm_init(struct pwm *ctx, struct pwm_sam *pwm, size_t channel)
 {
-    if (!picoRTOS_assert(channel < (size_t)PWM_SAM_CHANNEL_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(channel < (size_t)PWM_SAM3X_CHANNEL_COUNT)) return -EINVAL;
 
     ctx->pwm = pwm;
     ctx->ch = &pwm->base->PWM_CH[channel];
     ctx->channel = channel;
-    ctx->freq = pwm_sam_get_freq(ctx->pwm, PWM_SAM_PWM_CPRE_MCK);
+    ctx->freq = pwm_sam3x_get_freq(ctx->pwm, PWM_SAM3X_PWM_CPRE_MCK);
     ctx->ncycles = 0;
 
     return 0;
 }
 
-/* Function: pwm_sam_pwm_setup
+/* Function: pwm_sam3x_pwm_setup
  * Configures a PWM output
  *
  * Parameters:
@@ -235,9 +235,9 @@ int pwm_sam_pwm_init(struct pwm *ctx, struct pwm_sam *pwm, size_t channel)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_sam_pwm_setup(struct pwm *ctx, struct pwm_sam_pwm_settings *settings)
+int pwm_sam3x_pwm_setup(struct pwm *ctx, struct pwm_sam_pwm_settings *settings)
 {
-    if (!picoRTOS_assert(settings->cpre < PWM_SAM_PWM_CPRE_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(settings->cpre < PWM_SAM3X_PWM_CPRE_COUNT)) return -EINVAL;
 
     if (settings->cpol) ctx->ch->PWM_CMR |= PWM_CMRn_CPOL;
     else ctx->ch->PWM_CMR &= ~PWM_CMRn_CPOL;
@@ -245,7 +245,7 @@ int pwm_sam_pwm_setup(struct pwm *ctx, struct pwm_sam_pwm_settings *settings)
     ctx->ch->PWM_CMR &= ~PWM_CMRn_CPRE(PWM_CMRn_CPRE_M);
     ctx->ch->PWM_CMR |= PWM_CMRn_CPRE(settings->cpre);
 
-    ctx->freq = pwm_sam_get_freq(ctx->pwm, settings->cpre);
+    ctx->freq = pwm_sam3x_get_freq(ctx->pwm, settings->cpre);
     return 0;
 }
 

@@ -1,9 +1,9 @@
-#include "can-sam.h"
+#include "can-sam3x.h"
 #include "picoRTOS.h"
 
 #include <stdint.h>
 
-struct CAN_SAM {
+struct CAN_SAM3X {
     volatile uint32_t CAN_MR;
     volatile uint32_t CAN_IER;
     volatile uint32_t CAN_IDR;
@@ -19,7 +19,7 @@ struct CAN_SAM {
     volatile uint32_t CAN_WPMR;
     volatile uint32_t CAN_WPSR;
     uint32_t RESERVED1[69];
-    struct CAN_SAM_MB {
+    struct CAN_SAM3X_MB {
         volatile uint32_t CAN_MMR;
         volatile uint32_t CAN_MAM;
         volatile uint32_t CAN_MID;
@@ -28,7 +28,7 @@ struct CAN_SAM {
         volatile uint32_t CAN_MDL;
         volatile uint32_t CAN_MDH;
         volatile uint32_t CAN_MCR;
-    } MB[CAN_SAM_MB_COUNT];
+    } MB[CAN_SAM3X_MB_COUNT];
 };
 
 #define CAN_MR_DRPT   (1 << 7)
@@ -79,10 +79,10 @@ struct CAN_SAM {
 
 static int set_tx_mailboxes(/*@partial@*/ struct can *ctx, size_t n)
 {
-    if (!picoRTOS_assert(n < (size_t)CAN_SAM_MB_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(n < (size_t)CAN_SAM3X_MB_COUNT)) return -EINVAL;
 
     ctx->tx_mailbox_count = n;
-    ctx->rx_mailbox_count = (size_t)(CAN_SAM_MB_COUNT - n);
+    ctx->rx_mailbox_count = (size_t)(CAN_SAM3X_MB_COUNT - n);
 
     while (n-- != 0)
         ctx->base->MB[ctx->rx_mailbox_count + n].CAN_MMR =
@@ -91,7 +91,7 @@ static int set_tx_mailboxes(/*@partial@*/ struct can *ctx, size_t n)
     return 0;
 }
 
-int can_sam_init(struct can *ctx, struct CAN_SAM *base, clock_id_t clkid)
+int can_sam3x_init(struct can *ctx, struct CAN_SAM3X *base, clock_id_t clkid)
 {
     ctx->base = base;
     ctx->clkid = clkid;
@@ -133,7 +133,7 @@ static int set_brp_and_prop(struct can *ctx, size_t brp, size_t tq)
     /* -1 (account for SYNC_SEG) */
     tq -= 1;
 
-    /* default sample point is at 87.5% : 64 / 73 = 0.876 */
+    /* default sam3xple point is at 87.5% : 64 / 73 = 0.876 */
     phase1 = div_round_closest(tq * 64, 73);
 
     /* compute propag */
@@ -224,7 +224,7 @@ int can_setup(struct can *ctx, struct can_settings *settings)
     return 0;
 }
 
-static int mailbox_config_mid(struct CAN_SAM_MB *mb, can_id_t id)
+static int mailbox_config_mid(struct CAN_SAM3X_MB *mb, can_id_t id)
 {
     if (!picoRTOS_assert(id < (can_id_t)CAN_EXTID_COUNT)) return -EINVAL;
 
@@ -238,7 +238,7 @@ static int mailbox_config_mid(struct CAN_SAM_MB *mb, can_id_t id)
     return 0;
 }
 
-static int mailbox_config_mam(struct CAN_SAM_MB *mb, can_id_t id, can_id_t mask)
+static int mailbox_config_mam(struct CAN_SAM3X_MB *mb, can_id_t id, can_id_t mask)
 {
     if (!picoRTOS_assert(id < (can_id_t)CAN_EXTID_COUNT)) return -EINVAL;
     if (!picoRTOS_assert(mask < (can_id_t)CAN_EXTID_COUNT)) return -EINVAL;
@@ -260,7 +260,7 @@ int can_accept(struct can *ctx, can_id_t id, can_id_t accept_mask)
     if (!picoRTOS_assert(ctx->rx_mailbox_index < ctx->rx_mailbox_count)) return -ENOMEM;
 
     int res;
-    struct CAN_SAM_MB *mb = &ctx->base->MB[ctx->rx_mailbox_index];
+    struct CAN_SAM3X_MB *mb = &ctx->base->MB[ctx->rx_mailbox_index];
 
     /* disable mailbox */
     mb->CAN_MMR &= ~CAN_MMRn_MOT(CAN_MMRn_MOT_M);
@@ -284,14 +284,14 @@ int can_accept(struct can *ctx, can_id_t id, can_id_t accept_mask)
 static int transfer_tx_mailbox(struct can *ctx, size_t index,
                                can_id_t id, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(index < (size_t)CAN_SAM_MB_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(index < (size_t)CAN_SAM3X_MB_COUNT)) return -EINVAL;
     if (!picoRTOS_assert(id < (can_id_t)CAN_EXTID_COUNT)) return -EINVAL;
     if (!picoRTOS_assert(n > 0)) return -EINVAL;
     if (!picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT)) return -EINVAL;
 
     int res;
     const uint8_t *buf8 = (const uint8_t*)buf;
-    struct CAN_SAM_MB *mb = &ctx->base->MB[index];
+    struct CAN_SAM3X_MB *mb = &ctx->base->MB[index];
 
     /* double-check */
     if ((mb->CAN_MSR & CAN_MSRn_MRDY) == 0)
@@ -349,7 +349,7 @@ int can_write(struct can *ctx, can_id_t id, const void *buf, size_t n)
     return transfer_tx_mailbox(ctx, index, id, buf, n);
 }
 
-static can_id_t mailbox_read_mid(struct CAN_SAM_MB *mb)
+static can_id_t mailbox_read_mid(struct CAN_SAM3X_MB *mb)
 {
     uint32_t mid = mb->CAN_MID;
 
@@ -362,12 +362,12 @@ static can_id_t mailbox_read_mid(struct CAN_SAM_MB *mb)
 static int transfer_rx_mailbox(struct can *ctx, size_t index,
                                can_id_t *id, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(index < (size_t)CAN_SAM_MB_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(index < (size_t)CAN_SAM3X_MB_COUNT)) return -EINVAL;
     if (!picoRTOS_assert(n > 0)) return -EINVAL;
     if (!picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT)) return -EINVAL;
 
     uint8_t *buf8 = (uint8_t*)buf;
-    struct CAN_SAM_MB *mb = &ctx->base->MB[index];
+    struct CAN_SAM3X_MB *mb = &ctx->base->MB[index];
 
     if ((mb->CAN_MSR & CAN_MSRn_MRDY) == 0)
         return -EAGAIN;

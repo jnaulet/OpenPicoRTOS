@@ -1,9 +1,9 @@
-#include "uart-sam.h"
+#include "uart-sam3x.h"
 #include "picoRTOS.h"
 
 #include <stdint.h>
 
-struct UART_SAM {
+struct UART_SAM3X {
     volatile uint32_t UART_CR;
     volatile uint32_t UART_MR;
     volatile uint32_t UART_IER;
@@ -42,7 +42,7 @@ struct UART_SAM {
 #define UART_BRGR_CD_M  0xffffu
 #define UART_BRGR_CD(x) ((x) & UART_BRGR_CD_M)
 
-/* Function: uart_sam_init
+/* Function: uart_sam3x_init
  * Initializes an UART
  *
  * Parameters:
@@ -53,7 +53,7 @@ struct UART_SAM {
  * Returns:
  * Always 0
  */
-int uart_sam_init(struct uart *ctx, struct UART_SAM *base, clock_id_t clkid)
+int uart_sam3x_init(struct uart *ctx, struct UART_SAM3X *base, clock_id_t clkid)
 {
     ctx->base = base;
     ctx->clkid = clkid;

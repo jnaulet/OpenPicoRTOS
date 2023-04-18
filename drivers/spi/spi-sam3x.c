@@ -1,7 +1,7 @@
-#include "spi-sam.h"
+#include "spi-sam3x.h"
 #include "picoRTOS.h"
 
-struct SPI_SAM {
+struct SPI_SAM3X {
     volatile uint32_t SPI_CR;
     volatile uint32_t SPI_MR;
     volatile uint32_t SPI_RDR;
@@ -11,7 +11,7 @@ struct SPI_SAM {
     volatile uint32_t SPI_IDR;
     volatile uint32_t SPI_IMR;
     uint32_t RESERVED0[4];
-    volatile uint32_t SPI_CSR[SPI_SAM_CS_COUNT];
+    volatile uint32_t SPI_CSR[SPI_SAM3X_CS_COUNT];
     uint32_t RESERVED1[38];
     volatile uint32_t SPI_WPMR;
     volatile uint32_t SPI_WPSR;
@@ -61,7 +61,7 @@ struct SPI_SAM {
 #define SPI_CSRn_NCPHA     (1 << 1)
 #define SPI_CSRn_CPOL      (1 << 0)
 
-/* Function: spi_sam_init
+/* Function: spi_sam3x_init
  * Initializes a SPI
  *
  * Parameters:
@@ -72,7 +72,7 @@ struct SPI_SAM {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int spi_sam_init(struct spi *ctx, struct SPI_SAM *base, clock_id_t clkid)
+int spi_sam3x_init(struct spi *ctx, struct SPI_SAM3X *base, clock_id_t clkid)
 {
     ctx->base = base;
     ctx->clkid = clkid;
@@ -93,7 +93,7 @@ int spi_sam_init(struct spi *ctx, struct SPI_SAM *base, clock_id_t clkid)
     return 0;
 }
 
-/* Function: spi_sam_set_loopback
+/* Function: spi_sam3x_set_loopback
  * Sets SPI to loopback mode for tests
  *
  * Parameters:
@@ -103,7 +103,7 @@ int spi_sam_init(struct spi *ctx, struct SPI_SAM *base, clock_id_t clkid)
  * Returns:
  * Always 0
  */
-int spi_sam_set_loopback(struct spi *ctx, bool loopback)
+int spi_sam3x_set_loopback(struct spi *ctx, bool loopback)
 {
     if (loopback) ctx->base->SPI_MR |= SPI_MR_LLB;
     else ctx->base->SPI_MR &= ~SPI_MR_LLB;
@@ -113,7 +113,7 @@ int spi_sam_set_loopback(struct spi *ctx, bool loopback)
 
 static int set_bitrate(struct spi *ctx, size_t cs, unsigned long bitrate)
 {
-    if (!picoRTOS_assert(cs < (size_t)SPI_SAM_CS_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(cs < (size_t)SPI_SAM3X_CS_COUNT)) return -EINVAL;
     if (!picoRTOS_assert(bitrate > 0)) return -EINVAL;
 
     clock_freq_t freq = clock_get_freq(ctx->clkid);
@@ -129,7 +129,7 @@ static int set_bitrate(struct spi *ctx, size_t cs, unsigned long bitrate)
 
 static int set_clkmode(struct spi *ctx, size_t cs, spi_clock_mode_t clkmode)
 {
-    if (!picoRTOS_assert(cs < (size_t)SPI_SAM_CS_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(cs < (size_t)SPI_SAM3X_CS_COUNT)) return -EINVAL;
     if (!picoRTOS_assert(clkmode != SPI_CLOCK_MODE_IGNORE)) return -EINVAL;
     if (!picoRTOS_assert(clkmode < SPI_CLOCK_MODE_COUNT)) return -EINVAL;
 
@@ -165,11 +165,11 @@ static int set_clkmode(struct spi *ctx, size_t cs, spi_clock_mode_t clkmode)
 
 static int set_frame_size(struct spi *ctx, size_t cs, size_t frame_size)
 {
-    if (!picoRTOS_assert(cs < (size_t)SPI_SAM_CS_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(frame_size >= (size_t)SPI_SAM_FRAME_SIZE_MIN)) return -EINVAL;
-    if (!picoRTOS_assert(frame_size <= (size_t)SPI_SAM_FRAME_SIZE_MAX)) return -EINVAL;
+    if (!picoRTOS_assert(cs < (size_t)SPI_SAM3X_CS_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(frame_size >= (size_t)SPI_SAM3X_FRAME_SIZE_MIN)) return -EINVAL;
+    if (!picoRTOS_assert(frame_size <= (size_t)SPI_SAM3X_FRAME_SIZE_MAX)) return -EINVAL;
 
-    size_t bits = frame_size - (size_t)SPI_SAM_FRAME_SIZE_MIN;
+    size_t bits = frame_size - (size_t)SPI_SAM3X_FRAME_SIZE_MIN;
 
     ctx->base->SPI_CSR[cs] &= ~SPI_CSRn_BITS(SPI_CSRn_BITS_M);
     ctx->base->SPI_CSR[cs] |= SPI_CSRn_BITS(bits);
@@ -191,7 +191,7 @@ static int set_mode(struct spi *ctx, spi_mode_t mode)
 
 int spi_setup(struct spi *ctx, const struct spi_settings *settings)
 {
-    if (!picoRTOS_assert(settings->cs < (size_t)SPI_SAM_CS_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(settings->cs < (size_t)SPI_SAM3X_CS_COUNT)) return -EINVAL;
 
     int res;
 

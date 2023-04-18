@@ -1,15 +1,15 @@
-#ifndef CAN_SAM_H
-#define CAN_SAM_H
+#ifndef CAN_SAM3X_H
+#define CAN_SAM3X_H
 
 #include "can.h"
 #include "clock.h"
 
-struct CAN_SAM;
+struct CAN_SAM3X;
 
-#define CAN_SAM_MB_COUNT 8
+#define CAN_SAM3X_MB_COUNT 8
 
 struct can {
-    /*@temp@*/ struct CAN_SAM *base;
+    /*@temp@*/ struct CAN_SAM3X *base;
     clock_id_t clkid;
     /* mb allocation */
     size_t rx_mailbox_index;
@@ -21,7 +21,7 @@ struct can {
     bool rx_overwrite;
 };
 
-int can_sam_init(/*@out@*/ struct can *ctx, struct CAN_SAM *base, clock_id_t clkid);
+int can_sam3x_init(/*@out@*/ struct can *ctx, struct CAN_SAM3X *base, clock_id_t clkid);
 
 /* Runtime calls:
  * int can_setup(struct can *ctx, struct can_settings *settings);

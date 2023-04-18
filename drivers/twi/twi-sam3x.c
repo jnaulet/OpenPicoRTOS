@@ -1,9 +1,9 @@
-#include "twi-sam.h"
+#include "twi-sam3x.h"
 #include "picoRTOS.h"
 
 #include <stdint.h>
 
-struct TWI_SAM {
+struct TWI_SAM3X {
     volatile uint32_t TWI_CR;
     volatile uint32_t TWI_MMR;
     volatile uint32_t TWI_SMR;
@@ -62,7 +62,7 @@ struct TWI_SAM {
 #define TWI_SR_RXRDY  (1 << 1)
 #define TWI_SR_TXCOMP (1 << 0)
 
-/* Function: twi_sam_init
+/* Function: twi_sam3x_init
  * Initializes a TWI / I2C
  *
  * Parameters:
@@ -73,11 +73,11 @@ struct TWI_SAM {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int twi_sam_init(struct twi *ctx, struct TWI_SAM *base, clock_id_t clkid)
+int twi_sam3x_init(struct twi *ctx, struct TWI_SAM3X *base, clock_id_t clkid)
 {
     ctx->base = base;
     ctx->clkid = clkid;
-    ctx->state = TWI_SAM_STATE_IDLE;
+    ctx->state = TWI_SAM3X_STATE_IDLE;
     ctx->mode = TWI_MODE_COUNT;
     ctx->twi_cr = 0;
 
@@ -175,7 +175,7 @@ static int twi_write_as_master_idle(struct twi *ctx)
     ctx->twi_cr = (uint32_t)(TWI_CR_SVDIS | TWI_CR_MSEN);
     ctx->base->TWI_CR = ctx->twi_cr;
 
-    ctx->state = TWI_SAM_STATE_XFER;
+    ctx->state = TWI_SAM3X_STATE_XFER;
     return -EAGAIN;
 }
 
@@ -192,7 +192,7 @@ static int twi_write_as_master_xfer(struct twi *ctx, const void *buf, size_t n)
 
         /* NACK */
         if ((ctx->base->TWI_SR & TWI_SR_NACK) != 0) {
-            ctx->state = TWI_SAM_STATE_IDLE;
+            ctx->state = TWI_SAM3X_STATE_IDLE;
             break;
         }
 
@@ -202,7 +202,7 @@ static int twi_write_as_master_xfer(struct twi *ctx, const void *buf, size_t n)
         /* last byte */
         if (n == 0) {
             stop = (uint32_t)TWI_CR_STOP;
-            ctx->state = TWI_SAM_STATE_IDLE;
+            ctx->state = TWI_SAM3X_STATE_IDLE;
         }
 
         ctx->base->TWI_CR = (ctx->twi_cr | stop);
@@ -218,8 +218,8 @@ static int twi_write_as_master_xfer(struct twi *ctx, const void *buf, size_t n)
 static int twi_write_as_master(struct twi *ctx, const void *buf, size_t n)
 {
     switch (ctx->state) {
-    case TWI_SAM_STATE_IDLE: return twi_write_as_master_idle(ctx);
-    case TWI_SAM_STATE_XFER: return twi_write_as_master_xfer(ctx, buf, n);
+    case TWI_SAM3X_STATE_IDLE: return twi_write_as_master_idle(ctx);
+    case TWI_SAM3X_STATE_XFER: return twi_write_as_master_xfer(ctx, buf, n);
     default: break;
     }
 
@@ -277,7 +277,7 @@ static int twi_read_as_master_idle(struct twi *ctx, size_t n)
     if (n == (size_t)1) ctx->base->TWI_CR = ctx->twi_cr | TWI_CR_START | TWI_CR_STOP;
     else ctx->base->TWI_CR = ctx->twi_cr | TWI_CR_START;
 
-    ctx->state = TWI_SAM_STATE_XFER;
+    ctx->state = TWI_SAM3X_STATE_XFER;
     return -EAGAIN;
 }
 
@@ -294,7 +294,7 @@ static int twi_read_as_master_xfer(struct twi *ctx, void *buf, size_t n)
 
         /* NACK */
         if ((ctx->base->TWI_SR & TWI_SR_NACK) != 0) {
-            ctx->state = TWI_SAM_STATE_IDLE;
+            ctx->state = TWI_SAM3X_STATE_IDLE;
             break;
         }
 
@@ -303,7 +303,7 @@ static int twi_read_as_master_xfer(struct twi *ctx, void *buf, size_t n)
 
         if (n == 0) {
             stop = (uint32_t)TWI_CR_STOP;
-            ctx->state = TWI_SAM_STATE_IDLE;
+            ctx->state = TWI_SAM3X_STATE_IDLE;
         }
 
         ctx->base->TWI_CR = (ctx->twi_cr | stop);
@@ -319,8 +319,8 @@ static int twi_read_as_master_xfer(struct twi *ctx, void *buf, size_t n)
 static int twi_read_as_master(struct twi *ctx, void *buf, size_t n)
 {
     switch (ctx->state) {
-    case TWI_SAM_STATE_IDLE: return twi_read_as_master_idle(ctx, n);
-    case TWI_SAM_STATE_XFER: return twi_read_as_master_xfer(ctx, buf, n);
+    case TWI_SAM3X_STATE_IDLE: return twi_read_as_master_idle(ctx, n);
+    case TWI_SAM3X_STATE_XFER: return twi_read_as_master_xfer(ctx, buf, n);
     default: break;
     }
 

@@ -1,11 +1,11 @@
-#include "clock-sam_pmc.h"
+#include "clock-sam3x_pmc.h"
 #include "picoRTOS.h"
 
 #include <stdint.h>
 
 #include "picoRTOS_device.h"
 
-struct CLOCK_SAM_PMC {
+struct CLOCK_SAM3X_PMC {
     volatile uint32_t PMC_SCER;
     volatile uint32_t PMC_SCDR;
     volatile uint32_t PMC_SCSR;
@@ -82,7 +82,7 @@ struct CLOCK_SAM_PMC {
 #define PMC_PCR_PID(x) ((x) & PMC_PCR_PID_M)
 
 /* only one instance */
-static struct CLOCK_SAM_PMC *PMC = (struct CLOCK_SAM_PMC*)ADDR_PMC;
+static struct CLOCK_SAM3X_PMC *PMC = (struct CLOCK_SAM3X_PMC*)ADDR_PMC;
 
 static struct {
     /* internals */
@@ -97,13 +97,13 @@ static struct {
     clock_freq_t periph[DEVICE_PID_COUNT];
 } clocks;
 
-static void clock_sam_pmc_init_flash(void)
+static void clock_sam3x_pmc_init_flash(void)
 {
     *(volatile uint32_t*)ADDR_EEFC0 = (uint32_t)(1 << 10);
     *(volatile uint32_t*)ADDR_EEFC1 = (uint32_t)(1 << 10);
 }
 
-static int clock_sam_pmc_init_moscx(unsigned long hz)
+static int clock_sam3x_pmc_init_moscx(unsigned long hz)
 {
 #define CKGR_MOR_MOSCXTST_DEFAULT 8
 
@@ -130,7 +130,7 @@ static int clock_sam_pmc_init_moscx(unsigned long hz)
     return 0;
 }
 
-static void clock_sam_pmc_init_slck(void)
+static void clock_sam3x_pmc_init_slck(void)
 {
     if ((PMC->PMC_SR & PMC_SR_OSCSELS) == 0)
         clocks.slck = (clock_freq_t)32000;
@@ -169,7 +169,7 @@ static int plla_setup(unsigned long mula)
     return 0;
 }
 
-static int clock_sam_pmc_init_plla(unsigned long hz)
+static int clock_sam3x_pmc_init_plla(unsigned long hz)
 {
     if (!picoRTOS_assert((clock_freq_t)(hz / 2ul) >= clocks.moscx)) return -EINVAL;
 
@@ -179,7 +179,7 @@ static int clock_sam_pmc_init_plla(unsigned long hz)
     return plla_setup(mula);
 }
 
-static int clock_sam_pmc_init_mck(unsigned long mck_div)
+static int clock_sam3x_pmc_init_mck(unsigned long mck_div)
 {
 #define MAIN_CLK 1
 #define PLLA_CLK 2
@@ -226,8 +226,8 @@ static int clock_sam_pmc_init_mck(unsigned long mck_div)
     return 0;
 }
 
-/* Function: clock_sam_pmc_init
- * Initialises the SAM clock system
+/* Function: clock_sam3x_pmc_init
+ * Initialises the SAM3X clock system
  *
  * Parameters:
  *  settings - The settings to apply
@@ -235,7 +235,7 @@ static int clock_sam_pmc_init_mck(unsigned long mck_div)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int clock_sam_pmc_init(struct clock_settings *settings)
+int clock_sam3x_pmc_init(struct clock_settings *settings)
 {
     if (!picoRTOS_assert(settings->moscx > 0)) return -EINVAL;
 
@@ -245,26 +245,26 @@ int clock_sam_pmc_init(struct clock_settings *settings)
     PMC->PMC_WPMR = (uint32_t)PMC_WPMR_WPKEY(0x504d43);
 
     /* flash */
-    clock_sam_pmc_init_flash();
+    clock_sam3x_pmc_init_flash();
     /* slow clock */
-    clock_sam_pmc_init_slck();
+    clock_sam3x_pmc_init_slck();
 
     /* main crystal oscillator */
-    if ((res = clock_sam_pmc_init_moscx(settings->moscx)) < 0)
+    if ((res = clock_sam3x_pmc_init_moscx(settings->moscx)) < 0)
         return res;
 
     /* plla */
-    if ((res = clock_sam_pmc_init_plla(settings->plla)) < 0)
+    if ((res = clock_sam3x_pmc_init_plla(settings->plla)) < 0)
         return res;
 
     /* master clock */
-    if ((res = clock_sam_pmc_init_mck(settings->mck_div)) < 0)
+    if ((res = clock_sam3x_pmc_init_mck(settings->mck_div)) < 0)
         return res;
 
     return 0;
 }
 
-/* Function: clock_sam_pmc_enable
+/* Function: clock_sam3x_pmc_enable
  * Enables a particular clock
  *
  * Parameters:
@@ -274,12 +274,12 @@ int clock_sam_pmc_init(struct clock_settings *settings)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int clock_sam_pmc_enable(clock_id_t clkid, clock_sam_pmc_periph_div_t periph_div)
+int clock_sam3x_pmc_enable(clock_id_t clkid, clock_sam3x_pmc_periph_div_t periph_div)
 {
-    if (!picoRTOS_assert(periph_div < CLOCK_SAM_PMC_PERIPH_DIV_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(periph_div < CLOCK_SAM3X_PMC_PERIPH_DIV_COUNT)) return -EINVAL;
 
-    if (clkid > (clock_id_t)CLOCK_SAM_PMC_PERIPH_BASE) {
-        size_t pid = (size_t)clkid - (size_t)CLOCK_SAM_PMC_PERIPH_BASE;
+    if (clkid > (clock_id_t)CLOCK_SAM3X_PMC_PERIPH_BASE) {
+        size_t pid = (size_t)clkid - (size_t)CLOCK_SAM3X_PMC_PERIPH_BASE;
 
         if (!picoRTOS_assert(pid < (size_t)DEVICE_PID_COUNT))
             return -EINVAL;
@@ -295,7 +295,7 @@ int clock_sam_pmc_enable(clock_id_t clkid, clock_sam_pmc_periph_div_t periph_div
     return 0;
 }
 
-/* Function: clock_sam_pmc_disable
+/* Function: clock_sam3x_pmc_disable
  * Disable a particular clock
  *
  * Parameters:
@@ -304,10 +304,10 @@ int clock_sam_pmc_enable(clock_id_t clkid, clock_sam_pmc_periph_div_t periph_div
  * Returns:
  * 0 if success, -errno otherwise
  */
-int clock_sam_pmc_disable(clock_id_t clkid)
+int clock_sam3x_pmc_disable(clock_id_t clkid)
 {
-    if (clkid > (clock_id_t)CLOCK_SAM_PMC_PERIPH_BASE) {
-        size_t pid = (size_t)clkid - (size_t)CLOCK_SAM_PMC_PERIPH_BASE;
+    if (clkid > (clock_id_t)CLOCK_SAM3X_PMC_PERIPH_BASE) {
+        size_t pid = (size_t)clkid - (size_t)CLOCK_SAM3X_PMC_PERIPH_BASE;
 
         if (!picoRTOS_assert(pid < (size_t)DEVICE_PID_COUNT))
             return -EINVAL;
@@ -321,8 +321,8 @@ int clock_sam_pmc_disable(clock_id_t clkid)
 
 clock_freq_t clock_get_freq(clock_id_t clkid)
 {
-    if (clkid > (clock_id_t)CLOCK_SAM_PMC_PERIPH_BASE) {
-        size_t pid = (size_t)clkid - (size_t)CLOCK_SAM_PMC_PERIPH_BASE;
+    if (clkid > (clock_id_t)CLOCK_SAM3X_PMC_PERIPH_BASE) {
+        size_t pid = (size_t)clkid - (size_t)CLOCK_SAM3X_PMC_PERIPH_BASE;
 
         if (!picoRTOS_assert(pid < (size_t)DEVICE_PID_COUNT))
             return (clock_freq_t)-EINVAL;
@@ -330,17 +330,17 @@ clock_freq_t clock_get_freq(clock_id_t clkid)
         return clocks.periph[pid];
     }
 
-    if (clkid > (clock_id_t)CLOCK_SAM_PMC_PCK_BASE)
+    if (clkid > (clock_id_t)CLOCK_SAM3X_PMC_PCK_BASE)
         return (clock_freq_t)-EINVAL;
 
     switch (clkid) {
-    case CLOCK_SAM_PMC_SCLK: return clocks.slck;
-    case CLOCK_SAM_PMC_HCLK:    /*@fallthrough@*/
-    case CLOCK_SAM_PMC_FCLK:    /*@fallthrough@*/
-    case CLOCK_SAM_PMC_MCK: return clocks.mck;
-    case CLOCK_SAM_PMC_SYSTICK: return clocks.mck / (clock_freq_t)8;
-    case CLOCK_SAM_USB_HS:      /*@fallthrough@*/
-    case CLOCK_SAM_USB_FS:      /*@fallthrough@*/
+    case CLOCK_SAM3X_PMC_SCLK: return clocks.slck;
+    case CLOCK_SAM3X_PMC_HCLK:      /*@fallthrough@*/
+    case CLOCK_SAM3X_PMC_FCLK:      /*@fallthrough@*/
+    case CLOCK_SAM3X_PMC_MCK: return clocks.mck;
+    case CLOCK_SAM3X_PMC_SYSTICK: return clocks.mck / (clock_freq_t)8;
+    case CLOCK_SAM3X_USB_HS:        /*@fallthrough@*/
+    case CLOCK_SAM3X_USB_FS:        /*@fallthrough@*/
     default: break;
     }
 

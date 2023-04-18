@@ -1,9 +1,9 @@
-#include "mux-sam_pio.h"
+#include "mux-sam3x_pio.h"
 #include "picoRTOS.h"
 
 #include <stdint.h>
 
-struct MUX_SAM_PIO {
+struct MUX_SAM3X_PIO {
     volatile uint32_t PIO_PER;
     volatile uint32_t PIO_PDR;
     volatile uint32_t PIO_PSR;
@@ -60,7 +60,7 @@ struct MUX_SAM_PIO {
     volatile uint32_t PIO_WPSR;
 };
 
-/* Function: mux_sam_pio_init
+/* Function: mux_sam3x_pio_init
  * Initializes a mux port
  *
  * Parameters:
@@ -70,31 +70,31 @@ struct MUX_SAM_PIO {
  * Returns:
  * Always 0
  */
-int mux_sam_pio_init(struct mux_sam_pio *ctx, struct MUX_SAM_PIO *base)
+int mux_sam3x_pio_init(struct mux_sam3x_pio *ctx, struct MUX_SAM3X_PIO *base)
 {
     ctx->base = base;
     return 0;
 }
 
-static int mux_sam_pio(struct mux_sam_pio *ctx, mux_sam_pio_t mux, uint32_t mask)
+static int mux_sam3x_pio(struct mux_sam3x_pio *ctx, mux_sam3x_pio_t mux, uint32_t mask)
 {
-    if (!picoRTOS_assert(mux < MUX_SAM_PIO_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(mux < MUX_SAM3X_PIO_COUNT)) return -EINVAL;
 
     switch (mux) {
-    case MUX_SAM_PIO_DISABLE:
+    case MUX_SAM3X_PIO_DISABLE:
         ctx->base->PIO_PDR = mask;
         break;
 
-    case MUX_SAM_PIO_GPIO:
+    case MUX_SAM3X_PIO_GPIO:
         ctx->base->PIO_PER = mask;
         break;
 
-    case MUX_SAM_PIO_A:
+    case MUX_SAM3X_PIO_A:
         ctx->base->PIO_PDR = mask;
         ctx->base->PIO_ABSR &= ~mask;
         break;
 
-    case MUX_SAM_PIO_B:
+    case MUX_SAM3X_PIO_B:
         ctx->base->PIO_PDR = mask;
         ctx->base->PIO_ABSR |= mask;
         break;
@@ -108,7 +108,7 @@ static int mux_sam_pio(struct mux_sam_pio *ctx, mux_sam_pio_t mux, uint32_t mask
     return 0;
 }
 
-/* Function: mux_sam_pio_input
+/* Function: mux_sam3x_pio_input
  * Sets a pin to input only
  *
  * Parameters:
@@ -119,22 +119,22 @@ static int mux_sam_pio(struct mux_sam_pio *ctx, mux_sam_pio_t mux, uint32_t mask
  * Returns:
  * 0 if success, -errno otherwise
  */
-int mux_sam_pio_input(struct mux_sam_pio *ctx, size_t pin, mux_sam_pio_t mux)
+int mux_sam3x_pio_input(struct mux_sam3x_pio *ctx, size_t pin, mux_sam3x_pio_t mux)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_SAM_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(mux < MUX_SAM_PIO_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(pin < (size_t)MUX_SAM3X_PIN_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(mux < MUX_SAM3X_PIO_COUNT)) return -EINVAL;
 
     int res;
     uint32_t mask = (uint32_t)(1 << pin);
 
-    if ((res = mux_sam_pio(ctx, mux, mask)) < 0)
+    if ((res = mux_sam3x_pio(ctx, mux, mask)) < 0)
         return res;
 
     ctx->base->PIO_ODR = mask;
     return 0;
 }
 
-/* Function: mux_sam_pio_output
+/* Function: mux_sam3x_pio_output
  * Sets a pin to output only
  *
  * Parameters:
@@ -145,22 +145,22 @@ int mux_sam_pio_input(struct mux_sam_pio *ctx, size_t pin, mux_sam_pio_t mux)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int mux_sam_pio_output(struct mux_sam_pio *ctx, size_t pin, mux_sam_pio_t mux)
+int mux_sam3x_pio_output(struct mux_sam3x_pio *ctx, size_t pin, mux_sam3x_pio_t mux)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_SAM_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(mux < MUX_SAM_PIO_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(pin < (size_t)MUX_SAM3X_PIN_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(mux < MUX_SAM3X_PIO_COUNT)) return -EINVAL;
 
     int res;
     uint32_t mask = (uint32_t)(1 << pin);
 
-    if ((res = mux_sam_pio(ctx, mux, mask)) < 0)
+    if ((res = mux_sam3x_pio(ctx, mux, mask)) < 0)
         return res;
 
     ctx->base->PIO_OER = mask;
     return 0;
 }
 
-/* Function: mux_sam_pio_pull_up
+/* Function: mux_sam3x_pio_pull_up
  * Pulls up a specific pin
  *
  * Parameters:
@@ -170,9 +170,9 @@ int mux_sam_pio_output(struct mux_sam_pio *ctx, size_t pin, mux_sam_pio_t mux)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int mux_sam_pio_pull_up(struct mux_sam_pio *ctx, size_t pin)
+int mux_sam3x_pio_pull_up(struct mux_sam3x_pio *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_SAM_PIN_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(pin < (size_t)MUX_SAM3X_PIN_COUNT)) return -EINVAL;
 
     ctx->base->PIO_PUER = (uint32_t)(1 << pin);
     return 0;

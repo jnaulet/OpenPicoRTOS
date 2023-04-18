@@ -1,9 +1,9 @@
-#include "wd-sam.h"
+#include "wd-sam3x.h"
 #include "picoRTOS.h"
 
 #include <stdint.h>
 
-struct WD_SAM {
+struct WD_SAM3X {
     volatile uint32_t WDT_CR;
     volatile uint32_t WDT_MR;
     volatile uint32_t WDT_SR;
@@ -27,7 +27,7 @@ struct WD_SAM {
 #define WD_SR_WDERR (1 << 1)
 #define WD_SR_WDUNF (1 << 0)
 
-/* Function: wd_sam_init
+/* Function: wd_sam3x_init
  * Initializes a watchdog timer
  *
  * Parameters:
@@ -38,7 +38,7 @@ struct WD_SAM {
  * Returns:
  * Always 0
  */
-int wd_sam_init(struct wd *ctx, struct WD_SAM *base, clock_id_t clkid)
+int wd_sam3x_init(struct wd *ctx, struct WD_SAM3X *base, clock_id_t clkid)
 {
     ctx->base = base;
     ctx->clkid = clkid;
@@ -50,7 +50,7 @@ int wd_sam_init(struct wd *ctx, struct WD_SAM *base, clock_id_t clkid)
     return 0;
 }
 
-/* Function: wd_sam_setup
+/* Function: wd_sam3x_setup
  * Configures a WD
  *
  * Parameters:
@@ -60,7 +60,7 @@ int wd_sam_init(struct wd *ctx, struct WD_SAM *base, clock_id_t clkid)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int wd_sam_setup(struct wd *ctx, struct wd_sam_settings *settings)
+int wd_sam3x_setup(struct wd *ctx, struct wd_sam3x_settings *settings)
 {
 #define DEFAULT_DIVIDER 128
     uint32_t wdv;

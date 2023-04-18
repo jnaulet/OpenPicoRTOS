@@ -1,9 +1,9 @@
-#include "pwm-sam_tc.h"
+#include "pwm-sam3x_tc.h"
 #include "picoRTOS.h"
 
 #include <stdint.h>
 
-struct PWM_SAM_TC {
+struct PWM_SAM3X_TC {
     volatile uint32_t TC_CCR;
     volatile uint32_t TC_CMR;
     volatile uint32_t TC_SMMR;
@@ -105,10 +105,10 @@ struct PWM_SAM_TC {
 #define TC_FMR_ENCF1 (1 << 1)
 #define TC_FMR_ENCF0 (1 << 0)
 
-static clock_freq_t pwm_sam_tc_get_freq(clock_id_t clkid,
-                                        pwm_sam_tc_tcclks_t tcclks)
+static clock_freq_t pwm_sam3x_tc_get_freq(clock_id_t clkid,
+                                          pwm_sam3x_tc_tcclks_t tcclks)
 {
-    if (!picoRTOS_assert(tcclks < PWM_SAM_TC_TCCLKS_COUNT))
+    if (!picoRTOS_assert(tcclks < PWM_SAM3X_TC_TCCLKS_COUNT))
         return (clock_freq_t)-EINVAL;
 
     clock_freq_t freq = clock_get_freq(clkid);
@@ -117,11 +117,11 @@ static clock_freq_t pwm_sam_tc_get_freq(clock_id_t clkid,
         return (clock_freq_t)-EIO;
 
     switch (tcclks) {
-    case PWM_SAM_TC_TCCLKS_TIMER_CLOCK1: return freq / (clock_freq_t)2;
-    case PWM_SAM_TC_TCCLKS_TIMER_CLOCK2: return freq / (clock_freq_t)8;
-    case PWM_SAM_TC_TCCLKS_TIMER_CLOCK3: return freq / (clock_freq_t)32;
-    case PWM_SAM_TC_TCCLKS_TIMER_CLOCK4: return freq / (clock_freq_t)128;
-    case PWM_SAM_TC_TCCLKS_TIMER_CLOCK5: return freq; /* if tc->clkid is SLCK */
+    case PWM_SAM3X_TC_TCCLKS_TIMER_CLOCK1: return freq / (clock_freq_t)2;
+    case PWM_SAM3X_TC_TCCLKS_TIMER_CLOCK2: return freq / (clock_freq_t)8;
+    case PWM_SAM3X_TC_TCCLKS_TIMER_CLOCK3: return freq / (clock_freq_t)32;
+    case PWM_SAM3X_TC_TCCLKS_TIMER_CLOCK4: return freq / (clock_freq_t)128;
+    case PWM_SAM3X_TC_TCCLKS_TIMER_CLOCK5: return freq; /* if tc->clkid is SLCK */
     default: break;
     }
 
@@ -130,15 +130,15 @@ static clock_freq_t pwm_sam_tc_get_freq(clock_id_t clkid,
     return (clock_freq_t)-ENOSYS;
 }
 
-int pwm_sam_tc_init(struct pwm *ctx, struct PWM_SAM_TC *base, clock_id_t clkid)
+int pwm_sam3x_tc_init(struct pwm *ctx, struct PWM_SAM3X_TC *base, clock_id_t clkid)
 {
     ctx->base = base;
     ctx->clkid = clkid;
-    ctx->tio = PWM_SAM_TC_TIOA;
+    ctx->tio = PWM_SAM3X_TC_TIOA;
     ctx->ncycles = 0;
 
     /* freq */
-    ctx->freq = pwm_sam_tc_get_freq(ctx->clkid, PWM_SAM_TC_TCCLKS_TIMER_CLOCK1);
+    ctx->freq = pwm_sam3x_tc_get_freq(ctx->clkid, PWM_SAM3X_TC_TCCLKS_TIMER_CLOCK1);
     if (!picoRTOS_assert(ctx->freq > 0))
         return -EIO;
 
@@ -148,14 +148,14 @@ int pwm_sam_tc_init(struct pwm *ctx, struct PWM_SAM_TC *base, clock_id_t clkid)
     return 0;
 }
 
-int pwm_sam_tc_setup(struct pwm *ctx, struct pwm_sam_tc_settings *settings)
+int pwm_sam3x_tc_setup(struct pwm *ctx, struct pwm_sam3x_tc_settings *settings)
 {
-    if (!picoRTOS_assert(settings->tio < PWM_SAM_TC_TIO_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->wavsel < PWM_SAM_TC_WAVSEL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->ncpn < PWM_SAM_TC_CP_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->ncpc < PWM_SAM_TC_CP_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(settings->tio < PWM_SAM3X_TC_TIO_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(settings->wavsel < PWM_SAM3X_TC_WAVSEL_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(settings->ncpn < PWM_SAM3X_TC_CP_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(settings->ncpc < PWM_SAM3X_TC_CP_COUNT)) return -EINVAL;
 
-    ctx->freq = pwm_sam_tc_get_freq(ctx->clkid, settings->tcclks);
+    ctx->freq = pwm_sam3x_tc_get_freq(ctx->clkid, settings->tcclks);
     if (!picoRTOS_assert(ctx->freq > 0))
         return -EIO;
 
@@ -164,7 +164,7 @@ int pwm_sam_tc_setup(struct pwm *ctx, struct pwm_sam_tc_settings *settings)
     ctx->base->TC_CMR &= ~TC_CMR_WAVSEL(TC_CMR_WAVSEL_M);
     ctx->base->TC_CMR |= TC_CMR_WAVSEL(settings->wavsel);
 
-    if (settings->tio == PWM_SAM_TC_TIOA) {
+    if (settings->tio == PWM_SAM3X_TC_TIOA) {
         ctx->base->TC_CMR &= ~TC_CMR_ACPA(TC_CMR_ACPA_M);
         ctx->base->TC_CMR &= ~TC_CMR_ACPC(TC_CMR_ACPC_M);
         ctx->base->TC_CMR |= TC_CMR_ACPA(settings->ncpn);
@@ -194,7 +194,7 @@ int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle)
 {
     size_t rn = ((size_t)duty_cycle * ctx->ncycles) >> 16;
 
-    if (ctx->tio == PWM_SAM_TC_TIOA) ctx->base->TC_RA = (uint32_t)rn;
+    if (ctx->tio == PWM_SAM3X_TC_TIOA) ctx->base->TC_RA = (uint32_t)rn;
     else ctx->base->TC_RB = (uint32_t)rn;
 
     return 0;
@@ -212,16 +212,16 @@ void pwm_stop(struct pwm *ctx)
 
 /* ipwm */
 
-int ipwm_sam_tc_init(struct ipwm *ctx, struct PWM_SAM_TC *base, clock_id_t clkid)
+int ipwm_sam3x_tc_init(struct ipwm *ctx, struct PWM_SAM3X_TC *base, clock_id_t clkid)
 {
     ctx->base = base;
     ctx->clkid = clkid;
-    ctx->state = IPWM_SAM_TC_STATE_IDLE;
-    ctx->ldr = IPWM_SAM_TC_LDR_NONE;
-    ctx->tcclks = PWM_SAM_TC_TCCLKS_TIMER_CLOCK1;
+    ctx->state = IPWM_SAM3X_TC_STATE_IDLE;
+    ctx->ldr = IPWM_SAM3X_TC_LDR_NONE;
+    ctx->tcclks = PWM_SAM3X_TC_TCCLKS_TIMER_CLOCK1;
 
     /* freq */
-    ctx->freq = pwm_sam_tc_get_freq(ctx->clkid, ctx->tcclks);
+    ctx->freq = pwm_sam3x_tc_get_freq(ctx->clkid, ctx->tcclks);
     if (!picoRTOS_assert(ctx->freq > 0))
         return -EIO;
 
@@ -231,12 +231,12 @@ int ipwm_sam_tc_init(struct ipwm *ctx, struct PWM_SAM_TC *base, clock_id_t clkid
     return 0;
 }
 
-int ipwm_sam_tc_setup(struct ipwm *ctx, struct ipwm_sam_tc_settings *settings)
+int ipwm_sam3x_tc_setup(struct ipwm *ctx, struct ipwm_sam3x_tc_settings *settings)
 {
-    if (!picoRTOS_assert(settings->tcclks < PWM_SAM_TC_TCCLKS_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->ldr < IPWM_SAM_TC_LDR_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(settings->tcclks < PWM_SAM3X_TC_TCCLKS_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(settings->ldr < IPWM_SAM3X_TC_LDR_COUNT)) return -EINVAL;
 
-    ctx->freq = pwm_sam_tc_get_freq(ctx->clkid, settings->tcclks);
+    ctx->freq = pwm_sam3x_tc_get_freq(ctx->clkid, settings->tcclks);
     if (!picoRTOS_assert(ctx->freq > 0))
         return -EIO;
 
@@ -257,7 +257,7 @@ static int ipwm_get_period_idle(struct ipwm *ctx)
 
     ctx->base->TC_CCR = (uint32_t)(TC_CCR_SWTRG | TC_CCR_CLKEN);
 
-    ctx->state = IPWM_SAM_TC_STATE_ACQ;
+    ctx->state = IPWM_SAM3X_TC_STATE_ACQ;
     return -EAGAIN;
 }
 
@@ -271,15 +271,15 @@ static int ipwm_get_period_acq(struct ipwm *ctx, pwm_period_us_t *period)
     int ncycles = (int)(ctx->base->TC_RB - ctx->base->TC_RA);
 
     *period = (pwm_period_us_t)(ncycles / ((int)ctx->freq / 1000000));
-    ctx->state = IPWM_SAM_TC_STATE_IDLE;
+    ctx->state = IPWM_SAM3X_TC_STATE_IDLE;
     return 0;
 }
 
 int ipwm_get_period(struct ipwm *ctx, pwm_period_us_t *period)
 {
     switch (ctx->state) {
-    case IPWM_SAM_TC_STATE_IDLE: return ipwm_get_period_idle(ctx);
-    case IPWM_SAM_TC_STATE_ACQ: return ipwm_get_period_acq(ctx, period);
+    case IPWM_SAM3X_TC_STATE_IDLE: return ipwm_get_period_idle(ctx);
+    case IPWM_SAM3X_TC_STATE_ACQ: return ipwm_get_period_acq(ctx, period);
     default: break;
     }
 
@@ -300,7 +300,7 @@ static int ipwm_get_duty_cycle_idle(struct ipwm *ctx)
     ctx->base->TC_RC = (uint32_t)((int)ctx->freq / CONFIG_TICK_HZ);
     ctx->base->TC_CCR = (uint32_t)(TC_CCR_SWTRG | TC_CCR_CLKEN);
 
-    ctx->state = IPWM_SAM_TC_STATE_ACQ;
+    ctx->state = IPWM_SAM3X_TC_STATE_ACQ;
     return -EAGAIN;
 }
 
@@ -311,16 +311,16 @@ static int ipwm_get_duty_cycle_acq(struct ipwm *ctx, pwm_duty_cycle_t *duty_cycl
 
     /* 0% & 100% duty cycle management */
     if ((tc_sr & TC_SR_CPCS) != 0) {
-        if ((tc_sr & TC_SR_MTIOA) != 0 && ctx->ldr == IPWM_SAM_TC_LDR_RISING)
+        if ((tc_sr & TC_SR_MTIOA) != 0 && ctx->ldr == IPWM_SAM3X_TC_LDR_RISING)
             *duty_cycle = (pwm_duty_cycle_t)PWM_DUTY_CYCLE_MAX;
-        if ((tc_sr & TC_SR_MTIOA) == 0 && ctx->ldr == IPWM_SAM_TC_LDR_RISING)
+        if ((tc_sr & TC_SR_MTIOA) == 0 && ctx->ldr == IPWM_SAM3X_TC_LDR_RISING)
             *duty_cycle = (pwm_duty_cycle_t)PWM_DUTY_CYCLE_MIN;
-        if ((tc_sr & TC_SR_MTIOA) != 0 && ctx->ldr == IPWM_SAM_TC_LDR_FALLING)
+        if ((tc_sr & TC_SR_MTIOA) != 0 && ctx->ldr == IPWM_SAM3X_TC_LDR_FALLING)
             *duty_cycle = (pwm_duty_cycle_t)PWM_DUTY_CYCLE_MIN;
-        if ((tc_sr & TC_SR_MTIOA) == 0 && ctx->ldr == IPWM_SAM_TC_LDR_FALLING)
+        if ((tc_sr & TC_SR_MTIOA) == 0 && ctx->ldr == IPWM_SAM3X_TC_LDR_FALLING)
             *duty_cycle = (pwm_duty_cycle_t)PWM_DUTY_CYCLE_MAX;
         /* out */
-        ctx->state = IPWM_SAM_TC_STATE_IDLE;
+        ctx->state = IPWM_SAM3X_TC_STATE_IDLE;
         return 0;
     }
 
@@ -332,15 +332,15 @@ static int ipwm_get_duty_cycle_acq(struct ipwm *ctx, pwm_duty_cycle_t *duty_cycl
     int ncycles = (int)ctx->base->TC_RA;
 
     *duty_cycle = (pwm_duty_cycle_t)(ncycles * (PWM_DUTY_CYCLE_MAX / max));
-    ctx->state = IPWM_SAM_TC_STATE_IDLE;
+    ctx->state = IPWM_SAM3X_TC_STATE_IDLE;
     return 0;
 }
 
 int ipwm_get_duty_cycle(struct ipwm *ctx, pwm_duty_cycle_t *duty_cycle)
 {
     switch (ctx->state) {
-    case IPWM_SAM_TC_STATE_IDLE: return ipwm_get_duty_cycle_idle(ctx);
-    case IPWM_SAM_TC_STATE_ACQ: return ipwm_get_duty_cycle_acq(ctx, duty_cycle);
+    case IPWM_SAM3X_TC_STATE_IDLE: return ipwm_get_duty_cycle_idle(ctx);
+    case IPWM_SAM3X_TC_STATE_ACQ: return ipwm_get_duty_cycle_acq(ctx, duty_cycle);
     default: break;
     }
 
