@@ -74,7 +74,7 @@ int gpio_sam3x_pio_init(struct gpio *ctx, struct GPIO_SAM3X_PIO *base, size_t pi
     if (!picoRTOS_assert(pin < (size_t)GPIO_SAM3X_PIO_PIN_COUNT)) return -EINVAL;
 
     ctx->base = base;
-    ctx->mask = (uint32_t)(1 << pin);
+    ctx->mask = (uint32_t)(1ul << pin);
 
     return 0;
 }
