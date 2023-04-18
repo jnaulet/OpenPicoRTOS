@@ -38,16 +38,16 @@ INCLUDE += -I$(PICORTOS_DIR)/drivers/uart
 INCLUDE += -I$(PICORTOS_DIR)/drivers/wd
 
 # drivers
-SRC_C += $(PICORTOS_DIR)/drivers/adc/adc-sam.c
-SRC_C += $(PICORTOS_DIR)/drivers/can/can-sam.c
-SRC_C += $(PICORTOS_DIR)/drivers/clock/clock-sam_pmc.c
-SRC_C += $(PICORTOS_DIR)/drivers/gpio/gpio-sam_pio.c
-SRC_C += $(PICORTOS_DIR)/drivers/mux/mux-sam_pio.c
-SRC_C += $(PICORTOS_DIR)/drivers/pwm/pwm-sam_tc.c
-SRC_C += $(PICORTOS_DIR)/drivers/spi/spi-sam.c
-SRC_C += $(PICORTOS_DIR)/drivers/twi/twi-sam.c
-SRC_C += $(PICORTOS_DIR)/drivers/uart/uart-sam.c
-SRC_C += $(PICORTOS_DIR)/drivers/wd/wd-sam.c
+SRC_C += $(PICORTOS_DIR)/drivers/adc/adc-sam3x.c
+SRC_C += $(PICORTOS_DIR)/drivers/can/can-sam3x.c
+SRC_C += $(PICORTOS_DIR)/drivers/clock/clock-sam3x_pmc.c
+SRC_C += $(PICORTOS_DIR)/drivers/gpio/gpio-sam3x_pio.c
+SRC_C += $(PICORTOS_DIR)/drivers/mux/mux-sam3x_pio.c
+SRC_C += $(PICORTOS_DIR)/drivers/pwm/pwm-sam3x_tc.c
+SRC_C += $(PICORTOS_DIR)/drivers/spi/spi-sam3x.c
+SRC_C += $(PICORTOS_DIR)/drivers/twi/twi-sam3x.c
+SRC_C += $(PICORTOS_DIR)/drivers/uart/uart-sam3x.c
+SRC_C += $(PICORTOS_DIR)/drivers/wd/wd-sam3x.c
 
 # demo
 SRC_C += main.c
