@@ -11,6 +11,10 @@ PICORTOS_DIR := $(abspath ../..)
 -include $(PICORTOS_DIR)/devices/raspberry/rp2040/Makefile-SMP.in
 
 SPLINTFLAGS := -checks +unixlib
+CPPCHECKFLAGS += --enable=all --inline-suppr -DNDEBUG
+CPPCHECKFLAGS += --suppress=missingIncludeSystem
+CPPCHECKFLAGS += --suppress=unusedFunction
+CPPCHECKFLAGS += --suppress=unusedStructMember
 
 CFLAGS += -Wall -Wextra -std=c99 $(INCLUDE) -O0 -g3 $(DEFINE)
 CFLAGS += -mcpu=cortex-m0plus
@@ -84,6 +88,9 @@ $(ELF2UF2):
 
 splint:
 	splint $(SPLINTFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
+
+cppcheck:
+	cppcheck $(CPPCHECKFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
 
 clean:
 	-rm -fR $(BUILD)
