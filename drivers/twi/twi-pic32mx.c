@@ -227,10 +227,10 @@ static int twi_write_as_master(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_write_as_slave_idle(struct twi *ctx)
 {
-    /* addr */
+    /* drop addr */
     if ((ctx->base->I2CxSTAT.REG & I2CxSTAT_D_A) == 0 &&
         (ctx->base->I2CxSTAT.REG & I2CxSTAT_R_W) != 0) {
-        /*@unused@*/ volatile uint8_t addr = (uint8_t)ctx->base->I2CxRCV.REG;
+        /*@i@*/ (void)ctx->base->I2CxRCV.REG;
         ctx->state = TWI_PIC32MX_STATE_DATA;
     }
 
@@ -359,7 +359,7 @@ static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
 
     /* drop addr byte */
     if ((ctx->base->I2CxSTAT.REG & I2CxSTAT_D_A) == 0) {
-        /*@unused@*/ volatile uint8_t addr = (uint8_t)ctx->base->I2CxRCV.REG;
+        /*@i@*/ (void)ctx->base->I2CxRCV.REG;
         ctx->base->I2CxCON.SET = (uint32_t)I2CxCON_SCLREL;
         return -EAGAIN;
     }

@@ -54,7 +54,7 @@ struct ADC_PIC32MX {
     volatile uint32_t ADCDATAx[64]; /* only 45 on pic32mz */
 };
 
-#define ADCCON1_TRBEN      (1 << 31)
+#define ADCCON1_TRBEN      (1u << 31)
 #define ADCCON1_TRBERR     (1 << 30)
 #define ADCCON1_TRBMST_M   0x7u
 #define ADCCON1_TRBMST(x)  (((x) & ADCCON1_TRBMST_M) << 27)
@@ -75,7 +75,7 @@ struct ADC_PIC32MX {
 #define ADCCON1_IRQVS(x)   (((x) & ADCCON1_IRQVS_M) << 4)
 #define ADCCON1_STRGLVL    (1 << 3)
 
-#define ADCCON2_BGVRRDY   (1 << 31)
+#define ADCCON2_BGVRRDY   (1u << 31)
 #define ADCCON2_REFFLT    (1 << 30)
 #define ADCCON2_EOSRDY    (1 << 29)
 #define ADCCON2_CVDCPL_M  0x7u
@@ -135,7 +135,7 @@ struct ADC_PIC32MX {
 #define ADCTRGMODE_SSAMPEN1  (1 << 1)
 #define ADCTRGMODE_SSAMPEN0  (1 << 0)
 
-#define ADCFLTRx_AFEN        (1 << 31)
+#define ADCFLTRx_AFEN        (1u << 31)
 #define ADCFLTRx_DATA16EN    (1 << 30)
 #define ADCFLTRx_DFMODE      (1 << 29)
 #define ADCFLTRx_OVRSAM_M    0x7u
@@ -174,7 +174,7 @@ struct ADC_PIC32MX {
 #define ADCTRG_TRGSRC0_M  0x1fu
 #define ADCTRG_TRGSRC0(x) ((x) & ADCTRG_TRGSRC0_M)
 
-#define ADCFSTAT_FEN      (1 << 31)
+#define ADCFSTAT_FEN      (1u << 31)
 #define ADCFSTAT_ADC4EN   (1 << 28)
 #define ADCFSTAT_ADC3EN   (1 << 27)
 #define ADCFSTAT_ADC2EN   (1 << 26)
@@ -304,10 +304,10 @@ int adc_pic32mx_setup(struct adc_pic32mx *ctx, struct adc_pic32mx_settings *sett
 static int wakeup_ready_busywait(struct adc *ctx)
 {
     int loop = CONFIG_DEADLOCK_COUNT;
-    struct adc_pic32mx *adc = ctx->base;
+    struct adc_pic32mx *parent = ctx->parent;
 
     while (loop-- != 0)
-        if ((adc->base->ADCANCON & ADCANCON_WKRDYx(ctx->sar)) != 0)
+        if ((parent->base->ADCANCON & ADCANCON_WKRDYx(ctx->sar)) != 0)
             break;
 
     if (!picoRTOS_assert(loop != -1))
@@ -331,17 +331,17 @@ static int sar_from_channel(size_t channel)
  *
  * Parameters:
  *  ctx - The ADC channel to init
- *  base - The parent block object
+ *  parent - The parent block object
  *  channel - The channel number
  *
  * Returns:
  * 0 if success, -errno otherwise
  */
-int adc_pic32mx_adc_init(struct adc *ctx, struct adc_pic32mx *base, size_t channel)
+int adc_pic32mx_adc_init(struct adc *ctx, struct adc_pic32mx *parent, size_t channel)
 {
     if (!picoRTOS_assert(channel < (size_t)ADC_PIC32MX_CHANNEL_COUNT)) return -EINVAL;
 
-    ctx->base = base;
+    ctx->parent = parent;
     ctx->channel = channel;
     ctx->sar = (size_t)sar_from_channel(channel);
     ctx->trgsrc = ADC_PIC32MX_ADC_TRGSRC_NONE;
@@ -359,7 +359,7 @@ static int set_input_mode(struct adc *ctx, adc_pic32mx_adc_im_t im)
 {
     if (!picoRTOS_assert(im < ADC_PIC32MX_ADC_IM_COUNT)) return -EINVAL;
 
-    struct adc_pic32mx *adc = ctx->base;
+    struct adc_pic32mx *parent = ctx->parent;
 
     size_t index = ctx->channel >> 4;
     size_t sign_bit = (size_t)((ctx->channel & 0xfu) * 2ul);
@@ -367,23 +367,23 @@ static int set_input_mode(struct adc *ctx, adc_pic32mx_adc_im_t im)
 
     switch (im) {
     case ADC_PIC32MX_ADC_IM_UNSIGNED_DATA_SINGLE_ENDED:
-        adc->base->ADCIMCONx[index] &= ~sign_bit;
-        adc->base->ADCIMCONx[index] &= ~diff_bit;
+        parent->base->ADCIMCONx[index] &= ~sign_bit;
+        parent->base->ADCIMCONx[index] &= ~diff_bit;
         break;
 
     case ADC_PIC32MX_ADC_IM_SIGNED_DATA_SINGLE_ENDED:
-        adc->base->ADCIMCONx[index] |= sign_bit;
-        adc->base->ADCIMCONx[index] &= ~diff_bit;
+        parent->base->ADCIMCONx[index] |= sign_bit;
+        parent->base->ADCIMCONx[index] &= ~diff_bit;
         break;
 
     case ADC_PIC32MX_ADC_IM_UNSIGNED_DATA_DIFFERENTIAL:
-        adc->base->ADCIMCONx[index] &= ~sign_bit;
-        adc->base->ADCIMCONx[index] |= diff_bit;
+        parent->base->ADCIMCONx[index] &= ~sign_bit;
+        parent->base->ADCIMCONx[index] |= diff_bit;
         break;
 
     case ADC_PIC32MX_ADC_IM_SIGNED_DATA_DIFFERENTIAL:
-        adc->base->ADCIMCONx[index] |= sign_bit;
-        adc->base->ADCIMCONx[index] |= diff_bit;
+        parent->base->ADCIMCONx[index] |= sign_bit;
+        parent->base->ADCIMCONx[index] |= diff_bit;
         break;
 
     default:
@@ -396,12 +396,12 @@ static int set_input_mode(struct adc *ctx, adc_pic32mx_adc_im_t im)
 
 static int add_channel_to_css(struct adc *ctx)
 {
-    struct adc_pic32mx *adc = ctx->base;
+    struct adc_pic32mx *parent = ctx->parent;
 
     size_t index = (ctx->channel >> 5);
     size_t shift = (size_t)(ctx->channel & 0x1fu);
 
-    adc->base->ADCCSS[index] |= (1 << shift);
+    parent->base->ADCCSS[index] |= (1 << shift);
     return 0;
 }
 
@@ -413,17 +413,17 @@ static int set_trgsrc_and_lvl(struct adc *ctx,
     if (!picoRTOS_assert(lvl < ADC_PIC32MX_ADC_LVL_COUNT)) return -EINVAL;
     if (!picoRTOS_assert(ctx->channel < (size_t)ADC_PIC32MX_TRGSRCABLE_COUNT)) return -EIO;
 
-    struct adc_pic32mx *adc = ctx->base;
+    struct adc_pic32mx *parent = ctx->parent;
     size_t shift = (size_t)((ctx->channel & 0x3) * 8);
     size_t index = ctx->channel >> 2;
 
-    adc->base->ADCTRG[index] = (uint32_t)(ADCTRG_TRGSRC0(trgsrc) << shift);
+    parent->base->ADCTRG[index] = (uint32_t)(ADCTRG_TRGSRC0(trgsrc) << shift);
 
     /* level */
     if (lvl == ADC_PIC32MX_ADC_LVL_HIGH)
-        adc->base->ADCTRGSNS |= ADCTRGSNS_LVL(ctx->channel);
+        parent->base->ADCTRGSNS |= ADCTRGSNS_LVL(ctx->channel);
     else
-        adc->base->ADCTRGSNS &= ~ADCTRGSNS_LVL(ctx->channel);
+        parent->base->ADCTRGSNS &= ~ADCTRGSNS_LVL(ctx->channel);
 
     /* scan */
     if (trgsrc == ADC_PIC32MX_ADC_TRGSRC_STRIG)
@@ -442,28 +442,28 @@ static int adc_pic32mx_shared_setup(struct adc *ctx,
     if (!picoRTOS_assert(settings->samc <= (unsigned long)ADCxTIME_SAMC_M + 2ul)) return -EINVAL;
     if (!picoRTOS_assert(settings->lvl < ADC_PIC32MX_ADC_LVL_COUNT)) return -EINVAL;
 
-    struct adc_pic32mx *adc = ctx->base;
+    struct adc_pic32mx *parent = ctx->parent;
 
     /* reslution */
-    adc->base->ADCCON1 &= ~ADCCON1_SELRES(ADCCON1_SELRES_M);
-    adc->base->ADCCON1 |= ADCCON1_SELRES(settings->selres);
+    parent->base->ADCCON1 &= ~ADCCON1_SELRES(ADCCON1_SELRES_M);
+    parent->base->ADCCON1 |= ADCCON1_SELRES(settings->selres);
     /* sample time */
-    adc->base->ADCCON2 &= ~ADCCON2_SAMC(ADCCON2_SAMC_M);
-    adc->base->ADCCON2 |= ADCCON2_SAMC(settings->samc - 2ul);
+    parent->base->ADCCON2 &= ~ADCCON2_SAMC(ADCCON2_SAMC_M);
+    parent->base->ADCCON2 |= ADCCON2_SAMC(settings->samc - 2ul);
     /* divider */
-    adc->base->ADCCON2 &= ~ADCCON2_ADCDIV(ADCCON2_ADCDIV_M);
-    adc->base->ADCCON2 |= ADCCON2_ADCDIV(settings->adcdiv);
+    parent->base->ADCCON2 &= ~ADCCON2_ADCDIV(ADCCON2_ADCDIV_M);
+    parent->base->ADCCON2 |= ADCCON2_ADCDIV(settings->adcdiv);
 
     /* lvl */
     if (settings->lvl == ADC_PIC32MX_ADC_LVL_HIGH)
-        adc->base->ADCCON1 |= ADCCON1_STRGLVL;
+        parent->base->ADCCON1 |= ADCCON1_STRGLVL;
     else
-        adc->base->ADCCON1 &= ~ADCCON1_STRGLVL;
+        parent->base->ADCCON1 &= ~ADCCON1_STRGLVL;
 
     /* class 3 channel */
     if (ctx->channel >= (size_t)ADC_PIC32MX_TRGSRCABLE_COUNT) {
         (void)add_channel_to_css(ctx);
-        ctx->trgsrc = (adc_pic32mx_adc_trgsrc_t)adc->strgsrc;
+        ctx->trgsrc = (adc_pic32mx_adc_trgsrc_t)parent->strgsrc;
     }
 
     return 0;
@@ -488,7 +488,7 @@ int adc_pic32mx_adc_setup(struct adc *ctx, struct adc_pic32mx_adc_settings *sett
     if (!picoRTOS_assert(settings->samc <= (unsigned long)ADCxTIME_SAMC_M + 2ul)) return -EINVAL;
 
     int res;
-    struct adc_pic32mx *adc = ctx->base;
+    struct adc_pic32mx *parent = ctx->parent;
 
     if ((res = set_input_mode(ctx, settings->im)) < 0)
         return res;
@@ -505,17 +505,17 @@ int adc_pic32mx_adc_setup(struct adc *ctx, struct adc_pic32mx_adc_settings *sett
 
     }else{
         /* unshared ADCs */
-        adc->base->ADCxTIME[ctx->sar] = (uint32_t)ADCxTIME_ADCDIV(settings->adcdiv - 1ul);
-        adc->base->ADCxTIME[ctx->sar] |= ADCxTIME_SELRES(settings->selres);
-        adc->base->ADCxTIME[ctx->sar] |= ADCxTIME_SAMC(settings->samc - 2ul);
+        parent->base->ADCxTIME[ctx->sar] = (uint32_t)ADCxTIME_ADCDIV(settings->adcdiv - 1ul);
+        parent->base->ADCxTIME[ctx->sar] |= ADCxTIME_SELRES(settings->selres);
+        parent->base->ADCxTIME[ctx->sar] |= ADCxTIME_SAMC(settings->samc - 2ul);
     }
 
     /* enable ADC */
-    adc->base->ADCANCON |= ADCANCON_ANENx(ctx->sar);
+    parent->base->ADCANCON |= ADCANCON_ANENx(ctx->sar);
     if ((res = wakeup_ready_busywait(ctx)) < 0)
         return res;
 
-    adc->base->ADCCON3 |= ADCCON3_DIGENx(ctx->sar);
+    parent->base->ADCCON3 |= ADCCON3_DIGENx(ctx->sar);
     return 0;
 }
 
@@ -532,34 +532,34 @@ int adc_setup(struct adc *ctx, struct adc_settings *settings)
 
 static bool adc_data_is_ready(struct adc *ctx)
 {
-    struct adc_pic32mx *adc = ctx->base;
+    struct adc_pic32mx *parent = ctx->parent;
     size_t shift = (size_t)(ctx->channel & 0x1f);
     size_t index = ctx->channel >> 5;
 
     /* reset scan */
-    /*@unused@*/ volatile uint32_t adccon2 = adc->base->ADCCON2;
+    /*@i@*/ (void)parent->base->ADCCON2;
 
-    return (adc->base->ADCDSTAT[index] & (1 << shift)) != 0;
+    return (parent->base->ADCDSTAT[index] & (1 << shift)) != 0;
 }
 
 int adc_read(struct adc *ctx, int *data)
 {
     uint32_t adcdatax;
-    struct adc_pic32mx *adc = ctx->base;
+    struct adc_pic32mx *parent = ctx->parent;
 
     if (!adc_data_is_ready(ctx)) {
         /* software triggers */
         if (ctx->trgsrc == ADC_PIC32MX_ADC_TRGSRC_GSWTRG)
-            adc->base->ADCCON3 |= ADCCON3_GSWTRG;
+            parent->base->ADCCON3 |= ADCCON3_GSWTRG;
 
         if (ctx->trgsrc == ADC_PIC32MX_ADC_TRGSRC_GLSWTRG)
-            adc->base->ADCCON3 |= ADCCON3_GLSWTRG;
+            parent->base->ADCCON3 |= ADCCON3_GLSWTRG;
 
         return -EAGAIN;
     }
 
     /* get data */
-    adcdatax = adc->base->ADCDATAx[ctx->channel];
+    adcdatax = parent->base->ADCDATAx[ctx->channel];
     /* apply calibration */
     *data = ((int)adcdatax * ctx->multiplier) / ctx->divider + ctx->offset;
 

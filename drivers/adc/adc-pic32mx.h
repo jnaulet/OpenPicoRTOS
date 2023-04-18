@@ -106,7 +106,7 @@ typedef enum {
 } adc_pic32mx_adc_lvl_t;
 
 struct adc {
-    /*@temp@*/ struct adc_pic32mx *base;
+    /*@temp@*/ struct adc_pic32mx *parent;
     size_t channel;
     size_t sar;
     adc_pic32mx_adc_trgsrc_t trgsrc;
@@ -125,7 +125,7 @@ struct adc_pic32mx_adc_settings {
     adc_pic32mx_adc_lvl_t lvl;          /* trigger edge */
 };
 
-int adc_pic32mx_adc_init(/*@out@*/ struct adc *ctx, struct adc_pic32mx *base, size_t channel);
+int adc_pic32mx_adc_init(/*@out@*/ struct adc *ctx, struct adc_pic32mx *parent, size_t channel);
 int adc_pic32mx_adc_setup(struct adc *ctx, struct adc_pic32mx_adc_settings *settings);
 
 /* Runtime calls:
