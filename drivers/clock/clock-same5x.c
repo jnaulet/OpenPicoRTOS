@@ -403,7 +403,7 @@ int clock_same5x_dfll_enable(void)
     if ((res = dfll_sync_busywait((uint32_t)DFLLSYNC_ENABLE)) < 0)
         return res;
 
-    /* ? */
+    /* cppcheck-suppress selfAssignment */
     OSCCTRL->DFLLVAL = OSCCTRL->DFLLVAL;
     if ((res = dfll_sync_busywait((uint32_t)DFLLSYNC_DFLLVAL)) < 0)
         return res;
