@@ -107,13 +107,12 @@ OpenPicoRTOS doesn't provide any dynamic memory management. Problem solved.
 ## 5. Fully predictable
 
 This is achieved by reducing the task management to its simplest expression:
-  - No round-robin support
-  - Tasks have fixed priorities
-  - Tasks have unique and individual priorities
+  - Tasks have fixed order of execution, starting from 0 to CONFIG_TASK_COUNT
+  - Task availability depends on readiness & tick modulo (see task_core_is_available())
 
 Priorities should be understood as "order of execution", more than anything else.
 
-On every tick the scheduler will parse the tasks list backwards to find the one that has the highest priority and the READY state and run it.
+On every tick the scheduler will parse the tasks list backwards to find the one that has the highest priority & availability and run it.
 
 Any "syscall" will allow the scheduler to move to the next task until it reaches idle or a new tick occurs.
 
