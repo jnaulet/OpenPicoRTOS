@@ -1,10 +1,10 @@
-# OpenPicoRTOS [![Latest Release](https://img.shields.io/github/release-date/jnaulet/OpenPicoRTOS)](https://img.shields.io) [![Commits since](https://img.shields.io/github/commits-since/jnaulet/OpenPicoRTOS/latest/v1.7.x)](https://img.shields.io)
+# OpenPicoRTOS [![Latest Release](https://img.shields.io/github/release-date/jnaulet/OpenPicoRTOS)](https://img.shields.io) [![Commits since](https://img.shields.io/github/commits-since/jnaulet/OpenPicoRTOS/latest/v1.8.x)](https://img.shields.io)
 
-Very small, lightning fast, yet portable preemptive RTOS with SMP suppport.
+Very small, safe, lightning fast, yet portable preemptive RTOS with SMP support.
 
 ## Quick Presentation
 
-picoRTOS is a teeny tiny RTOS with as little overhead as humanly possible.
+picoRTOS is a small hard RTOS with as little overhead as humanly possible.
 
 ## Table of contents
 
@@ -16,6 +16,7 @@ picoRTOS is a teeny tiny RTOS with as little overhead as humanly possible.
   6. [Inter-processus communication](#inter-processus-communication)
   8. [Shared priorities](#shared-priorities)
   7. [Interrupt management](#interrupt-management)
+  7. [Staging tree](#staging-tree)
   9. [Featured demos](#featured-demos)
 
 ## Book of requirements
@@ -47,9 +48,11 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - ARM Cortex-M0+
  - ARM Cortex-M3
  - ARM Cortex-M4/F
- - Atmel AVR5+
- - Atmel TinyAVR 0+ Series
+ - Atmel ATMega (AVR5+)
+ - Atmel TinyAVR (0+) Series
  - MIPS M51xx / PIC32Mx
+ - RISC-V RV32IMAC (staging)
+ - TI C2000 / c28x
 
 ### Multi-core SMP
  - RP2040 SMP
@@ -68,8 +71,10 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - Atmel ATSAMD5x/E5x
  - Atmel ATtiny817
  - Atmel ATtiny1607
+ - GigaDevice GD32VF103 (staging)
  - Microchip PIC32MZ-EF
  - Raspberry Pico RP2040
+ - Texas Instruments TMS320F2737xD
 
 ## Working principle
 
@@ -134,6 +139,15 @@ All architectures are supported (at least partially) at the moment.
 This feature should be used with care, as interrupts tend to destroy the real-time part in
 "RTOS".
 
+## Staging tree
+
+Version 1.8 introduces the staging tree.
+
+This tree contains code that builds & fits the book of requirements but could
+not be tested for one reason or the other.
+
+This code should be considered highly experimental until validation.
+
 ## Featured demos
 
 Basic demo code is provided for the following boards:
@@ -144,5 +158,7 @@ Basic demo code is provided for the following boards:
   - ATtiny817-Xplained Mini
   - ATtiny1607 Curiosity Nano
   - Curiosity 2.0 PIC32 MZ EF
+  - Sipeed Longan Nano (staging)
+  - Texas Instruments Launchxl-f28379d
   - Raspberry Pi Pico (single core)
   - Raspberry Pi Pico (dual-core SMP)

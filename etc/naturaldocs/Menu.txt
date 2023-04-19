@@ -69,11 +69,24 @@ Group: hw-specific  {
       File: Watchdog  (no auto-title, drivers/wd/wd-avr.c)
       }  # Group: ATMega / AVR
 
+   Group: C2000  {
+
+      File: ADC  (no auto-title, drivers/adc/adc-ti_type4.c)
+      File: CAN  (no auto-title, drivers/can/can-ti_dcan.c)
+      File: Clocks  (no auto-title, drivers/clock/clock-f28379x.c)
+      File: GPIO  (no auto-title, drivers/gpio/gpio-ti_f28x.c)
+      File: MUX  (no auto-title, drivers/mux/mux-ti_f28x.c)
+      File: ePWM  (no auto-title, drivers/pwm/pwm-ti_epwm.c)
+      File: SPI  (no auto-title, drivers/spi/spi-ti_f28x.c)
+      File: TWI  (no auto-title, drivers/twi/twi-ti_f28x.c)
+      File: Watchdog  (no auto-title, drivers/wd/wd-ti_f28x.c)
+      }  # Group: C2000
+
    Group: PIC32MX  {
 
       File: ADC  (no auto-title, drivers/adc/adc-pic32mx.c)
-      File: CAN  (no auto-title, drivers/can/can-pic32mx.c)
       File: Clocks  (no auto-title, drivers/clock/clock-pic32mx.c)
+      File: Flash  (no auto-title, drivers/flash/flash-pic32mx.c)
       File: GPIO  (no auto-title, drivers/gpio/gpio-pic32mx.c)
       File: Misc.  (no auto-title, drivers/misc/misc-pic32mx.c)
       File: MUX  (no auto-title, drivers/mux/mux-pic32mx.c)
@@ -100,7 +113,6 @@ Group: hw-specific  {
 
       File: ADC  (no auto-title, drivers/adc/adc-rp2040.c)
       File: Clocks  (no auto-title, drivers/clock/clock-rp2040.c)
-      File: DMA  (no auto-title, drivers/dma/dma-rp2040.c)
       File: GPIO  (no auto-title, drivers/gpio/gpio-rp2040_sio.c)
       File: MUX  (no auto-title, drivers/mux/mux-rp2040.c)
       File: PWM  (no auto-title, drivers/pwm/pwm-rp2040.c)
@@ -110,28 +122,30 @@ Group: hw-specific  {
       File: Watchdog  (no auto-title, drivers/wd/wd-rp2040.c)
       }  # Group: RP2040
 
-   Group: SAM3X8E  {
+   Group: SAM3a/3x  {
 
-      File: ADC  (no auto-title, drivers/adc/adc-sam.c)
-      File: Clocks  (no auto-title, drivers/clock/clock-sam_pmc.c)
-      File: GPIO  (no auto-title, drivers/gpio/gpio-sam_pio.c)
-      File: MUX  (no auto-title, drivers/mux/mux-sam_pio.c)
-      File: PWM  (no auto-title, drivers/pwm/pwm-sam.c)
-      File: SPI  (no auto-title, drivers/spi/spi-sam.c)
-      File: TWI  (no auto-title, drivers/twi/twi-sam.c)
-      File: UART  (no auto-title, drivers/uart/uart-sam.c)
-      File: Watchdog  (no auto-title, drivers/wd/wd-sam.c)
-      }  # Group: SAM3X8E
+      File: ADC  (no auto-title, drivers/adc/adc-sam3x.c)
+      File: Clocks  (no auto-title, drivers/clock/clock-sam3x_pmc.c)
+      File: GPIO  (no auto-title, drivers/gpio/gpio-sam3x_pio.c)
+      File: MUX  (no auto-title, drivers/mux/mux-sam3x_pio.c)
+      File: PWM  (no auto-title, drivers/pwm/pwm-sam3x.c)
+      File: SPI  (no auto-title, drivers/spi/spi-sam3x.c)
+      File: TWI  (no auto-title, drivers/twi/twi-sam3x.c)
+      File: UART  (no auto-title, drivers/uart/uart-sam3x.c)
+      File: Watchdog  (no auto-title, drivers/wd/wd-sam3x.c)
+      }  # Group: SAM3a/3x
 
    Group: SAMD5x/E5x  {
 
       File: ADC  (no auto-title, drivers/adc/adc-same5x.c)
       File: Clocks  (no auto-title, drivers/clock/clock-same5x.c)
+      File: Flash  (no auto-title, drivers/flash/flash-same5x.c)
       File: GPIO  (no auto-title, drivers/gpio/gpio-same5x.c)
       File: MUX  (no auto-title, drivers/mux/mux-same5x.c)
       File: PWM  (no auto-title, drivers/pwm/pwm-same5x_tc.c)
-      File: SPI  (no auto-title, drivers/spi/spi-sercom.c)
-      File: UART  (no auto-title, drivers/uart/uart-sercom.c)
+      File: SPI  (no auto-title, drivers/spi/spi-atmel_sercom.c)
+      File: TWI  (no auto-title, drivers/twi/twi-atmel_sercom.c)
+      File: UART  (no auto-title, drivers/uart/uart-atmel_sercom.c)
       File: Watchdog  (no auto-title, drivers/wd/wd-same5x.c)
       }  # Group: SAMD5x/E5x
 

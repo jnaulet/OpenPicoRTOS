@@ -1,5 +1,58 @@
 # Release notes
 
+## picoRTOS v1.8.0
+### What's new ?
+
+OpenPicoRTOS is now a standalone kernel that only needs a toolchain to be
+built.   
+This allows it to run from flash or from ram depending on the level of
+performance your project requires.   
+This makes ports a little more challenging in the beginning but gives then a lot
+of freedom at runtime.
+
+A complete static analysis with splint & cppcheck has been performed on
+the code to ensure it was free of errors & some minor bugfixes have followed.
+
+Two new drivers for flash controllers have been added :
+  - SAMD/E5x
+  - PIC32Mx
+
+The flash HAL is still experimental and probably requires some improvements
+but at least the mechanics could be tested, finally.
+
+arch/avr/avr5 & arch/avr/avr6 have been merged in a more convenient
+arch/avr/avrmega
+
+A new port is available: arch/c2000/c28x. A demo for the launchxl-f28379d eval
+board is provided to test the scheduler & the drivers.
+
+Finally, a staging tree has been added. It mimics the main tree but only contains
+experimental features / drivers / ports that could not be tested for one reason or
+the other, but fulfil the code safety requirements (2 static analysers + build with
+no errors or warnings).
+
+A RISC-V (RV32IMAC) port is staging, alongside general support for the
+GigaDevice GD32VF103 microcontroller.
+
+## picoRTOS v1.7.0
+### What's new ?
+
+Round-robin scheduling ! This is the new feature provided in the v1.7.x series.
+Works in SMP & single core modes.
+
+Some drivers have been moved around:
+  - spi-pl022 -> spi-arm_pl022
+  - uart-pl011 -> uart-arm_pl011
+  - gpio-sio -> gpio-rp2040_sio
+
+Asserts have changed a bit for testing purposes, you get now:
+ - assert_fatal (returns)
+ - assert_void (only in debug)
+ - assert_void_fatal (doesn't return)
+
+Unit tests have been added to ensure single-core & SMP versions get the same behaviour.
+
+
 ## picoRTOS v1.6.3
 ### What's new ?
 

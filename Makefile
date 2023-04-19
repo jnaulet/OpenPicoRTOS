@@ -6,7 +6,8 @@ uncrustify:
 	  --replace --no-backup {} +
 
 naturaldocs:
-	naturaldocs -i . -xi docs \
+	naturaldocs -i . \
+	  -xi docs -xi demo -xi staging \
 	  -p etc/naturaldocs \
 	  -o HTML docs
 
