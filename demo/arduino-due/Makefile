@@ -31,7 +31,6 @@ INCLUDE += -I$(PICORTOS_DIR)/ipc
 INCLUDE += -I$(PICORTOS_DIR)/arch/include
 INCLUDE += -I$(PICORTOS_DIR)/drivers/include
 INCLUDE += -I$(PICORTOS_DIR)/drivers/adc
-INCLUDE += -I$(PICORTOS_DIR)/drivers/can
 INCLUDE += -I$(PICORTOS_DIR)/drivers/clock
 INCLUDE += -I$(PICORTOS_DIR)/drivers/gpio
 INCLUDE += -I$(PICORTOS_DIR)/drivers/mux
@@ -43,7 +42,6 @@ INCLUDE += -I$(PICORTOS_DIR)/drivers/wd
 
 # drivers
 SRC_C += $(PICORTOS_DIR)/drivers/adc/adc-sam3x.c
-SRC_C += $(PICORTOS_DIR)/drivers/can/can-sam3x.c
 SRC_C += $(PICORTOS_DIR)/drivers/clock/clock-sam3x_pmc.c
 SRC_C += $(PICORTOS_DIR)/drivers/gpio/gpio-sam3x_pio.c
 SRC_C += $(PICORTOS_DIR)/drivers/mux/mux-sam3x_pio.c
@@ -52,6 +50,9 @@ SRC_C += $(PICORTOS_DIR)/drivers/spi/spi-sam3x.c
 SRC_C += $(PICORTOS_DIR)/drivers/twi/twi-sam3x.c
 SRC_C += $(PICORTOS_DIR)/drivers/uart/uart-sam3x.c
 SRC_C += $(PICORTOS_DIR)/drivers/wd/wd-sam3x.c
+
+INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/can
+SRC_C += $(PICORTOS_DIR)/staging/drivers/can/can-sam3x.c
 
 # demo
 SRC_C += main.c
