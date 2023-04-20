@@ -35,7 +35,6 @@ SRC_C += $(PICORTOS_DIR)/ipc/picoRTOS_cond.c
 # Drivers
 INCLUDE += -I$(PICORTOS_DIR)/drivers/include
 INCLUDE += -I$(PICORTOS_DIR)/drivers/adc
-INCLUDE += -I$(PICORTOS_DIR)/drivers/can
 INCLUDE += -I$(PICORTOS_DIR)/drivers/clock
 INCLUDE += -I$(PICORTOS_DIR)/drivers/gpio
 INCLUDE += -I$(PICORTOS_DIR)/drivers/misc
@@ -48,7 +47,6 @@ INCLUDE += -I$(PICORTOS_DIR)/drivers/wd
 
 # Drivers
 SRC_C += $(PICORTOS_DIR)/drivers/adc/adc-pic32mx.c
-SRC_C += $(PICORTOS_DIR)/drivers/can/can-pic32mx.c
 SRC_C += $(PICORTOS_DIR)/drivers/clock/clock-pic32mx.c
 SRC_C += $(PICORTOS_DIR)/drivers/gpio/gpio-pic32mx.c
 SRC_C += $(PICORTOS_DIR)/drivers/misc/misc-pic32mx.c
@@ -58,6 +56,9 @@ SRC_C += $(PICORTOS_DIR)/drivers/spi/spi-pic32mx.c
 SRC_C += $(PICORTOS_DIR)/drivers/twi/twi-pic32mx.c
 SRC_C += $(PICORTOS_DIR)/drivers/uart/uart-pic32mx.c
 SRC_C += $(PICORTOS_DIR)/drivers/wd/wd-pic32mx.c
+
+INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/can
+SRC_C += $(PICORTOS_DIR)/staging/drivers/can/can-pic32mx.c
 
 # demo
 SRC_S += config.S
