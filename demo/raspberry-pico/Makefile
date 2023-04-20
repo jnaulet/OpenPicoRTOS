@@ -26,7 +26,6 @@ INCLUDE += -I.
 INCLUDE += -I$(PICORTOS_DIR)/drivers/include
 INCLUDE += -I$(PICORTOS_DIR)/drivers/adc
 INCLUDE += -I$(PICORTOS_DIR)/drivers/clock
-INCLUDE += -I$(PICORTOS_DIR)/drivers/dma
 INCLUDE += -I$(PICORTOS_DIR)/drivers/gpio
 INCLUDE += -I$(PICORTOS_DIR)/drivers/misc
 INCLUDE += -I$(PICORTOS_DIR)/drivers/mux
@@ -38,7 +37,6 @@ INCLUDE += -I$(PICORTOS_DIR)/drivers/wd
 
 SRC_C += $(PICORTOS_DIR)/drivers/adc/adc-rp2040.c
 SRC_C += $(PICORTOS_DIR)/drivers/clock/clock-rp2040.c
-SRC_C += $(PICORTOS_DIR)/drivers/dma/dma-rp2040.c
 SRC_C += $(PICORTOS_DIR)/drivers/gpio/gpio-rp2040_sio.c
 SRC_C += $(PICORTOS_DIR)/drivers/misc/misc-rp2040_reset.c
 SRC_C += $(PICORTOS_DIR)/drivers/mux/mux-rp2040.c
@@ -47,6 +45,9 @@ SRC_C += $(PICORTOS_DIR)/drivers/spi/spi-arm_pl022.c
 SRC_C += $(PICORTOS_DIR)/drivers/twi/twi-dw_apb_i2c.c
 SRC_C += $(PICORTOS_DIR)/drivers/uart/uart-arm_pl011.c
 SRC_C += $(PICORTOS_DIR)/drivers/wd/wd-rp2040.c
+
+INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/dma
+SRC_C += $(PICORTOS_DIR)/staging/drivers/dma/dma-rp2040.c
 
 # IPCs 
 SRC_C += $(PICORTOS_DIR)/ipc/picoRTOS_mutex.c
