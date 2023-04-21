@@ -1,3 +1,11 @@
+# Build file for PIC32Mx
+ELF_RAM := curiosity-2.0-pic32mz-ef_ram.elf
+ELF_FLASH := curiosity-2.0-pic32mz-ef_flash.elf
+
+CC := gcc
+CROSS := xc32-
+BUILD := build
+
 # picoRTOS
 PICORTOS_DIR := $(abspath ../..)
 -include $(PICORTOS_DIR)/devices/microchip/pic32mz-ef/Makefile.in
@@ -10,6 +18,14 @@ CPPCHECKFLAGS += --suppress=unusedFunction
 CPPCHECKFLAGS += --suppress=unusedStructMember
 
 INCLUDE += -I.
+
+CFLAGS += -Wall -Wextra -std=c99 $(INCLUDE) -O0 -g3 $(DEFINE)
+CFLAGS += -mprocessor=32MZ2048EFM144 -fno-common -MP -MMD -MF -DXPRJ_default=default
+
+SFLAGS += -x assembler-with-cpp -g3 $(DEFINE) $(INCLUDE)
+SFLAGS += -mprocessor=32MZ2048EFM144  -MMD -MF -DXPRJ_default=default
+
+LDFLAGS += -nostartfiles -nostdlib
 
 # IPCs
 INCLUDE += -I$(PICORTOS_DIR)/ipc
@@ -44,8 +60,33 @@ SRC_C += $(PICORTOS_DIR)/drivers/uart/uart-pic32mx.c
 SRC_C += $(PICORTOS_DIR)/drivers/wd/wd-pic32mx.c
 
 # demo
+SRC_S += config.S
 SRC_C += curiosity-2.0-pic32mz-ef.c
 SRC_C += main.c
+
+OBJ := $(SRC_C:%.c=$(BUILD)/%.o)
+OBJ += $(SRC_S:%.S=$(BUILD)/%.o)
+
+LDRAM := $(DEVICE_DIR)/gcc/pic32mz-efm_2048_ram.ld
+LDFLASH := $(DEVICE_DIR)/gcc/pic32mz-efm_2048_rom.ld
+
+all: $(ELF_RAM) $(ELF_FLASH)
+
+$(ELF_RAM): $(OBJ)
+	-mkdir -p $(@D)
+	$(CROSS)$(CC) $^ -T$(LDRAM) $(LDFLAGS) -o $@
+
+$(ELF_FLASH): $(OBJ)
+	-mkdir -p $(@D)
+	$(CROSS)$(CC) $^ -T$(LDFLASH) $(LDFLAGS) -o $@
+
+$(BUILD)/%.o: %.c
+	-mkdir -p $(@D)
+	$(CROSS)$(CC) $(CFLAGS) -c $< -o $@
+
+$(BUILD)/%.o: %.S
+	-mkdir -p $(@D)
+	$(CROSS)$(CC) $(SFLAGS) -c $< -o $@
 
 splint:
 	splint $(SPLINTFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
@@ -53,4 +94,8 @@ splint:
 cppcheck:
 	cppcheck $(CPPCHECKFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
 
-.PHONY: splint
+clean:
+	-rm -rf $(BUILD)
+	-rm -f *.elf
+
+.PHONY: clean splint
