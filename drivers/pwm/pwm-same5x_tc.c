@@ -209,17 +209,17 @@ static int set_invert(struct pwm_same5x_tc *ctx, size_t channel, bool invert)
  *
  * Parameters:
  *  ctx - The PWM channel to init
- *  base - The parent SAME5x TC base address
+ *  parent - The parent SAME5x TC base address
  *  channel - The PWM channel number (0-1)
  *
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_same5x_tc_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_same5x_tc *pwm, size_t channel)
+int pwm_same5x_tc_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_same5x_tc *parent, size_t channel)
 {
     if (!picoRTOS_assert(channel < (size_t)PWM_SAME5X_TC_CHANNEL_COUNT)) return -EINVAL;
 
-    ctx->pwm = pwm;
+    ctx->parent = parent;
     ctx->channel = channel;
 
     return 0;
@@ -237,7 +237,7 @@ int pwm_same5x_tc_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_same5x_tc *pwm,
  */
 int pwm_same5x_tc_pwm_setup(struct pwm *ctx, struct pwm_same5x_tc_pwm_settings *settings)
 {
-    return set_invert(ctx->pwm, ctx->channel, settings->invert);
+    return set_invert(ctx->parent, ctx->channel, settings->invert);
 }
 
 static int set_period8(struct pwm_same5x_tc *ctx, size_t ncycles)
@@ -271,15 +271,15 @@ static int set_period32(struct pwm_same5x_tc *ctx, size_t ncycles)
 
 int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
 {
-    struct pwm_same5x_tc *pwm = ctx->pwm;
-    unsigned long freq = (unsigned long)pwm->freq / pwm->prescaler;
+    struct pwm_same5x_tc *parent = ctx->parent;
+    unsigned long freq = (unsigned long)parent->freq / parent->prescaler;
 
-    pwm->ncycles = (size_t)(freq / 1000000ul) * (size_t)period;
+    parent->ncycles = (size_t)(freq / 1000000ul) * (size_t)period;
 
-    switch (pwm->mode) {
-    case PWM_SAME5X_TC_MODE_8: return set_period8(pwm, pwm->ncycles);
-    case PWM_SAME5X_TC_MODE_16: return set_period16(pwm, pwm->ncycles);
-    case PWM_SAME5X_TC_MODE_32: return set_period32(pwm, pwm->ncycles);
+    switch (parent->mode) {
+    case PWM_SAME5X_TC_MODE_8: return set_period8(parent, parent->ncycles);
+    case PWM_SAME5X_TC_MODE_16: return set_period16(parent, parent->ncycles);
+    case PWM_SAME5X_TC_MODE_32: return set_period32(parent, parent->ncycles);
     default: break;
     }
 
@@ -292,14 +292,14 @@ static int set_duty_cycle8(struct pwm *ctx, size_t ccx)
 {
     if (!picoRTOS_assert(ccx < (size_t)0x100)) return -EINVAL;
 
-    struct pwm_same5x_tc *pwm = ctx->pwm;
+    struct pwm_same5x_tc *parent = ctx->parent;
 
     if (ctx->channel == 0) {
-        pwm->base->TC8.CC0 = (uint8_t)ccx;
-        return sync_busywait(pwm, (uint32_t)SYNCBUSY_CC0);
+        parent->base->TC8.CC0 = (uint8_t)ccx;
+        return sync_busywait(parent, (uint32_t)SYNCBUSY_CC0);
     }else{
-        pwm->base->TC8.CC1 = (uint8_t)ccx;
-        return sync_busywait(pwm, (uint32_t)SYNCBUSY_CC1);
+        parent->base->TC8.CC1 = (uint8_t)ccx;
+        return sync_busywait(parent, (uint32_t)SYNCBUSY_CC1);
     }
 }
 
@@ -307,26 +307,26 @@ static int set_duty_cycle16(struct pwm *ctx, size_t ccx)
 {
     if (!picoRTOS_assert(ccx < (size_t)0x10000)) return -EINVAL;
 
-    struct pwm_same5x_tc *pwm = ctx->pwm;
+    struct pwm_same5x_tc *parent = ctx->parent;
 
-    pwm->base->TC16.CC1 = (uint16_t)ccx;
-    return sync_busywait(pwm, (uint32_t)SYNCBUSY_CC1);
+    parent->base->TC16.CC1 = (uint16_t)ccx;
+    return sync_busywait(parent, (uint32_t)SYNCBUSY_CC1);
 }
 
 static int set_duty_cycle32(struct pwm *ctx, size_t ccx)
 {
-    struct pwm_same5x_tc *pwm = ctx->pwm;
+    struct pwm_same5x_tc *parent = ctx->parent;
 
-    pwm->base->TC32.CC1 = (uint32_t)ccx;
-    return sync_busywait(pwm, (uint32_t)SYNCBUSY_CC1);
+    parent->base->TC32.CC1 = (uint32_t)ccx;
+    return sync_busywait(parent, (uint32_t)SYNCBUSY_CC1);
 }
 
 int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle)
 {
-    struct pwm_same5x_tc *pwm = ctx->pwm;
-    size_t ccx = ((size_t)duty_cycle * pwm->ncycles) >> 16;
+    struct pwm_same5x_tc *parent = ctx->parent;
+    size_t ccx = ((size_t)duty_cycle * parent->ncycles) >> 16;
 
-    switch (pwm->mode) {
+    switch (parent->mode) {
     case PWM_SAME5X_TC_MODE_8: return set_duty_cycle8(ctx, ccx);
     case PWM_SAME5X_TC_MODE_16: return set_duty_cycle16(ctx, ccx);
     case PWM_SAME5X_TC_MODE_32: return set_duty_cycle32(ctx, ccx);
@@ -354,24 +354,24 @@ static int cmd_read_back_as_zero(struct pwm_same5x_tc *ctx)
 
 void pwm_start(struct pwm *ctx)
 {
-    struct pwm_same5x_tc *pwm = ctx->pwm;
+    struct pwm_same5x_tc *parent = ctx->parent;
 
-    pwm->base->CTRLA |= CTRLA_ENABLE;
-    (void)sync_busywait(pwm, (uint32_t)SYNCBUSY_ENABLE);
+    parent->base->CTRLA |= CTRLA_ENABLE;
+    (void)sync_busywait(parent, (uint32_t)SYNCBUSY_ENABLE);
 
-    pwm->base->CTRLBSET = (uint8_t)CTRLB_CMD(0x1);
-    (void)sync_busywait(pwm, (uint32_t)SYNCBUSY_CTRLB);
-    (void)cmd_read_back_as_zero(pwm);
+    parent->base->CTRLBSET = (uint8_t)CTRLB_CMD(0x1);
+    (void)sync_busywait(parent, (uint32_t)SYNCBUSY_CTRLB);
+    (void)cmd_read_back_as_zero(parent);
 }
 
 void pwm_stop(struct pwm *ctx)
 {
-    struct pwm_same5x_tc *pwm = ctx->pwm;
+    struct pwm_same5x_tc *parent = ctx->parent;
 
-    pwm->base->CTRLA &= ~CTRLA_ENABLE;
-    (void)sync_busywait(pwm, (uint32_t)SYNCBUSY_ENABLE);
+    parent->base->CTRLA &= ~CTRLA_ENABLE;
+    (void)sync_busywait(parent, (uint32_t)SYNCBUSY_ENABLE);
 
-    pwm->base->CTRLBSET = (uint8_t)CTRLB_CMD(0x2);
-    (void)sync_busywait(pwm, (uint32_t)SYNCBUSY_CTRLB);
-    (void)cmd_read_back_as_zero(pwm);
+    parent->base->CTRLBSET = (uint8_t)CTRLB_CMD(0x2);
+    (void)sync_busywait(parent, (uint32_t)SYNCBUSY_CTRLB);
+    (void)cmd_read_back_as_zero(parent);
 }

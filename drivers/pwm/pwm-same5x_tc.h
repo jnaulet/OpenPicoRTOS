@@ -58,7 +58,7 @@ int pwm_same5x_tc_setup(struct pwm_same5x_tc *ctx, struct pwm_same5x_tc_settings
 #define PWM_SAME5X_TC_CHANNEL_COUNT 2
 
 struct pwm {
-    /*@temp@*/ struct pwm_same5x_tc *pwm;
+    /*@temp@*/ struct pwm_same5x_tc *parent;
     size_t channel;
 };
 
@@ -66,7 +66,7 @@ struct pwm_same5x_tc_pwm_settings {
     bool invert;
 };
 
-int pwm_same5x_tc_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_same5x_tc *pwm, size_t channel);
+int pwm_same5x_tc_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_same5x_tc *parent, size_t channel);
 int pwm_same5x_tc_pwm_setup(struct pwm *ctx, struct pwm_same5x_tc_pwm_settings *settings);
 
 /* Runtime calls:
