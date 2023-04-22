@@ -82,7 +82,7 @@ int dma_r2040_init(struct dma *ctx, struct DMA_RP2040 *base, size_t channel)
 
 /* hooks */
 
-int dma_xfer(struct dma *ctx, struct dma_xfer *xfer)
+int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
 {
     if (!picoRTOS_assert(xfer->size > 0)) return -EINVAL;
     if (!picoRTOS_assert(xfer->size != (size_t)3)) return -EINVAL;
@@ -101,8 +101,22 @@ int dma_xfer(struct dma *ctx, struct dma_xfer *xfer)
     if (xfer->size == (size_t)2) CTRL_TRIG |= CTRL_TRIG_DATA_SIZE(0x1);
     if (xfer->size == (size_t)4) CTRL_TRIG |= CTRL_TRIG_DATA_SIZE(0x2);
 
-    /* trigger */
     ctx->ch->CTRL_TRIG = CTRL_TRIG;
+    return 0;
+}
+
+int dma_xfer(struct dma *ctx, struct dma_xfer *xfer)
+{
+    if (!picoRTOS_assert(xfer->size > 0)) return -EINVAL;
+    if (!picoRTOS_assert(xfer->size != (size_t)3)) return -EINVAL;
+    if (!picoRTOS_assert(xfer->size < (size_t)5)) return -EINVAL;
+
+    int res;
+
+    if ((res = dma_setup(ctx, xfer)) < 0)
+        return res;
+
+    /* trigger ? */
 
     return 0;
 }
