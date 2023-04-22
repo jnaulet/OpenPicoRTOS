@@ -18,6 +18,18 @@ struct dma_xfer {
     size_t byte_count;  /* byte count */
 };
 
+/* Function: dma_setup
+ * Configures a DMA for external trigger
+ *
+ * Parameters:
+ *  ctx - The DMA channel to configure
+ *  xfer - The transfer parameters
+ *
+ * Returns:
+ * 0 in case of success, -errno otherwise
+ */
+int dma_setup(struct dma *ctx, struct dma_xfer *xfer);
+
 /* Function: dma_xfer
  * Starts a DMA transfer
  *
