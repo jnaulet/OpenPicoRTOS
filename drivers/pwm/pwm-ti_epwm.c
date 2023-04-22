@@ -390,17 +390,17 @@ int pwm_ti_epwm_setup(struct pwm_ti_epwm *ctx, struct pwm_ti_epwm_settings *sett
  *
  * Parameters:
  *  ctx - The pwm to init
- *  ti_epwm - The parent TI_EPWM block
+ *  parent - The parent ePWM block
  *  cmp - The pwm output (A/B)
  *
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_ti_epwm_pwm_init(struct pwm *ctx, struct pwm_ti_epwm *epwm, pwm_ti_epwm_cmp_t cmp)
+int pwm_ti_epwm_pwm_init(struct pwm *ctx, struct pwm_ti_epwm *parent, pwm_ti_epwm_cmp_t cmp)
 {
     if (!picoRTOS_assert(cmp < PWM_TI_EPWM_CMP_COUNT)) return -EINVAL;
 
-    ctx->epwm = epwm;
+    ctx->parent = parent;
     ctx->cmp = cmp;
     ctx->ncycles = 0;
 
@@ -411,28 +411,28 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
 {
     if (!picoRTOS_assert(period > 0)) return -EINVAL;
 
-    struct pwm_ti_epwm *epwm = ctx->epwm;
+    struct pwm_ti_epwm *parent = ctx->parent;
 
-    uint32_t hz = (uint32_t)epwm->freq;
+    uint32_t hz = (uint32_t)parent->freq;
 
     ctx->ncycles = (hz / (uint32_t)1000000ul) * (uint32_t)period;
 
     if (!picoRTOS_assert(ctx->ncycles > 0))
         return -EINVAL;
 
-    epwm->base->TBPRD = (uint16_t)ctx->ncycles;
+    parent->base->TBPRD = (uint16_t)ctx->ncycles;
 
     return 0;
 }
 
 int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle)
 {
-    struct pwm_ti_epwm *epwm = ctx->epwm;
+    struct pwm_ti_epwm *parent = ctx->parent;
     uint32_t value = (uint32_t)duty_cycle * ctx->ncycles / (uint32_t)PWM_DUTY_CYCLE_MAX;
 
     switch (ctx->cmp) {
-    case PWM_TI_EPWM_CMPA: epwm->base->CMPA = (uint32_t)CMPA_CMPA(value); break;
-    case PWM_TI_EPWM_CMPB: epwm->base->CMPB = (uint32_t)CMPB_CMPB(value); break;
+    case PWM_TI_EPWM_CMPA: parent->base->CMPA = (uint32_t)CMPA_CMPA(value); break;
+    case PWM_TI_EPWM_CMPB: parent->base->CMPB = (uint32_t)CMPB_CMPB(value); break;
     default:
         picoRTOS_break();
         /*@notreached@*/ return -EIO;
@@ -443,15 +443,15 @@ int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle)
 
 void pwm_start(struct pwm *ctx)
 {
-    struct pwm_ti_epwm *epwm = ctx->epwm;
+    struct pwm_ti_epwm *parent = ctx->parent;
 
-    epwm->base->TBCTL &= ~TBCTL_CTRMODE(TBCTL_CTRMODE_M);
-    epwm->base->TBCTL |= TBCTL_CTRMODE(epwm->waveform);
+    parent->base->TBCTL &= ~TBCTL_CTRMODE(TBCTL_CTRMODE_M);
+    parent->base->TBCTL |= TBCTL_CTRMODE(parent->waveform);
 }
 
 void pwm_stop(struct pwm *ctx)
 {
-    struct pwm_ti_epwm *epwm = ctx->epwm;
+    struct pwm_ti_epwm *parent = ctx->parent;
 
-    epwm->base->TBCTL &= ~TBCTL_CTRMODE(TBCTL_CTRMODE_M);
+    parent->base->TBCTL &= ~TBCTL_CTRMODE(TBCTL_CTRMODE_M);
 }

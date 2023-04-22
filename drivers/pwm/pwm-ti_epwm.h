@@ -57,12 +57,12 @@ typedef enum {
 } pwm_ti_epwm_cmp_t;
 
 struct pwm {
-    /*@temp@*/ struct pwm_ti_epwm *epwm;
+    /*@temp@*/ struct pwm_ti_epwm *parent;
     pwm_ti_epwm_cmp_t cmp;
     uint32_t ncycles;
 };
 
-int pwm_ti_epwm_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_ti_epwm *epwm, pwm_ti_epwm_cmp_t cmp);
+int pwm_ti_epwm_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_ti_epwm *parent, pwm_ti_epwm_cmp_t cmp);
 
 /* Runtime calls:
  * int pwm_set_period(struct pwm *ctx, pwm_period_us_t period);
