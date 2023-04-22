@@ -120,17 +120,17 @@ int adc_tinyavr_setup(struct adc_tinyavr *ctx, struct adc_tinyavr_settings *sett
  *
  * Parameters:
  *  ctx - The ADC channel to init
- *  adc - The parent ADC block
+ *  parent - The parent ADC block
  *  muxpos - The mux position of the selected channel
  *
  * Returns:
  * 0 in case of success, -errno otherwise
  */
-int adc_tinyavr_adc_init(struct adc *ctx, struct adc_tinyavr *adc, adc_tinyavr_muxpos_t muxpos)
+int adc_tinyavr_adc_init(struct adc *ctx, struct adc_tinyavr *parent, adc_tinyavr_muxpos_t muxpos)
 {
     if (!picoRTOS_assert(muxpos < ADC_TINYAVR_MUXPOS_COUNT)) return -EINVAL;
 
-    ctx->adc = adc;
+    ctx->parent = parent;
     ctx->muxpos = muxpos;
 
     /* default setup */
@@ -152,47 +152,47 @@ int adc_setup(struct adc *ctx, struct adc_settings *settings)
 
 static int adc_read_idle(struct adc *ctx)
 {
-    struct adc_tinyavr *adc = ctx->adc;
+    struct adc_tinyavr *parent = ctx->parent;
 
     /* check status */
-    if ((adc->base->COMMAND & COMMAND_STCONV) != 0)
+    if ((parent->base->COMMAND & COMMAND_STCONV) != 0)
         return -EAGAIN;
 
     /* set muxpos */
-    adc->base->MUXPOS = (uint8_t)MUXPOS_MUXPOS(ctx->muxpos);
+    parent->base->MUXPOS = (uint8_t)MUXPOS_MUXPOS(ctx->muxpos);
 
     /* start conversion */
-    adc->base->COMMAND = (uint8_t)COMMAND_STCONV;
+    parent->base->COMMAND = (uint8_t)COMMAND_STCONV;
 
-    adc->state = ADC_TINYAVR_STATE_ACQ;
+    parent->state = ADC_TINYAVR_STATE_ACQ;
     return -EAGAIN;
 }
 
 static int adc_read_acq(struct adc *ctx, int *data)
 {
-    struct adc_tinyavr *adc = ctx->adc;
+    struct adc_tinyavr *parent = ctx->parent;
 
-    if ((adc->base->INTFLAGS & INTFLAGS_RESRDY) == 0)
+    if ((parent->base->INTFLAGS & INTFLAGS_RESRDY) == 0)
         return -EAGAIN;
 
     /* read data */
-    uint16_t result = adc->base->RES;
+    uint16_t result = parent->base->RES;
 
     /* apply calibration */
     *data = ((int)result * ctx->multiplier) / ctx->divider + ctx->offset;
 
     /* clear flag */
-    adc->base->INTFLAGS = (uint8_t)INTFLAGS_RESRDY;
+    parent->base->INTFLAGS = (uint8_t)INTFLAGS_RESRDY;
 
-    adc->state = ADC_TINYAVR_STATE_IDLE;
+    parent->state = ADC_TINYAVR_STATE_IDLE;
     return 1;
 }
 
 int adc_read(struct adc *ctx, int *data)
 {
-    struct adc_tinyavr *adc = ctx->adc;
+    struct adc_tinyavr *parent = ctx->parent;
 
-    switch (adc->state) {
+    switch (parent->state) {
     case ADC_TINYAVR_STATE_IDLE: return adc_read_idle(ctx);
     case ADC_TINYAVR_STATE_ACQ: return adc_read_acq(ctx, data);
     default: break;
