@@ -206,18 +206,18 @@ static clock_freq_t pwm_sam3x_get_freq(struct pwm_sam *ctx, pwm_sam_pwm_cpre_t c
  *
  * Parameters:
  *  ctx - The PWM output to init
- *  pwm - The parent PWM block
+ *  parent - The parent PWM block
  *  channel - The output channel
  *
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_sam3x_pwm_init(struct pwm *ctx, struct pwm_sam *pwm, size_t channel)
+int pwm_sam3x_pwm_init(struct pwm *ctx, struct pwm_sam *parent, size_t channel)
 {
     if (!picoRTOS_assert(channel < (size_t)PWM_SAM3X_CHANNEL_COUNT)) return -EINVAL;
 
-    ctx->pwm = pwm;
-    ctx->ch = &pwm->base->PWM_CH[channel];
+    ctx->parent = parent;
+    ctx->ch = &parent->base->PWM_CH[channel];
     ctx->channel = channel;
     ctx->freq = pwm_sam3x_get_freq(ctx->pwm, PWM_SAM3X_PWM_CPRE_MCK);
     ctx->ncycles = 0;
@@ -245,7 +245,7 @@ int pwm_sam3x_pwm_setup(struct pwm *ctx, struct pwm_sam_pwm_settings *settings)
     ctx->ch->PWM_CMR &= ~PWM_CMRn_CPRE(PWM_CMRn_CPRE_M);
     ctx->ch->PWM_CMR |= PWM_CMRn_CPRE(settings->cpre);
 
-    ctx->freq = pwm_sam3x_get_freq(ctx->pwm, settings->cpre);
+    ctx->freq = pwm_sam3x_get_freq(ctx->parent, settings->cpre);
     return 0;
 }
 
@@ -269,10 +269,10 @@ int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle)
 
 void pwm_start(struct pwm *ctx)
 {
-    ctx->pwm->base->PWM_ENA |= (1 << ctx->channel);
+    ctx->parent->base->PWM_ENA |= (1 << ctx->channel);
 }
 
 void pwm_stop(struct pwm *ctx)
 {
-    ctx->pwm->base->PWM_ENA &= ~(1 << ctx->channel);
+    ctx->parent->base->PWM_ENA &= ~(1 << ctx->channel);
 }

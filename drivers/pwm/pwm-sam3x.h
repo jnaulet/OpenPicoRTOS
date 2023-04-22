@@ -47,7 +47,7 @@ int pwm_sam3x_setup(struct pwm_sam *ctx, struct pwm_sam_settings *settings);
 /* channels */
 
 struct pwm {
-    /*@temp@*/ struct pwm_sam3x *pwm;
+    /*@temp@*/ struct pwm_sam3x *parent;
     /*@temp@*/ struct PWM_SAM3X_CH *ch;
     size_t channel;
     clock_freq_t freq;
@@ -76,7 +76,7 @@ struct pwm_sam3x_pwm_settings {
     pwm_sam3x_pwm_cpre_t cpre;
 };
 
-int pwm_sam3x_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_sam *pwm, size_t channel);
+int pwm_sam3x_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_sam *parent, size_t channel);
 int pwm_sam3x_pwm_setup(struct pwm *ctx, struct pwm_sam_pwm_settings *settings);
 
 /* Runtime calls:
