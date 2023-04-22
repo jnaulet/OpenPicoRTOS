@@ -28,14 +28,14 @@ typedef enum {
 } pwm_rp2040_pwm_output_t;
 
 struct pwm {
-    /*@temp@*/ struct pwm_rp2040 *pwm;
+    /*@temp@*/ struct pwm_rp2040 *parent;
     /*@temp@*/ struct PWM_RP2040_CH *ch;
     pwm_rp2040_pwm_output_t output;
     size_t div;
     size_t ncycles;
 };
 
-int pwm_rp2040_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_rp2040 *pwm, size_t channel, pwm_rp2040_pwm_output_t output);
+int pwm_rp2040_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_rp2040 *parent, size_t channel, pwm_rp2040_pwm_output_t output);
 
 /* Runtime calls:
  * int pwm_set_period(struct pwm *ctx, pwm_period_us_t period);
@@ -52,7 +52,7 @@ typedef enum {
 } pwm_rp2040_ipwm_state_t;
 
 struct ipwm {
-    /*@temp@*/ struct pwm_rp2040 *pwm;
+    /*@temp@*/ struct pwm_rp2040 *parent;
     /*@temp@*/ struct PWM_RP2040_CH *ch;
     pwm_rp2040_ipwm_state_t state;
     size_t div;
@@ -65,7 +65,7 @@ struct pwm_rp2040_ipwm_settings {
     bool polarity;
 };
 
-int pwm_rp2040_ipwm_init(/*@out@*/ struct ipwm *ctx, struct pwm_rp2040 *pwm, size_t channel);
+int pwm_rp2040_ipwm_init(/*@out@*/ struct ipwm *ctx, struct pwm_rp2040 *parent, size_t channel);
 int pwm_rp2040_ipwm_setup(struct ipwm *ctx, struct pwm_rp2040_ipwm_settings *settings);
 
 /* Runtime calls:

@@ -59,21 +59,21 @@ int pwm_rp2040_init(struct pwm_rp2040 *ctx, struct PWM_RP2040 *base, clock_id_t 
  *
  * Parameters:
  *  ctx - The PWM output to init
- *  pwm - The parent PWM block
+ *  parent - The parent PWM block
  *  channel - The pwm channel selected
  *  output - The output pin (A/B)
  *
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_rp2040_pwm_init(struct pwm *ctx, struct pwm_rp2040 *pwm,
+int pwm_rp2040_pwm_init(struct pwm *ctx, struct pwm_rp2040 *parent,
                         size_t channel, pwm_rp2040_pwm_output_t output)
 {
     if (!picoRTOS_assert(channel < (size_t)PWM_RP2040_PWM_CHANNEL_COUNT)) return -EINVAL;
     if (!picoRTOS_assert(output < PWM_RP2040_PWM_OUTPUT_COUNT)) return -EINVAL;
 
-    ctx->pwm = pwm;
-    ctx->ch = &pwm->base->CH[channel];
+    ctx->parent = parent;
+    ctx->ch = &parent->base->CH[channel];
     ctx->output = output;
     ctx->div = (size_t)1;
     ctx->ncycles = 0;
@@ -92,7 +92,7 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
     if (!picoRTOS_assert(period > 0)) return -EINVAL;
 
     /* real RP2040 channel frequency */
-    size_t hz = (size_t)ctx->pwm->freq / ctx->div;
+    size_t hz = (size_t)ctx->parent->freq / ctx->div;
 
     ctx->ncycles = (hz / (size_t)1000000) * (size_t)period;
 
@@ -144,7 +144,7 @@ void pwm_stop(struct pwm *ctx)
  *
  * Parameters:
  *  ctx - The IPWM to init
- *  pwm - The parent PWM block
+ *  parent - The parent PWM block
  *  channel - The selected channel
  *
  * Returns:
@@ -153,12 +153,12 @@ void pwm_stop(struct pwm *ctx)
  * Remarks:
  * On RP2040, only pin B can act as an input
  */
-int pwm_rp2040_ipwm_init(struct ipwm *ctx, struct pwm_rp2040 *pwm, size_t channel)
+int pwm_rp2040_ipwm_init(struct ipwm *ctx, struct pwm_rp2040 *parent, size_t channel)
 {
     if (!picoRTOS_assert(channel < (size_t)PWM_RP2040_PWM_CHANNEL_COUNT)) return -EINVAL;
 
-    ctx->pwm = pwm;
-    ctx->ch = &pwm->base->CH[channel];
+    ctx->parent = parent;
+    ctx->ch = &parent->base->CH[channel];
     ctx->state = PWM_RP2040_IPWM_STATE_IDLE;
     ctx->div = (size_t)1;
     ctx->ref = 0;
@@ -273,7 +273,7 @@ static int ipwm_get_duty_cycle_acq(struct ipwm *ctx, pwm_duty_cycle_t *duty_cycl
         ctx->ch->CSR &= ~CHn_CSR_EN;
 
         /* computing result... */
-        size_t hz = (size_t)ctx->pwm->freq / ctx->div;
+        size_t hz = (size_t)ctx->parent->freq / ctx->div;
         size_t elapsed_cycles = (hz * (size_t)elapsed) / (size_t)CONFIG_TICK_HZ;
 
         /* final result */
