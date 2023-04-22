@@ -75,11 +75,11 @@ struct pwm_settings {
 };
 
 struct pwm {
-    /*@temp@*/ struct pwm_avr *pwm_avr;
+    /*@temp@*/ struct pwm_avr *parent;
     pwm_avr_oc_t oc;
 };
 
-int pwm_avr_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_avr *pwm_avr, pwm_avr_oc_t oc);
+int pwm_avr_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_avr *parent, pwm_avr_oc_t oc);
 int pwm_avr_pwm_setup(struct pwm *ctx, struct pwm_settings *settings);
 
 /* Runtime calls:
