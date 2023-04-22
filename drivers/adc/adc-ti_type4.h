@@ -146,7 +146,7 @@ struct adc_ti_type4_adc_settings {
 };
 
 struct adc {
-    /*@temp@*/ struct adc_ti_type4 *adc;
+    /*@temp@*/ struct adc_ti_type4 *parent;
     size_t channel;
     size_t soc_start;
     size_t soc_end;
@@ -159,7 +159,7 @@ struct adc {
 };
 
 int adc_ti_type4_adc_init(/*@out@*/ struct adc *ctx,
-                          struct adc_ti_type4 *adc,
+                          struct adc_ti_type4 *parent,
                           size_t channel,
                           size_t sample_count,
                           adc_ti_type4_intflg_t intflg);

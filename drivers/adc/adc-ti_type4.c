@@ -282,7 +282,7 @@ int adc_ti_type4_setup(struct adc_ti_type4 *ctx, struct adc_ti_type4_settings *s
  *
  * Parameters:
  *  ctx - The ADC channel to init
- *  adc - The parent ADC block
+ *  parent - The parent ADC block
  *  channel - The ADC channel number
  *  nsamples - The number of samples for this channel
  *  intflg - The interrupt flag to associate to this channel
@@ -290,7 +290,7 @@ int adc_ti_type4_setup(struct adc_ti_type4 *ctx, struct adc_ti_type4_settings *s
  * Returns:
  * 0 if success, -errno otherwise
  */
-int adc_ti_type4_adc_init(struct adc *ctx, struct adc_ti_type4 *adc,
+int adc_ti_type4_adc_init(struct adc *ctx, struct adc_ti_type4 *parent,
                           size_t channel, size_t sample_count,
                           adc_ti_type4_intflg_t intflg)
 {
@@ -301,7 +301,7 @@ int adc_ti_type4_adc_init(struct adc *ctx, struct adc_ti_type4 *adc,
     int res;
     size_t index;
 
-    ctx->adc = adc;
+    ctx->parent = parent;
     ctx->intflg = intflg;
     ctx->channel = channel;
     ctx->trig = ADC_TI_TYPE4_TRIG_SOFT;
@@ -311,7 +311,7 @@ int adc_ti_type4_adc_init(struct adc *ctx, struct adc_ti_type4 *adc,
     ctx->divider = 1;
     ctx->offset = 0;
 
-    if ((res = request_samples(ctx->adc, sample_count)) < 0)
+    if ((res = request_samples(ctx->parent, sample_count)) < 0)
         return res;
 
     index = (size_t)res;
@@ -322,14 +322,14 @@ int adc_ti_type4_adc_init(struct adc *ctx, struct adc_ti_type4 *adc,
     ASM(" eallow");
 
     for (; (size_t)index <= ctx->soc_end; index++) {
-        adc->base->ADCSOCnCTL[index] = (uint32_t)ADCSOCnCTL_CHSEL((uint32_t)ctx->channel);
-        adc->base->ADCSOCnCTL[index] |= ctx->adc->acqps_min;
+        parent->base->ADCSOCnCTL[index] = (uint32_t)ADCSOCnCTL_CHSEL((uint32_t)ctx->channel);
+        parent->base->ADCSOCnCTL[index] |= ctx->parent->acqps_min;
     }
 
     ASM(" edis");
 
     /* associate intflg to this channel */
-    return request_intflg(ctx->adc, ctx->soc_end, intflg);
+    return request_intflg(ctx->parent, ctx->soc_end, intflg);
 }
 
 /* Function: adc_ti_type4_adc_setup
@@ -346,18 +346,18 @@ int adc_ti_type4_adc_setup(struct adc *ctx,
                            struct adc_ti_type4_adc_settings *settings)
 {
     if (!picoRTOS_assert(settings->trig < ADC_TI_TYPE4_TRIG_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert((size_t)settings->acqps >= ctx->adc->acqps_min)) return -EINVAL;
+    if (!picoRTOS_assert((size_t)settings->acqps >= ctx->parent->acqps_min)) return -EINVAL;
 
     size_t i;
-    struct adc_ti_type4 *adc = ctx->adc;
+    struct adc_ti_type4 *parent = ctx->parent;
 
     ctx->trig = settings->trig;
 
     ASM(" eallow");
     for (i = ctx->soc_start; i <= ctx->soc_end; i++)
-        adc->base->ADCSOCnCTL[i] = (uint32_t)(ADCSOCnCTL_CHSEL((uint32_t)ctx->channel) |
-                                              ADCSOCnCTL_TRIGSEL((uint32_t)settings->trig) |
-                                              ADCSOCnCTL_ACQPS((uint32_t)settings->acqps));
+        parent->base->ADCSOCnCTL[i] = (uint32_t)(ADCSOCnCTL_CHSEL((uint32_t)ctx->channel) |
+                                                 ADCSOCnCTL_TRIGSEL((uint32_t)settings->trig) |
+                                                 ADCSOCnCTL_ACQPS((uint32_t)settings->acqps));
     ASM(" edis");
 
     return 0;
@@ -365,11 +365,11 @@ int adc_ti_type4_adc_setup(struct adc *ctx,
 
 static int trig_soft(struct adc *ctx)
 {
-    struct adc_ti_type4 *adc = ctx->adc;
+    struct adc_ti_type4 *parent = ctx->parent;
     uint16_t mask = (uint16_t)(1 << (ctx->soc_end + 1)) - 1;
 
     mask &= ~(uint16_t)((1 << ctx->soc_start) - 1);
-    adc->base->ADCSOCFRC1 = mask;
+    parent->base->ADCSOCFRC1 = mask;
 
     return -EAGAIN;
 }
@@ -396,11 +396,11 @@ int adc_read_multiple(struct adc *ctx, int *data, size_t n)
     if (!picoRTOS_assert(n <= (size_t)ADC_TI_TYPE4_SAMPLES_MAX)) return -EINVAL;
 
     size_t i;
-    struct adc_ti_type4 *adc = ctx->adc;
+    struct adc_ti_type4 *parent = ctx->parent;
     uint16_t intmask = (uint16_t)1 << ctx->intflg;
     size_t max = MIN(ctx->soc_end + 1, ctx->soc_start + n);
 
-    if ((adc->base->ADCINTFLG & intmask) == 0) {
+    if ((parent->base->ADCINTFLG & intmask) == 0) {
         if (ctx->trig == ADC_TI_TYPE4_TRIG_SOFT)
             return trig_soft(ctx);
 
@@ -408,11 +408,11 @@ int adc_read_multiple(struct adc *ctx, int *data, size_t n)
     }
 
     for (i = ctx->soc_start; i < max; i++) {
-        uint16_t result = adc->result->ADCRESULTn[i];
+        uint16_t result = parent->result->ADCRESULTn[i];
         *data++ = ((int)result * ctx->multiplier) / ctx->divider + ctx->offset;
     }
 
     /* clear flags */
-    adc->base->ADCINTFLGCLR = intmask;
+    parent->base->ADCINTFLGCLR = intmask;
     return (int)i;
 }
