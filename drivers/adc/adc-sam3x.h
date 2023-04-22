@@ -15,7 +15,7 @@ struct adc_sam3x {
 int adc_sam3x_init(/*@out@*/ struct adc_sam3x *ctx, struct ADC_SAM3X *base);
 
 struct adc {
-    /*@temp@*/ struct adc_sam3x *adc;
+    /*@temp@*/ struct adc_sam3x *parent;
     size_t channel;
     /* calibration */
     int multiplier;
@@ -23,7 +23,7 @@ struct adc {
     int offset;
 };
 
-int adc_sam3x_adc_init(/*@out@*/ struct adc *ctx, struct adc_sam3x *adc, size_t channel);
+int adc_sam3x_adc_init(/*@out@*/ struct adc *ctx, struct adc_sam3x *parent, size_t channel);
 
 /* Runtime calls:
  * int adc_setup(struct adc *ctx, struct adc_settings *settings);

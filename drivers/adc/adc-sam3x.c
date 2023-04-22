@@ -80,24 +80,24 @@ int adc_sam3x_init(struct adc_sam3x *ctx, struct ADC_SAM3X *base)
  *
  * Parameters:
  *  ctx - The Adc channel to init
- *  adc - The parent ADC block
+ *  parent - The parent ADC block
  *  channel - The selected channel
  *
  * Returns:
  * 0 in case of success, -errno otherwise
  */
-int adc_sam3x_adc_init(struct adc *ctx, struct adc_sam3x *adc, size_t channel)
+int adc_sam3x_adc_init(struct adc *ctx, struct adc_sam3x *parent, size_t channel)
 {
     if (!picoRTOS_assert(channel < (size_t)ADC_SAM3X_CHANNEL_COUNT)) return -EINVAL;
 
-    ctx->adc = adc;
+    ctx->parent = parent;
     ctx->channel = channel;
     ctx->multiplier = 1;
     ctx->divider = 1;
     ctx->offset = 0;
 
     /* enable channel */
-    adc->base->ADC_CHER |= (1 << channel);
+    parent->base->ADC_CHER |= (1 << channel);
 
     return 0;
 }
@@ -113,9 +113,9 @@ int adc_setup(struct adc *ctx, struct adc_settings *settings)
 
 int adc_read(struct adc *ctx, int *data)
 {
-    struct adc_sam3x *adc = ctx->adc;
+    struct adc_sam3x *parent = ctx->parent;
 
-    uint32_t cdr = adc->base->ADC_CDR[ctx->channel];
+    uint32_t cdr = parent->base->ADC_CDR[ctx->channel];
 
     /* apply calibration */
     *data = ((int)cdr * ctx->multiplier) / ctx->divider + ctx->offset;
