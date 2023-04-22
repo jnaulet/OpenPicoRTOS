@@ -128,19 +128,19 @@ int pwm_tinyavr_tca_setup(struct pwm_tinyavr_tca *ctx, struct pwm_tinyavr_tca_se
  *
  * Parameters:
  *  ctx - The PWM output to init
- *  pwm - The parent PWM block / TCAx
+ *  parent - The parent PWM block / TCAx
  *  cmp - The pin to output PWM to
  *
  * Returns:
  * 0 if success, -errno otherwise
  */
 int pwm_tinyavr_tca_pwm_init(struct pwm *ctx,
-                             struct pwm_tinyavr_tca *pwm,
+                             struct pwm_tinyavr_tca *parent,
                              pwm_tinyavr_tca_cmp_t cmp)
 {
     if (!picoRTOS_assert(cmp < PWM_TINYAVR_TCA_CMP_COUNT)) return -EINVAL;
 
-    ctx->pwm = pwm;
+    ctx->parent = parent;
     ctx->cmp = cmp;
 
     return 0;
@@ -150,13 +150,13 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
 {
     if (!picoRTOS_assert(period > 0)) return -EINVAL;
 
-    struct pwm_tinyavr_tca *pwm = ctx->pwm;
+    struct pwm_tinyavr_tca *parent = ctx->parent;
 
     /* real tinyAVR channel frequency */
-    unsigned long hz = (unsigned long)pwm->freq / pwm->div;
+    unsigned long hz = (unsigned long)parent->freq / parent->div;
 
     ctx->ncycles = (size_t)((hz / 1000000ul) * (unsigned long)period);
-    pwm->base->PER = (uint16_t)ctx->ncycles;
+    parent->base->PER = (uint16_t)ctx->ncycles;
 
     return 0;
 }
@@ -164,23 +164,23 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
 int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle)
 {
     size_t index = (size_t)ctx->cmp;
-    struct pwm_tinyavr_tca *pwm = ctx->pwm;
+    struct pwm_tinyavr_tca *parent = ctx->parent;
     unsigned long cmpn = ((unsigned long)duty_cycle * ctx->ncycles) >> 16;
 
-    pwm->base->CMPn[index] = (uint16_t)cmpn;
+    parent->base->CMPn[index] = (uint16_t)cmpn;
     return 0;
 }
 
 void pwm_start(struct pwm *ctx)
 {
-    struct pwm_tinyavr_tca *pwm = ctx->pwm;
+    struct pwm_tinyavr_tca *parent = ctx->parent;
 
-    pwm->base->CTRLESET = (uint8_t)CTRLE_CMD(0x2);
+    parent->base->CTRLESET = (uint8_t)CTRLE_CMD(0x2);
 
     switch (ctx->cmp) {
-    case PWM_TINYAVR_TCA_CMP0: pwm->base->CTRLB |= CTRLB_CMP0EN; break;
-    case PWM_TINYAVR_TCA_CMP1: pwm->base->CTRLB |= CTRLB_CMP1EN; break;
-    case PWM_TINYAVR_TCA_CMP2: pwm->base->CTRLB |= CTRLB_CMP2EN; break;
+    case PWM_TINYAVR_TCA_CMP0: parent->base->CTRLB |= CTRLB_CMP0EN; break;
+    case PWM_TINYAVR_TCA_CMP1: parent->base->CTRLB |= CTRLB_CMP1EN; break;
+    case PWM_TINYAVR_TCA_CMP2: parent->base->CTRLB |= CTRLB_CMP2EN; break;
     default:
         picoRTOS_break();
     }
@@ -188,12 +188,12 @@ void pwm_start(struct pwm *ctx)
 
 void pwm_stop(struct pwm *ctx)
 {
-    struct pwm_tinyavr_tca *pwm = ctx->pwm;
+    struct pwm_tinyavr_tca *parent = ctx->parent;
 
     switch (ctx->cmp) {
-    case PWM_TINYAVR_TCA_CMP0: pwm->base->CTRLB &= ~CTRLB_CMP0EN; break;
-    case PWM_TINYAVR_TCA_CMP1: pwm->base->CTRLB &= ~CTRLB_CMP1EN; break;
-    case PWM_TINYAVR_TCA_CMP2: pwm->base->CTRLB &= ~CTRLB_CMP2EN; break;
+    case PWM_TINYAVR_TCA_CMP0: parent->base->CTRLB &= ~CTRLB_CMP0EN; break;
+    case PWM_TINYAVR_TCA_CMP1: parent->base->CTRLB &= ~CTRLB_CMP1EN; break;
+    case PWM_TINYAVR_TCA_CMP2: parent->base->CTRLB &= ~CTRLB_CMP2EN; break;
     default:
         picoRTOS_break();
     }

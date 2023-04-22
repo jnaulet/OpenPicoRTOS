@@ -54,12 +54,12 @@ typedef enum {
 } pwm_tinyavr_tca_cmp_t;
 
 struct pwm {
-    /*@temp@*/ struct pwm_tinyavr_tca *pwm;
+    /*@temp@*/ struct pwm_tinyavr_tca *parent;
     pwm_tinyavr_tca_cmp_t cmp;
     size_t ncycles;
 };
 
-int pwm_tinyavr_tca_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_tinyavr_tca *pwm, pwm_tinyavr_tca_cmp_t cmp);
+int pwm_tinyavr_tca_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_tinyavr_tca *parent, pwm_tinyavr_tca_cmp_t cmp);
 
 /* Runtime calls:
  * int pwm_set_period(struct pwm *ctx, pwm_period_us_t period);
