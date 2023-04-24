@@ -15,4 +15,10 @@ struct PIC32MX_CLR_SET_INV {
 void pic32mx_unlock(void);
 void pic32mx_lock(void);
 
+/* MMU */
+#define KVA_M              0x1fffffffu
+#define KVA_TO_PA(x)       ((uint32_t)(x) & KVA_M)
+#define KVA_BASE(x)        ((uint32_t)(x) & ~KVA_M)
+#define PA_TO_KVA(x, base) ((x) | (base))
+
 #endif

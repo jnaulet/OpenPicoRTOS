@@ -14,11 +14,6 @@
 #define OPMOD_CONFIG      0x4
 #define OPMOD_LISTEN_ALL  0x7
 
-#define KVA_M              0x1fffffffu
-#define KVA_TO_PA(x)       ((uint32_t)(x) & KVA_M)
-#define KVA_BASE(x)        ((uint32_t)(x) & ~KVA_M)
-#define PA_TO_KVA(x, base) ((x) | (base))
-
 struct CAN_PIC32MX {
     struct PIC32MX_CLR_SET_INV CiCON;
     struct PIC32MX_CLR_SET_INV CiCFG;
