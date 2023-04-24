@@ -106,17 +106,17 @@ static int adc_avr_set_mux(struct adc_avr *ctx, size_t channel)
  *
  * Parameters:
  *  ctx - The ADC channel to init
- *  adc - The parent ADC block
+ *  parent - The parent ADC block
  *  channel - The number of the selected channel
  *
  * Returns:
  * 0 in case of success, -errno otherwise
  */
-int adc_avr_adc_init(struct adc *ctx, struct adc_avr *adc, size_t channel)
+int adc_avr_adc_init(struct adc *ctx, struct adc_avr *parent, size_t channel)
 {
     if (!picoRTOS_assert(channel <= (size_t)ADC_AVR_CHANNEL_P13_N10)) return -EINVAL;
 
-    ctx->adc = adc;
+    ctx->parent = parent;
     ctx->channel = channel;
     ctx->multiplier = 1;
     ctx->divider = 1;
@@ -127,36 +127,36 @@ int adc_avr_adc_init(struct adc *ctx, struct adc_avr *adc, size_t channel)
 
 static int adc_read_idle(struct adc *ctx)
 {
-    struct adc_avr *adc = ctx->adc;
+    struct adc_avr *parent = ctx->parent;
 
-    if (adc_avr_set_mux(adc, ctx->channel) < 0)
+    if (adc_avr_set_mux(parent, ctx->channel) < 0)
         return -EINVAL;
 
     /* start conversion */
-    if ((adc->base->ADCSRA & ADCSRA_ADATE) == 0)
-        adc->base->ADCSRA |= ADCSRA_ADSC;
+    if ((parent->base->ADCSRA & ADCSRA_ADATE) == 0)
+        parent->base->ADCSRA |= ADCSRA_ADSC;
 
-    adc->state = ADC_AVR_STATE_ACQ;
+    parent->state = ADC_AVR_STATE_ACQ;
     return -EAGAIN;
 }
 
 static int adc_read_acq(struct adc *ctx, int *data)
 {
-    struct adc_avr *adc = ctx->adc;
+    struct adc_avr *parent = ctx->parent;
 
-    if ((adc->base->ADCSRA & ADCSRA_ADIF) == 0)
+    if ((parent->base->ADCSRA & ADCSRA_ADIF) == 0)
         return -EAGAIN;
 
     /* read data */
-    uint16_t result = adc->base->ADC;
+    uint16_t result = parent->base->ADC;
 
     /* apply calibration */
     *data = ((int)result * ctx->multiplier) / ctx->divider + ctx->offset;
 
     /* clear flag */
-    adc->base->ADCSRA |= ADCSRA_ADIF;
+    parent->base->ADCSRA |= ADCSRA_ADIF;
 
-    adc->state = ADC_AVR_STATE_IDLE;
+    parent->state = ADC_AVR_STATE_IDLE;
     return 1;
 }
 
@@ -171,9 +171,9 @@ int adc_setup(struct adc *ctx, struct adc_settings *settings)
 
 int adc_read(struct adc *ctx, int *data)
 {
-    struct adc_avr *adc = ctx->adc;
+    struct adc_avr *parent = ctx->parent;
 
-    switch (adc->state) {
+    switch (parent->state) {
     case ADC_AVR_STATE_IDLE: return adc_read_idle(ctx);
     case ADC_AVR_STATE_ACQ: return adc_read_acq(ctx, data);
     default: break;

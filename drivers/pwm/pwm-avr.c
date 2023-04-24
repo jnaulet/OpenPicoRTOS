@@ -232,17 +232,17 @@ static void stop(struct pwm_avr *ctx)
  *
  * Parameters:
  *  ctx - The PWM output to init
- *  pwm_avr - The parent PWM block / TC
+ *  parent - The parent PWM block / TC
  *  oc - The output compare / pin the PWM will outptu from
  *
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_avr_pwm_init(struct pwm *ctx, struct pwm_avr *pwm_avr, pwm_avr_oc_t oc)
+int pwm_avr_pwm_init(struct pwm *ctx, struct pwm_avr *parent, pwm_avr_oc_t oc)
 {
     if (!picoRTOS_assert(oc < PWM_AVR_OC_COUNT)) return -EINVAL;
 
-    ctx->pwm_avr = pwm_avr;
+    ctx->parent = parent;
     ctx->oc = oc;
 
     return 0;
@@ -263,7 +263,7 @@ int pwm_avr_pwm_setup(struct pwm *ctx, struct pwm_settings *settings)
     int res;
 
     /* output compare */
-    if ((res = set_output_compare_mode(ctx->pwm_avr, ctx->oc, settings->mode)) < 0)
+    if ((res = set_output_compare_mode(ctx->parent, ctx->oc, settings->mode)) < 0)
         return res;
 
     return 0;
@@ -275,24 +275,24 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
 {
     if (!picoRTOS_assert(period > (size_t)0)) return -EINVAL;
 
-    struct pwm_avr *pwm_avr = ctx->pwm_avr;
-    uint32_t hz = (uint32_t)pwm_avr->freq / pwm_avr->prescale;
+    struct pwm_avr *parent = ctx->parent;
+    uint32_t hz = (uint32_t)parent->freq / parent->prescale;
 
-    pwm_avr->ncycles = (uint16_t)((hz / (uint32_t)1000000ul) * (uint32_t)period);
+    parent->ncycles = (uint16_t)((hz / (uint32_t)1000000ul) * (uint32_t)period);
 
-    if (!picoRTOS_assert(pwm_avr->ncycles > 0)) return -EINVAL;
+    if (!picoRTOS_assert(parent->ncycles > 0)) return -EINVAL;
 
-    switch (ctx->pwm_avr->waveform) {
+    switch (parent->waveform) {
     case PWM_AVR_WAVEFORM_PHASE_FREQ_CORRECT_ICRn:  /*@fallthrough@*/
     case PWM_AVR_WAVEFORM_PHASE_CORRECT_ICRn:       /*@fallthrough@*/
     case PWM_AVR_WAVEFORM_FAST_PWM_ICRn:
-        pwm_avr->base->ICRn = pwm_avr->ncycles;
+        parent->base->ICRn = parent->ncycles;
         break;
 
     case PWM_AVR_WAVEFORM_PHASE_FREQ_CORRECT_OCRnA: /*@fallthrough@*/
     case PWM_AVR_WAVEFORM_PHASE_CORRECT_OCRnA:      /*@fallthrough@*/
     case PWM_AVR_WAVEFORM_FAST_PWM_OCRnA:
-        pwm_avr->base->OCRnA = pwm_avr->ncycles;
+        parent->base->OCRnA = parent->ncycles;
         break;
 
     default:
@@ -306,14 +306,14 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
 
 int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle)
 {
-    struct pwm_avr *pwm_avr = ctx->pwm_avr;
-    uint16_t ncycles = ctx->pwm_avr->ncycles;
+    struct pwm_avr *parent = ctx->parent;
+    uint16_t ncycles = parent->ncycles;
     uint16_t OCRn = (uint16_t)(((uint32_t)duty_cycle * (uint32_t)ncycles) >> 16);
 
     switch (ctx->oc) {
-    case PWM_AVR_OCnA: pwm_avr->base->OCRnA = OCRn; break;
-    case PWM_AVR_OCnB: pwm_avr->base->OCRnB = OCRn; break;
-    case PWM_AVR_OCnC: pwm_avr->base->OCRnC = OCRn; break;
+    case PWM_AVR_OCnA: parent->base->OCRnA = OCRn; break;
+    case PWM_AVR_OCnB: parent->base->OCRnB = OCRn; break;
+    case PWM_AVR_OCnC: parent->base->OCRnC = OCRn; break;
     default:
         picoRTOS_break();
         /*@notreached@*/
@@ -325,10 +325,10 @@ int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle)
 
 void pwm_start(struct pwm *ctx)
 {
-    start(ctx->pwm_avr);
+    start(ctx->parent);
 }
 
 void pwm_stop(struct pwm *ctx)
 {
-    stop(ctx->pwm_avr);
+    stop(ctx->parent);
 }

@@ -128,7 +128,7 @@ int adc_avr_setup(struct adc_avr *ctx, struct adc_avr_settings *settings);
 /* channels */
 
 struct adc {
-    /*@temp@*/ struct adc_avr *adc;
+    /*@temp@*/ struct adc_avr *parent;
     size_t channel;
     /* calibration */
     int multiplier;
@@ -136,7 +136,7 @@ struct adc {
     int offset;
 };
 
-int adc_avr_adc_init(/*@out@*/ struct adc *ctx, struct adc_avr *adc, size_t channel);
+int adc_avr_adc_init(/*@out@*/ struct adc *ctx, struct adc_avr *parent, size_t channel);
 
 /* Runtime calls:
  * int adc_setup(struct adc *ctx, struct adc_settings *settings);
