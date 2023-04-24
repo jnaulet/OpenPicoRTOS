@@ -290,7 +290,7 @@ static void adc_main(void *priv)
  */
 
 /*@unused@*/
-static void can_main(void *priv)
+static void __attribute__((unused)) can_main(void *priv)
 {
 #define CAN_TEST_ID (can_id_t)0x7
 
@@ -327,6 +327,75 @@ static void can_main(void *priv)
     }
 }
 
+/* This thread tests the flash by erasing the last 16k sector & writing
+ * 2068 bytes to cover all the flash controller options */
+#include "misc-pic32mx.h"
+
+static void flash_main(void *priv)
+{
+#define BUF_COUNT   516 /* 1x 2048b page + 1 qword */
+
+    picoRTOS_assert_void(priv != NULL);
+
+    int res;
+    size_t n;
+    int nwritten = 0;
+    static uint32_t buf[BUF_COUNT];
+
+    int deadlock = CONFIG_DEADLOCK_COUNT;
+    struct flash *FLASH = (struct flash*)priv;
+
+    /* test on last block of flash */
+    size_t block = (size_t)flash_get_nblocks(FLASH) - 1;
+    size_t addr = (size_t)flash_get_block_addr(FLASH, block);
+    uint32_t *mem = (uint32_t*)PA_TO_KVA(addr, 0xa0000000); /* FIXME */
+
+    /* init buffer */
+    for (n = 0; n < (size_t)BUF_COUNT; n++)
+        buf[n] = (uint32_t)n;
+
+    /* erase block */
+    while ((res = flash_erase(FLASH, block)) == -EAGAIN &&  deadlock-- != 0)
+        picoRTOS_schedule();
+
+    picoRTOS_assert_void_fatal(deadlock != -1);
+    picoRTOS_assert_void_fatal(res == 0);
+
+    /* blankcheck */
+    if (flash_blankcheck(FLASH, block) < 0)
+        picoRTOS_break();
+
+    /* at last, write */
+    n = sizeof(buf);
+
+    while (n != 0) {
+        uint8_t *buf8 = (uint8_t*)buf;
+        deadlock = CONFIG_DEADLOCK_COUNT;
+
+        while ((res = flash_write(FLASH, addr + (size_t)nwritten, &buf8[nwritten], n)) == -EAGAIN &&
+               deadlock-- != 0)
+            picoRTOS_schedule();
+
+        picoRTOS_assert_void_fatal(res > 0);
+        picoRTOS_assert_void_fatal(deadlock != -1);
+
+        nwritten += res;
+        n -= (size_t)res;
+    }
+
+    /* row */
+    picoRTOS_assert_void_fatal(mem[0] == (uint32_t)0);
+    picoRTOS_assert_void_fatal(mem[511] == (uint32_t)511);
+    /* qword */
+    picoRTOS_assert_void_fatal(mem[512] == (uint32_t)512);
+    picoRTOS_assert_void_fatal(mem[515] == (uint32_t)515);
+    /* word: doesn't work with ECC activated, ignore */
+    //picoRTOS_assert_void_fatal(mem[516] == (uint32_t)516);
+
+    /* suicide */
+    picoRTOS_kill();
+}
+
 int main(void)
 {
     static struct curiosity_20_pic32mz_ef board;
@@ -352,6 +421,7 @@ int main(void)
     static picoRTOS_stack_t stack9[CONFIG_DEFAULT_STACK_COUNT];
     /* static picoRTOS_stack_t stack10[CONFIG_DEFAULT_STACK_COUNT]; */
     static picoRTOS_stack_t stack11[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack12[CONFIG_DEFAULT_STACK_COUNT];
 
     /* leds */
     picoRTOS_task_init(&task, led1_main, &board.LED1, stack0, PICORTOS_STACK_COUNT(stack0));
@@ -384,8 +454,11 @@ int main(void)
      * picoRTOS_task_init(&task, can_main, &board.CAN2, stack10, PICORTOS_STACK_COUNT(stack10));
      * picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
      */
+    /* flash */
+    picoRTOS_task_init(&task, flash_main, &board.FLASH, stack11, PICORTOS_STACK_COUNT(stack11));
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
     /* lastly, watchdog */
-    picoRTOS_task_init(&task, wd_main, &board.WDT, stack11, PICORTOS_STACK_COUNT(stack11));
+    picoRTOS_task_init(&task, wd_main, &board.WDT, stack12, PICORTOS_STACK_COUNT(stack12));
     picoRTOS_add_task(&task, picoRTOS_get_last_available_priority());
 
     /* start the scheduler */

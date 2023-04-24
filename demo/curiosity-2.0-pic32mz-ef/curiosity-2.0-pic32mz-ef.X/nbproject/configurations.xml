@@ -32,6 +32,7 @@
         <itemPath>../../../drivers/twi/twi-pic32mx.c</itemPath>
         <itemPath>../../../drivers/adc/adc-pic32mx.c</itemPath>
         <itemPath>../../../staging/drivers/can/can-pic32mx.c</itemPath>
+        <itemPath>../../../drivers/flash/flash-pic32mx.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f2" displayName="picoRTOS" projectFiles="true">
         <logicalFolder name="f1" displayName="arch" projectFiles="true">
@@ -68,7 +69,7 @@
         <targetDevice>PIC32MZ2048EFM144</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>noID</platformTool>
+        <platformTool>pkob4hybrid</platformTool>
         <languageToolchain>XC32</languageToolchain>
         <languageToolchainVersion>4.20</languageToolchainVersion>
         <platform>2</platform>
@@ -264,7 +265,7 @@
       </C32CPP>
       <C32Global>
         <property key="common-include-directories"
-                  value="../../../;../;../../../ipc;../../../arch/include;../../../arch/mips32/m51xx;../../../devices/microchip/pic32mz-ef;../../../drivers/include;../../../drivers/misc;../../../drivers/clock;../../../drivers/mux;../../../drivers/gpio;../../../drivers/uart;../../../drivers/spi;../../../drivers/wd;../../../drivers/pwm;../../../drivers/twi;../../../drivers/adc;../../../staging/drivers/can"/>
+                  value="../../../;../;../../../ipc;../../../arch/include;../../../arch/mips32/m51xx;../../../devices/microchip/pic32mz-ef;../../../drivers/include;../../../drivers/misc;../../../drivers/clock;../../../drivers/mux;../../../drivers/gpio;../../../drivers/uart;../../../drivers/spi;../../../drivers/wd;../../../drivers/pwm;../../../drivers/twi;../../../drivers/adc;../../../staging/drivers/can;../../../drivers/flash"/>
         <property key="gp-relative-option" value=""/>
         <property key="legacy-libc" value="true"/>
         <property key="mdtcm" value=""/>

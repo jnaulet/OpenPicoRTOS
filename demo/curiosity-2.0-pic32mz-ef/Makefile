@@ -20,10 +20,10 @@ CPPCHECKFLAGS += --suppress=unusedStructMember
 INCLUDE += -I.
 
 CFLAGS += -Wall -Wextra -std=c99 $(INCLUDE) -O0 -g3 $(DEFINE)
-CFLAGS += -mprocessor=32MZ2048EFM144 -fno-common -MP -MMD -MF -DXPRJ_default=default
+CFLAGS += -mprocessor=32MZ2048EFM144 -fno-common -DXPRJ_default=default
 
 SFLAGS += -x assembler-with-cpp -g3 $(DEFINE) $(INCLUDE)
-SFLAGS += -mprocessor=32MZ2048EFM144  -MMD -MF -DXPRJ_default=default
+SFLAGS += -mprocessor=32MZ2048EFM144  -DXPRJ_default=default
 
 LDFLAGS += -nostartfiles -nostdlib
 
@@ -36,6 +36,7 @@ SRC_C += $(PICORTOS_DIR)/ipc/picoRTOS_cond.c
 INCLUDE += -I$(PICORTOS_DIR)/drivers/include
 INCLUDE += -I$(PICORTOS_DIR)/drivers/adc
 INCLUDE += -I$(PICORTOS_DIR)/drivers/clock
+INCLUDE += -I$(PICORTOS_DIR)/drivers/flash
 INCLUDE += -I$(PICORTOS_DIR)/drivers/gpio
 INCLUDE += -I$(PICORTOS_DIR)/drivers/misc
 INCLUDE += -I$(PICORTOS_DIR)/drivers/mux
@@ -48,6 +49,7 @@ INCLUDE += -I$(PICORTOS_DIR)/drivers/wd
 # Drivers
 SRC_C += $(PICORTOS_DIR)/drivers/adc/adc-pic32mx.c
 SRC_C += $(PICORTOS_DIR)/drivers/clock/clock-pic32mx.c
+SRC_C += $(PICORTOS_DIR)/drivers/flash/flash-pic32mx.c
 SRC_C += $(PICORTOS_DIR)/drivers/gpio/gpio-pic32mx.c
 SRC_C += $(PICORTOS_DIR)/drivers/misc/misc-pic32mx.c
 SRC_C += $(PICORTOS_DIR)/drivers/mux/mux-pic32mx.c
@@ -57,6 +59,7 @@ SRC_C += $(PICORTOS_DIR)/drivers/twi/twi-pic32mx.c
 SRC_C += $(PICORTOS_DIR)/drivers/uart/uart-pic32mx.c
 SRC_C += $(PICORTOS_DIR)/drivers/wd/wd-pic32mx.c
 
+# staging tree
 INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/can
 SRC_C += $(PICORTOS_DIR)/staging/drivers/can/can-pic32mx.c
 

@@ -247,6 +247,14 @@ static int can_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
     return 0;
 }
 
+static int flash_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
+{
+    (void)flash_pic32mx_init(&ctx->FLASH,
+                             (struct FLASH_PIC32MX*)ADDR_FLASH_CONTROLLER,
+                             (size_t)128); /* 128 16kb blocks on pic32mz-ef 2048 */
+    return 0;
+}
+
 int curiosity_20_pic32mz_ef_init(struct curiosity_20_pic32mz_ef *ctx)
 {
     /* watchdog first */
@@ -262,6 +270,7 @@ int curiosity_20_pic32mz_ef_init(struct curiosity_20_pic32mz_ef *ctx)
     (void)twi_init(ctx);
     (void)adc_init(ctx);
     (void)can_init(ctx);
+    (void)flash_init(ctx);
 
     return 0;
 }

@@ -3,6 +3,7 @@
 
 #include "adc-pic32mx.h"
 #include "can-pic32mx.h"
+#include "flash-pic32mx.h"
 #include "gpio-pic32mx.h"
 #include "pwm-pic32mx.h"
 #include "spi-pic32mx.h"
@@ -29,6 +30,7 @@ struct curiosity_20_pic32mz_ef {
     struct adc A0;
     struct adc IVtemp;
     struct can CAN2;
+    struct flash FLASH;
 };
 
 int curiosity_20_pic32mz_ef_init(/*@out@*/ struct curiosity_20_pic32mz_ef *ctx);
