@@ -71,7 +71,7 @@ typedef enum {
 } adc_tinyavr_muxpos_t;
 
 struct adc {
-    /*@temp@*/ struct adc_tinyavr *adc;
+    /*@temp@*/ struct adc_tinyavr *parent;
     adc_tinyavr_muxpos_t muxpos;
     /* calibration */
     int multiplier;
@@ -79,7 +79,7 @@ struct adc {
     int offset;
 };
 
-int adc_tinyavr_adc_init(/*@out@*/ struct adc *ctx, struct adc_tinyavr *adc, adc_tinyavr_muxpos_t muxpos);
+int adc_tinyavr_adc_init(/*@out@*/ struct adc *ctx, struct adc_tinyavr *parent, adc_tinyavr_muxpos_t muxpos);
 
 /* Runtime calls:
  * int adc_setup(struct adc *ctx, struct adc_settings *settings);
