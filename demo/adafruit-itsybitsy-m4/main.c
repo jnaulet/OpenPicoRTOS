@@ -157,6 +157,72 @@ static void wd_main(void *priv)
     }
 }
 
+/*
+ * flash_main is a thread that tests some flash features
+ */
+static void flash_main(void *priv)
+{
+#define BUF_COUNT   132 /* 1x512b page + qword */
+
+    picoRTOS_assert_void(priv != NULL);
+
+    int res;
+    size_t n;
+    int nwritten = 0;
+    static uint32_t buf[BUF_COUNT];
+
+    int deadlock = CONFIG_DEADLOCK_COUNT;
+    struct flash *FLASH = (struct flash*)priv;
+
+    /* test on last block of flash */
+    size_t block = (size_t)flash_get_nblocks(FLASH) - 1;
+    size_t addr = (size_t)flash_get_block_addr(FLASH, block);
+    uint32_t *mem = (uint32_t*)addr;
+
+    /* init buffer */
+    for (n = 0; n < (size_t)BUF_COUNT; n++)
+        buf[n] = (uint32_t)n;
+
+    /* erase sector */
+    while ((res = flash_erase(FLASH, block)) == -EAGAIN && deadlock-- != 0)
+        picoRTOS_schedule();
+
+    picoRTOS_assert_void_fatal(deadlock != -1);
+    picoRTOS_assert_void_fatal(res == 0);
+
+    /* blankcheck */
+    if (flash_blankcheck(FLASH, block) < 0)
+        picoRTOS_break();
+
+    /* at last, write */
+    n = sizeof(buf);
+
+    while (n != 0) {
+        uint8_t *buf8 = (uint8_t*)buf;
+        deadlock = CONFIG_DEADLOCK_COUNT;
+
+        while ((res = flash_write(FLASH, addr + (size_t)nwritten, &buf8[nwritten], n)) == -EAGAIN &&
+               deadlock-- != 0)
+            picoRTOS_schedule();
+
+        picoRTOS_assert_void_fatal(res > 0);
+        picoRTOS_assert_void_fatal(deadlock != -1);
+
+        nwritten += res;
+        n -= (size_t)res;
+    }
+
+    /* page */
+    picoRTOS_assert_void(mem[0] == (uint32_t)0);
+    picoRTOS_assert_void(mem[127] == (uint32_t)127);
+    /* qword */
+    picoRTOS_assert_void(mem[128] == (uint32_t)128);
+    picoRTOS_assert_void(mem[131] == (uint32_t)131);
+
+    /* suicide */
+    picoRTOS_kill();
+}
+
 int main(void)
 {
     static struct adafruit_itsybitsy_m4 itsybitsy;
@@ -171,6 +237,7 @@ int main(void)
     static picoRTOS_stack_t stack3[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack4[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack5[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack6[CONFIG_DEFAULT_STACK_COUNT];
 
     /* TICK */
     picoRTOS_task_init(&task, led_main, &itsybitsy.RED, stack0, PICORTOS_STACK_COUNT(stack0));
@@ -192,8 +259,12 @@ int main(void)
     picoRTOS_task_init(&task, adc_main, &itsybitsy.ADC, stack4, PICORTOS_STACK_COUNT(stack4));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
 
+    /* FLASH */
+    picoRTOS_task_init(&task, flash_main, &itsybitsy.FLASH, stack5, PICORTOS_STACK_COUNT(stack5));
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+
     /* WDT */
-    picoRTOS_task_init(&task, wd_main, &itsybitsy.WDT, stack5, PICORTOS_STACK_COUNT(stack5));
+    picoRTOS_task_init(&task, wd_main, &itsybitsy.WDT, stack6, PICORTOS_STACK_COUNT(stack6));
     picoRTOS_add_task(&task, picoRTOS_get_last_available_priority());
 
     picoRTOS_start();

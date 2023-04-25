@@ -93,6 +93,10 @@ static void clock_init(void)
 
     /* WDT */
     (void)clock_same5x_mclk_enable(CLOCK_SAME5X_MCLK_APBA_WDT);
+
+    /* FLASH */
+    (void)clock_same5x_mclk_enable(CLOCK_SAME5X_MCLK_AHB_NVMCTRL);
+    (void)clock_same5x_mclk_enable(CLOCK_SAME5X_MCLK_APBB_NVMCTRL);
 }
 
 static void mux_init(void)
@@ -201,6 +205,12 @@ static int wd_init(/*@partial@*/ struct adafruit_itsybitsy_m4 *ctx)
     return wd_start(&ctx->WDT);
 }
 
+static int flash_init(/*@partial@*/ struct adafruit_itsybitsy_m4 *ctx)
+{
+    (void)flash_same5x_init(&ctx->FLASH, (struct FLASH_SAME5X*)ADDR_NVMCTRL);
+    return 0;
+}
+
 int adafruit_itsybitsy_m4_init(struct adafruit_itsybitsy_m4 *ctx)
 {
     clock_init();
@@ -213,6 +223,7 @@ int adafruit_itsybitsy_m4_init(struct adafruit_itsybitsy_m4 *ctx)
     (void)pwm_init(ctx);
     (void)adc_init(ctx);
     (void)wd_init(ctx);
+    (void)flash_init(ctx);
 
     return 0;
 }

@@ -2,6 +2,7 @@
 #define ADAFRUIT_ITSYBITSY_M4_H
 
 #include "adc-same5x.h"
+#include "flash-same5x.h"
 #include "gpio-same5x.h"
 #include "spi-sercom.h"
 #include "uart-sercom.h"
@@ -15,6 +16,7 @@ struct adafruit_itsybitsy_m4 {
     struct pwm D5;
     struct adc ADC;
     struct wd WDT;
+    struct flash FLASH;
 };
 
 int adafruit_itsybitsy_m4_init(/*@out@*/ struct adafruit_itsybitsy_m4 *ctx);
