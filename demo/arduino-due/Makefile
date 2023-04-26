@@ -51,8 +51,12 @@ SRC_C += $(PICORTOS_DIR)/drivers/twi/twi-sam3x.c
 SRC_C += $(PICORTOS_DIR)/drivers/uart/uart-sam3x.c
 SRC_C += $(PICORTOS_DIR)/drivers/wd/wd-sam3x.c
 
+# staging
 INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/can
+INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/flash
+
 SRC_C += $(PICORTOS_DIR)/staging/drivers/can/can-sam3x.c
+SRC_C += $(PICORTOS_DIR)/staging/drivers/flash/flash-sam3x.c
 
 # demo
 SRC_C += main.c
