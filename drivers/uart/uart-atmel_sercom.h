@@ -1,20 +1,20 @@
-#ifndef UART_SERCOM_H
-#define UART_SERCOM_H
+#ifndef UART_ATMEL_SERCOM_H
+#define UART_ATMEL_SERCOM_H
 
 #include "uart.h"
 #include "clock.h"
 
-#define UART_SERCOM_CS_MIN 5
-#define UART_SERCOM_CS_MAX 9
+#define UART_ATMEL_SERCOM_CS_MIN 5
+#define UART_ATMEL_SERCOM_CS_MAX 9
 
-struct UART_SERCOM;
+struct UART_ATMEL_SERCOM;
 
 struct uart {
-    /*@temp@*/ struct UART_SERCOM *base;
+    /*@temp@*/ struct UART_ATMEL_SERCOM *base;
     clock_id_t clkid;
 };
 
-int uart_sercom_init(/*@out@*/ struct uart *ctx, struct UART_SERCOM *base, clock_id_t clkid);
+int uart_atmel_sercom_init(/*@out@*/ struct uart *ctx, struct UART_ATMEL_SERCOM *base, clock_id_t clkid);
 
 /* Implements:
  *

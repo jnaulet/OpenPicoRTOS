@@ -1,9 +1,9 @@
-#include "uart-sercom.h"
+#include "uart-atmel_sercom.h"
 #include "picoRTOS.h"
 
 #include <stdint.h>
 
-struct UART_SERCOM {
+struct UART_ATMEL_SERCOM {
     volatile uint32_t CTRLA;
     volatile uint32_t CTRLB;
     volatile uint32_t CTRLC;
@@ -116,7 +116,7 @@ static int sync_busywait(struct uart *ctx, uint32_t mask)
     return 0;
 }
 
-/* Function: uart_sercom_init
+/* Function: uart_atmel_sercom_init
  * Initializes a SERCOM UART
  *
  * Parameters:
@@ -127,7 +127,7 @@ static int sync_busywait(struct uart *ctx, uint32_t mask)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int uart_sercom_init(struct uart *ctx, struct UART_SERCOM *base, clock_id_t clkid)
+int uart_atmel_sercom_init(struct uart *ctx, struct UART_ATMEL_SERCOM *base, clock_id_t clkid)
 {
     ctx->base = base;
     ctx->clkid = clkid;
@@ -166,8 +166,8 @@ static int set_baudrate(struct uart *ctx, unsigned long baudrate)
 
 static int set_cs(struct uart *ctx, size_t cs)
 {
-    if (!picoRTOS_assert(cs >= (size_t)UART_SERCOM_CS_MIN)) return -EINVAL;
-    if (!picoRTOS_assert(cs <= (size_t)UART_SERCOM_CS_MAX)) return -EINVAL;
+    if (!picoRTOS_assert(cs >= (size_t)UART_ATMEL_SERCOM_CS_MIN)) return -EINVAL;
+    if (!picoRTOS_assert(cs <= (size_t)UART_ATMEL_SERCOM_CS_MAX)) return -EINVAL;
 
     ctx->base->CTRLB &= ~CTRLB_CHSIZE(CTRLB_CHSIZE_M);
     ctx->base->CTRLB |= CTRLB_CHSIZE(cs % (size_t)8);
