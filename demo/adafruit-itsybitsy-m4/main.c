@@ -223,6 +223,43 @@ static void flash_main(void *priv)
     picoRTOS_kill();
 }
 
+/*
+ * This thread tests the i2c slave, it reads a byte (0xa5) and send 0x5a back
+ */
+static void twi_slave_main(void *priv)
+{
+    picoRTOS_assert_void(priv != NULL);
+
+    struct twi *TWI = (struct twi*)priv;
+
+    for (;;) {
+        int res;
+        int timeout = (int)PICORTOS_DELAY_SEC(2);
+
+        if ((res = twi_poll(TWI)) == -EAGAIN) {
+            picoRTOS_schedule();
+            continue;
+        }
+
+        if (res == TWI_WRITE) {
+            char c = (char)0;
+            while (twi_read(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
+                picoRTOS_schedule();
+
+            picoRTOS_assert_void(timeout != -1);
+            picoRTOS_assert_void(c == (char)0xa5);
+        }
+
+        if (res == TWI_READ) {
+            char c = (char)0x5a;
+            while (twi_write(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
+                picoRTOS_schedule();
+
+            picoRTOS_assert_void(timeout != -1);
+        }
+    }
+}
+
 int main(void)
 {
     static struct adafruit_itsybitsy_m4 itsybitsy;
@@ -238,6 +275,7 @@ int main(void)
     static picoRTOS_stack_t stack4[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack5[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack6[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack7[CONFIG_DEFAULT_STACK_COUNT];
 
     /* TICK */
     picoRTOS_task_init(&task, led_main, &itsybitsy.RED, stack0, PICORTOS_STACK_COUNT(stack0));
@@ -263,8 +301,12 @@ int main(void)
     picoRTOS_task_init(&task, flash_main, &itsybitsy.FLASH, stack5, PICORTOS_STACK_COUNT(stack5));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
 
+    /* I2C */
+    picoRTOS_task_init(&task, twi_slave_main, &itsybitsy.I2C, stack6, PICORTOS_STACK_COUNT(stack6));
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+
     /* WDT */
-    picoRTOS_task_init(&task, wd_main, &itsybitsy.WDT, stack6, PICORTOS_STACK_COUNT(stack6));
+    picoRTOS_task_init(&task, wd_main, &itsybitsy.WDT, stack7, PICORTOS_STACK_COUNT(stack7));
     picoRTOS_add_task(&task, picoRTOS_get_last_available_priority());
 
     picoRTOS_start();

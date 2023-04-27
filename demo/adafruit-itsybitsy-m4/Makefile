@@ -32,6 +32,7 @@ INCLUDE += -I$(PICORTOS_DIR)/drivers/gpio
 INCLUDE += -I$(PICORTOS_DIR)/drivers/mux
 INCLUDE += -I$(PICORTOS_DIR)/drivers/pwm
 INCLUDE += -I$(PICORTOS_DIR)/drivers/spi
+INCLUDE += -I$(PICORTOS_DIR)/drivers/twi
 INCLUDE += -I$(PICORTOS_DIR)/drivers/uart
 INCLUDE += -I$(PICORTOS_DIR)/drivers/wd
 
@@ -42,9 +43,15 @@ SRC_C += $(PICORTOS_DIR)/drivers/flash/flash-same5x.c
 SRC_C += $(PICORTOS_DIR)/drivers/gpio/gpio-same5x.c
 SRC_C += $(PICORTOS_DIR)/drivers/mux/mux-same5x.c
 SRC_C += $(PICORTOS_DIR)/drivers/pwm/pwm-same5x_tc.c
-SRC_C += $(PICORTOS_DIR)/drivers/spi/spi-sercom.c
-SRC_C += $(PICORTOS_DIR)/drivers/uart/uart-sercom.c
+SRC_C += $(PICORTOS_DIR)/drivers/spi/spi-atmel_sercom.c
+SRC_C += $(PICORTOS_DIR)/drivers/twi/twi-atmel_sercom.c
+SRC_C += $(PICORTOS_DIR)/drivers/uart/uart-atmel_sercom.c
 SRC_C += $(PICORTOS_DIR)/drivers/wd/wd-same5x.c
+
+# staging
+INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/can
+
+SRC_C += $(PICORTOS_DIR)/staging/drivers/can/can-same5x.c
 
 # demo
 SRC_C += main.c

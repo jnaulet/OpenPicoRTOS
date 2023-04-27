@@ -97,6 +97,11 @@ static void clock_init(void)
     /* FLASH */
     (void)clock_same5x_mclk_enable(CLOCK_SAME5X_MCLK_AHB_NVMCTRL);
     (void)clock_same5x_mclk_enable(CLOCK_SAME5X_MCLK_APBB_NVMCTRL);
+
+    /* I2C */
+    (void)clock_same5x_mclk_enable(CLOCK_SAME5X_MCLK_APBB_SERCOM2);
+    (void)clock_same5x_setup(CLOCK_SAME5X_SERCOM2_CORE, GCLK_DFLL48M);
+    (void)clock_same5x_enable(CLOCK_SAME5X_SERCOM2_CORE);
 }
 
 static void mux_init(void)
@@ -125,6 +130,11 @@ static void mux_init(void)
 
     /* ADC */
     (void)mux_same5x_input(&PORTA, (size_t)2, MUX_PMUX_B);         /* A0 */
+
+    /* I2C */
+    (void)mux_same5x_output(&PORTA, (size_t)12, MUX_PMUX_C);    /* SDA */
+    (void)mux_same5x_output(&PORTA, (size_t)13, MUX_PMUX_C);    /* SCL */
+
 }
 
 static int gpio_init(/*@partial@*/ struct adafruit_itsybitsy_m4 *ctx)
@@ -144,7 +154,7 @@ static int spi_init(/*@partial@*/ struct adafruit_itsybitsy_m4 *ctx)
     };
 
     /* external */
-    (void)spi_sercom_init(&ctx->SPI, (struct SPI_SERCOM*)ADDR_SERCOM1, CLOCK_SAME5X_SERCOM1_CORE);
+    (void)spi_atmel_sercom_init(&ctx->SPI, (struct SPI_ATMEL_SERCOM*)ADDR_SERCOM1, CLOCK_SAME5X_SERCOM1_CORE);
     return spi_setup(&ctx->SPI, &SPI_settings);
 }
 
@@ -159,7 +169,7 @@ static int uart_init(/*@partial@*/ struct adafruit_itsybitsy_m4 *ctx)
         false,
     };
 
-    (void)uart_sercom_init(&ctx->UART, (struct UART_SERCOM*)ADDR_SERCOM3, CLOCK_SAME5X_SERCOM3_CORE);
+    (void)uart_atmel_sercom_init(&ctx->UART, (struct UART_ATMEL_SERCOM*)ADDR_SERCOM3, CLOCK_SAME5X_SERCOM3_CORE);
     return uart_setup(&ctx->UART, &UART_settings);
 }
 
@@ -211,6 +221,21 @@ static int flash_init(/*@partial@*/ struct adafruit_itsybitsy_m4 *ctx)
     return 0;
 }
 
+static int twi_init(/*@partial@*/ struct adafruit_itsybitsy_m4 *ctx)
+{
+    struct twi_settings TWI_settings = {
+        TWI_BITRATE_STANDARD,   /* bitrate */
+        TWI_MODE_SLAVE,         /* mode */
+        (twi_addr_t)0x55        /* slave address */
+    };
+
+    (void)twi_atmel_sercom_init(&ctx->I2C, (struct TWI_ATMEL_SERCOM*)ADDR_SERCOM2,
+                                CLOCK_SAME5X_SERCOM2_CORE);
+
+    (void)twi_setup(&ctx->I2C, &TWI_settings);
+    return 0;
+}
+
 int adafruit_itsybitsy_m4_init(struct adafruit_itsybitsy_m4 *ctx)
 {
     clock_init();
@@ -224,6 +249,7 @@ int adafruit_itsybitsy_m4_init(struct adafruit_itsybitsy_m4 *ctx)
     (void)adc_init(ctx);
     (void)wd_init(ctx);
     (void)flash_init(ctx);
+    (void)twi_init(ctx);
 
     return 0;
 }

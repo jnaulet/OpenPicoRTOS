@@ -6,7 +6,7 @@
 #define CONFIG_TICK_HZ          1000
 
 /* TASKS */
-#define CONFIG_TASK_COUNT      7
+#define CONFIG_TASK_COUNT      8
 
 /* STACK */
 #define CONFIG_DEFAULT_STACK_COUNT 256
