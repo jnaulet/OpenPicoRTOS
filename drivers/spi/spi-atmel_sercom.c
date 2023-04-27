@@ -1,9 +1,9 @@
-#include "spi-sercom.h"
+#include "spi-atmel_sercom.h"
 #include "picoRTOS.h"
 
 #include <stdint.h>
 
-struct SPI_SERCOM {
+struct SPI_ATMEL_SERCOM {
     volatile uint32_t CTRLA;
     volatile uint32_t CTRLB;
     volatile uint32_t CTRLC;
@@ -90,7 +90,7 @@ static int sync_busywait(struct spi *ctx, uint32_t mask)
     return 0;
 }
 
-/* Function: spi_sercom_init
+/* Function: spi_atmel_sercom_init
  * Initializes a SERCOM SPI
  *
  * Parameters:
@@ -101,7 +101,7 @@ static int sync_busywait(struct spi *ctx, uint32_t mask)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int spi_sercom_init(struct spi *ctx, struct SPI_SERCOM *base, clock_id_t clkid)
+int spi_atmel_sercom_init(struct spi *ctx, struct SPI_ATMEL_SERCOM *base, clock_id_t clkid)
 {
     int res;
 
@@ -186,8 +186,8 @@ static int set_clkmode(struct spi *ctx, spi_clock_mode_t clkmode)
 
 static int set_frame_size(struct spi *ctx, size_t frame_size)
 {
-    if (!picoRTOS_assert(frame_size >= (size_t)SPI_SERCOM_FRAME_SIZE_MIN)) return -EINVAL;
-    if (!picoRTOS_assert(frame_size <= (size_t)SPI_SERCOM_FRAME_SIZE_MAX)) return -EINVAL;
+    if (!picoRTOS_assert(frame_size >= (size_t)SPI_ATMEL_SERCOM_FRAME_SIZE_MIN)) return -EINVAL;
+    if (!picoRTOS_assert(frame_size <= (size_t)SPI_ATMEL_SERCOM_FRAME_SIZE_MAX)) return -EINVAL;
 
     if (frame_size <= (size_t)8)
         ctx->base->CTRLC &= ~CTRLC_DATA32B;
