@@ -135,6 +135,16 @@ int twi_setup(struct twi *ctx, struct twi_settings *settings)
     return 0;
 }
 
+int twi_poll(struct twi *ctx)
+{
+    if ((ctx->base->I2CxSTAT.REG & I2CxSTAT_D_A) == 0) {
+        if ((ctx->base->I2CxSTAT.REG & I2CxSTAT_R_W) == 0) return TWI_WRITE;
+        else return TWI_READ;
+    }
+
+    return -EAGAIN;
+}
+
 static int twi_rw_as_master_idle(struct twi *ctx)
 {
     /* check if bus is idle */
