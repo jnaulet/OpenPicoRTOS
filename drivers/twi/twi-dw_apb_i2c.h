@@ -30,7 +30,7 @@ int twi_dw_apb_i2c_init(/*@out@*/ struct twi *ctx, struct TWI_DW_APB_I2C *base, 
 
 /* Runtime calls:
  * int twi_setup(struct twi *ctx, struct twi_settings *settings);
- *
+ * int twi_poll(struct twi *ctx);
  * int twi_write(struct twi *ctx, const void *buf, size_t n);
  * int twi_read(struct twi *ctx, void *buf, size_t n);
  */

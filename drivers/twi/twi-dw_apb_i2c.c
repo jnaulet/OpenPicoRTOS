@@ -226,6 +226,14 @@ int twi_setup(struct twi *ctx, struct twi_settings *settings)
     return 0;
 }
 
+int twi_poll(struct twi *ctx)
+{
+    if ((ctx->base->IC_RAW_INTR_STAT & IC_INTR_STAT_R_RX_FULL) != 0) return TWI_WRITE;
+    if ((ctx->base->IC_RAW_INTR_STAT & IC_INTR_STAT_R_RD_REQ) != 0) return TWI_READ;
+
+    return -EAGAIN;
+}
+
 static int twi_rw_as_master_check_abort(struct twi *ctx)
 {
     int ret = 0;
