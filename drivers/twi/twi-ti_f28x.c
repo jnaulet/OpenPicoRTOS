@@ -193,6 +193,16 @@ int twi_setup(struct twi *ctx, struct twi_settings *settings)
     return res;
 }
 
+int twi_poll(struct twi *ctx)
+{
+    if ((ctx->base->I2CSTR & I2CSTR_AAS) != 0) {
+        if ((ctx->base->I2CSTR & I2CSTR_SDIR) == 0) return TWI_WRITE;
+        else return TWI_READ;
+    }
+
+    return -EAGAIN;
+}
+
 static int twi_write_as_slave_idle(struct twi *ctx, size_t n)
 {
     if (!picoRTOS_assert(n > 0)) return -EINVAL;
