@@ -226,6 +226,14 @@ int twi_setup(struct twi *ctx, struct twi_settings *settings)
     return 0;
 }
 
+int twi_poll(struct twi *ctx)
+{
+    if ((ctx->base->IC_RAW_INTR_STAT & IC_INTR_STAT_R_RX_FULL) != 0) return TWI_WRITE;
+    if ((ctx->base->IC_RAW_INTR_STAT & IC_INTR_STAT_R_RD_REQ) != 0) return TWI_READ;
+
+    return -EAGAIN;
+}
+
 static int twi_rw_as_master_check_abort(struct twi *ctx)
 {
     int ret = 0;
@@ -333,11 +341,30 @@ static int twi_write_as_slave_idle(struct twi *ctx)
     return -EAGAIN;
 }
 
+static int twi_write_as_slave_check_abort(struct twi *ctx)
+{
+    int ret = 0;
+    uint32_t source = ctx->base->IC_TX_ABRT_SOURCE;
+    uint32_t intr_stat = ctx->base->IC_INTR_STAT;
+
+    /* check for abort */
+    if ((intr_stat & IC_INTR_STAT_R_TX_ABRT) != 0) {
+        /* NACK */
+        if ((source & IC_TX_ABRT_SOURCE_ABRT_TXDATA_NOACK) != 0)
+            ret = -ENOMSG;
+
+        /* ack bit */
+        ctx->base->IC_CLR_TX_ABRT |= 1;
+    }
+
+    return ret;
+}
+
 static int twi_write_as_slave_xfer(struct twi *ctx, const void *buf, size_t n)
 {
     if (!picoRTOS_assert(n > 0)) return -EINVAL;
 
-    size_t sent = 0;
+    int sent = 0;
     const uint8_t *buf8 = (uint8_t*)buf;
 
     while (n-- != 0) {
@@ -347,27 +374,38 @@ static int twi_write_as_slave_xfer(struct twi *ctx, const void *buf, size_t n)
         if ((ctx->base->IC_STATUS & IC_STATUS_TFNF) == 0)
             break;
 
-        if ((res = twi_rw_as_master_check_abort(ctx)) < 0) {
-            ctx->state = TWI_DW_APB_I2C_STATE_IDLE;
-            return res;
-        }
-
-        if ((ctx->base->IC_RAW_INTR_STAT & IC_INTR_STAT_R_STOP_DET) != 0) {
-            ctx->base->IC_CLR_STOP_DET |= 1;
-            ctx->state = TWI_DW_APB_I2C_STATE_IDLE;
-            break;
+        if ((res = twi_write_as_slave_check_abort(ctx)) < 0 ||
+            (ctx->base->IC_RAW_INTR_STAT & IC_INTR_STAT_R_STOP_DET) != 0) {
+            ctx->state = TWI_DW_APB_I2C_STATE_STOP;
+            ctx->last = sent;
+            return -EAGAIN;
         }
 
         ctx->base->IC_DATA_CMD = (uint32_t)buf8[sent++];
 
-        if (n == 0)
-            ctx->state = TWI_DW_APB_I2C_STATE_IDLE;
+        if (n == 0) {
+            ctx->state = TWI_DW_APB_I2C_STATE_STOP;
+            ctx->last = sent;
+            return -EAGAIN;
+        }
     }
 
     if (sent == 0)
         return -EAGAIN;
 
-    return (int)sent;
+    return sent;
+}
+
+static int twi_rw_as_slave_stop(struct twi *ctx)
+{
+    if ((ctx->base->IC_RAW_INTR_STAT & IC_INTR_STAT_R_STOP_DET) == 0)
+        return -EAGAIN;
+
+    ctx->base->IC_CLR_STOP_DET |= 1;
+    (void)twi_write_as_slave_check_abort(ctx);
+
+    ctx->state = TWI_DW_APB_I2C_STATE_IDLE;
+    return ctx->last;
 }
 
 static int twi_write_as_slave(struct twi *ctx, const void *buf, size_t n)
@@ -377,6 +415,7 @@ static int twi_write_as_slave(struct twi *ctx, const void *buf, size_t n)
     switch (ctx->state) {
     case TWI_DW_APB_I2C_STATE_IDLE: return twi_write_as_slave_idle(ctx);
     case TWI_DW_APB_I2C_STATE_XFER: return twi_write_as_slave_xfer(ctx, buf, n);
+    case TWI_DW_APB_I2C_STATE_STOP: return twi_rw_as_slave_stop(ctx);
     default: break;
     }
 
@@ -487,7 +526,7 @@ static int twi_read_as_slave_xfer(struct twi *ctx, void *buf, size_t n)
 {
     if (!picoRTOS_assert(n > 0)) return -EINVAL;
 
-    size_t recv = 0;
+    int recv = 0;
     uint8_t *buf8 = (uint8_t*)buf;
 
     while (n-- != 0) {
@@ -499,16 +538,16 @@ static int twi_read_as_slave_xfer(struct twi *ctx, void *buf, size_t n)
         /* end of xfer */
         if (n == 0 ||
             (ctx->base->IC_RAW_INTR_STAT & IC_INTR_STAT_R_STOP_DET) != 0) {
-            ctx->base->IC_CLR_STOP_DET |= 1;
-            ctx->state = TWI_DW_APB_I2C_STATE_IDLE;
-            break;
+            ctx->state = TWI_DW_APB_I2C_STATE_STOP;
+            ctx->last = recv;
+            return -EAGAIN;
         }
     }
 
     if (recv == 0)
         return -EAGAIN;
 
-    return (int)recv;
+    return recv;
 }
 
 static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
@@ -518,6 +557,7 @@ static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
     switch (ctx->state) {
     case TWI_DW_APB_I2C_STATE_IDLE: return twi_read_as_slave_idle(ctx);
     case TWI_DW_APB_I2C_STATE_XFER: return twi_read_as_slave_xfer(ctx, buf, n);
+    case TWI_DW_APB_I2C_STATE_STOP: return twi_rw_as_slave_stop(ctx);
     default: break;
     }
 
