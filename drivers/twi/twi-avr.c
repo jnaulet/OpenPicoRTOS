@@ -159,6 +159,16 @@ int twi_setup(struct twi *ctx, struct twi_settings *settings)
     return res;
 }
 
+int twi_poll(struct twi *ctx)
+{
+    int tws = (int)TWSR_TWS_READ(ctx->base->TWSR);
+
+    if (tws == TWSR_SR_SLAW_RECV_ACK_RET) return TWI_WRITE;
+    if (tws == TWSR_ST_SLAR_RECV_ACK_RET) return TWI_READ;
+
+    return -EAGAIN;
+}
+
 static int twi_rw_as_master_idle(struct twi *ctx)
 {
     /* 1. Application writes to TWCR to initiate transmission of START */
