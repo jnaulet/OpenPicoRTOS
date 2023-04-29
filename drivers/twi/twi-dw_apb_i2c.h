@@ -14,6 +14,7 @@ typedef enum {
     TWI_DW_APB_I2C_STATE_IDLE,
     TWI_DW_APB_I2C_STATE_REQ,
     TWI_DW_APB_I2C_STATE_XFER,
+    TWI_DW_APB_I2C_STATE_STOP,
     TWI_DW_APB_I2C_STATE_COUNT
 } twi_dw_apb_i2c_state_t;
 
