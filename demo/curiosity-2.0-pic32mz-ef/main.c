@@ -244,20 +244,30 @@ static void twi_slave_main(void *priv)
     struct twi *TWI = (struct twi*)priv;
 
     for (;;) {
-        char c = (char)0;
+        int res;
         int timeout = (int)PICORTOS_DELAY_SEC(2);
 
-        while (twi_read(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
+        if ((res = twi_poll(TWI)) == -EAGAIN) {
             picoRTOS_schedule();
+            continue;
+        }
 
-        picoRTOS_assert_void(timeout != -1);
-        picoRTOS_assert_void(c == (char)0xa5);
+        if (res == TWI_WRITE) {
+            char c = (char)0;
+            while (twi_read(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
+                picoRTOS_schedule();
 
-        c = (char)0x5a;
-        while (twi_write(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
-            picoRTOS_schedule();
+            picoRTOS_assert_void(timeout != -1);
+            picoRTOS_assert_void(c == (char)0xa5);
+        }
 
-        picoRTOS_assert_void(timeout != -1);
+        if (res == TWI_READ) {
+            char c = (char)0x5a;
+            while (twi_write(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
+                picoRTOS_schedule();
+
+            picoRTOS_assert_void(timeout != -1);
+        }
     }
 }
 
