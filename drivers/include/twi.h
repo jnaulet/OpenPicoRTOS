@@ -36,6 +36,14 @@ typedef enum {
 
 typedef uint16_t twi_addr_t;
 
+/* Constants: TWI R/W
+ *
+ * TWI_WRITE - Twi write command (0)
+ * TWI_READ - Twi read command (1)
+ */
+#define TWI_WRITE 0
+#define TWI_READ  1
+
 /* Constants: TWI addresses
  *
  * TWI_ADDR_GENERAL - General call address (0)
@@ -61,6 +69,17 @@ struct twi_settings {
  * 0 in case of success, -errno otherwise
  */
 int twi_setup(struct twi *ctx, struct twi_settings *settings);
+
+/* Function: twi_poll
+ * Polls TWI interface for transfer (slave mode)
+ *
+ * Paramters:
+ *  ctx - A TWI instance
+ *
+ * Returns:
+ * TWI_READ if a read is recv, TWI_WRITE if write is recv, -errno otherwise
+ */
+int twi_poll(struct twi *ctx);
 
 /* Function: twi_write
  * Write data to a TWI interface
