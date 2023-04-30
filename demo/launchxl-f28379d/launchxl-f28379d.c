@@ -178,7 +178,7 @@ static void i2c_init(/*@partial@*/ struct launchxl_f28379d *ctx)
     struct twi_settings I2C_settings = {
         100000ul,           /* bitrate */
         TWI_MODE_MASTER,
-        (twi_addr_t)0x69,   /* slave_addr */
+        (twi_addr_t)0x55,   /* slave_addr */
     };
 
     (void)twi_ti_f28x_init(&ctx->I2CA, (struct I2C_REGS*)ADDR_I2CA, CLOCK_F28379X_SYSCLK);

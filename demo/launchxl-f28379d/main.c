@@ -206,10 +206,7 @@ static void can_main(void *priv)
 
 /*
  * This thread tests the i2c master by sending a byte (0xa5) to 0x69 and expecting a
- * specific answer from a slave (0x5a).
- *
- * You must wire I2CA to I2CB for this test to work. There's also a clear electrical
- * problem, it only works with an oscilloscope connected to the pins on my desk.
+ * specific answer from a slave (0x5a). You must wire I2CA to I2CB for this test to work.
  */
 static void twi_master_main(void *priv)
 {
