@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
+#define TWI_TI_F28X_TXFFIL 16
+#define TWI_TI_F28X_RXFFIL 0
+
 struct I2C_REGS {
     volatile uint16_t I2COAR;
     volatile uint16_t I2CIER;
@@ -95,7 +98,9 @@ static int reset(struct twi *ctx)
 
     /* start in fifo mode */
     ctx->base->I2CFFTX = (uint16_t)(I2CFFTX_I2CFFEN | I2CFFTX_TXFFRST | I2CFFTX_TXFFINTCLR);
+    ctx->base->I2CFFTX |= I2CFFTX_TXFFIL(TWI_TI_F28X_TXFFIL);
     ctx->base->I2CFFRX = (uint16_t)(I2CFFRX_RXFFRST | I2CFFRX_RXFFINTCLR);
+    ctx->base->I2CFFTX |= I2CFFRX_RXFFIL(TWI_TI_F28X_RXFFIL);
     ctx->base->I2CMDR = (uint16_t)I2CMDR_IRS;
     return 0;
 }
@@ -203,21 +208,7 @@ int twi_poll(struct twi *ctx)
     return -EAGAIN;
 }
 
-static int twi_write_as_slave_idle(struct twi *ctx, size_t n)
-{
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-
-    /* check if bus is available */
-    if ((ctx->base->I2CSTR & I2CSTR_BB) != 0)
-        return -EAGAIN;
-
-    /* prepare xfer */
-    ctx->base->I2CCNT = (uint16_t)n;
-    ctx->base->I2CMDR = (uint16_t)(I2CMDR_TRX | I2CMDR_IRS);
-
-    ctx->state = TWI_TI_F28X_STATE_XFER;
-    return -EAGAIN;
-}
+/* SLAVE TRANSMIT */
 
 static int twi_write_as_slave_xfer(struct twi *ctx, const void *buf, size_t n)
 {
@@ -227,7 +218,7 @@ static int twi_write_as_slave_xfer(struct twi *ctx, const void *buf, size_t n)
     uint16_t *buf16 = (uint16_t*)buf;
 
     while ((size_t)sent != n) {
-        if ((ctx->base->I2CSTR & I2CSTR_XRDY) == 0)
+        if ((ctx->base->I2CFFTX & I2CFFTX_TXFFINT) == 0)
             break;
 
         ctx->base->I2CDXR = buf16[sent++];
@@ -242,12 +233,24 @@ static int twi_write_as_slave_xfer(struct twi *ctx, const void *buf, size_t n)
     return sent;
 }
 
+static int twi_write_as_slave_idle(struct twi *ctx, const void *buf, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+
+    /* prepare xfer */
+    ctx->base->I2CCNT = (uint16_t)n;
+    ctx->base->I2CMDR = (uint16_t)(I2CMDR_TRX | I2CMDR_IRS);
+
+    ctx->state = TWI_TI_F28X_STATE_XFER;
+    return twi_write_as_slave_xfer(ctx, buf, n);
+}
+
 static int twi_write_as_slave(struct twi *ctx, const void *buf, size_t n)
 {
     if (!picoRTOS_assert(n > 0)) return -EINVAL;
 
     switch (ctx->state) {
-    case TWI_TI_F28X_STATE_IDLE: return twi_write_as_slave_idle(ctx, n);
+    case TWI_TI_F28X_STATE_IDLE: return twi_write_as_slave_idle(ctx, buf, n);
     case TWI_TI_F28X_STATE_XFER: return twi_write_as_slave_xfer(ctx, buf, n);
     default: break;
     }
@@ -256,21 +259,7 @@ static int twi_write_as_slave(struct twi *ctx, const void *buf, size_t n)
     /*@notreached@*/ return -EIO;
 }
 
-static int twi_write_as_master_idle(struct twi *ctx, size_t n)
-{
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-
-    /* check if bus is available */
-    if ((ctx->base->I2CSTR & I2CSTR_BB) != 0)
-        return -EAGAIN;
-
-    /* prepare xfer */
-    ctx->base->I2CCNT = (uint16_t)n;
-    ctx->base->I2CMDR = (uint16_t)(I2CMDR_STT | I2CMDR_MST | I2CMDR_STP | I2CMDR_TRX | I2CMDR_IRS);
-
-    ctx->state = TWI_TI_F28X_STATE_XFER;
-    return -EAGAIN;
-}
+/* MASTER TRANSMIT */
 
 static int check_for_errors(struct twi *ctx)
 {
@@ -300,7 +289,7 @@ static int twi_write_as_master_xfer(struct twi *ctx, const void *buf, size_t n)
             return res;
         }
 
-        if ((ctx->base->I2CSTR & I2CSTR_XRDY) == 0)
+        if ((ctx->base->I2CFFTX & I2CFFTX_TXFFINT) == 0)
             break;
 
         ctx->base->I2CDXR = buf16[sent++];
@@ -315,10 +304,26 @@ static int twi_write_as_master_xfer(struct twi *ctx, const void *buf, size_t n)
     return sent;
 }
 
+static int twi_write_as_master_idle(struct twi *ctx, const void *buf, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+
+    /* check if bus is available */
+    if ((ctx->base->I2CSTR & I2CSTR_BB) != 0)
+        return -EAGAIN;
+
+    /* prepare xfer */
+    ctx->base->I2CCNT = (uint16_t)n;
+    ctx->base->I2CMDR = (uint16_t)(I2CMDR_STT | I2CMDR_MST | I2CMDR_STP | I2CMDR_TRX | I2CMDR_IRS);
+
+    ctx->state = TWI_TI_F28X_STATE_XFER;
+    return twi_write_as_master_xfer(ctx, buf, n);
+}
+
 static int twi_write_as_master(struct twi *ctx, const void *buf, size_t n)
 {
     switch (ctx->state) {
-    case TWI_TI_F28X_STATE_IDLE: return twi_write_as_master_idle(ctx, n);
+    case TWI_TI_F28X_STATE_IDLE: return twi_write_as_master_idle(ctx, buf, n);
     case TWI_TI_F28X_STATE_XFER: return twi_write_as_master_xfer(ctx, buf, n);
     default: break;
     }
@@ -341,19 +346,9 @@ int twi_write(struct twi *ctx, const void *buf, size_t n)
     /*@notreached@*/ return -EIO;
 }
 
-static int twi_read_as_slave_idle(struct twi *ctx, size_t n)
-{
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+/* SLAVE RECEIVE */
 
-    /* prepare xfer */
-    ctx->base->I2CCNT = (uint16_t)n;
-    ctx->base->I2CMDR = (uint16_t)I2CMDR_IRS;
-
-    ctx->state = TWI_TI_F28X_STATE_XFER;
-    return -EAGAIN;
-}
-
-static int twi_read_as_slave_xfer(struct twi *ctx, const void *buf, size_t n)
+static int twi_read_as_slave_xfer(struct twi *ctx, void *buf, size_t n)
 {
     if (!picoRTOS_assert(n > 0)) return -EINVAL;
 
@@ -361,7 +356,7 @@ static int twi_read_as_slave_xfer(struct twi *ctx, const void *buf, size_t n)
     uint16_t *buf16 = (uint16_t*)buf;
 
     while ((size_t)recv != n) {
-        if (((ctx->base->I2CFFRX >> 8) & I2CFFRX_RXFFST_M) == 0)
+        if ((ctx->base->I2CFFRX & I2CFFRX_RXFFINT) == 0)
             break;
 
         buf16[recv++] = ctx->base->I2CDRR;
@@ -376,12 +371,24 @@ static int twi_read_as_slave_xfer(struct twi *ctx, const void *buf, size_t n)
     return recv;
 }
 
+static int twi_read_as_slave_idle(struct twi *ctx, void *buf, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+
+    /* prepare xfer */
+    ctx->base->I2CCNT = (uint16_t)n;
+    ctx->base->I2CMDR = (uint16_t)I2CMDR_IRS;
+
+    ctx->state = TWI_TI_F28X_STATE_XFER;
+    return twi_read_as_slave_xfer(ctx, buf, n);
+}
+
 static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
 {
     if (!picoRTOS_assert(n > 0)) return -EINVAL;
 
     switch (ctx->state) {
-    case TWI_TI_F28X_STATE_IDLE: return twi_read_as_slave_idle(ctx, n);
+    case TWI_TI_F28X_STATE_IDLE: return twi_read_as_slave_idle(ctx, buf, n);
     case TWI_TI_F28X_STATE_XFER: return twi_read_as_slave_xfer(ctx, buf, n);
     default: break;
     }
@@ -390,23 +397,9 @@ static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
     /*@notreached@*/ return -EIO;
 }
 
-static int twi_read_as_master_idle(struct twi *ctx, size_t n)
-{
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+/* MASTER RECEIVE */
 
-    /* check if bus is available */
-    if ((ctx->base->I2CSTR & I2CSTR_BB) != 0)
-        return -EAGAIN;
-
-    /* prepare xfer */
-    ctx->base->I2CCNT = (uint16_t)n;
-    ctx->base->I2CMDR = (uint16_t)(I2CMDR_STT | I2CMDR_MST | I2CMDR_STP | I2CMDR_IRS);
-
-    ctx->state = TWI_TI_F28X_STATE_XFER;
-    return -EAGAIN;
-}
-
-static int twi_read_as_master_xfer(struct twi *ctx, const void *buf, size_t n)
+static int twi_read_as_master_xfer(struct twi *ctx, void *buf, size_t n)
 {
     if (!picoRTOS_assert(n > 0)) return -EINVAL;
 
@@ -414,7 +407,7 @@ static int twi_read_as_master_xfer(struct twi *ctx, const void *buf, size_t n)
     uint16_t *buf16 = (uint16_t*)buf;
 
     while ((size_t)recv != n) {
-        if (((ctx->base->I2CFFRX >> 8) & I2CFFRX_RXFFST_M) == 0)
+        if ((ctx->base->I2CFFRX & I2CFFRX_RXFFINT) == 0)
             break;
 
         buf16[recv++] = ctx->base->I2CDRR;
@@ -429,10 +422,26 @@ static int twi_read_as_master_xfer(struct twi *ctx, const void *buf, size_t n)
     return recv;
 }
 
+static int twi_read_as_master_idle(struct twi *ctx, void *buf, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+
+    /* check if bus is available */
+    if ((ctx->base->I2CSTR & I2CSTR_BB) != 0)
+        return -EAGAIN;
+
+    /* prepare xfer */
+    ctx->base->I2CCNT = (uint16_t)n;
+    ctx->base->I2CMDR = (uint16_t)(I2CMDR_STT | I2CMDR_MST | I2CMDR_STP | I2CMDR_IRS);
+
+    ctx->state = TWI_TI_F28X_STATE_XFER;
+    return twi_read_as_master_xfer(ctx, buf, n);
+}
+
 static int twi_read_as_master(struct twi *ctx, void *buf, size_t n)
 {
     switch (ctx->state) {
-    case TWI_TI_F28X_STATE_IDLE: return twi_read_as_master_idle(ctx, n);
+    case TWI_TI_F28X_STATE_IDLE: return twi_read_as_master_idle(ctx, buf, n);
     case TWI_TI_F28X_STATE_XFER: return twi_read_as_master_xfer(ctx, buf, n);
     default: break;
     }
