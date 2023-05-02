@@ -178,6 +178,11 @@ void arch_propagate_tick(void)
     *SIO_FIFO_WR = 0;
 }
 
+void arch_acknowledge_tick(void)
+{
+    arch_flush_rd_fifo();
+}
+
 /* ATOMIC ops */
 
 picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *var,
