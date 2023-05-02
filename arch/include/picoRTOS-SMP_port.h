@@ -65,6 +65,13 @@ extern void arch_spin_unlock(void);                             /* ends code sec
  */
 extern void arch_propagate_tick(void);
 
+/* Function: arch_acknowledge_tick
+ * Acknowledge the system tick interrupt as an auxiliary core
+ *
+ * This function is called by picoRTOS_tick() when it's run by an auxiliary core
+ */
+extern void arch_acknowledge_tick(void);
+
 /* INTERRUPT MANAGEMENT (optional) */
 
 /* Function: arch_smp_enable_interrupt

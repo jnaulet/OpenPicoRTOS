@@ -594,8 +594,10 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
         picoRTOS.tick++;
         arch_propagate_tick();
         pid = picoRTOS_rewind_as_main(core);
-    }else
+    }else{
+        arch_acknowledge_tick();
         pid = picoRTOS_rewind_as_aux(core);
+    }
 
     /* refresh current task pointer */
     task = &TASK_BY_PID(pid);
