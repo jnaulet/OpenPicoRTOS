@@ -4,14 +4,16 @@
 
 #include <stdint.h>
 
-#define INTC_BCR   ((volatile uint32_t*)(ADDR_INTC + 0))
-#define INTC_CPR   ((volatile uint32_t*)(ADDR_INTC + 0x10))
-#define INTC_IACKR ((volatile uint32_t*)(ADDR_INTC + 0x20))
-#define INTC_EOIR  ((volatile uint32_t*)(ADDR_INTC + 0x30))
-#define INTC_PSR   ((volatile uint16_t*)(ADDR_INTC + 0x60))
+#define INTC_MCR   ((volatile uint32_t*)(ADDR_INTC))
+#define INTC_CPR   ((volatile uint32_t*)(ADDR_INTC + 0x8))
+#define INTC_IACKR ((volatile uint32_t*)(ADDR_INTC + 0x10))
+#define INTC_EOIR  ((volatile uint32_t*)(ADDR_INTC + 0x18))
+#define INTC_PSR   ((volatile uint8_t*)(ADDR_INTC + 0x40))
 
-#define INTC_PSR_PRIN_M  0xfu
-#define INTC_PSR_PRIN(x) ((x) & INTC_PSR_PRIN_M)
+#define INTC_PSR_PRC_SELn_M  0x3u
+#define INTC_PSR_PRC_SELn(x) (((x) & INTC_PSR_PRC_SELn_M) << 5)
+#define INTC_PSR_PRC_PRIn_M  0xfu
+#define INTC_PSR_PRC_PRIn(x) ((x) & INTC_PSR_PRC_PRIn_M)
 
 #define DEC_VALUE PICORTOS_CYCLES_PER_TICK
 
@@ -41,7 +43,7 @@ void arch_init(void)
     ASM("wrteei 0");
 
     /* reset intc */
-    *INTC_BCR = 0;
+    *INTC_MCR = 0;
     *INTC_CPR = 0;
     *INTC_IACKR = (uint32_t)__intc_vectors_start__;
 
@@ -98,15 +100,21 @@ void arch_register_interrupt(picoRTOS_irq_t irq, picoRTOS_isr_fn fn, void *priv)
     ISR_TABLE_priv[irq] = (unsigned long)priv;
 }
 
+#define PRC_SELn_PROC_0 0x0
+#define PRC_SELn_PROC_1 0x3
+
 void arch_enable_interrupt(picoRTOS_irq_t irq)
 {
     if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT))
         return;
 
-    /* only support for priority 1 yet */
-    int prc_sel = 0x8000 >> arch_core();
+    uint8_t psr = (uint8_t)INTC_PSR_PRC_SELn(PRC_SELn_PROC_0);
 
-    INTC_PSR[irq] = (uint16_t)(prc_sel | INTC_PSR_PRIN(1));
+    if (arch_core() != 0)
+        psr = (uint8_t)INTC_PSR_PRC_SELn(PRC_SELn_PROC_1);
+
+    /* only support for priority 1 yet */
+    INTC_PSR[irq] = psr | (uint8_t)INTC_PSR_PRC_PRIn(1);
 }
 
 void arch_disable_interrupt(picoRTOS_irq_t irq)
@@ -114,10 +122,8 @@ void arch_disable_interrupt(picoRTOS_irq_t irq)
     if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT))
         return;
 
-    /* de-select core */
-    int prc_sel = 0x8000 >> arch_core();
-
-    INTC_PSR[irq] &= ~(uint16_t)prc_sel;
+    /* disable by setting prio to 0 */
+    INTC_PSR[irq] &= ~(uint8_t)INTC_PSR_PRC_PRIn(INTC_PSR_PRC_PRIn_M);
 }
 
 /* STAT OPS */
