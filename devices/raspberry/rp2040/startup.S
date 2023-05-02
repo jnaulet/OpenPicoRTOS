@@ -136,4 +136,4 @@ _exit:
 	/* Weak handlers */
 	def_irq_handler NMI_Handler
 	def_irq_handler HardFault_Handler
-	def_irq_handler SVC_Handler
+	def_irq_handler PendSV_Handler

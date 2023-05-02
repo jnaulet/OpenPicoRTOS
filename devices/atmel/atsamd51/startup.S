@@ -75,5 +75,5 @@ _exit:
 	def_irq_handler MemManage_Handler
 	def_irq_handler BusFault_Handler
 	def_irq_handler UsageFault_Handler
-	def_irq_handler SVC_Handler
 	def_irq_handler DebugMon_Handler
+	def_irq_handler PendSV_Handler

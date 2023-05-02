@@ -41,7 +41,7 @@ Reset_Handler:
 	/* copy .text to ram */
 	COPY_TO_RAM __etext, __text_start__, __text_end__
 	COPY_TO_RAM __vectors, __vectors_start__, __vectors_end__
-        
+
 .ignore_text_relocation:
 	/* init vectors & stack */
 	INIT_VTOR __vectors_start__
@@ -68,5 +68,5 @@ _exit:
 	def_irq_handler MemManage_Handler
 	def_irq_handler BusFault_Handler
 	def_irq_handler UsageFault_Handler
-	def_irq_handler SVC_Handler
 	def_irq_handler DebugMon_Handler
+	def_irq_handler PendSV_Handler
