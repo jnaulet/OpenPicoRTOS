@@ -245,12 +245,6 @@ static int twi_send_stop_as_master(struct twi *ctx)
 
 static int twi_stop_as_master(struct twi *ctx, int ret)
 {
-    if ((ctx->base->INTFLAG & INTFLAG_MB) == 0)
-        return -EAGAIN;
-
-    ctx->base->CTRLB &= ~CTRLB_CMD(CTRLB_CMD_M);
-    ctx->base->CTRLB |= CTRLB_CMD(0x3); /* stop condition */
-
     ctx->state = TWI_ATMEL_SERCOM_STATE_STOP;
     ctx->last = ret;
 
@@ -265,7 +259,7 @@ static int twi_wait_stop_as_slave(struct twi *ctx)
         return -EAGAIN;
 
     /* clear intflags */
-    ctx->base->INTFLAG = ctx->base->INTFLAG;
+    ctx->base->INTFLAG = (uint16_t)-1;
     ctx->base->CTRLB &= ~CTRLB_ACKACT;
 
     ctx->state = TWI_ATMEL_SERCOM_STATE_IDLE;
