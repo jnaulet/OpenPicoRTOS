@@ -86,11 +86,7 @@ arch_start_first_task:
 	.global arch_syscall
 arch_syscall:
 	push {lr}
-	/* call arch_PENDSV directly (values will be auto-stacked) */
-	movs r2, #0x80
-	lsls r2, r2, #21
-	ldr r3, =NVIC_ICSR
-	str r2, [r3]
+	svc #0
 	pop {pc}
 
 	.thumb_func
@@ -104,9 +100,9 @@ SysTick_Handler:
 	pop {pc}	/* return */
 
 	.thumb_func
-	.type PendSV_Handler, %function
-	.global PendSV_Handler
-PendSV_Handler:
+	.type SVC_Handler, %function
+	.global SVC_Handler
+SVC_Handler:
 	push {lr}	/* store lr (interrupt return) */
 	SAVE_CONTEXT r0
 	ldr r1, [r0, #32]	/* get syscall from psp (auto-stacked r0) */
