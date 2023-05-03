@@ -123,9 +123,9 @@ arch_resume:
 	jr ra
 
 	.align 4
-	.type MTIP_Handler, %function
-	.global MTIP_Handler
-MTIP_Handler:
+	.type MachineTimerInterrupt_Handler, %function
+	.global MachineTimerInterrupt_Handler
+MachineTimerInterrupt_Handler:
 	SAVE_CONTEXT
 	/* tick */
 	csrr a0, mscratch
@@ -138,9 +138,9 @@ MTIP_Handler:
 	mret
 
 	.align 4
-	.type MSIP_Handler, %function
-	.global MSIP_Handler
-MSIP_Handler:
+	.type MachineSoftwareInterrupt_Handler, %function
+	.global MachineSoftwareInterrupt_Handler
+MachineSoftwareInterrupt_Handler:
 	SAVE_CONTEXT
 	/* syscall */
 	csrr a0, mscratch
@@ -216,20 +216,26 @@ arch_compare_and_swap:
 	jr ra
 
 	.align 4
-	.type MEIP_Handler, %function
-	.global MEIP_Handler
-MEIP_Handler:
+	.type PlatformDefined_Handler, %function
+	.global PlatformDefined_Handler
+PlatformDefined_Handler:
 	SAVE_CONTEXT
 	/* extract irq parameters */
-
+	la t0, ISR_TABLE
+	la t1, 0xfff
+	csrr t2, mcause
+	and t1, t1, t2 /* t1: exception code */
 	/* find isr table entry */
+	addi t1, t1, -16
+	slli t1, t1, 2
+	add t0, t0, t1
+	lw t2, 0 (t0)
+	lw a0, 4 (t0)
 	/* check fn */
-
+	beq t2, zero, isr_fn_is_null
 	/* finally branch to isr */
-	jr t0
-
-	/* ack irq */
-
+	jr t2
+	/* TODO: ack irq ? */
 	/* epilogue */
 	RESTORE_CONTEXT
 	mret
