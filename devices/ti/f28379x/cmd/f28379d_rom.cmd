@@ -48,6 +48,7 @@ SECTIONS
                         LOAD_START(RamfuncsLoadStart),
                         LOAD_SIZE(RamfuncsLoadSize),
                         RUN_START(RamfuncsRunStart),
+                        RUN_END(RamfuncsRunEnd),
                         ALIGN(8)
 #else
    .TI.ramfuncs     : { *(.ramfunc) *(.ramfuncs) } LOAD = FLASH0_13,
@@ -55,6 +56,7 @@ SECTIONS
                         LOAD_START(_RamfuncsLoadStart),
                         LOAD_SIZE(_RamfuncsLoadSize),
                         RUN_START(_RamfuncsRunStart),
+                        RUN_END(_RamfuncsRunEnd),
                         ALIGN(8)
 #endif
 }

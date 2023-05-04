@@ -5,14 +5,16 @@
 	.retain
 
 	.if __TI_EABI__
-	.asg RamfuncsRunStart, _RamfuncsRunStart
-	.asg RamfuncsLoadSize, _RamfuncsLoadSize
 	.asg RamfuncsLoadStart, _RamfuncsLoadStart
+	.asg RamfuncsLoadSize, _RamfuncsLoadSize
+	.asg RamfuncsRunStart, _RamfuncsRunStart
+	.asg RamfuncsRunEnd, _RamfuncsRunEnd
 	.endif
 
+	.global _RamfuncsLoadStart
 	.global _RamfuncsLoadSize
 	.global _RamfuncsRunStart
-	.global _RamfuncsLoadStart
+	.global _RamfuncsRunEnd
 
 	.ref _c_int00
 
@@ -26,13 +28,17 @@ Reset_Handler:
 	addb AL, #-1
 	bf .ignore_text_relocation, NC
 
-	COPY_TO_RAM #_RamfuncsRunStart, #_RamfuncsLoadStart, #_RamfuncsLoadSize
+	COPY_TO_RAM #_RamfuncsLoadStart, #_RamfuncsRunStart, #_RamfuncsRunEnd
 
 .ignore_text_relocation:
 	;; copy vectors
 	eallow
-	COPY_TO_RAM #ADDR_PIEVECTTABLE, #__vectors, #896
+	COPY_TO_RAM #__vectors, #ADDR_PIEVECTTABLE, #ADDR_PIEVECTTABLE + 0x1c0
 	edis
+
+	;; enable ePIE
+	mov AL, #1
+	mov *(0:ADDR_PIECTRL), AL
 
 	;; re-enable watchdog
 	TURN_WATCHDOG_ON

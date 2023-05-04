@@ -22,9 +22,10 @@ TURN_WATCHDOG_ON .macro
 	edis
 	.endm
 
-COPY_TO_RAM .macro dst, src, size
-	mov AL, size
-	movl XAR4, dst
-	movl XAR7, src
+COPY_TO_RAM .macro base, start, end
+	movl XAR4, start
+	mov ACC, end - 1
+	subl ACC, XAR4
+	movl XAR7, base
 	rpt @AL || pread *XAR4++, *XAR7
 	.endm
