@@ -25,7 +25,6 @@ struct PIEIxRn {
     volatile unsigned int IFR;
 };
 
-#define PIECTRL      ((volatile unsigned int*)(ADDR_PIECTRL + 0x0))
 #define PIEIxRn      ((volatile struct PIEIxRn*)(ADDR_PIECTRL + 0x2))
 #define PIEVECTTABLE ((volatile unsigned long*)ADDR_PIEVECTTABLE)
 
@@ -55,9 +54,6 @@ void arch_init(void)
     /* interrupt enable + start */
     CPUTIMER2->TCR |= 0x4000;
     CPUTIMER2->TCR &= ~0x10;
-
-    /* enable PIE */
-    *PIECTRL |= 0x1;
 }
 
 void arch_suspend(void)
