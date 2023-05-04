@@ -100,26 +100,22 @@ static void pwm_init(/*@partial@*/ struct launchxl_f28379d *ctx)
     struct pwm_ti_epwm_settings C99_EPWM1_settings = {
         100000000ul,     /* frequency */
         PWM_TI_EPWM_WAVEFORM_UP,
-        /* output A */
+    };
+
+    struct pwm_ti_epwm_pwm_settings CMPA_settings = {
         PWM_TI_EPWM_AQ_CLEAR,       /* zero */
         PWM_TI_EPWM_AQ_DISABLE,     /* period */
         PWM_TI_EPWM_AQ_SET,         /* CMPA, up */
         PWM_TI_EPWM_AQ_DISABLE,     /* CMPA, down */
         PWM_TI_EPWM_AQ_DISABLE,     /* CMPB, up */
         PWM_TI_EPWM_AQ_DISABLE,     /* CMPB, down */
-        /* output B */
-        PWM_TI_EPWM_AQ_DISABLE,     /* zero */
-        PWM_TI_EPWM_AQ_DISABLE,     /* period */
-        PWM_TI_EPWM_AQ_DISABLE,     /* CMPA, up */
-        PWM_TI_EPWM_AQ_DISABLE,     /* CMPA, down */
-        PWM_TI_EPWM_AQ_DISABLE,     /* CMPB, up */
-        PWM_TI_EPWM_AQ_DISABLE      /* CMPB, down */
     };
 
     (void)pwm_ti_epwm_init(&C99_EPWM1, (struct C99_EPWM_REGS*)ADDR_EPWM1, CLOCK_F28379X_EPWMCLK);
     (void)pwm_ti_epwm_setup(&C99_EPWM1, &C99_EPWM1_settings);
 
     (void)pwm_ti_epwm_pwm_init(&ctx->PWM, &C99_EPWM1, PWM_TI_EPWM_CMPA);
+    (void)pwm_ti_epwm_pwm_setup(&ctx->PWM, &CMPA_settings);
     (void)pwm_set_period(&ctx->PWM, (pwm_period_us_t)100);
 }
 
