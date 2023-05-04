@@ -52,9 +52,13 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - Atmel TinyAVR (0+) Series
  - MIPS M51xx / PIC32Mx
  - RISC-V RV32IMAC
+ - PowerPC e200z4 (staging)
+ - PowerPC e200z7 (staging)
  - TI C2000 / c28x
 
 ### Multi-core SMP
+ - PowerPC e200z4 SMP (staging)
+ - PowerPC e200z7 SMP (staging)
  - RP2040 SMP
 
 ### Simulation
@@ -153,6 +157,8 @@ Basic demo code is provided for the following boards:
   - ATtiny817-Xplained Mini
   - ATtiny1607 Curiosity Nano
   - Curiosity 2.0 PIC32 MZ EF
+  - NXP Devkit MPC5748G (dual-core SMP) (staging)
+  - NXP MPC575E-EVB (dual-core SMP) (staging)
   - Sipeed Longan Nano
   - Sipeed Longan Nano + LCD
   - Texas Instruments Launchxl-f28379d
