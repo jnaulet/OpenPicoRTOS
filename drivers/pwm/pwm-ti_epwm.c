@@ -357,28 +357,8 @@ int pwm_ti_epwm_setup(struct pwm_ti_epwm *ctx, struct pwm_ti_epwm_settings *sett
 {
     int res;
 
-    if ((res = set_tbclk(ctx, settings->frequency)) < 0)
-        return res;
-
-    if ((res = set_waveform(ctx, settings->waveform)) < 0)
-        return res;
-
-    /* output A */
-    if ((res = set_output_a(ctx, AQCTLn_ACTION_ZRO, settings->output_a_zero_aq)) < 0 ||
-        (res = set_output_a(ctx, AQCTLn_ACTION_PRD, settings->output_a_prd_aq)) < 0 ||
-        (res = set_output_a(ctx, AQCTLn_ACTION_CAU, settings->output_a_cmpa_up_aq)) < 0 ||
-        (res = set_output_a(ctx, AQCTLn_ACTION_CAD, settings->output_a_cmpa_down_aq)) < 0 ||
-        (res = set_output_a(ctx, AQCTLn_ACTION_CBU, settings->output_a_cmpb_up_aq)) < 0 ||
-        (res = set_output_a(ctx, AQCTLn_ACTION_CBD, settings->output_a_cmpb_down_aq)) < 0)
-        return res;
-
-    /* output B */
-    if ((res = set_output_b(ctx, AQCTLn_ACTION_ZRO, settings->output_b_zero_aq)) < 0 ||
-        (res = set_output_b(ctx, AQCTLn_ACTION_PRD, settings->output_b_prd_aq)) < 0 ||
-        (res = set_output_b(ctx, AQCTLn_ACTION_CAU, settings->output_b_cmpa_up_aq)) < 0 ||
-        (res = set_output_b(ctx, AQCTLn_ACTION_CAD, settings->output_b_cmpa_down_aq)) < 0 ||
-        (res = set_output_b(ctx, AQCTLn_ACTION_CBU, settings->output_b_cmpb_up_aq)) < 0 ||
-        (res = set_output_b(ctx, AQCTLn_ACTION_CBD, settings->output_b_cmpb_down_aq)) < 0)
+    if ((res = set_tbclk(ctx, settings->frequency)) < 0 ||
+        (res = set_waveform(ctx, settings->waveform)) < 0)
         return res;
 
     ctx->freq = settings->frequency;
@@ -405,6 +385,58 @@ int pwm_ti_epwm_pwm_init(struct pwm *ctx, struct pwm_ti_epwm *parent, pwm_ti_epw
     ctx->ncycles = 0;
 
     return 0;
+}
+
+static int setup_output_a(struct pwm *ctx, struct pwm_ti_epwm_pwm_settings *settings)
+{
+    int res;
+
+    if ((res = set_output_a(ctx->parent, AQCTLn_ACTION_ZRO, settings->zero_aq)) < 0 ||
+        (res = set_output_a(ctx->parent, AQCTLn_ACTION_PRD, settings->prd_aq)) < 0 ||
+        (res = set_output_a(ctx->parent, AQCTLn_ACTION_CAU, settings->cmpa_up_aq)) < 0 ||
+        (res = set_output_a(ctx->parent, AQCTLn_ACTION_CAD, settings->cmpa_down_aq)) < 0 ||
+        (res = set_output_a(ctx->parent, AQCTLn_ACTION_CBU, settings->cmpb_up_aq)) < 0 ||
+        (res = set_output_a(ctx->parent, AQCTLn_ACTION_CBD, settings->cmpb_down_aq)) < 0)
+        return res;
+
+    return 0;
+}
+
+static int setup_output_b(struct pwm *ctx, struct pwm_ti_epwm_pwm_settings *settings)
+{
+    int res;
+
+    if ((res = set_output_b(ctx->parent, AQCTLn_ACTION_ZRO, settings->zero_aq)) < 0 ||
+        (res = set_output_b(ctx->parent, AQCTLn_ACTION_PRD, settings->prd_aq)) < 0 ||
+        (res = set_output_b(ctx->parent, AQCTLn_ACTION_CAU, settings->cmpa_up_aq)) < 0 ||
+        (res = set_output_b(ctx->parent, AQCTLn_ACTION_CAD, settings->cmpa_down_aq)) < 0 ||
+        (res = set_output_b(ctx->parent, AQCTLn_ACTION_CBU, settings->cmpb_up_aq)) < 0 ||
+        (res = set_output_b(ctx->parent, AQCTLn_ACTION_CBD, settings->cmpb_down_aq)) < 0)
+        return res;
+
+    return 0;
+}
+
+/* Function: pwm_ti_epwm_pwm_setup
+ * Configures a PWM output from an TI_EPWM block
+ *
+ * Parameters:
+ *  ctx - The pwm to init
+ *  settings - The pwm output settings
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
+int pwm_ti_epwm_pwm_setup(struct pwm *ctx, struct pwm_ti_epwm_pwm_settings *settings)
+{
+    switch (ctx->cmp) {
+    case PWM_TI_EPWM_CMPA: return setup_output_a(ctx, settings);
+    case PWM_TI_EPWM_CMPB: return setup_output_b(ctx, settings);
+    default: break;
+    }
+
+    picoRTOS_break();
+    /*@notreached@*/ return -EIO;
 }
 
 int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)

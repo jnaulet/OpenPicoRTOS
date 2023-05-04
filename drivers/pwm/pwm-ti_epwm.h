@@ -13,14 +13,6 @@ typedef enum {
     PWM_TI_EPWM_WAVEFORM_COUNT
 } pwm_ti_epwm_waveform_t;
 
-typedef enum {
-    PWM_TI_EPWM_AQ_DISABLE  = 0,
-    PWM_TI_EPWM_AQ_CLEAR    = 1,
-    PWM_TI_EPWM_AQ_SET      = 2,
-    PWM_TI_EPWM_AQ_TOGGLE   = 3,
-    PWM_TI_EPWM_AQ_COUNT
-} pwm_ti_epwm_aq_t;
-
 struct pwm_ti_epwm {
     /*@temp@*/ struct C99_EPWM_REGS *base;
     clock_freq_t clk_freq;
@@ -31,21 +23,15 @@ struct pwm_ti_epwm {
 struct pwm_ti_epwm_settings {
     unsigned long frequency;
     pwm_ti_epwm_waveform_t waveform;
-    /* output A */
-    pwm_ti_epwm_aq_t output_a_zero_aq;
-    pwm_ti_epwm_aq_t output_a_prd_aq;
-    pwm_ti_epwm_aq_t output_a_cmpa_up_aq;
-    pwm_ti_epwm_aq_t output_a_cmpa_down_aq;
-    pwm_ti_epwm_aq_t output_a_cmpb_up_aq;
-    pwm_ti_epwm_aq_t output_a_cmpb_down_aq;
-    /* output B */
-    pwm_ti_epwm_aq_t output_b_zero_aq;
-    pwm_ti_epwm_aq_t output_b_prd_aq;
-    pwm_ti_epwm_aq_t output_b_cmpa_up_aq;
-    pwm_ti_epwm_aq_t output_b_cmpa_down_aq;
-    pwm_ti_epwm_aq_t output_b_cmpb_up_aq;
-    pwm_ti_epwm_aq_t output_b_cmpb_down_aq;
 };
+
+typedef enum {
+    PWM_TI_EPWM_AQ_DISABLE  = 0,
+    PWM_TI_EPWM_AQ_CLEAR    = 1,
+    PWM_TI_EPWM_AQ_SET      = 2,
+    PWM_TI_EPWM_AQ_TOGGLE   = 3,
+    PWM_TI_EPWM_AQ_COUNT
+} pwm_ti_epwm_aq_t;
 
 int pwm_ti_epwm_init(/*@out@*/ struct pwm_ti_epwm *ctx, struct C99_EPWM_REGS *base, clock_id_t clkid);
 int pwm_ti_epwm_setup(struct pwm_ti_epwm *ctx, struct pwm_ti_epwm_settings *settings);
@@ -62,7 +48,17 @@ struct pwm {
     uint32_t ncycles;
 };
 
+struct pwm_ti_epwm_pwm_settings {
+    pwm_ti_epwm_aq_t zero_aq;
+    pwm_ti_epwm_aq_t prd_aq;
+    pwm_ti_epwm_aq_t cmpa_up_aq;
+    pwm_ti_epwm_aq_t cmpa_down_aq;
+    pwm_ti_epwm_aq_t cmpb_up_aq;
+    pwm_ti_epwm_aq_t cmpb_down_aq;
+};
+
 int pwm_ti_epwm_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_ti_epwm *parent, pwm_ti_epwm_cmp_t cmp);
+int pwm_ti_epwm_pwm_setup(struct pwm *ctx, struct pwm_ti_epwm_pwm_settings *settings);
 
 /* Runtime calls:
  * int pwm_set_period(struct pwm *ctx, pwm_period_us_t period);
