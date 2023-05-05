@@ -1,4 +1,5 @@
 #include "picoRTOS_queue.h"
+#include "picoRTOS_port.h"
 
 #define IS_POW2(x) (((x) & ((x) - 1)) == 0)
 
@@ -12,6 +13,8 @@ void picoRTOS_queue_head_init(struct picoRTOS_queue_head *ctx, size_t count)
     ctx->w = 0;
     ctx->r = ctx->mask;
     ctx->i = 0;
+
+    arch_flush_dcache(ctx, sizeof(*ctx));
 }
 
 int picoRTOS_queue_head_pop(struct picoRTOS_queue_head *ctx)
@@ -19,6 +22,8 @@ int picoRTOS_queue_head_pop(struct picoRTOS_queue_head *ctx)
     size_t next;
 
     picoRTOS_futex_lock(&ctx->lock);
+    arch_invalidate_dcache(ctx, sizeof(*ctx));
+
     next = (ctx->r + 1) & ctx->mask;
 
     if (next == ctx->w) {
@@ -29,7 +34,9 @@ int picoRTOS_queue_head_pop(struct picoRTOS_queue_head *ctx)
     ctx->r = next;
     ctx->i = next;
 
+    arch_flush_dcache(ctx, sizeof(*ctx));
     picoRTOS_futex_unlock(&ctx->lock);
+
     return 0;
 }
 
@@ -38,6 +45,8 @@ int picoRTOS_queue_head_push(struct picoRTOS_queue_head *ctx)
     size_t next;
 
     picoRTOS_futex_lock(&ctx->lock);
+    arch_invalidate_dcache(ctx, sizeof(*ctx));
+
     next = (ctx->w + 1) & ctx->mask;
 
     if (next == ctx->r) {
@@ -48,6 +57,8 @@ int picoRTOS_queue_head_push(struct picoRTOS_queue_head *ctx)
     ctx->i = ctx->w;
     ctx->w = next;
 
+    arch_flush_dcache(ctx, sizeof(*ctx));
     picoRTOS_futex_unlock(&ctx->lock);
+
     return 0;
 }

@@ -14,7 +14,7 @@ struct picoRTOS_queue_head {
     volatile size_t r;
     volatile size_t w;
     volatile size_t i;
-};
+} __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
 
 void picoRTOS_queue_head_init(/*@out@*/ struct picoRTOS_queue_head *ctx, size_t count);
 int picoRTOS_queue_head_pop(struct picoRTOS_queue_head *ctx);
