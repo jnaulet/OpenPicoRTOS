@@ -110,6 +110,10 @@ void arch_propagate_tick(void)
 {
 }
 
+void arch_acknowledge_tick(void)
+{
+}
+
 void arch_smp_enable_interrupt(picoRTOS_irq_t irq,
                                picoRTOS_mask_t core_mask)
 {
@@ -117,5 +121,17 @@ void arch_smp_enable_interrupt(picoRTOS_irq_t irq,
 
 void arch_smp_disable_interrupt(picoRTOS_irq_t irq,
                                 picoRTOS_mask_t core_mask)
+{
+}
+
+/* CACHES */
+
+void arch_invalidate_dcache(void *addr __attribute__ ((unused)),
+                            size_t n __attribute__ ((unused)))
+{
+}
+
+void arch_flush_dcache(void *addr __attribute__ ((unused)),
+                       size_t n __attribute__ ((unused)))
 {
 }
