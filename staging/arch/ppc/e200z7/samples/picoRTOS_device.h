@@ -67,7 +67,6 @@
 /* C55FMC FLASH */
 
 #define FLASH_NXP_C55FMC_SECTOR_COUNT     18
-#define FLASH_NXP_C55FMC_PROGRAMABLE_SIZE 128
 #define FLASH_NXP_C55FMC_MAP { \
         { 0x600000ul, 0x603ffful, 1ul, 31ul  }, /* 16KB CSE data block0 */ \
         { 0x604000ul, 0x607ffful, 1ul, 30ul  }, /* 16KB CSE data block1 */ \

@@ -166,6 +166,20 @@ arch_core:
 	se_blr
 
 	.align 4
+	.type arch_dcbi, %function
+	.global arch_dcbi
+arch_dcbi:
+	dcbi 0, r3
+	se_blr
+
+	.align 4
+	.type arch_dcbf, %function
+	.global arch_dcbf
+arch_dcbf:
+	dcbf 0, r3
+	se_blr
+
+	.align 4
 	.global ExternalInput_Handler
 ExternalInput_Handler:
 	SAVE_CONTEXT

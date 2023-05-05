@@ -25,6 +25,8 @@ picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
 
 /*@external@*/ extern picoRTOS_cycles_t arch_DEC(void);
 /*@external@*/ extern picoRTOS_core_t arch_core(void);
+/*@external@*/ extern void arch_dcbi(uint32_t addr);
+/*@external@*/ extern void arch_dcbf(uint32_t addr);
 /*@external@*/ extern void arch_dec_init(uint32_t value);
 /*@external@*/ extern void arch_start_first_task(picoRTOS_stack_t *sp);
 /*@external@*/ extern void arch_syscall(picoRTOS_syscall_t syscall, void *priv);
@@ -66,8 +68,11 @@ void arch_resume(void)
 picoRTOS_stack_t *arch_prepare_stack(struct picoRTOS_task *task)
 {
     /* PPCs have a decrementing stack */
-    return arch_save_first_context(task->stack + task->stack_count,
-                                   task->fn, task->priv);
+    picoRTOS_stack_t *stack_top = task->stack + task->stack_count;
+    picoRTOS_stack_t *sp = arch_save_first_context(stack_top, task->fn, task->priv);
+
+    arch_flush_dcache(sp, (size_t)stack_top - (size_t)sp);
+    return sp;
 }
 
 /* cppcheck-suppress constParameter */
@@ -132,3 +137,47 @@ picoRTOS_cycles_t arch_counter(void)
 {
     return (picoRTOS_cycles_t)DEC_VALUE - arch_DEC();
 }
+
+/* CACHE OPS */
+
+#ifdef DEVICE_HAS_SOFTWARE_CACHE_COHERENCY
+void arch_invalidate_dcache(void *addr, size_t n)
+{
+    if (!picoRTOS_assert_fatal(n > 0)) return;
+
+    size_t npages = (n + (ARCH_L1_DCACHE_LINESIZE - 1)) / ARCH_L1_DCACHE_LINESIZE;
+    uint32_t base = (uint32_t)addr & ~(ARCH_L1_DCACHE_LINESIZE - 1);
+
+    while (npages-- != 0)
+        arch_dcbi(base + (npages * ARCH_L1_DCACHE_LINESIZE));
+
+    ASM("mbar");
+}
+
+void arch_flush_dcache(void *addr, size_t n)
+{
+    if (!picoRTOS_assert_fatal(n > 0)) return;
+
+    size_t npages = (n + (ARCH_L1_DCACHE_LINESIZE - 1)) / ARCH_L1_DCACHE_LINESIZE;
+    uint32_t base = (uint32_t)addr & ~(ARCH_L1_DCACHE_LINESIZE - 1);
+
+    while (npages-- != 0)
+        arch_dcbf(base + (npages * ARCH_L1_DCACHE_LINESIZE));
+
+    ASM("mbar");
+}
+
+#else
+
+void arch_invalidate_dcache(/*@unused@*/ void *addr __attribute__((unused)),
+                            /*@unused@*/ size_t n __attribute__((unused)))
+{
+    ASM("mbar");
+}
+
+void arch_flush_dcache(/*@unused@*/ void *addr __attribute__((unused)),
+                       /*@unused@*/ size_t n __attribute__((unused)))
+{
+    ASM("mbar");
+}
+#endif
