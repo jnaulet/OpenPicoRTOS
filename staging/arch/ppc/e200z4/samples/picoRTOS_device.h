@@ -7,6 +7,12 @@
 
 #define ADDR_INTC       0xfc040000
 
+#define ADDR_EDMA       0xfc0a3000
+
+#define ADDR_EMIOS0     0xffc38000
+#define ADDR_EMIOS1     0xfbc38000
+#define ADDR_EMIOS2     0xffc3c000
+
 #define ADDR_ADC0       0xffe00000
 #define ADDR_ADC1       0xfbe00000
 
@@ -86,33 +92,25 @@
 /* IRQs */
 
 #define IRQ_SSCIR0 0
-#define IRQ_PIT3   229
+/* TBD */
 
 /* DEVICE */
 
 #define DEVICE_INTERRUPT_VECTOR_COUNT 768
-
-/* EXCEPTIONS */
-
-#define ARCH_EE_HANDLER        IVOR4_Handler
-#define ARCH_SC_HANDLER        IVOR8_Handler
+#define DEVICE_HAS_SOFTWARE_CACHE_COHERENCY
 
 /* PERIPHERALS */
 
+/* ADC */
+#define ADC_NXP_SAR_CHANNEL_COUNT 96
+
 /* FLEXCAN */
-#define CAN_FLEXCAN_MB_COUNT 96
+#define CAN_NXP_FLEXCAN_MB_COUNT 96
 
 /* C55FMC FLASH */
 
-#define FLASH_C55FMC_SECTOR_COUNT     45
-#define FLASH_C55FMC_PROGRAMABLE_SIZE 128
-#define FLASH_C55FMC_MAP { \
-        { 0x0400000ul, 0x0403ffful, 0ul, 0ul  },    /* UTEST */ \
-        { 0x0404000ul, 0x0407ffful, 0ul, 14ul },    /* BAF */ \
-        { 0x0610000ul, 0x061fffful, 0ul, 8ul  },    /* HSM code block 2 */ \
-        { 0x0620000ul, 0x062fffful, 0ul, 6ul  },    /* HSM code block 3 */ \
-        { 0x0f80000ul, 0x0f83ffful, 1ul, 31ul },    /* HSM data block 0 */ \
-        { 0x0f84000ul, 0x0f87ffful, 1ul, 30ul },    /* HSM data block 1 */ \
+#define FLASH_NXP_C55FMC_SECTOR_COUNT     39
+#define FLASH_NXP_C55FMC_MAP { \
         { 0x0f8c000ul, 0x0f8fffful, 0ul, 15ul },    /* 16KB block */ \
         { 0x0f90000ul, 0x0f93ffful, 0ul, 31ul },    /* 16KB block */ \
         { 0x0f94000ul, 0x0f97ffful, 0ul, 30ul },    /* 16KB block */ \

@@ -9,8 +9,10 @@ typedef unsigned short picoRTOS_atomic_t;
 typedef unsigned long picoRTOS_irq_t;
 typedef unsigned long picoRTOS_cycles_t;
 
-#define ARCH_INITIAL_STACK_COUNT 37
-#define ARCH_MIN_STACK_COUNT (ARCH_INITIAL_STACK_COUNT + 8)
+#define ARCH_L1_DCACHE_LINESIZE 32  /* 8 words */
+
+#define ARCH_INITIAL_STACK_COUNT 46 /* 37 + cache align */
+#define ARCH_MIN_STACK_COUNT     (ARCH_INITIAL_STACK_COUNT + 8)
 
 /* SMP */
 typedef unsigned long picoRTOS_mask_t;

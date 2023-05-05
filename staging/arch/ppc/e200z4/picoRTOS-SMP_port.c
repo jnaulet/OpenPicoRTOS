@@ -55,7 +55,6 @@
 
 /* ASM */
 /*@external@*/ extern picoRTOS_core_t arch_core(void);
-/*@external@*/ extern void arch_disable_dcache(void);
 /*@external@*/ extern void arch_core_start(void);
 /*@external@*/ extern void arch_SSCIR0(void *priv);
 
@@ -86,9 +85,6 @@ void arch_smp_init(void)
 
     /* init whole intc */
     smp_intc_init();
-
-    /* disable dcache (no cache sync on e200z4) */
-    arch_disable_dcache();
 }
 
 static void transition_complete_busywait(void)

@@ -31,7 +31,7 @@ arch_core_start:
 	ENABLE_MSR_ME
 
 	INVALIDATE_AND_ENABLE_CACHE ICACHE
-	/* INVALIDATE_AND_ENABLE_CACHE DCACHE */
+	INVALIDATE_AND_ENABLE_CACHE DCACHE
 
 	ARCH_INIT_CORE_STACK
 	E_LIW r2, __sdata2_start__	/* sdata2 */
@@ -53,14 +53,6 @@ arch_core_start:
 	e_add16i r1, r1, 4
 
 	e_bl arch_start_first_task
-
-	.align 4
-	.type arch_disable_dcache, %function
-	.global arch_disable_dcache
-arch_disable_dcache:
-	e_li r3, 0
-	mtspr DCACHE, r3
-	se_blr
 
 	.align 4
 	.type arch_SSCIR0, %function
