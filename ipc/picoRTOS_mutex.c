@@ -1,5 +1,4 @@
 #include "picoRTOS_mutex.h"
-#include "picoRTOS_port.h"
 
 /* check */
 #ifndef CONFIG_DEADLOCK_COUNT
@@ -25,6 +24,7 @@ void picoRTOS_mutex_init(struct picoRTOS_mutex *mutex)
 {
     mutex->owner = (picoRTOS_atomic_t)-1;
     mutex->count = 0;
+    arch_flush_dcache(mutex, sizeof(*mutex));
 }
 
 /* Function: picoRTOS_mutex_trylock
@@ -47,6 +47,8 @@ int picoRTOS_mutex_trylock(struct picoRTOS_mutex *mutex)
         return -EAGAIN;
 
     mutex->count++;
+
+    arch_flush_dcache(mutex, sizeof(*mutex));
     return 0;
 }
 
@@ -88,9 +90,12 @@ void picoRTOS_mutex_unlock(struct picoRTOS_mutex *mutex)
 {
     picoRTOS_atomic_t owner = (picoRTOS_atomic_t)picoRTOS_self();
 
+    arch_invalidate_dcache(mutex, sizeof(*mutex));
     if (!picoRTOS_assert_fatal(mutex->owner == owner)) return;
     if (!picoRTOS_assert_fatal(mutex->count > 0)) return;
 
     if (--mutex->count == 0)
         mutex->owner = (picoRTOS_atomic_t)-1;
+
+    arch_flush_dcache(mutex, sizeof(*mutex));
 }

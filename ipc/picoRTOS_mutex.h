@@ -3,11 +3,12 @@
 
 #include <errno.h>
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 struct picoRTOS_mutex {
     picoRTOS_atomic_t owner;
     size_t count;
-};
+} __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
 
 /* macro for static init */
 #define PICORTOS_MUTEX_INITIALIZER              \
