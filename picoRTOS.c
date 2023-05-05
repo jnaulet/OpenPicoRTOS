@@ -25,7 +25,8 @@ struct picoRTOS_task_core {
     picoRTOS_task_state_t state;
     picoRTOS_tick_t tick;
     /* checks */
-    /*@temp@*/ picoRTOS_stack_t *stack;
+    /*@temp@*/ picoRTOS_stack_t *stack_bottom;
+    /*@temp@*/ picoRTOS_stack_t *stack_top;
     size_t stack_count;
     /* statistics */
     struct {
@@ -66,7 +67,8 @@ static void task_core_init(/*@out@*/ struct picoRTOS_task_core *task)
     task->state = PICORTOS_TASK_STATE_EMPTY;
     task->tick = 0;
     /* checks */
-    task->stack = NULL;
+    task->stack_bottom = NULL;
+    task->stack_top = NULL;
     task->stack_count = 0;
     /* stats */
     task->stat.counter = (picoRTOS_cycles_t)0;
@@ -92,7 +94,8 @@ static void task_core_quickcpy(/*@out@*/ struct picoRTOS_task_core *dst,
     dst->sp = src->sp;
     dst->state = src->state;
     /* checks */
-    dst->stack = src->stack;
+    dst->stack_bottom = src->stack_bottom;
+    dst->stack_top = src->stack_top;
     dst->stack_count = src->stack_count;
     /* shared priorities */
     dst->prio = src->prio;
@@ -150,7 +153,8 @@ static void task_idle_init(void)
     TASK_BY_PID(TASK_IDLE_PID).sp = arch_prepare_stack(&idle);
     TASK_BY_PID(TASK_IDLE_PID).state = PICORTOS_TASK_STATE_READY;
     /* checks */
-    TASK_BY_PID(TASK_IDLE_PID).stack = idle.stack;
+    TASK_BY_PID(TASK_IDLE_PID).stack_bottom = idle.stack;
+    TASK_BY_PID(TASK_IDLE_PID).stack_top = idle.stack + idle.stack_count;
     TASK_BY_PID(TASK_IDLE_PID).stack_count = idle.stack_count;
     /* shared priorities, ignored by sort anyway */
     TASK_BY_PID(TASK_IDLE_PID).prio = (picoRTOS_priority_t)TASK_IDLE_PRIO;
@@ -241,7 +245,8 @@ void picoRTOS_add_task(struct picoRTOS_task *task, picoRTOS_priority_t prio)
     TASK_BY_PID(pid).sp = arch_prepare_stack(task);
     TASK_BY_PID(pid).state = PICORTOS_TASK_STATE_READY;
     /* checks */
-    TASK_BY_PID(pid).stack = task->stack;
+    TASK_BY_PID(pid).stack_bottom = task->stack;
+    TASK_BY_PID(pid).stack_top = task->stack + task->stack_count;
     TASK_BY_PID(pid).stack_count = task->stack_count;
     /* shared priorities */
     TASK_BY_PID(pid).prio = prio;
@@ -489,33 +494,25 @@ picoRTOS_tick_t picoRTOS_get_tick(void)
 
 /* SYSCALLS */
 
-static void syscall_sleep(picoRTOS_tick_t delay)
+static void syscall_sleep(struct picoRTOS_task_core *task, picoRTOS_tick_t delay)
 {
     if (delay > 0) {
-        struct picoRTOS_task_core *task = &TASK_CURRENT();
         task->tick = picoRTOS.tick + delay;
         task->state = PICORTOS_TASK_STATE_SLEEP;
     }
 }
 
-static void syscall_kill(void)
+static void syscall_kill(struct picoRTOS_task_core *task)
 {
-    TASK_CURRENT().state = PICORTOS_TASK_STATE_EMPTY;
+    task->state = PICORTOS_TASK_STATE_EMPTY;
 }
 
-/*@exposed@*/ /*@null@*/
-static picoRTOS_stack_t *syscall_switch_context(picoRTOS_stack_t *sp)
+/*@exposed@*/
+static struct picoRTOS_task_core *
+syscall_switch_context(struct picoRTOS_task_core *task)
 {
-    struct picoRTOS_task_core *task = &TASK_CURRENT();
-
-    if (!picoRTOS_assert_fatal(sp >= task->stack)) return NULL;
-    if (!picoRTOS_assert_fatal(sp < (task->stack + task->stack_count))) return NULL;
-
     /* stats */
     task_core_stat_switch(task);
-
-    /* store current sp */
-    task->sp = sp;
 
     /* choose next task to run */
     do
@@ -529,20 +526,29 @@ static picoRTOS_stack_t *syscall_switch_context(picoRTOS_stack_t *sp)
     /* stats */
     task_core_stat_begin(task);
 
-    return task->sp;
+    return task;
 }
 
 picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, picoRTOS_syscall_t syscall, void *priv)
 {
     if (!picoRTOS_assert_fatal(syscall < PICORTOS_SYSCALL_COUNT)) return NULL;
 
+    struct picoRTOS_task_core *task = &TASK_CURRENT();
+
+    if (!picoRTOS_assert_fatal(sp >= task->stack_bottom)) return NULL;
+    if (!picoRTOS_assert_fatal(sp < task->stack_top)) return NULL;
+
+    /* store current sp */
+    task->sp = sp;
+
     switch (syscall) {
-    case PICORTOS_SYSCALL_SLEEP: syscall_sleep((picoRTOS_tick_t)priv); break;
-    case PICORTOS_SYSCALL_KILL: syscall_kill(); break;
+    case PICORTOS_SYSCALL_SLEEP: syscall_sleep(task, (picoRTOS_tick_t)priv); break;
+    case PICORTOS_SYSCALL_KILL: syscall_kill(task); break;
     default: /* PICORTOS_SYSCALL_SWITCH_CONTEXT */ break;
     }
 
-    return syscall_switch_context(sp);
+    task = syscall_switch_context(task);
+    return task->sp;
 }
 
 /* TICK */
@@ -551,8 +557,8 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
 {
     struct picoRTOS_task_core *task = &TASK_CURRENT();
 
-    if (!picoRTOS_assert_fatal(sp >= task->stack)) return NULL;
-    if (!picoRTOS_assert_fatal(sp < (task->stack + task->stack_count))) return NULL;
+    if (!picoRTOS_assert_fatal(sp >= task->stack_bottom)) return NULL;
+    if (!picoRTOS_assert_fatal(sp < task->stack_top)) return NULL;
 
     /* stats */
     task_core_stat_preempt(task);

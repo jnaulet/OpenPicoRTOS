@@ -198,4 +198,24 @@ arch_register_interrupt(picoRTOS_irq_t irq,
  */
 picoRTOS_cycles_t arch_counter(void);
 
+/* CACHES */
+
+/* Function: arch_invalidate_dcache
+ * Invalidates one or more cache lines
+ *
+ * Parameters:
+ *  addr - A cacheable address in RAM
+ *  n - The number of bytes to invalidate
+ */
+/*@external@*/ extern void arch_invalidate_dcache(void *addr, size_t n);
+
+/* Function: arch_flush_dcache
+ * Flushes one or more cache lines
+ *
+ * Parameters:
+ *  addr - A cacheable address in RAM
+ *  n - The number of bytes to flush
+ */
+/*@external@*/ extern void arch_flush_dcache(void *addr, size_t n);
+
 #endif
