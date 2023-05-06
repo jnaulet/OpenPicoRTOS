@@ -2,8 +2,7 @@ PICORTOS_DIR := $(abspath ../../..)
 
 CHECK += arch/arm/cm0+
 CHECK += arch/arm/cm3
-CHECK += arch/avr/avr5
-CHECK += arch/avr/avr6
+CHECK += arch/avr/avrmega
 CHECK += arch/avr/avrxmega3
 CHECK += arch/c2000/c28x
 CHECK += arch/mips32/m51xx
