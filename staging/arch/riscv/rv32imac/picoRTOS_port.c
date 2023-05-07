@@ -71,3 +71,15 @@ void arch_disable_interrupt(picoRTOS_irq_t irq)
 {
     if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT)) return;
 }
+
+/* CACHES (dummy) */
+
+void arch_invalidate_dcache(/*@unused@*/ void *addr __attribute__((unused)),
+                            /*@unused@*/ size_t n __attribute__((unused)))
+{
+}
+
+void arch_flush_dcache(/*@unused@*/ void *addr __attribute__((unused)),
+                       /*@unused@*/ size_t n __attribute__((unused)))
+{
+}
