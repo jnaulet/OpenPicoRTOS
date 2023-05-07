@@ -2,15 +2,22 @@
 #include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
-#define INTC_INTCON ((volatile unsigned long*)(ADDR_INTC + 0x0))
-#define INTC_IFSn   ((volatile unsigned long*)(ADDR_INTC + 0x40))
-#define INTC_IECn   ((volatile unsigned long*)(ADDR_INTC + 0xc0))
-#define INTC_IPCn   ((volatile unsigned long*)(ADDR_INTC + 0x140))
+#include <stdint.h>
+
+#define INTC_INTCON ((volatile uint32_t*)(ADDR_INTC + 0x0))
+#define INTC_IFSn   ((volatile uint32_t*)(ADDR_INTC + 0x40))
+#define INTC_IECn   ((volatile uint32_t*)(ADDR_INTC + 0xc0))
+#define INTC_IPCn   ((volatile uint32_t*)(ADDR_INTC + 0x140))
+
+/* ASM */
 
 /*@external@*/ extern /*@temp@*/
 picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
                                           picoRTOS_task_fn_t fn,
                                           void *priv);
+
+/*@external@*/ extern void arch_hit_invalidate_d(uint32_t addr);
+/*@external@*/ extern void arch_hit_writeback_inv_d(uint32_t addr);
 
 /*@external@*/ extern void arch_start_first_task(picoRTOS_stack_t *sp);
 /*@external@*/ extern void arch_syscall(picoRTOS_syscall_t syscall, void *priv);
@@ -119,3 +126,43 @@ void arch_disable_interrupt(picoRTOS_irq_t irq)
      * TODO: find a way to make this more generic and portable */
     INTC_IECn[IEC_index << 2] &= ~(1 << IEC_bit);
 }
+
+/* CACHE */
+
+#ifdef DEVICE_HAS_SOFTWARE_CACHE_COHERENCY
+void arch_invalidate_dcache(void *addr, size_t n)
+{
+    if (!picoRTOS_assert_fatal(n > 0)) return;
+
+    size_t npages = (n + (ARCH_L1_DCACHE_LINESIZE - 1)) / ARCH_L1_DCACHE_LINESIZE;
+    uint32_t base = (uint32_t)addr & ~(ARCH_L1_DCACHE_LINESIZE - 1);
+
+    while (npages-- != 0)
+        arch_hit_invalidate_d(base + (npages * ARCH_L1_DCACHE_LINESIZE));
+
+    ASM("ehb");
+}
+
+void arch_flush_dcache(void *addr, size_t n)
+{
+    if (!picoRTOS_assert_fatal(n > 0)) return;
+
+    size_t npages = (n + (ARCH_L1_DCACHE_LINESIZE - 1)) / ARCH_L1_DCACHE_LINESIZE;
+    uint32_t base = (uint32_t)addr & ~(ARCH_L1_DCACHE_LINESIZE - 1);
+
+    while (npages-- != 0)
+        arch_hit_writeback_inv_d(base + (npages * ARCH_L1_DCACHE_LINESIZE));
+
+    ASM("ehb");
+}
+#else
+void arch_invalidate_dcache(/*@unused@*/ void *addr __attribute__((unused)),
+                            /*@unused@*/ size_t n __attribute__((unused)))
+{
+}
+
+void arch_flush_dcache(/*@unused@*/ void *addr __attribute__((unused)),
+                       /*@unused@*/ size_t n __attribute__((unused)))
+{
+}
+#endif

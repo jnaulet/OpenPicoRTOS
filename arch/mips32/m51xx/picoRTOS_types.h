@@ -12,6 +12,8 @@ typedef unsigned long picoRTOS_atomic_t;
 typedef unsigned long picoRTOS_irq_t;
 typedef unsigned long picoRTOS_cycles_t;
 
+#define ARCH_L1_DCACHE_LINESIZE 16
+
 #define ARCH_INITIAL_CPU_STACK_COUNT 29
 #define ARCH_INITIAL_FPU_STACK_COUNT 0
 #define ARCH_INITIAL_DSP_STACK_COUNT 0

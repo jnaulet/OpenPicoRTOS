@@ -304,6 +304,20 @@ GeneralException_Unhandled:
 	nop
 
 	.align 2
+	.type arch_hit_invalidate_d, %function
+	.global arch_hit_invalidate_d
+arch_hit_invalidate_d:
+	cache Hit_Invalidate_D, 0 (a0)
+	jr ra
+
+	 .align 2
+	.type arch_hit_writeback_inv_d, %function
+	.global arch_hit_writeback_inv_d
+arch_hit_writeback_inv_d:
+	cache Hit_Writeback_Inv_D, 0 (a0)
+	jr ra
+
+	.align 2
 	.type arch_save_first_context, %function
 	.global arch_save_first_context
 arch_save_first_context:
