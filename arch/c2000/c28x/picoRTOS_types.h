@@ -18,6 +18,9 @@ typedef unsigned long picoRTOS_cycles_t;
 
 #define ARCH_MIN_STACK_COUNT (ARCH_INTIAL_STACK_COUNT + 2)
 
+/* no cache */
+#define ARCH_L1_DCACHE_LINESIZE sizeof(unsigned long)
+
 /* splint cannot check inline assembly */
 #ifdef S_SPLINT_S
 # define ASM(x) {}

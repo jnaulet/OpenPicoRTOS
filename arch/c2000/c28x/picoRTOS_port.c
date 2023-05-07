@@ -169,3 +169,15 @@ picoRTOS_cycles_t arch_counter(void)
     return (picoRTOS_cycles_t)CPUTIMER2_PRD_VALUE -
            (picoRTOS_cycles_t)CPUTIMER2->TIM;
 }
+
+/* CACHES (dummy) */
+
+void arch_invalidate_dcache(/*@unused@*/ void *addr __attribute__((unused)),
+                            /*@unused@*/ size_t n __attribute__((unused)))
+{
+}
+
+void arch_flush_dcache(/*@unused@*/ void *addr __attribute__((unused)),
+                       /*@unused@*/ size_t n __attribute__((unused)))
+{
+}
