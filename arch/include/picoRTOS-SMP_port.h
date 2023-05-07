@@ -13,7 +13,7 @@
  * See also:
  *  <arch_init>
  */
-extern void arch_smp_init(void); /* init picoRTOS SMP for arch */
+extern void arch_smp_init(void);
 
 /* Function: arch_core_init
  * Auxiliary core startup function
@@ -30,7 +30,7 @@ extern void arch_smp_init(void); /* init picoRTOS SMP for arch */
 extern void arch_core_init(picoRTOS_core_t core,
                            picoRTOS_stack_t *stack,
                            size_t stack_count,
-                           picoRTOS_stack_t *sp);               /* start core */
+                           picoRTOS_stack_t *sp);
 
 /* Function: arch_core
  * Provides the current running core identifier/index
@@ -38,7 +38,7 @@ extern void arch_core_init(picoRTOS_core_t core,
  * Returns:
  * The current running core index
  */
-extern picoRTOS_core_t arch_core(void);                         /* get core id */
+extern picoRTOS_core_t arch_core(void);
 
 /* Function: arch_spin_lock
  * Locks the SMP spinlock
@@ -50,12 +50,12 @@ extern picoRTOS_core_t arch_core(void);                         /* get core id *
  * This MUST make CONFIG_DEADLOCK_COUNT attempts to acquire the spinlock and declare deadlock
  * if it fails (debug exception)
  */
-extern void arch_spin_lock(void);                               /* protects code section from other cores */
+extern void arch_spin_lock(void);
 
 /* Function: arch_spin_unlock
  * Unlocks the SMP spinlock
  */
-extern void arch_spin_unlock(void);                             /* ends code section protection */
+extern void arch_spin_unlock(void);
 
 /* Function: arch_propagate_tick
  * Propagates the system tick interrupt to auxiliary cores
@@ -84,9 +84,8 @@ extern void arch_acknowledge_tick(void);
  * See also:
  *  <picoRTOS_SMP_enable_interrupt>
  */
-/*@external@*/
-extern void arch_smp_enable_interrupt(picoRTOS_irq_t irq,
-                                      picoRTOS_mask_t core_mask);
+extern /*@unused@*/ void arch_smp_enable_interrupt(picoRTOS_irq_t irq,
+                                                   picoRTOS_mask_t core_mask);
 
 /* Function: arch_smp_disable_interrupt
  * Disables an interrupt on a specific core or set of cores
@@ -98,8 +97,7 @@ extern void arch_smp_enable_interrupt(picoRTOS_irq_t irq,
  * See also:
  *  <picoRTOS_SMP_disable_interrupt>
  */
-/*@external@*/
-extern void arch_smp_disable_interrupt(picoRTOS_irq_t irq,
-                                       picoRTOS_mask_t core_mask);
+extern /*@unused@*/ void arch_smp_disable_interrupt(picoRTOS_irq_t irq,
+                                                    picoRTOS_mask_t core_mask);
 
 #endif

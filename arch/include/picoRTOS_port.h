@@ -29,7 +29,7 @@ typedef enum {
  * Returns:
  *  The task stack you have to switch to (context restoration)
  */
-/*@exposed@*/ /*@null@*/
+extern /*@exposed@*/ /*@null@*/
 picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp,
                                    picoRTOS_syscall_t syscall,
                                    /*@null@*/ void *priv);
@@ -44,15 +44,15 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp,
  * Returns:
  *  The task stack pointer you have to switch to (context restoration)
  */
-/*@exposed@*/ /*@null@*/
-picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp);  /* update tick */
+extern /*@exposed@*/ /*@null@*/
+picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp);
 
 /* Function: arch_init
  * Architecture port initialization function
  *
  * This is where you setup your tick timer, interrupts, etc
  */
-extern void arch_init(void);    /* init architecture */
+extern void arch_init(void);
 
 /* Function: arch_suspend
  * Suspends the scheduling
@@ -60,14 +60,15 @@ extern void arch_init(void);    /* init architecture */
  * See also:
  *  <picoRTOS_suspend>
  */
-extern void arch_suspend(void); /* suspends tick */
+extern void arch_suspend(void);
+
 /* Function: arch_resume
  * Resumes the scheduling
  *
  * See also:
  *  <picoRTOS_resume>
  */
-extern void arch_resume(void);  /* resumes tick */
+extern void arch_resume(void);
 
 /* Function: arch_prepare_stack
  * Prepares a task's stack for context restoration
@@ -81,7 +82,7 @@ extern void arch_resume(void);  /* resumes tick */
  * Returns:
  * A pointer to the first element of the newly prepared stack
  */
-/*@temp@*/ extern picoRTOS_stack_t * arch_prepare_stack(struct picoRTOS_task *task);
+extern /*@temp@*/ picoRTOS_stack_t * arch_prepare_stack(struct picoRTOS_task *task);
 
 /* Function: arch_start_first_task
  * Starts the first task on the system (idle) and bootstraps the scheduler
@@ -89,7 +90,7 @@ extern void arch_resume(void);  /* resumes tick */
  * Parameters:
  *  sp - The stack pointer of the idle task
  */
-/*@noreturn@*/ extern void arch_start_first_task(picoRTOS_stack_t *sp);
+extern /*@noreturn@*/ void arch_start_first_task(picoRTOS_stack_t *sp);
 
 /* Function: arch_syscall
  * Syscall port function
@@ -117,7 +118,7 @@ extern void arch_syscall(picoRTOS_syscall_t syscall, /*@null@*/ void *priv);
  * Parameters:
  *  null - SHOULD always be NULL
  */
-/*@noreturn@*/ extern void arch_idle(/*@null@*/ void *null);
+extern /*@noreturn@*/ void arch_idle(/*@null@*/ void *null);
 
 /* ARCH: ATOMIC OPS */
 
@@ -130,8 +131,8 @@ extern void arch_syscall(picoRTOS_syscall_t syscall, /*@null@*/ void *priv);
  * Returns:
  *  0 in case of success, 1 otherwise
  */
-/*@external@*/ extern picoRTOS_atomic_t
-arch_test_and_set(picoRTOS_atomic_t *ptr);    /* atomic test and set */
+extern /*@unused@*/ picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr);
+
 /* Function: arch_compare_and_swap
  * Atomic compare and swap operation,
  * will swap the value of *var to new if it's equal to old
@@ -144,10 +145,9 @@ arch_test_and_set(picoRTOS_atomic_t *ptr);    /* atomic test and set */
  * Returns:
  *  The previous value of *var (old) if success, anything else otherwise (preferably new)
  */
-/*@external@*/ extern picoRTOS_atomic_t
-arch_compare_and_swap(picoRTOS_atomic_t *var,
-                      picoRTOS_atomic_t old,
-                      picoRTOS_atomic_t val); /* atomic compare and swap */
+extern /*@unused@*/ picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *var,
+                                                            picoRTOS_atomic_t old,
+                                                            picoRTOS_atomic_t val);
 
 /* ARCH: INTERRUPTS (optional) */
 
@@ -157,10 +157,9 @@ arch_compare_and_swap(picoRTOS_atomic_t *var,
  * See also:
  *  <picoRTOS_register_interrupt>
  */
-/*@external@*/ extern void
-arch_register_interrupt(picoRTOS_irq_t irq,
-                        picoRTOS_isr_fn fn,
-                        /*@null@*/ void *priv);
+extern /*@unused@*/ void arch_register_interrupt(picoRTOS_irq_t irq,
+                                                 picoRTOS_isr_fn fn,
+                                                 /*@null@*/ void *priv);
 
 /* Function: arch_enable_interrupt
  * Enables an irq
@@ -171,7 +170,7 @@ arch_register_interrupt(picoRTOS_irq_t irq,
  * See also:
  *  <picoRTOS_register_interrupt>
  */
-/*@external@*/ extern void arch_enable_interrupt(picoRTOS_irq_t irq);
+extern /*@unused@*/ void arch_enable_interrupt(picoRTOS_irq_t irq);
 
 /* Function: arch_disable_interrupt
  * Disables an irq
@@ -182,7 +181,7 @@ arch_register_interrupt(picoRTOS_irq_t irq,
  * See also:
  *  <picoRTOS_disable_interrupt>
  */
-/*@external@*/ extern void arch_disable_interrupt(picoRTOS_irq_t irq);
+extern /*@unused@*/ void arch_disable_interrupt(picoRTOS_irq_t irq);
 
 /* STATS */
 
@@ -196,7 +195,7 @@ arch_register_interrupt(picoRTOS_irq_t irq,
  * Returns:
  *  The value of the counter in picoRTOS_cycles_t
  */
-picoRTOS_cycles_t arch_counter(void);
+extern picoRTOS_cycles_t arch_counter(void);
 
 /* CACHES */
 
@@ -207,7 +206,7 @@ picoRTOS_cycles_t arch_counter(void);
  *  addr - A cacheable address in RAM
  *  n - The number of bytes to invalidate
  */
-/*@external@*/ extern void arch_invalidate_dcache(void *addr, size_t n);
+extern /*@unused@*/ void arch_invalidate_dcache(void *addr, size_t n);
 
 /* Function: arch_flush_dcache
  * Flushes one or more cache lines
@@ -216,6 +215,6 @@ picoRTOS_cycles_t arch_counter(void);
  *  addr - A cacheable address in RAM
  *  n - The number of bytes to flush
  */
-/*@external@*/ extern void arch_flush_dcache(void *addr, size_t n);
+extern /*@unused@*/ void arch_flush_dcache(void *addr, size_t n);
 
 #endif
