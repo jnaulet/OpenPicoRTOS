@@ -70,7 +70,7 @@ void __attribute__((weak)) arch_idle(void *null)
 }
 
 /* ATOMIC OPS EMULATION */
-#ifdef CONFIG_ARCH_EMULATE_ATOMIC
+
 picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *var,
                                         picoRTOS_atomic_t old,
                                         picoRTOS_atomic_t val)
@@ -90,7 +90,6 @@ picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr)
 {
     return arch_compare_and_swap(ptr, 0, (picoRTOS_atomic_t)1);
 }
-#endif
 
 /* INTERRUPT MANAGEMENT */
 
