@@ -1,5 +1,6 @@
 #include "adc-nxp_eqadc.h"
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 struct ADC_NXP_EQADC {
     volatile uint32_t MCR;
@@ -150,6 +151,7 @@ static int adc_nxp_eqadc_register_cc(struct adc_nxp_eqadc *ctx, size_t channel)
         ctx->cmd[ctx->channel_count - 1] &= ~ADC_NXP_EQADC_CFIFO_EOQ;
 
     ctx->cmd[ctx->channel_count] = cmd;
+    arch_flush_dcache(ctx->cmd, sizeof(ctx->cmd));
 
     /* dma fill */
     ctx->fill_xfer.saddr = (intptr_t)ctx->cmd;
@@ -260,11 +262,15 @@ int adc_setup(struct adc *ctx, struct adc_settings *settings)
 
 int adc_read(struct adc *ctx, int *data)
 {
+    int value;
     struct adc_nxp_eqadc *parent = ctx->parent;
-    /* continuous mode, just return latest value  */
-    int result = (int)parent->result[ctx->channel_index];
+    uint32_t *result = &parent->result[ctx->channel_index];
 
-    if ((result & RESULT_EMPTY) != 0) {
+    /* get channel corresponding value */
+    arch_invalidate_dcache(result, sizeof(*result));
+    value = (int)*result;
+
+    if ((value & RESULT_EMPTY) != 0) {
         /* software trigger (single scan mode) */
         if (parent->mode0 == ADC_NXP_EQADC_MODE0_SINGLE_SCAN)
             parent->base->CFCR0 |= CFCR0_SSE0;
@@ -272,8 +278,8 @@ int adc_read(struct adc *ctx, int *data)
         return -EAGAIN;
     }
 
-    *data = (result * ctx->multiplier) / ctx->divider + ctx->offset;
-    parent->result[ctx->channel_index] |= RESULT_EMPTY; /* mark as read */
+    *data = (value * ctx->multiplier) / ctx->divider + ctx->offset;
+    *result |= RESULT_EMPTY; /* mark as read */
 
     return 1;
 }

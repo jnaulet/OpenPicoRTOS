@@ -5,6 +5,7 @@
 #include "dma.h"
 
 #include <stdbool.h>
+#include "picoRTOS_types.h"
 
 struct ADC_NXP_EQADC;
 
@@ -19,8 +20,12 @@ typedef enum {
 struct adc_nxp_eqadc {
     /*@temp@*/ struct ADC_NXP_EQADC *base;
     size_t channel_count;
-    uint32_t cmd[ADC_NXP_EQADC_CHANNEL_COUNT];
-    uint32_t result[ADC_NXP_EQADC_CHANNEL_COUNT];
+    /* cache-page aligned buffers */
+    uint32_t cmd[ADC_NXP_EQADC_CHANNEL_COUNT]
+    __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
+    uint32_t result[ADC_NXP_EQADC_CHANNEL_COUNT]
+    __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
+    /* mode0 only */
     adc_nxp_eqadc_mode0_t mode0;
     /* dma */
     /*@temp@*/ /*@null@*/ struct dma *fill;
