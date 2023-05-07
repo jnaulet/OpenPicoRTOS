@@ -102,12 +102,7 @@ job much easier for critical applications.
 
 ## Inter-processus communication
 
-IPCs are available to architectures that support the correct associated atomic operations.
-A small infringement has been made to the hard real time philosophy of the project by supporting
-the CONFIG_ARCH_EMULATE_ATOMIC on platforms that don't support native atomic operations. This is
-not recommended, though.
-
-### The following IPCs are provided:
+The following IPCs are provided:
 
  - futexes (require arch_test_and_set)
  - re-entrant mutexes (require arch_compare_and_swap)

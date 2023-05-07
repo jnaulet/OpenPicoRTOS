@@ -73,17 +73,4 @@
  */
 #define CONFIG_DEADLOCK_COUNT 1000
 
-/* Define: CONFIG_ARCH_EMULATE_ATOMIC
- * Emulates atomic operations on systems that don't provide them
- *
- * Certain systems like Cortex-M0 or AVR don't provide native atomic
- * operations, this is a way to emulate them by allowing picoRTOS to
- * enable/disable interrupts
- *
- * This way of doing is not the proper way on a hard RTOS, this is why it
- * has been made optional and requires this field to clearly show how it is
- * handled
- */
-#define CONFIG_ARCH_EMULATE_ATOMIC
-
 #endif
