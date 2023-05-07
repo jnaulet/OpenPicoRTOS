@@ -131,19 +131,42 @@ int flash_sam3x_init(/*@out@*/ struct flash *ctx, struct FLASH_SAM3X *base)
     return 0;
 }
 
-int flash_erase_sector(struct flash *ctx, size_t sector)
+int flash_get_nblocks(struct flash *ctx)
 {
-    if (!picoRTOS_assert(sector < ctx->page_count)) return -EINVAL;
-
-    return run_cmd(ctx, FCMD_EWP, (int)sector);
+    return (int)ctx->page_count;
 }
 
-int flash_blankcheck_sector(struct flash *ctx, size_t sector)
+int flash_get_erase_size(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(sector < ctx->page_count)) return -EINVAL;
+    if (!picoRTOS_assert(block < ctx->page_count)) return -EINVAL;
+    return (int)ctx->page_size;
+}
+
+int flash_get_write_size(struct flash *ctx, size_t block)
+{
+    if (!picoRTOS_assert(block < ctx->page_count)) return -EINVAL;
+    return QWORD_SIZE;
+}
+
+int flash_get_block_addr(struct flash *ctx, size_t block)
+{
+    if (!picoRTOS_assert(block < ctx->page_count)) return -EINVAL;
+    return (int)(block * ctx->page_size);
+}
+
+int flash_erase(struct flash *ctx, size_t block)
+{
+    if (!picoRTOS_assert(block < ctx->page_count)) return -EINVAL;
+
+    return run_cmd(ctx, FCMD_EWP, (int)block);
+}
+
+int flash_blankcheck(struct flash *ctx, size_t block)
+{
+    if (!picoRTOS_assert(block < ctx->page_count)) return -EINVAL;
 
     size_t n = ctx->page_size / sizeof(uint32_t);
-    uint32_t *addr = (uint32_t*)(sector * ctx->page_size);
+    uint32_t *addr = (uint32_t*)flash_get_block_addr(ctx, block);
 
     while (n-- != 0)
         if (*addr++ != (uint32_t)-1)
@@ -225,16 +248,16 @@ int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n)
     return nwritten;
 }
 
-int flash_lock_sector(struct flash *ctx, size_t sector)
+int flash_lock(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(sector < ctx->page_count)) return -EINVAL;
+    if (!picoRTOS_assert(block < ctx->page_count)) return -EINVAL;
 
-    return run_cmd(ctx, FCMD_SLB, (int)sector);
+    return run_cmd(ctx, FCMD_SLB, (int)block);
 }
 
-int flash_unlock_sector(struct flash *ctx, size_t sector)
+int flash_unlock(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(sector < ctx->page_count)) return -EINVAL;
+    if (!picoRTOS_assert(block < ctx->page_count)) return -EINVAL;
 
-    return run_cmd(ctx, FCMD_CLB, (int)sector);
+    return run_cmd(ctx, FCMD_CLB, (int)block);
 }
