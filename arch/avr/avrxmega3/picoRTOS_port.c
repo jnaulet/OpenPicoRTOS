@@ -77,7 +77,7 @@ void __attribute__((weak)) arch_idle(void *null)
 }
 
 /* ATOMIC OPS EMULATION */
-#ifdef CONFIG_ARCH_EMULATE_ATOMIC
+
 picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *var,
                                         picoRTOS_atomic_t old,
                                         picoRTOS_atomic_t val)
@@ -98,7 +98,6 @@ picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr)
     return arch_compare_and_swap(ptr, (picoRTOS_atomic_t)0,
                                  (picoRTOS_atomic_t)1);
 }
-#endif
 
 /* INTERRUPTS MANAGEMENT */
 
@@ -134,4 +133,16 @@ void arch_disable_interrupt(picoRTOS_irq_t irq)
 picoRTOS_cycles_t arch_counter(void)
 {
     return (picoRTOS_cycles_t)*RTC_CNT;
+}
+
+/* CACHES (dummy) */
+
+void arch_invalidate_dcache(/*@unused@*/ void *addr __attribute__((unused)),
+                            /*@unused@*/ size_t n __attribute__((unused)))
+{
+}
+
+void arch_flush_dcache(/*@unused@*/ void *addr __attribute__((unused)),
+                       /*@unused@*/ size_t n __attribute__((unused)))
+{
 }
