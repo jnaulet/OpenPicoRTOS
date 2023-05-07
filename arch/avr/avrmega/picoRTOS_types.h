@@ -27,26 +27,25 @@ typedef unsigned int picoRTOS_cycles_t;
 #else
 # define ASM(x) __asm__ volatile (x)
 # define arch_break() ({ ASM("break"); })
-#endif
 
 /* Unfortunately avr-gcc defines all errnos to ENOERR,
  * so we have to redefine our own here */
-#include <errno.h>
+# include <errno.h>
+# undef EIO
+# undef ENXIO
+# undef ENOMEM
+# undef EFAULT
+# undef EBUSY
+# undef EINVAL
+# undef EPIPE
 
-#undef EIO
-#undef ENXIO
-#undef ENOMEM
-#undef EFAULT
-#undef EBUSY
-#undef EINVAL
-#undef EPIPE
-
-#define EIO              5      /* I/O error */
-#define ENXIO            6      /* No such device or address */
-#define ENOMEM          12      /* Out of memory */
-#define EFAULT          14      /* Bad address */
-#define EBUSY           16      /* Device or resource busy */
-#define EINVAL          22      /* Invalid argument */
-#define EPIPE           32      /* Broken pipe */
+# define EIO              5         /* I/O error */
+# define ENXIO            6         /* No such device or address */
+# define ENOMEM          12         /* Out of memory */
+# define EFAULT          14         /* Bad address */
+# define EBUSY           16         /* Device or resource busy */
+# define EINVAL          22         /* Invalid argument */
+# define EPIPE           32         /* Broken pipe */
+#endif
 
 #endif
