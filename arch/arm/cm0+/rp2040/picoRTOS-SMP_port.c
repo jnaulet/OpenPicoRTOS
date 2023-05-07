@@ -202,11 +202,6 @@ picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *var,
     return res;
 }
 
-picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr)
-{
-    return arch_compare_and_swap(ptr, 0, (picoRTOS_atomic_t)1);
-}
-
 /* INTERRUPT MANAGEMENT */
 
 void arch_smp_enable_interrupt(/*@unused@*/ picoRTOS_irq_t irq __attribute__((unused)),

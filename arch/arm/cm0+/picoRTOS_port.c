@@ -71,9 +71,10 @@ void __attribute__((weak)) arch_idle(void *null)
 
 /* ATOMIC OPS EMULATION */
 
-picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *var,
-                                        picoRTOS_atomic_t old,
-                                        picoRTOS_atomic_t val)
+picoRTOS_atomic_t __attribute__((weak))
+arch_compare_and_swap(picoRTOS_atomic_t *var,
+                      picoRTOS_atomic_t old,
+                      picoRTOS_atomic_t val)
 {
     ASM("cpsid i");
 
