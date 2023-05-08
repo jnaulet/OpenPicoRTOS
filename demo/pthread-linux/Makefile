@@ -31,6 +31,10 @@ $(BUILD_DIR)/%.o: %.c
 	-mkdir -p $(@D)
 	$(CROSS)$(CC) $(CFLAGS) -c $< -o $@
 
+splint:
+cppcheck:
+	@echo "dummy analysis"
+
 clean:
 	-rm -rf $(BUILD_DIR)
 	-rm -f $(ELF)
