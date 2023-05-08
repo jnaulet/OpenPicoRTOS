@@ -13,7 +13,7 @@ struct dma {
     /*@temp@*/ struct DMA_RP2040_CH *ch;
 };
 
-int dma_r2040_init(/*@out@*/ struct dma *ctx, struct DMA_RP2040 *base, size_t channel);
+int dma_r2040_init(/*@out@*/ struct dma *ctx, int base, size_t channel);
 
 /* Runtime calls:
  * int dma_setup((struct dma *ctx, struct dma_xfer *xfer);

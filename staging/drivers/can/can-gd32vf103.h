@@ -13,7 +13,7 @@ struct can {
     size_t filter_count;
 };
 
-int can_gd32vf103_init(/*@out@*/ struct can *ctx, struct CAN_GD32VF103 *base, clock_id_t clkid);
+int can_gd32vf103_init(/*@out@*/ struct can *ctx, int base, clock_id_t clkid);
 
 /* Implements:
  * int can_setup(struct can *ctx, struct can_settings *settings);

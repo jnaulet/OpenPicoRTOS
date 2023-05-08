@@ -24,7 +24,7 @@ struct can {
     uint32_t txb[CAN_SAME5X_TXB_WORD_COUNT];
 };
 
-int can_same5x_init(/*@out@*/ struct can *ctx, struct CAN_SAME5X *base, clock_id_t clkid);
+int can_same5x_init(/*@out@*/ struct can *ctx, int base, clock_id_t clkid);
 
 /* implements:
  * int can_setup(struct can *ctx, struct can_settings *settings);

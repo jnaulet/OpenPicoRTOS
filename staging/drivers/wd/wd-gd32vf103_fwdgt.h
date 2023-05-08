@@ -15,7 +15,7 @@ struct wd_gd32vf103_fwdgt_settings {
     unsigned long timeout_us;
 };
 
-int wd_gd32vf103_fwdgt_init(/*@out@*/ struct wd *ctx, struct WD_GD32VF103_FWDGT *base, clock_id_t clkid);
+int wd_gd32vf103_fwdgt_init(/*@out@*/ struct wd *ctx, int base, clock_id_t clkid);
 int wd_gd32vf103_fwdgt_setup(struct wd *ctx, struct wd_gd32vf103_fwdgt_settings *settings);
 
 /* Implements:

@@ -131,9 +131,9 @@ struct PWM_GD32VF103_TIMER {
 #define TIMERx_CHxCV_CHxVAL_M  0xffffu
 #define TIMERx_CHxCV_CHxVAL(x) ((x) & TIMERx_CHxCV_CHxVAL_M)
 
-int pwm_gd32vf103_init(struct pwm_gd32vf103 *ctx, struct PWM_GD32VF103_TIMER *base, clock_id_t clkid)
+int pwm_gd32vf103_init(struct pwm_gd32vf103 *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct PWM_GD32VF103_TIMER*)base;
     ctx->clkid = clkid;
 
     /* turn off */

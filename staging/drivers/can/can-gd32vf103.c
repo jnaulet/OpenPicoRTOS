@@ -143,9 +143,9 @@ struct CAN_GD32VF103 {
 #define CAN_FCTL_HBC1F(x) (((x) & CAN_FCTL_HBC1F_M) << 8)
 #define CAN_FCTL_FLD      (1 << 0)
 
-int can_gd32vf103_init(struct can *ctx, struct CAN_GD32VF103 *base, clock_id_t clkid)
+int can_gd32vf103_init(struct can *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct CAN_GD32VF103*)base;
     ctx->clkid = clkid;
     /* filters */
     ctx->filter_count = 0;

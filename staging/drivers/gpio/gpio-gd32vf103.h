@@ -14,7 +14,7 @@ struct gpio {
     uint32_t mask;
 };
 
-int gpio_gd32vf103_init(/*@out@*/ struct gpio *ctx, struct GPIO_GD32VF103 *base, size_t pin);
+int gpio_gd32vf103_init(/*@out@*/ struct gpio *ctx, int base, size_t pin);
 
 /* Implements:
  * void gpio_write(struct gpio *ctx, bool value);

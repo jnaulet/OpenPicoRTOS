@@ -20,9 +20,9 @@ struct WD_GD32VF103_FWDGT {
 #define FWDGT_RLD_RLD_M  0xfffu
 #define FWDGT_RLD_RLD(x) ((x) & FWDGT_RLD_RLD_M)
 
-int wd_gd32vf103_fwdgt_init(struct wd *ctx, struct WD_GD32VF103_FWDGT *base, clock_id_t clkid)
+int wd_gd32vf103_fwdgt_init(struct wd *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct WD_GD32VF103_FWDGT*)base;
     ctx->clkid = clkid;
 
     return 0;

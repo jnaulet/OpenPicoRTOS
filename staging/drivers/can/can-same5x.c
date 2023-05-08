@@ -303,7 +303,7 @@ static int set_cccr(/*@reldef@*/ struct can *ctx, uint32_t value)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int can_same5x_init(struct can *ctx, struct CAN_SAME5X *base, clock_id_t clkid)
+int can_same5x_init(struct can *ctx, int base, clock_id_t clkid)
 {
 #define RELATIVE_ADDR(x) ((unsigned int)(x) & 0x1fffffffu)
     /* check for memory issues */
@@ -313,7 +313,7 @@ int can_same5x_init(struct can *ctx, struct CAN_SAME5X *base, clock_id_t clkid)
 
     int res;
 
-    ctx->base = base;
+    ctx->base = (struct CAN_SAME5X*)base;
     ctx->clkid = clkid;
     ctx->sidf_count = 0;
 

@@ -25,7 +25,7 @@ struct twi {
     int last;
 };
 
-int twi_gd32vf103_init(/*@out@*/ struct twi *ctx, struct TWI_GD32VF103_I2C *base, clock_id_t clkid);
+int twi_gd32vf103_init(/*@out@*/ struct twi *ctx, int base, clock_id_t clkid);
 
 /* Implements:
  * int twi_setup(struct twi *ctx, struct twi_settings *settings);

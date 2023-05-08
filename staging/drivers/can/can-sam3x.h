@@ -21,7 +21,7 @@ struct can {
     bool rx_overwrite;
 };
 
-int can_sam3x_init(/*@out@*/ struct can *ctx, struct CAN_SAM3X *base, clock_id_t clkid);
+int can_sam3x_init(/*@out@*/ struct can *ctx, int base, clock_id_t clkid);
 
 /* Runtime calls:
  * int can_setup(struct can *ctx, struct can_settings *settings);

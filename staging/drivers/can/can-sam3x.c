@@ -91,9 +91,9 @@ static int set_tx_mailboxes(/*@partial@*/ struct can *ctx, size_t n)
     return 0;
 }
 
-int can_sam3x_init(struct can *ctx, struct CAN_SAM3X *base, clock_id_t clkid)
+int can_sam3x_init(struct can *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct CAN_SAM3X*)base;
     ctx->clkid = clkid;
     /* mb allocation */
     ctx->rx_mailbox_index = 0;

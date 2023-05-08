@@ -10,7 +10,7 @@ struct flash {
     size_t block_count;
 };
 
-int flash_gd32vf103_init(/*@out@*/ struct flash *ctx, struct FLASH_GD32VF103 *base, size_t block_count);
+int flash_gd32vf103_init(/*@out@*/ struct flash *ctx, int base, size_t block_count);
 
 /* Implements:
  * int flash_erase_sector(struct flash *ctx, size_t sector);

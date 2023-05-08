@@ -19,7 +19,7 @@ struct flash {
     size_t page_count;
 };
 
-int flash_sam3x_init(/*@out@*/ struct flash *ctx, struct FLASH_SAM3X *base);
+int flash_sam3x_init(/*@out@*/ struct flash *ctx, int base);
 
 /* Implements:
  * int flash_erase_sector(struct flash *ctx, size_t sector);

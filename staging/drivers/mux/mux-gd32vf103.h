@@ -12,7 +12,7 @@ struct mux {
     /*@temp@*/ struct MUX_GD32VF103_GPIO *base;
 };
 
-int mux_gd32vf103_init(/*@out@*/ struct mux *ctx, struct MUX_GD32VF103_GPIO *base);
+int mux_gd32vf103_init(/*@out@*/ struct mux *ctx, int base);
 
 typedef enum {
     MUX_GD32VF103_MODE_PUSH_PULL    = 0,

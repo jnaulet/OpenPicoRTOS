@@ -73,9 +73,9 @@ struct UART_GD32VF103_USART {
 #define USART_GP_PSC_M   0xffu
 #define USART_GP_PSC(x)  ((x) & USART_GP_PSC_M)
 
-int uart_gd32vf103_init(struct uart *ctx, struct UART_GD32VF103_USART *base, clock_id_t clkid)
+int uart_gd32vf103_init(struct uart *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct UART_GD32VF103_USART*)base;
     ctx->clkid = clkid;
 
     /* turn on */

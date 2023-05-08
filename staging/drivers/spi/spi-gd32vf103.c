@@ -41,9 +41,9 @@ struct SPI_GD32VF103 {
 #define SPI_STAT_TBE     (1 << 1)
 #define SPI_STAT_RBNE    (1 << 0)
 
-int spi_gd32vf103_init(struct spi *ctx, struct SPI_GD32VF103 *base, clock_id_t clkid)
+int spi_gd32vf103_init(struct spi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct SPI_GD32VF103*)base;
     ctx->clkid = clkid;
 
     /* turn on */

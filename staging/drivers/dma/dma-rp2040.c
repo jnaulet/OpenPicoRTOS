@@ -64,11 +64,11 @@ struct DMA_RP2040 {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int dma_r2040_init(struct dma *ctx, struct DMA_RP2040 *base, size_t channel)
+int dma_r2040_init(struct dma *ctx, int base, size_t channel)
 {
     if (!picoRTOS_assert(channel < (size_t)DMA_RP2040_CHANNEL_COUNT)) return -EINVAL;
 
-    ctx->base = base;
+    ctx->base = (struct DMA_RP2040*)base;
     ctx->ch = &ctx->base->CH[channel];
 
     /* enable channel */

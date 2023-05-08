@@ -11,11 +11,11 @@ struct GPIO_GD32VF103 {
     volatile uint32_t GPIOx_LOCK;
 };
 
-int gpio_gd32vf103_init(struct gpio *ctx, struct GPIO_GD32VF103 *base, size_t pin)
+int gpio_gd32vf103_init(struct gpio *ctx, int base, size_t pin)
 {
     if (!picoRTOS_assert(pin < (size_t)GPIO_GD32VF103_PIN_COUNT)) return -EINVAL;
 
-    ctx->base = base;
+    ctx->base = (struct GPIO_GD32VF103*)base;
     ctx->mask = (uint32_t)(1 << pin);
 
     return 0;

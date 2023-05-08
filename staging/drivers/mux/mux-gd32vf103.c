@@ -16,9 +16,9 @@ struct MUX_GD32VF103_GPIO {
 #define GPIOx_CTL0_MD0_M   0x3u
 #define GPIOx_CTL0_MD0(x)  ((x) & GPIOx_CTL0_MD0_M)
 
-int mux_gd32vf103_init(/*@out@*/ struct mux *ctx, struct MUX_GD32VF103_GPIO *base)
+int mux_gd32vf103_init(/*@out@*/ struct mux *ctx, int base)
 {
-    ctx->base = base;
+    ctx->base = (struct MUX_GD32VF103_GPIO*)base;
     return 0;
 }
 

@@ -14,7 +14,7 @@ struct uart {
     clock_id_t clkid;
 };
 
-int uart_gd32vf103_init(/*@out@*/ struct uart *ctx, struct UART_GD32VF103_USART *base, clock_id_t clkid);
+int uart_gd32vf103_init(/*@out@*/ struct uart *ctx, int base, clock_id_t clkid);
 
 /* Implements:
  * int uart_setup(struct uart *ctx, const struct uart_settings *settings);

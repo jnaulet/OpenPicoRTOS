@@ -52,9 +52,9 @@ struct FLASH_GD32VF103 {
 #define FMC_OBSTAT_SPC     (1 << 1)
 #define FMC_OBSTAT_OBERR   (1 << 0)
 
-int flash_gd32vf103_init(struct flash *ctx, struct FLASH_GD32VF103 *base, size_t block_count)
+int flash_gd32vf103_init(struct flash *ctx, int base, size_t block_count)
 {
-    ctx->base = base;
+    ctx->base = (struct FLASH_GD32VF103*)base;
     ctx->block_count = block_count;
 
     return 0;

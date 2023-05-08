@@ -117,11 +117,11 @@ static int init_efd_busywait(/*@partial@*/ struct flash *ctx)
     return res;
 }
 
-int flash_sam3x_init(/*@out@*/ struct flash *ctx, struct FLASH_SAM3X *base)
+int flash_sam3x_init(/*@out@*/ struct flash *ctx, int base)
 {
     int res;
 
-    ctx->base = base;
+    ctx->base = (struct FLASH_SAM3X*)base;
     ctx->state = FLASH_SAM3X_STATE_IDLE;
 
     /* info */

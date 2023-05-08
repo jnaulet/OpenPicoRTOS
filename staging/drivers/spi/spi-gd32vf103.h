@@ -13,7 +13,7 @@ struct spi {
     size_t frame_size;
 };
 
-int spi_gd32vf103_init(/*@out@*/ struct spi *ctx, struct SPI_GD32VF103 *base, clock_id_t clkid);
+int spi_gd32vf103_init(/*@out@*/ struct spi *ctx, int base, clock_id_t clkid);
 
 /* Implements:
  * int spi_setup(struct spi *ctx, const struct spi_settings *settings);

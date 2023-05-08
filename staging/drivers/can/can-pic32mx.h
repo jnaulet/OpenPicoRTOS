@@ -35,7 +35,7 @@ struct can_pic32mx_settings {
     size_t fsize[CAN_PIC32MX_FIFO_COUNT];   /* min: 1 */
 };
 
-int can_pic32mx_init(/*@out@*/ struct can *ctx, struct CAN_PIC32MX *base, clock_id_t clkid);
+int can_pic32mx_init(/*@out@*/ struct can *ctx, int base, clock_id_t clkid);
 /* At some point, add a can_pic32mx_setup() to setup all FIFOs */
 
 /* Runtime calls:

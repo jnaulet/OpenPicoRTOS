@@ -41,7 +41,7 @@ struct adc_gd32vf103_settings {
     /* oversampling */
 };
 
-int adc_gd32vf103_init(/*@out@*/ struct adc_gd32vf103 *ctx, struct ADC_GD32VF103 *base);
+int adc_gd32vf103_init(/*@out@*/ struct adc_gd32vf103 *ctx, int base);
 int adc_gd32vf103_setup(struct adc_gd32vf103 *ctx, struct adc_gd32vf103_settings *settings);
 
 /* to start coninous scan. FIXME */

@@ -25,7 +25,7 @@ struct pwm_gd32vf103_settings {
     pwm_gd32vf103_waveform_t waveform;
 };
 
-int pwm_gd32vf103_init(/*@out@*/ struct pwm_gd32vf103 *ctx, struct PWM_GD32VF103_TIMER *base, clock_id_t clkid);
+int pwm_gd32vf103_init(/*@out@*/ struct pwm_gd32vf103 *ctx, int base, clock_id_t clkid);
 int pwm_gd32vf103_setup(struct pwm_gd32vf103 *ctx, struct pwm_gd32vf103_settings *settings);
 
 /* channels */

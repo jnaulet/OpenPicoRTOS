@@ -221,9 +221,9 @@ static int init_fifos(/*@partial@*/ struct can *ctx)
  * Returns:
  * Always 0
  */
-int can_pic32mx_init(struct can *ctx, struct CAN_PIC32MX *base, clock_id_t clkid)
+int can_pic32mx_init(struct can *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct CAN_PIC32MX*)base;
     ctx->clkid = clkid;
     /* mb allocation */
     ctx->tx_mailbox_index = 0;

@@ -85,9 +85,9 @@ struct TWI_GD32VF103_I2C {
 
 #define I2C_FMPCFG_FMPEN (1 << 0)
 
-int twi_gd32vf103_init(struct twi *ctx, struct TWI_GD32VF103_I2C *base, clock_id_t clkid)
+int twi_gd32vf103_init(struct twi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct TWI_GD32VF103_I2C*)base;
     ctx->clkid = clkid;
 
     /* turn on */
