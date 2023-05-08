@@ -44,8 +44,7 @@ static void raspberry_pico_init_mux(void)
     (void)rp2040_unreset(&RESET, RP2040_RESET_IO_BANK0);
     (void)rp2040_unreset(&RESET, RP2040_RESET_PADS_BANK0);
 
-    (void)mux_rp2040_init(&MUX, (struct MUX_RP2040_IO*)ADDR_IO_BANK0,
-                          (struct MUX_RP2040_PADS *)ADDR_PADS_BANK0);
+    (void)mux_rp2040_init(&MUX, ADDR_IO_BANK0, ADDR_PADS_BANK0);
 
     /* UART */
     (void)mux_rp2040_output(&MUX, (size_t)0, MUX_RP2040_F2);    /* UART0 TX */
@@ -102,7 +101,7 @@ static void raspberry_pico_init_uart(/*@partial@*/ struct raspberry_pico *ctx)
 
     (void)rp2040_unreset(&RESET, RP2040_RESET_UART0);
 
-    (void)uart_arm_pl011_init(&UART, (struct UART_ARM_PL011*)ADDR_UART0, CLOCK_RP2040_PERI);
+    (void)uart_arm_pl011_init(&UART, ADDR_UART0, CLOCK_RP2040_PERI);
     (void)uart_setup(&UART, &UART_settings);
 
     ctx->UART = &UART;
@@ -121,11 +120,11 @@ static void raspberry_pico_init_i2c(/*@partial@*/ struct raspberry_pico *ctx)
     (void)rp2040_unreset(&RESET, RP2040_RESET_I2C0);
     (void)rp2040_unreset(&RESET, RP2040_RESET_I2C1);
 
-    (void)twi_dw_apb_i2c_init(&I2C0, (struct TWI_DW_APB_I2C*)ADDR_I2C0, CLOCK_RP2040_SYS);
+    (void)twi_dw_apb_i2c_init(&I2C0, ADDR_I2C0, CLOCK_RP2040_SYS);
     (void)twi_setup(&I2C0, &TWI_settings);
 
     TWI_settings.mode = TWI_MODE_SLAVE;
-    (void)twi_dw_apb_i2c_init(&I2C1, (struct TWI_DW_APB_I2C*)ADDR_I2C1, CLOCK_RP2040_SYS);
+    (void)twi_dw_apb_i2c_init(&I2C1, ADDR_I2C1, CLOCK_RP2040_SYS);
     (void)twi_setup(&I2C1, &TWI_settings);
 
     ctx->I2C0 = &I2C0;
@@ -146,7 +145,7 @@ static void raspberry_pico_init_spi(/*@partial@*/ struct raspberry_pico *ctx)
 
     (void)rp2040_unreset(&RESET, RP2040_RESET_SPI1);
 
-    (void)spi_arm_pl022_init(&SPI, (struct SPI_ARM_PL022*)ADDR_SPI1, CLOCK_RP2040_PERI);
+    (void)spi_arm_pl022_init(&SPI, ADDR_SPI1, CLOCK_RP2040_PERI);
     (void)spi_setup(&SPI, &SPI_settings);
 
     /* loopback mode for tests */
@@ -165,13 +164,13 @@ static void raspberry_pico_init_gpio(/*@partial@*/ struct raspberry_pico *ctx)
     static struct gpio GPIO18;
     static struct gpio GPIO19;
 
-    (void)gpio_rp2040_sio_init(&GPIO4, (struct GPIO_RP2040_SIO*)ADDR_SIO_GPIO, (size_t)3, GPIO_RP2040_SIO_DIR_OUTPUT);
-    (void)gpio_rp2040_sio_init(&GPIO8, (struct GPIO_RP2040_SIO*)ADDR_SIO_GPIO, (size_t)8, GPIO_RP2040_SIO_DIR_INPUT);
-    (void)gpio_rp2040_sio_init(&GPIO15, (struct GPIO_RP2040_SIO*)ADDR_SIO_GPIO, (size_t)15, GPIO_RP2040_SIO_DIR_INPUT);
-    (void)gpio_rp2040_sio_init(&GPIO16, (struct GPIO_RP2040_SIO*)ADDR_SIO_GPIO, (size_t)16, GPIO_RP2040_SIO_DIR_INPUT);
-    (void)gpio_rp2040_sio_init(&GPIO17, (struct GPIO_RP2040_SIO*)ADDR_SIO_GPIO, (size_t)17, GPIO_RP2040_SIO_DIR_INPUT);
-    (void)gpio_rp2040_sio_init(&GPIO18, (struct GPIO_RP2040_SIO*)ADDR_SIO_GPIO, (size_t)18, GPIO_RP2040_SIO_DIR_INPUT);
-    (void)gpio_rp2040_sio_init(&GPIO19, (struct GPIO_RP2040_SIO*)ADDR_SIO_GPIO, (size_t)19, GPIO_RP2040_SIO_DIR_OUTPUT);
+    (void)gpio_rp2040_sio_init(&GPIO4, ADDR_SIO_GPIO, (size_t)3, GPIO_RP2040_SIO_DIR_OUTPUT);
+    (void)gpio_rp2040_sio_init(&GPIO8, ADDR_SIO_GPIO, (size_t)8, GPIO_RP2040_SIO_DIR_INPUT);
+    (void)gpio_rp2040_sio_init(&GPIO15, ADDR_SIO_GPIO, (size_t)15, GPIO_RP2040_SIO_DIR_INPUT);
+    (void)gpio_rp2040_sio_init(&GPIO16, ADDR_SIO_GPIO, (size_t)16, GPIO_RP2040_SIO_DIR_INPUT);
+    (void)gpio_rp2040_sio_init(&GPIO17, ADDR_SIO_GPIO, (size_t)17, GPIO_RP2040_SIO_DIR_INPUT);
+    (void)gpio_rp2040_sio_init(&GPIO18, ADDR_SIO_GPIO, (size_t)18, GPIO_RP2040_SIO_DIR_INPUT);
+    (void)gpio_rp2040_sio_init(&GPIO19, ADDR_SIO_GPIO, (size_t)19, GPIO_RP2040_SIO_DIR_OUTPUT);
 
     ctx->GPIO4 = &GPIO4;
     ctx->GPIO8 = &GPIO8;
@@ -198,7 +197,7 @@ static void raspberry_pico_init_pwm(/*@partial@*/ struct raspberry_pico *ctx)
     };
 
     (void)rp2040_unreset(&RESET, RP2040_RESET_PWM);
-    (void)pwm_rp2040_init(&PWM, (struct PWM_RP2040*)ADDR_PWM, CLOCK_RP2040_PERI);
+    (void)pwm_rp2040_init(&PWM, ADDR_PWM, CLOCK_RP2040_PERI);
 
     /* PWMs */
     (void)pwm_rp2040_pwm_init(&PWM4A, &PWM, (size_t)4, PWM_RP2040_PWM_OUTPUT_A);
@@ -232,7 +231,7 @@ static void raspberry_pico_init_adc(/*@partial@*/ struct raspberry_pico *ctx)
     static struct adc TEMP_SENSOR;
 
     (void)rp2040_unreset(&RESET, RP2040_RESET_ADC);
-    (void)adc_rp2040_init(&ADC, (struct ADC_RP2040*)ADDR_ADC);
+    (void)adc_rp2040_init(&ADC, ADDR_ADC);
 
     /* temp sensor calibration, in degrees */
     struct adc_settings TEMP_settings = {
@@ -261,7 +260,7 @@ static void raspberry_pico_init_wdt(/*@partial@*/ struct raspberry_pico *ctx)
         (1000000ul / (unsigned long)CONFIG_TICK_HZ) + 1ul
     };
 
-    (void)wd_rp2040_init(&WDT, (struct WD_RP2040*)ADDR_WATCHDOG, CLOCK_RP2040_REF);
+    (void)wd_rp2040_init(&WDT, ADDR_WATCHDOG, CLOCK_RP2040_REF);
     (void)wd_rp2040_setup(&WDT, &WDT_settings);
     (void)wd_start(&WDT);
 
@@ -271,7 +270,7 @@ static void raspberry_pico_init_wdt(/*@partial@*/ struct raspberry_pico *ctx)
 int raspberry_pico_init(/*@out@*/ struct raspberry_pico *ctx)
 {
     /* reset subsystem (required) */
-    (void)rp2040_reset_init(&RESET, (struct RP2040_RESET*)ADDR_RESET);
+    (void)rp2040_reset_init(&RESET, ADDR_RESET);
 
     raspberry_pico_init_clock();
     raspberry_pico_init_mux();

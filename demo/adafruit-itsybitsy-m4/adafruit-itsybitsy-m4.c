@@ -109,8 +109,8 @@ static void mux_init(void)
     struct mux_same5x PORTA;
     struct mux_same5x PORTB;
 
-    (void)mux_same5x_init(&PORTA, (struct MUX_SAME5X*)ADDR_PORTA);
-    (void)mux_same5x_init(&PORTB, (struct MUX_SAME5X*)ADDR_PORTB);
+    (void)mux_same5x_init(&PORTA, ADDR_PORTA);
+    (void)mux_same5x_init(&PORTB, ADDR_PORTB);
 
     /* RED */
     (void)mux_same5x_output(&PORTA, (size_t)22, MUX_PMUX_GPIO); /* D13 */
@@ -139,7 +139,7 @@ static void mux_init(void)
 
 static int gpio_init(/*@partial@*/ struct adafruit_itsybitsy_m4 *ctx)
 {
-    return gpio_same5x_init(&ctx->RED, (struct GPIO_SAME5X*)ADDR_PORTA, (size_t)22);
+    return gpio_same5x_init(&ctx->RED, ADDR_PORTA, (size_t)22);
 }
 
 static int spi_init(/*@partial@*/ struct adafruit_itsybitsy_m4 *ctx)
@@ -154,7 +154,7 @@ static int spi_init(/*@partial@*/ struct adafruit_itsybitsy_m4 *ctx)
     };
 
     /* external */
-    (void)spi_atmel_sercom_init(&ctx->SPI, (struct SPI_ATMEL_SERCOM*)ADDR_SERCOM1, CLOCK_SAME5X_SERCOM1_CORE);
+    (void)spi_atmel_sercom_init(&ctx->SPI, ADDR_SERCOM1, CLOCK_SAME5X_SERCOM1_CORE);
     return spi_setup(&ctx->SPI, &SPI_settings);
 }
 
@@ -169,7 +169,7 @@ static int uart_init(/*@partial@*/ struct adafruit_itsybitsy_m4 *ctx)
         false,
     };
 
-    (void)uart_atmel_sercom_init(&ctx->UART, (struct UART_ATMEL_SERCOM*)ADDR_SERCOM3, CLOCK_SAME5X_SERCOM3_CORE);
+    (void)uart_atmel_sercom_init(&ctx->UART, ADDR_SERCOM3, CLOCK_SAME5X_SERCOM3_CORE);
     return uart_setup(&ctx->UART, &UART_settings);
 }
 
@@ -182,7 +182,7 @@ static int pwm_init(/*@partial@*/ struct adafruit_itsybitsy_m4 *ctx)
         PWM_SAME5X_TC_WAVEGEN_MPWM,
     };
 
-    (void)pwm_same5x_tc_init(&TC3, (struct PWM_SAME5X_TC*)ADDR_TC3, CLOCK_SAME5X_TC3);
+    (void)pwm_same5x_tc_init(&TC3, ADDR_TC3, CLOCK_SAME5X_TC3);
     (void)pwm_same5x_tc_setup(&TC3, &TC3_settings);
 
     (void)pwm_same5x_tc_pwm_init(&ctx->D5, &TC3, (size_t)1);
@@ -197,7 +197,7 @@ static int adc_init(/*@partial@*/ struct adafruit_itsybitsy_m4 *ctx)
         0   /* offset */
     };
 
-    (void)adc_same5x_init(&ctx->ADC, (struct ADC_SAME5X*)ADDR_ADC0, ADC_SAME5X_CHANNEL_SCALEDCOREVCC);
+    (void)adc_same5x_init(&ctx->ADC, ADDR_ADC0, ADC_SAME5X_CHANNEL_SCALEDCOREVCC);
     return adc_setup(&ctx->ADC, &ADC_settings_mV);
 }
 
@@ -209,7 +209,7 @@ static int wd_init(/*@partial@*/ struct adafruit_itsybitsy_m4 *ctx)
         WD_SAME5X_PERIOD_16CYC
     };
 
-    (void)wd_same5x_init(&ctx->WDT, (struct WD_SAME5X*)ADDR_WDT);
+    (void)wd_same5x_init(&ctx->WDT, ADDR_WDT);
     (void)wd_same5x_setup(&ctx->WDT, &WD_settings);
 
     return wd_start(&ctx->WDT);
@@ -217,7 +217,7 @@ static int wd_init(/*@partial@*/ struct adafruit_itsybitsy_m4 *ctx)
 
 static int flash_init(/*@partial@*/ struct adafruit_itsybitsy_m4 *ctx)
 {
-    (void)flash_same5x_init(&ctx->FLASH, (struct FLASH_SAME5X*)ADDR_NVMCTRL);
+    (void)flash_same5x_init(&ctx->FLASH, ADDR_NVMCTRL);
     return 0;
 }
 
@@ -229,10 +229,9 @@ static int twi_init(/*@partial@*/ struct adafruit_itsybitsy_m4 *ctx)
         (twi_addr_t)0x55        /* slave address */
     };
 
-    (void)twi_atmel_sercom_init(&ctx->I2C, (struct TWI_ATMEL_SERCOM*)ADDR_SERCOM2,
-                                CLOCK_SAME5X_SERCOM2_CORE);
-
+    (void)twi_atmel_sercom_init(&ctx->I2C, ADDR_SERCOM2, CLOCK_SAME5X_SERCOM2_CORE);
     (void)twi_setup(&ctx->I2C, &TWI_settings);
+
     return 0;
 }
 

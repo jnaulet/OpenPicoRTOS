@@ -33,10 +33,10 @@ static void arduino_due_init_mux(void)
     struct mux_sam3x_pio MUXC;
     struct mux_sam3x_pio MUXD;
 
-    (void)mux_sam3x_pio_init(&MUXA, (struct MUX_SAM3X_PIO*)ADDR_PIOA);
-    (void)mux_sam3x_pio_init(&MUXB, (struct MUX_SAM3X_PIO*)ADDR_PIOB);
-    (void)mux_sam3x_pio_init(&MUXC, (struct MUX_SAM3X_PIO*)ADDR_PIOC);
-    (void)mux_sam3x_pio_init(&MUXD, (struct MUX_SAM3X_PIO*)ADDR_PIOD);
+    (void)mux_sam3x_pio_init(&MUXA, ADDR_PIOA);
+    (void)mux_sam3x_pio_init(&MUXB, ADDR_PIOB);
+    (void)mux_sam3x_pio_init(&MUXC, ADDR_PIOC);
+    (void)mux_sam3x_pio_init(&MUXD, ADDR_PIOD);
 
     /* ANALOG IN */
     /* Nothing to do in theory */
@@ -125,7 +125,7 @@ static void arduino_due_init_analog_in(/*@partial@*/ struct arduino_due *ctx)
     /* main ADC */
     static struct adc_sam3x ADC;
 
-    (void)adc_sam3x_init(&ADC, (struct ADC_SAM3X*)ADDR_ADC);
+    (void)adc_sam3x_init(&ADC, ADDR_ADC);
 
     /* channels */
     static struct adc A0;
@@ -203,7 +203,7 @@ static void arduino_due_init_can(/*@partial@*/ struct arduino_due *ctx)
         false       /* loopback */
     };
 
-    (void)can_sam3x_init(&CAN, (struct CAN_SAM3X*)ADDR_CAN0, CLOCK_SAM3X_PMC_PERIPH(PID_CAN0));
+    (void)can_sam3x_init(&CAN, ADDR_CAN0, CLOCK_SAM3X_PMC_PERIPH(PID_CAN0));
     (void)can_setup(&CAN, &CAN_settings);
 
     /* HAL */
@@ -252,38 +252,38 @@ static void arduino_due_init_digital(/*@partial@*/ struct arduino_due *ctx)
     static struct gpio DIGITAL52;
     static struct gpio DIGITAL53;
 
-    (void)gpio_sam3x_pio_init(&DIGITAL22, (struct GPIO_SAM3X_PIO*)ADDR_PIOB, (size_t)26);
-    (void)gpio_sam3x_pio_init(&DIGITAL23, (struct GPIO_SAM3X_PIO*)ADDR_PIOA, (size_t)14);
-    (void)gpio_sam3x_pio_init(&DIGITAL24, (struct GPIO_SAM3X_PIO*)ADDR_PIOA, (size_t)15);
-    (void)gpio_sam3x_pio_init(&DIGITAL25, (struct GPIO_SAM3X_PIO*)ADDR_PIOD, (size_t)0);
-    (void)gpio_sam3x_pio_init(&DIGITAL26, (struct GPIO_SAM3X_PIO*)ADDR_PIOD, (size_t)1);
-    (void)gpio_sam3x_pio_init(&DIGITAL27, (struct GPIO_SAM3X_PIO*)ADDR_PIOD, (size_t)2);
-    (void)gpio_sam3x_pio_init(&DIGITAL28, (struct GPIO_SAM3X_PIO*)ADDR_PIOD, (size_t)3);
-    (void)gpio_sam3x_pio_init(&DIGITAL29, (struct GPIO_SAM3X_PIO*)ADDR_PIOD, (size_t)6);
-    (void)gpio_sam3x_pio_init(&DIGITAL30, (struct GPIO_SAM3X_PIO*)ADDR_PIOD, (size_t)9);
-    (void)gpio_sam3x_pio_init(&DIGITAL31, (struct GPIO_SAM3X_PIO*)ADDR_PIOA, (size_t)7);
-    (void)gpio_sam3x_pio_init(&DIGITAL32, (struct GPIO_SAM3X_PIO*)ADDR_PIOD, (size_t)10);
-    (void)gpio_sam3x_pio_init(&DIGITAL33, (struct GPIO_SAM3X_PIO*)ADDR_PIOC, (size_t)1);
-    (void)gpio_sam3x_pio_init(&DIGITAL34, (struct GPIO_SAM3X_PIO*)ADDR_PIOC, (size_t)2);
-    (void)gpio_sam3x_pio_init(&DIGITAL35, (struct GPIO_SAM3X_PIO*)ADDR_PIOC, (size_t)3);
-    (void)gpio_sam3x_pio_init(&DIGITAL36, (struct GPIO_SAM3X_PIO*)ADDR_PIOC, (size_t)4);
-    (void)gpio_sam3x_pio_init(&DIGITAL37, (struct GPIO_SAM3X_PIO*)ADDR_PIOC, (size_t)5);
-    (void)gpio_sam3x_pio_init(&DIGITAL38, (struct GPIO_SAM3X_PIO*)ADDR_PIOC, (size_t)6);
-    (void)gpio_sam3x_pio_init(&DIGITAL39, (struct GPIO_SAM3X_PIO*)ADDR_PIOC, (size_t)7);
-    (void)gpio_sam3x_pio_init(&DIGITAL40, (struct GPIO_SAM3X_PIO*)ADDR_PIOC, (size_t)8);
-    (void)gpio_sam3x_pio_init(&DIGITAL41, (struct GPIO_SAM3X_PIO*)ADDR_PIOC, (size_t)9);
-    (void)gpio_sam3x_pio_init(&DIGITAL42, (struct GPIO_SAM3X_PIO*)ADDR_PIOA, (size_t)19);
-    (void)gpio_sam3x_pio_init(&DIGITAL43, (struct GPIO_SAM3X_PIO*)ADDR_PIOA, (size_t)20);
-    (void)gpio_sam3x_pio_init(&DIGITAL44, (struct GPIO_SAM3X_PIO*)ADDR_PIOC, (size_t)19);
-    (void)gpio_sam3x_pio_init(&DIGITAL45, (struct GPIO_SAM3X_PIO*)ADDR_PIOC, (size_t)18);
-    (void)gpio_sam3x_pio_init(&DIGITAL46, (struct GPIO_SAM3X_PIO*)ADDR_PIOC, (size_t)17);
-    (void)gpio_sam3x_pio_init(&DIGITAL47, (struct GPIO_SAM3X_PIO*)ADDR_PIOC, (size_t)16);
-    (void)gpio_sam3x_pio_init(&DIGITAL48, (struct GPIO_SAM3X_PIO*)ADDR_PIOC, (size_t)15);
-    (void)gpio_sam3x_pio_init(&DIGITAL49, (struct GPIO_SAM3X_PIO*)ADDR_PIOC, (size_t)14);
-    (void)gpio_sam3x_pio_init(&DIGITAL50, (struct GPIO_SAM3X_PIO*)ADDR_PIOC, (size_t)13);
-    (void)gpio_sam3x_pio_init(&DIGITAL51, (struct GPIO_SAM3X_PIO*)ADDR_PIOC, (size_t)12);
-    (void)gpio_sam3x_pio_init(&DIGITAL52, (struct GPIO_SAM3X_PIO*)ADDR_PIOB, (size_t)21);
-    (void)gpio_sam3x_pio_init(&DIGITAL53, (struct GPIO_SAM3X_PIO*)ADDR_PIOB, (size_t)14);
+    (void)gpio_sam3x_pio_init(&DIGITAL22, ADDR_PIOB, (size_t)26);
+    (void)gpio_sam3x_pio_init(&DIGITAL23, ADDR_PIOA, (size_t)14);
+    (void)gpio_sam3x_pio_init(&DIGITAL24, ADDR_PIOA, (size_t)15);
+    (void)gpio_sam3x_pio_init(&DIGITAL25, ADDR_PIOD, (size_t)0);
+    (void)gpio_sam3x_pio_init(&DIGITAL26, ADDR_PIOD, (size_t)1);
+    (void)gpio_sam3x_pio_init(&DIGITAL27, ADDR_PIOD, (size_t)2);
+    (void)gpio_sam3x_pio_init(&DIGITAL28, ADDR_PIOD, (size_t)3);
+    (void)gpio_sam3x_pio_init(&DIGITAL29, ADDR_PIOD, (size_t)6);
+    (void)gpio_sam3x_pio_init(&DIGITAL30, ADDR_PIOD, (size_t)9);
+    (void)gpio_sam3x_pio_init(&DIGITAL31, ADDR_PIOA, (size_t)7);
+    (void)gpio_sam3x_pio_init(&DIGITAL32, ADDR_PIOD, (size_t)10);
+    (void)gpio_sam3x_pio_init(&DIGITAL33, ADDR_PIOC, (size_t)1);
+    (void)gpio_sam3x_pio_init(&DIGITAL34, ADDR_PIOC, (size_t)2);
+    (void)gpio_sam3x_pio_init(&DIGITAL35, ADDR_PIOC, (size_t)3);
+    (void)gpio_sam3x_pio_init(&DIGITAL36, ADDR_PIOC, (size_t)4);
+    (void)gpio_sam3x_pio_init(&DIGITAL37, ADDR_PIOC, (size_t)5);
+    (void)gpio_sam3x_pio_init(&DIGITAL38, ADDR_PIOC, (size_t)6);
+    (void)gpio_sam3x_pio_init(&DIGITAL39, ADDR_PIOC, (size_t)7);
+    (void)gpio_sam3x_pio_init(&DIGITAL40, ADDR_PIOC, (size_t)8);
+    (void)gpio_sam3x_pio_init(&DIGITAL41, ADDR_PIOC, (size_t)9);
+    (void)gpio_sam3x_pio_init(&DIGITAL42, ADDR_PIOA, (size_t)19);
+    (void)gpio_sam3x_pio_init(&DIGITAL43, ADDR_PIOA, (size_t)20);
+    (void)gpio_sam3x_pio_init(&DIGITAL44, ADDR_PIOC, (size_t)19);
+    (void)gpio_sam3x_pio_init(&DIGITAL45, ADDR_PIOC, (size_t)18);
+    (void)gpio_sam3x_pio_init(&DIGITAL46, ADDR_PIOC, (size_t)17);
+    (void)gpio_sam3x_pio_init(&DIGITAL47, ADDR_PIOC, (size_t)16);
+    (void)gpio_sam3x_pio_init(&DIGITAL48, ADDR_PIOC, (size_t)15);
+    (void)gpio_sam3x_pio_init(&DIGITAL49, ADDR_PIOC, (size_t)14);
+    (void)gpio_sam3x_pio_init(&DIGITAL50, ADDR_PIOC, (size_t)13);
+    (void)gpio_sam3x_pio_init(&DIGITAL51, ADDR_PIOC, (size_t)12);
+    (void)gpio_sam3x_pio_init(&DIGITAL52, ADDR_PIOB, (size_t)21);
+    (void)gpio_sam3x_pio_init(&DIGITAL53, ADDR_PIOB, (size_t)14);
 
     /* HAL */
     ctx->DIGITAL22 = &DIGITAL22;
@@ -337,7 +337,7 @@ static void arduino_due_init_communication(/*@partial@*/ struct arduino_due *ctx
         false       /* cstopb */
     };
 
-    (void)uart_sam3x_init(&SERIAL0, (struct UART_SAM3X*)ADDR_UART, CLOCK_SAM3X_PMC_PERIPH(PID_UART));
+    (void)uart_sam3x_init(&SERIAL0, ADDR_UART, CLOCK_SAM3X_PMC_PERIPH(PID_UART));
     (void)uart_setup(&SERIAL0, &UART_settings);
 
     /* I2C */
@@ -349,7 +349,7 @@ static void arduino_due_init_communication(/*@partial@*/ struct arduino_due *ctx
         (twi_addr_t)0x69
     };
 
-    (void)twi_sam3x_init(&I2C, (struct TWI_SAM3X*)ADDR_TWI1, CLOCK_SAM3X_PMC_PERIPH(PID_TWI1));
+    (void)twi_sam3x_init(&I2C, ADDR_TWI1, CLOCK_SAM3X_PMC_PERIPH(PID_TWI1));
     (void)twi_setup(&I2C, &TWI_settings);
 
     /* HAL */
@@ -390,17 +390,17 @@ static void arduino_due_init_pwm(/*@partial@*/ struct arduino_due *ctx)
         PWM_SAM3X_TC_CP_CLEAR       /* nCPC */
     };
 
-    (void)pwm_sam3x_tc_init(&PWM2, (struct PWM_SAM3X_TC*)ADDR_TC0, CLOCK_SAM3X_PMC_PERIPH(PID_TC0));
+    (void)pwm_sam3x_tc_init(&PWM2, ADDR_TC0, CLOCK_SAM3X_PMC_PERIPH(PID_TC0));
     (void)pwm_sam3x_tc_setup(&PWM2, &PWM_settings_A);
-    (void)pwm_sam3x_tc_init(&PWM4, (struct PWM_SAM3X_TC*)ADDR_TC6, CLOCK_SAM3X_PMC_PERIPH(PID_TC6));
+    (void)pwm_sam3x_tc_init(&PWM4, ADDR_TC6, CLOCK_SAM3X_PMC_PERIPH(PID_TC6));
     (void)pwm_sam3x_tc_setup(&PWM4, &PWM_settings_B);
-    (void)pwm_sam3x_tc_init(&PWM5, (struct PWM_SAM3X_TC*)ADDR_TC6, CLOCK_SAM3X_PMC_PERIPH(PID_TC6));
+    (void)pwm_sam3x_tc_init(&PWM5, ADDR_TC6, CLOCK_SAM3X_PMC_PERIPH(PID_TC6));
     (void)pwm_sam3x_tc_setup(&PWM5, &PWM_settings_A);
-    (void)pwm_sam3x_tc_init(&PWM11, (struct PWM_SAM3X_TC*)ADDR_TC8, CLOCK_SAM3X_PMC_PERIPH(PID_TC8));
+    (void)pwm_sam3x_tc_init(&PWM11, ADDR_TC8, CLOCK_SAM3X_PMC_PERIPH(PID_TC8));
     (void)pwm_sam3x_tc_setup(&PWM11, &PWM_settings_A);
-    (void)pwm_sam3x_tc_init(&PWM12, (struct PWM_SAM3X_TC*)ADDR_TC8, CLOCK_SAM3X_PMC_PERIPH(PID_TC8));
+    (void)pwm_sam3x_tc_init(&PWM12, ADDR_TC8, CLOCK_SAM3X_PMC_PERIPH(PID_TC8));
     (void)pwm_sam3x_tc_setup(&PWM12, &PWM_settings_B);
-    (void)pwm_sam3x_tc_init(&PWM13, (struct PWM_SAM3X_TC*)ADDR_TC0, CLOCK_SAM3X_PMC_PERIPH(PID_TC0));
+    (void)pwm_sam3x_tc_init(&PWM13, ADDR_TC0, CLOCK_SAM3X_PMC_PERIPH(PID_TC0));
     (void)pwm_sam3x_tc_setup(&PWM13, &PWM_settings_B);
 
     /* IPWM */
@@ -411,7 +411,7 @@ static void arduino_due_init_pwm(/*@partial@*/ struct arduino_due *ctx)
         IPWM_SAM3X_TC_LDR_RISING
     };
 
-    (void)ipwm_sam3x_tc_init(&PWM3, (struct PWM_SAM3X_TC*)ADDR_TC7, CLOCK_SAM3X_PMC_PERIPH(PID_TC7));
+    (void)ipwm_sam3x_tc_init(&PWM3, ADDR_TC7, CLOCK_SAM3X_PMC_PERIPH(PID_TC7));
     (void)ipwm_sam3x_tc_setup(&PWM3, &IPWM_settings);
 
     /* HAL */
@@ -442,7 +442,7 @@ static void arduino_due_init_misc(/*@partial@*/ struct arduino_due *ctx)
         (size_t)0   /* cs */
     };
 
-    (void)spi_sam3x_init(&SPI, (struct SPI_SAM3X*)ADDR_SPI0, CLOCK_SAM3X_PMC_PERIPH(PID_SPI0));
+    (void)spi_sam3x_init(&SPI, ADDR_SPI0, CLOCK_SAM3X_PMC_PERIPH(PID_SPI0));
     (void)spi_setup(&SPI, &SPI_settings);
 
     /* I2C1 */
@@ -454,7 +454,7 @@ static void arduino_due_init_misc(/*@partial@*/ struct arduino_due *ctx)
         (twi_addr_t)0x69
     };
 
-    (void)twi_sam3x_init(&I2C1, (struct TWI_SAM3X*)ADDR_TWI0, CLOCK_SAM3X_PMC_PERIPH(PID_TWI0));
+    (void)twi_sam3x_init(&I2C1, ADDR_TWI0, CLOCK_SAM3X_PMC_PERIPH(PID_TWI0));
     (void)twi_setup(&I2C1, &TWI_settings);
 
     /* HAL */
@@ -471,7 +471,7 @@ static void arduino_due_init_wd(/*@partial@*/ struct arduino_due *ctx)
         4ul,                 /* timeout ms */
     };
 
-    (void)wd_sam3x_init(&WDT, (struct WD_SAM3X*)ADDR_WDT, CLOCK_SAM3X_PMC_SCLK);
+    (void)wd_sam3x_init(&WDT, ADDR_WDT, CLOCK_SAM3X_PMC_SCLK);
     (void)wd_sam3x_setup(&WDT, &WD_settings);
 
     /* HAL */

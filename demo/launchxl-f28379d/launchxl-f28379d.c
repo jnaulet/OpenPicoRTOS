@@ -31,9 +31,9 @@ static void mux_init(void)
     struct mux GPIOCTRL_B;
     struct mux GPIOCTRL_D;
 
-    (void)mux_ti_f28x_init(&GPIOCTRL_A, (struct GPIO_CTRL_REGS*)ADDR_GPIOCTRL_A);
-    (void)mux_ti_f28x_init(&GPIOCTRL_B, (struct GPIO_CTRL_REGS*)ADDR_GPIOCTRL_B);
-    (void)mux_ti_f28x_init(&GPIOCTRL_D, (struct GPIO_CTRL_REGS*)ADDR_GPIOCTRL_D);
+    (void)mux_ti_f28x_init(&GPIOCTRL_A, ADDR_GPIOCTRL_A);
+    (void)mux_ti_f28x_init(&GPIOCTRL_B, ADDR_GPIOCTRL_B);
+    (void)mux_ti_f28x_init(&GPIOCTRL_D, ADDR_GPIOCTRL_D);
 
     /* GPIOs */
     (void)mux_ti_f28x_output(&GPIOCTRL_A, (size_t)31, MUX_TI_F28X_GPIO, MUX_TI_F28X_GPIO);      /* LEDB */
@@ -73,9 +73,9 @@ static void mux_init(void)
 
 static void gpio_init(/*@partial@*/ struct launchxl_f28379d *ctx)
 {
-    (void)gpio_ti_f28x_init(&ctx->LED.B, (struct GPIO_DATA_REGS*)ADDR_GPIODATA_A, (size_t)31);
-    (void)gpio_ti_f28x_init(&ctx->TICK, (struct GPIO_DATA_REGS*)ADDR_GPIODATA_B, (size_t)0);
-    (void)gpio_ti_f28x_init(&ctx->LED.R, (struct GPIO_DATA_REGS*)ADDR_GPIODATA_B, (size_t)2);
+    (void)gpio_ti_f28x_init(&ctx->LED.B, ADDR_GPIODATA_A, (size_t)31);
+    (void)gpio_ti_f28x_init(&ctx->TICK, ADDR_GPIODATA_B, (size_t)0);
+    (void)gpio_ti_f28x_init(&ctx->LED.R, ADDR_GPIODATA_B, (size_t)2);
 }
 
 static void spi_init(/*@partial@*/ struct launchxl_f28379d *ctx)
@@ -89,7 +89,7 @@ static void spi_init(/*@partial@*/ struct launchxl_f28379d *ctx)
         (size_t)0
     };
 
-    (void)spi_ti_f28x_init(&ctx->SPI, (struct SPI_REGS*)ADDR_SPIA, CLOCK_F28379X_LSPCLK);
+    (void)spi_ti_f28x_init(&ctx->SPI, ADDR_SPIA, CLOCK_F28379X_LSPCLK);
     (void)spi_setup(&ctx->SPI, &SPI_settings);
     (void)spi_ti_f28x_set_loopback(&ctx->SPI, true);
 }
@@ -111,7 +111,7 @@ static void pwm_init(/*@partial@*/ struct launchxl_f28379d *ctx)
         PWM_TI_EPWM_AQ_DISABLE,     /* CMPB, down */
     };
 
-    (void)pwm_ti_epwm_init(&C99_EPWM1, (struct C99_EPWM_REGS*)ADDR_EPWM1, CLOCK_F28379X_EPWMCLK);
+    (void)pwm_ti_epwm_init(&C99_EPWM1, ADDR_EPWM1, CLOCK_F28379X_EPWMCLK);
     (void)pwm_ti_epwm_setup(&C99_EPWM1, &C99_EPWM1_settings);
 
     (void)pwm_ti_epwm_pwm_init(&ctx->PWM, &C99_EPWM1, PWM_TI_EPWM_CMPA);
@@ -135,7 +135,7 @@ static void adc_init(/*@partial@*/ struct launchxl_f28379d *ctx)
         (uint16_t)ADC_TI_TYPE4_ACQPS_MIN_12BIT
     };
 
-    (void)adc_ti_type4_init(&ADCA, (struct ADC_REGS*)ADDR_ADCA, (struct ADC_RESULT_REGS*)ADDR_ADCARESULT, ADCA_CAL_INL_ADDR);
+    (void)adc_ti_type4_init(&ADCA, ADDR_ADCA, ADDR_ADCARESULT, ADCA_CAL_INL_ADDR);
     (void)adc_ti_type4_setup(&ADCA, &ADCA_settings);
 
     (void)adc_ti_type4_adc_init(&ctx->ADCIN13, &ADCA, (size_t)13, (size_t)3, ADC_TI_TYPE4_INTFLG_1);
@@ -165,7 +165,7 @@ static void can_init(/*@partial@*/ struct launchxl_f28379d *ctx)
         true        /* loopback */
     };
 
-    (void)can_ti_dcan_init(&ctx->CAN, (struct CAN_REGS*)ADDR_CANB, CLOCK_F28379X_SYSCLK);
+    (void)can_ti_dcan_init(&ctx->CAN, ADDR_CANB, CLOCK_F28379X_SYSCLK);
     (void)can_setup(&ctx->CAN, &CAN_settings);
 }
 
@@ -177,18 +177,18 @@ static void i2c_init(/*@partial@*/ struct launchxl_f28379d *ctx)
         (twi_addr_t)0x55,   /* slave_addr */
     };
 
-    (void)twi_ti_f28x_init(&ctx->I2CA, (struct I2C_REGS*)ADDR_I2CA, CLOCK_F28379X_SYSCLK);
+    (void)twi_ti_f28x_init(&ctx->I2CA, ADDR_I2CA, CLOCK_F28379X_SYSCLK);
     (void)twi_setup(&ctx->I2CA, &I2C_settings);
 
     I2C_settings.mode = TWI_MODE_SLAVE;
-    (void)twi_ti_f28x_init(&ctx->I2CB, (struct I2C_REGS*)ADDR_I2CB, CLOCK_F28379X_SYSCLK);
+    (void)twi_ti_f28x_init(&ctx->I2CB, ADDR_I2CB, CLOCK_F28379X_SYSCLK);
     (void)twi_setup(&ctx->I2CB, &I2C_settings);
 }
 
 static void wd_init(/*@partial@*/ struct launchxl_f28379d *ctx)
 {
     /* wd auto-starts */
-    (void)wd_ti_f28x_init(&ctx->WDT, (struct WD_REGS*)ADDR_WD, CLOCK_F28379X_INTOSC1);
+    (void)wd_ti_f28x_init(&ctx->WDT, ADDR_WD, CLOCK_F28379X_INTOSC1);
     wd_refresh(&ctx->WDT);
 }
 

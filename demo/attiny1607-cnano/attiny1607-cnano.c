@@ -24,9 +24,9 @@ static void mux_init(void)
     static struct mux PORTC;
 
     /* ports */
-    (void)mux_tinyavr_init(&PORTA, (struct MUX_TINYAVR*)ADDR_PORTA);
-    (void)mux_tinyavr_init(&PORTB, (struct MUX_TINYAVR*)ADDR_PORTB);
-    (void)mux_tinyavr_init(&PORTC, (struct MUX_TINYAVR*)ADDR_PORTC);
+    (void)mux_tinyavr_init(&PORTA, ADDR_PORTA);
+    (void)mux_tinyavr_init(&PORTB, ADDR_PORTB);
+    (void)mux_tinyavr_init(&PORTC, ADDR_PORTC);
 
     /* SWITCH */
     (void)mux_tinyavr_input(&PORTC, (size_t)4);    /* SW0 */
@@ -54,7 +54,7 @@ static void mux_init(void)
 
 static int gpio_init(/*@partial@*/ struct attiny1607_cnano *ctx)
 {
-    (void)gpio_tinyavr_init(&ctx->SW0, (struct GPIO_TINYAVR*)ADDR_PORTC, (size_t)4);
+    (void)gpio_tinyavr_init(&ctx->SW0, ADDR_PORTC, (size_t)4);
     return 0;
 }
 
@@ -68,9 +68,7 @@ static int uart_init(/*@partial@*/ struct attiny1607_cnano *ctx)
         false,  /* 1 */
     };
 
-    (void)uart_tinyavr_usart_init(&ctx->UART, (struct USART_TINYAVR_UART*)ADDR_USART0,
-                                  CLOCK_TINYAVR_CLK_PER);
-
+    (void)uart_tinyavr_usart_init(&ctx->UART, ADDR_USART0, CLOCK_TINYAVR_CLK_PER);
     return uart_setup(&ctx->UART, &UART_settings);
 }
 
@@ -85,7 +83,7 @@ static int spi_init(/*@partial@*/ struct attiny1607_cnano *ctx)
         (size_t)0,  /* ignore SS */
     };
 
-    (void)spi_tinyavr_init(&ctx->SPI, (struct SPI_TINYAVR*)ADDR_SPI0, CLOCK_TINYAVR_CLK_PER);
+    (void)spi_tinyavr_init(&ctx->SPI, ADDR_SPI0, CLOCK_TINYAVR_CLK_PER);
     return spi_setup(&ctx->SPI, &SPI_settings);
 }
 
@@ -98,7 +96,7 @@ static int adc_init(/*@partial@*/ struct attiny1607_cnano *ctx)
         1500000ul, /* 1.5Mhz max */
     };
 
-    (void)adc_tinyavr_init(&ADC0, (struct ADC_TINYAVR*)ADDR_ADC0, CLOCK_TINYAVR_CLK_PER);
+    (void)adc_tinyavr_init(&ADC0, ADDR_ADC0, CLOCK_TINYAVR_CLK_PER);
     (void)adc_tinyavr_setup(&ADC0, &ADC0_settings);
 
     /* AIN4 settings */
@@ -119,7 +117,7 @@ static int wdt_init(/*@partial@*/ struct attiny1607_cnano *ctx)
         WD_TINYAVR_PERIOD_8MS,  /* period */
     };
 
-    (void)wd_tinyavr_init(&ctx->WDT, (struct WDT_TINYAVR*)ADDR_WDT);
+    (void)wd_tinyavr_init(&ctx->WDT, ADDR_WDT);
     (void)wd_tinyavr_setup(&ctx->WDT, &WDT_settings);
 
     /* don't start here for memory management reasons */
@@ -134,7 +132,7 @@ static int pwm_init(/*@partial@*/ struct attiny1607_cnano *ctx)
         PWM_TINYAVR_TCA_WGMODE_SINGLESLOPE,
     };
 
-    (void)pwm_tinyavr_tca_init(&TCA, (struct PWM_TINYAVR_TCA*)ADDR_TCA0, CLOCK_TINYAVR_CLK_PER);
+    (void)pwm_tinyavr_tca_init(&TCA, ADDR_TCA0, CLOCK_TINYAVR_CLK_PER);
     (void)pwm_tinyavr_tca_setup(&TCA, &TCA_settings);
 
     (void)pwm_tinyavr_tca_pwm_init(&ctx->LED0, &TCA, PWM_TINYAVR_TCA_CMP2);

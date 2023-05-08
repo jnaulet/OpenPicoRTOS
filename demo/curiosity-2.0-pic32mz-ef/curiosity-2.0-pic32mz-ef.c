@@ -31,13 +31,13 @@ static void mux_init(void)
     struct mux_pic32mx PORTJ;
     struct mux_pic32mx PORTK;
 
-    (void)mux_pic32mx_init(&PORTA, (struct MUX_PIC32MX*)ADDR_PORTA);
-    (void)mux_pic32mx_init(&PORTB, (struct MUX_PIC32MX*)ADDR_PORTB);
-    (void)mux_pic32mx_init(&PORTC, (struct MUX_PIC32MX*)ADDR_PORTC);
-    (void)mux_pic32mx_init(&PORTD, (struct MUX_PIC32MX*)ADDR_PORTD);
-    (void)mux_pic32mx_init(&PORTF, (struct MUX_PIC32MX*)ADDR_PORTF);
-    (void)mux_pic32mx_init(&PORTJ, (struct MUX_PIC32MX*)ADDR_PORTJ);
-    (void)mux_pic32mx_init(&PORTK, (struct MUX_PIC32MX*)ADDR_PORTK);
+    (void)mux_pic32mx_init(&PORTA, ADDR_PORTA);
+    (void)mux_pic32mx_init(&PORTB, ADDR_PORTB);
+    (void)mux_pic32mx_init(&PORTC, ADDR_PORTC);
+    (void)mux_pic32mx_init(&PORTD, ADDR_PORTD);
+    (void)mux_pic32mx_init(&PORTF, ADDR_PORTF);
+    (void)mux_pic32mx_init(&PORTJ, ADDR_PORTJ);
+    (void)mux_pic32mx_init(&PORTK, ADDR_PORTK);
 
     (void)mux_pic32mx_output(&PORTJ, (size_t)7);    /* LED1 */
     (void)mux_pic32mx_output(&PORTK, (size_t)7);    /* LED2 */
@@ -75,9 +75,9 @@ static void mux_init(void)
 
 static int gpio_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
 {
-    (void)gpio_pic32mx_init(&ctx->LED1, (struct GPIO_PIC32MX*)ADDR_PORTJ, (size_t)7);
-    (void)gpio_pic32mx_init(&ctx->LED2, (struct GPIO_PIC32MX*)ADDR_PORTK, (size_t)7);
-    (void)gpio_pic32mx_init(&ctx->LED3, (struct GPIO_PIC32MX*)ADDR_PORTJ, (size_t)3);
+    (void)gpio_pic32mx_init(&ctx->LED1, ADDR_PORTJ, (size_t)7);
+    (void)gpio_pic32mx_init(&ctx->LED2, ADDR_PORTK, (size_t)7);
+    (void)gpio_pic32mx_init(&ctx->LED3, ADDR_PORTJ, (size_t)3);
 
     /* turn them off */
     gpio_write(&ctx->LED1, true);
@@ -97,9 +97,9 @@ static int uart_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
         false,  /* 1 */
     };
 
-    (void)uart_pic32mx_init(&ctx->UART1, (struct UART_PIC32MX*)ADDR_UART1, CLOCK_PIC32MX_PBCLK2);
+    (void)uart_pic32mx_init(&ctx->UART1, ADDR_UART1, CLOCK_PIC32MX_PBCLK2);
     (void)uart_setup(&ctx->UART1, &UART_settings);
-    (void)uart_pic32mx_init(&ctx->UART6, (struct UART_PIC32MX*)ADDR_UART6, CLOCK_PIC32MX_PBCLK2);
+    (void)uart_pic32mx_init(&ctx->UART6, ADDR_UART6, CLOCK_PIC32MX_PBCLK2);
     (void)uart_setup(&ctx->UART6, &UART_settings);
 
     return 0;
@@ -116,14 +116,14 @@ static int spi_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
         (size_t)0,  /* ignore SS */
     };
 
-    (void)spi_pic32mx_init(&ctx->SPI1, (struct SPI_PIC32MX*)ADDR_SPI1, CLOCK_PIC32MX_PBCLK2);
+    (void)spi_pic32mx_init(&ctx->SPI1, ADDR_SPI1, CLOCK_PIC32MX_PBCLK2);
     return spi_setup(&ctx->SPI1, &SPI_settings);
 }
 
 static int wd_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
 {
     /* already init by config.S */
-    (void)wd_pic32mx_init(&ctx->WDT, (struct WD_PIC32MX*)ADDR_WATCHDOG_TIMER);
+    (void)wd_pic32mx_init(&ctx->WDT, ADDR_WATCHDOG_TIMER);
 
     wd_refresh(&ctx->WDT);
     return 0;
@@ -137,18 +137,9 @@ static int pwm_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
         true, /* invert */
     };
 
-    (void)pwm_pic32mx_init(&ctx->LED4.R,
-                           (struct PWM_PIC32MX_OC*)ADDR_OC5,
-                           (struct PWM_PIC32MX_TC*)ADDR_TIMER2,
-                           CLOCK_PIC32MX_PBCLK4);
-    (void)pwm_pic32mx_init(&ctx->LED4.G,
-                           (struct PWM_PIC32MX_OC*)ADDR_OC8,
-                           (struct PWM_PIC32MX_TC*)ADDR_TIMER2,
-                           CLOCK_PIC32MX_PBCLK4);
-    (void)pwm_pic32mx_init(&ctx->LED4.B,
-                           (struct PWM_PIC32MX_OC*)ADDR_OC3,
-                           (struct PWM_PIC32MX_TC*)ADDR_TIMER2,
-                           CLOCK_PIC32MX_PBCLK4);
+    (void)pwm_pic32mx_init(&ctx->LED4.R, ADDR_OC5, ADDR_TIMER2, CLOCK_PIC32MX_PBCLK4);
+    (void)pwm_pic32mx_init(&ctx->LED4.G, ADDR_OC8, ADDR_TIMER2, CLOCK_PIC32MX_PBCLK4);
+    (void)pwm_pic32mx_init(&ctx->LED4.B, ADDR_OC3, ADDR_TIMER2, CLOCK_PIC32MX_PBCLK4);
 
     (void)pwm_pic32mx_setup(&ctx->LED4.R, &LED_settings);
     (void)pwm_pic32mx_setup(&ctx->LED4.G, &LED_settings);
@@ -164,10 +155,7 @@ static int pwm_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
         false, /* invert */
     };
 
-    (void)pwm_pic32mx_init(&ctx->PWM1,
-                           (struct PWM_PIC32MX_OC*)ADDR_OC1,
-                           (struct PWM_PIC32MX_TC*)ADDR_TIMER3,
-                           CLOCK_PIC32MX_PBCLK4);
+    (void)pwm_pic32mx_init(&ctx->PWM1, ADDR_OC1, ADDR_TIMER3, CLOCK_PIC32MX_PBCLK4);
 
     (void)pwm_pic32mx_setup(&ctx->PWM1, &OC1_settings);
     (void)pwm_set_period(&ctx->PWM1, (pwm_period_us_t)100);
@@ -183,11 +171,11 @@ static int twi_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
         (twi_addr_t)0x55,
     };
 
-    (void)twi_pic32mx_init(&ctx->I2C1, (struct TWI_PIC32MX*)ADDR_I2C1, CLOCK_PIC32MX_PBCLK2);
+    (void)twi_pic32mx_init(&ctx->I2C1, ADDR_I2C1, CLOCK_PIC32MX_PBCLK2);
     (void)twi_setup(&ctx->I2C1, &TWI_settings);
 
     TWI_settings.mode = TWI_MODE_SLAVE;
-    (void)twi_pic32mx_init(&ctx->I2C2, (struct TWI_PIC32MX*)ADDR_I2C2, CLOCK_PIC32MX_PBCLK2);
+    (void)twi_pic32mx_init(&ctx->I2C2, ADDR_I2C2, CLOCK_PIC32MX_PBCLK2);
     (void)twi_setup(&ctx->I2C2, &TWI_settings);
 
     return 0;
@@ -205,7 +193,7 @@ static int adc_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
         ADC_PIC32MX_STRGSRC_GSWTRG,
     };
 
-    (void)adc_pic32mx_init(&ADC, (struct ADC_PIC32MX*)ADDR_ADC);
+    (void)adc_pic32mx_init(&ADC, ADDR_ADC);
     (void)adc_pic32mx_setup(&ADC, &ADC_settings);
 
     /* channel */
@@ -241,7 +229,7 @@ static int can_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
         true,       /* loopback */
     };
 
-    (void)can_pic32mx_init(&ctx->CAN2, (struct CAN_PIC32MX*)ADDR_CAN2, CLOCK_PIC32MX_PBCLK5);
+    (void)can_pic32mx_init(&ctx->CAN2, ADDR_CAN2, CLOCK_PIC32MX_PBCLK5);
     (void)can_setup(&ctx->CAN2, &CAN_settings);
 
     return 0;
@@ -249,9 +237,8 @@ static int can_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
 
 static int flash_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
 {
-    (void)flash_pic32mx_init(&ctx->FLASH,
-                             (struct FLASH_PIC32MX*)ADDR_FLASH_CONTROLLER,
-                             (size_t)128); /* 128 16kb blocks on pic32mz-ef 2048 */
+    /* 128 16kb blocks on pic32mz-ef 2048 */
+    (void)flash_pic32mx_init(&ctx->FLASH, ADDR_FLASH_CONTROLLER, (size_t)128);
     return 0;
 }
 

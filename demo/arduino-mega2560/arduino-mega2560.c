@@ -13,16 +13,16 @@ static void arduino_mega2560_init_mux(void)
     struct mux PORTK;
     struct mux PORTL;
 
-    (void)mux_avr_init(&PORTA, (struct MUX_AVR*)ADDR_PORTA);
-    (void)mux_avr_init(&PORTB, (struct MUX_AVR*)ADDR_PORTB);
-    (void)mux_avr_init(&PORTC, (struct MUX_AVR*)ADDR_PORTC);
-    (void)mux_avr_init(&PORTD, (struct MUX_AVR*)ADDR_PORTD);
-    (void)mux_avr_init(&PORTE, (struct MUX_AVR*)ADDR_PORTE);
-    (void)mux_avr_init(&PORTF, (struct MUX_AVR*)ADDR_PORTF);
-    (void)mux_avr_init(&PORTG, (struct MUX_AVR*)ADDR_PORTG);
-    (void)mux_avr_init(&PORTH, (struct MUX_AVR*)ADDR_PORTH);
-    (void)mux_avr_init(&PORTK, (struct MUX_AVR*)ADDR_PORTK);
-    (void)mux_avr_init(&PORTL, (struct MUX_AVR*)ADDR_PORTL);
+    (void)mux_avr_init(&PORTA, ADDR_PORTA);
+    (void)mux_avr_init(&PORTB, ADDR_PORTB);
+    (void)mux_avr_init(&PORTC, ADDR_PORTC);
+    (void)mux_avr_init(&PORTD, ADDR_PORTD);
+    (void)mux_avr_init(&PORTE, ADDR_PORTE);
+    (void)mux_avr_init(&PORTF, ADDR_PORTF);
+    (void)mux_avr_init(&PORTG, ADDR_PORTG);
+    (void)mux_avr_init(&PORTH, ADDR_PORTH);
+    (void)mux_avr_init(&PORTK, ADDR_PORTK);
+    (void)mux_avr_init(&PORTL, ADDR_PORTL);
 
     /* ANALOG IN */
     (void)mux_avr_input(&PORTF, (size_t)0);         /* A0 */
@@ -109,7 +109,7 @@ static void arduino_mega2560_init_analog_in(/*@partial@*/ struct arduino_mega256
         false /* !left_adjust_result */
     };
 
-    (void)adc_avr_init(&ADC, (struct ADC_AVR*)ADDR_ADC);
+    (void)adc_avr_init(&ADC, ADDR_ADC);
     (void)adc_avr_setup(&ADC, &ADC_settings);
 
     /* channels */
@@ -143,34 +143,34 @@ static void arduino_mega2560_init_analog_in(/*@partial@*/ struct arduino_mega256
 
 static void arduino_mega2560_init_digital(/*@partial@*/ struct arduino_mega2560 *ctx)
 {
-    (void)gpio_avr_init(&ctx->DIGITAL22, (struct GPIO_AVR*)ADDR_PORTA, (size_t)0);
-    (void)gpio_avr_init(&ctx->DIGITAL23, (struct GPIO_AVR*)ADDR_PORTA, (size_t)1);
-    (void)gpio_avr_init(&ctx->DIGITAL24, (struct GPIO_AVR*)ADDR_PORTA, (size_t)2);
-    (void)gpio_avr_init(&ctx->DIGITAL25, (struct GPIO_AVR*)ADDR_PORTA, (size_t)3);
-    (void)gpio_avr_init(&ctx->DIGITAL26, (struct GPIO_AVR*)ADDR_PORTA, (size_t)4);
-    (void)gpio_avr_init(&ctx->DIGITAL27, (struct GPIO_AVR*)ADDR_PORTA, (size_t)5);
-    (void)gpio_avr_init(&ctx->DIGITAL28, (struct GPIO_AVR*)ADDR_PORTA, (size_t)6);
-    (void)gpio_avr_init(&ctx->DIGITAL29, (struct GPIO_AVR*)ADDR_PORTA, (size_t)7);
-    (void)gpio_avr_init(&ctx->DIGITAL30, (struct GPIO_AVR*)ADDR_PORTC, (size_t)7);
-    (void)gpio_avr_init(&ctx->DIGITAL31, (struct GPIO_AVR*)ADDR_PORTC, (size_t)6);
-    (void)gpio_avr_init(&ctx->DIGITAL32, (struct GPIO_AVR*)ADDR_PORTC, (size_t)5);
-    (void)gpio_avr_init(&ctx->DIGITAL33, (struct GPIO_AVR*)ADDR_PORTC, (size_t)4);
-    (void)gpio_avr_init(&ctx->DIGITAL34, (struct GPIO_AVR*)ADDR_PORTC, (size_t)3);
-    (void)gpio_avr_init(&ctx->DIGITAL35, (struct GPIO_AVR*)ADDR_PORTC, (size_t)2);
-    (void)gpio_avr_init(&ctx->DIGITAL36, (struct GPIO_AVR*)ADDR_PORTC, (size_t)1);
-    (void)gpio_avr_init(&ctx->DIGITAL37, (struct GPIO_AVR*)ADDR_PORTC, (size_t)0);
-    (void)gpio_avr_init(&ctx->DIGITAL38, (struct GPIO_AVR*)ADDR_PORTD, (size_t)7);
-    (void)gpio_avr_init(&ctx->DIGITAL39, (struct GPIO_AVR*)ADDR_PORTG, (size_t)2);
-    (void)gpio_avr_init(&ctx->DIGITAL40, (struct GPIO_AVR*)ADDR_PORTG, (size_t)1);
-    (void)gpio_avr_init(&ctx->DIGITAL41, (struct GPIO_AVR*)ADDR_PORTG, (size_t)0);
-    (void)gpio_avr_init(&ctx->DIGITAL42, (struct GPIO_AVR*)ADDR_PORTL, (size_t)7);
-    (void)gpio_avr_init(&ctx->DIGITAL43, (struct GPIO_AVR*)ADDR_PORTL, (size_t)6);
-    (void)gpio_avr_init(&ctx->DIGITAL44, (struct GPIO_AVR*)ADDR_PORTL, (size_t)5);
-    (void)gpio_avr_init(&ctx->DIGITAL45, (struct GPIO_AVR*)ADDR_PORTL, (size_t)4);
-    (void)gpio_avr_init(&ctx->DIGITAL46, (struct GPIO_AVR*)ADDR_PORTL, (size_t)3);
-    (void)gpio_avr_init(&ctx->DIGITAL47, (struct GPIO_AVR*)ADDR_PORTL, (size_t)2);
-    (void)gpio_avr_init(&ctx->DIGITAL48, (struct GPIO_AVR*)ADDR_PORTL, (size_t)1);
-    (void)gpio_avr_init(&ctx->DIGITAL49, (struct GPIO_AVR*)ADDR_PORTL, (size_t)0);
+    (void)gpio_avr_init(&ctx->DIGITAL22, ADDR_PORTA, (size_t)0);
+    (void)gpio_avr_init(&ctx->DIGITAL23, ADDR_PORTA, (size_t)1);
+    (void)gpio_avr_init(&ctx->DIGITAL24, ADDR_PORTA, (size_t)2);
+    (void)gpio_avr_init(&ctx->DIGITAL25, ADDR_PORTA, (size_t)3);
+    (void)gpio_avr_init(&ctx->DIGITAL26, ADDR_PORTA, (size_t)4);
+    (void)gpio_avr_init(&ctx->DIGITAL27, ADDR_PORTA, (size_t)5);
+    (void)gpio_avr_init(&ctx->DIGITAL28, ADDR_PORTA, (size_t)6);
+    (void)gpio_avr_init(&ctx->DIGITAL29, ADDR_PORTA, (size_t)7);
+    (void)gpio_avr_init(&ctx->DIGITAL30, ADDR_PORTC, (size_t)7);
+    (void)gpio_avr_init(&ctx->DIGITAL31, ADDR_PORTC, (size_t)6);
+    (void)gpio_avr_init(&ctx->DIGITAL32, ADDR_PORTC, (size_t)5);
+    (void)gpio_avr_init(&ctx->DIGITAL33, ADDR_PORTC, (size_t)4);
+    (void)gpio_avr_init(&ctx->DIGITAL34, ADDR_PORTC, (size_t)3);
+    (void)gpio_avr_init(&ctx->DIGITAL35, ADDR_PORTC, (size_t)2);
+    (void)gpio_avr_init(&ctx->DIGITAL36, ADDR_PORTC, (size_t)1);
+    (void)gpio_avr_init(&ctx->DIGITAL37, ADDR_PORTC, (size_t)0);
+    (void)gpio_avr_init(&ctx->DIGITAL38, ADDR_PORTD, (size_t)7);
+    (void)gpio_avr_init(&ctx->DIGITAL39, ADDR_PORTG, (size_t)2);
+    (void)gpio_avr_init(&ctx->DIGITAL40, ADDR_PORTG, (size_t)1);
+    (void)gpio_avr_init(&ctx->DIGITAL41, ADDR_PORTG, (size_t)0);
+    (void)gpio_avr_init(&ctx->DIGITAL42, ADDR_PORTL, (size_t)7);
+    (void)gpio_avr_init(&ctx->DIGITAL43, ADDR_PORTL, (size_t)6);
+    (void)gpio_avr_init(&ctx->DIGITAL44, ADDR_PORTL, (size_t)5);
+    (void)gpio_avr_init(&ctx->DIGITAL45, ADDR_PORTL, (size_t)4);
+    (void)gpio_avr_init(&ctx->DIGITAL46, ADDR_PORTL, (size_t)3);
+    (void)gpio_avr_init(&ctx->DIGITAL47, ADDR_PORTL, (size_t)2);
+    (void)gpio_avr_init(&ctx->DIGITAL48, ADDR_PORTL, (size_t)1);
+    (void)gpio_avr_init(&ctx->DIGITAL49, ADDR_PORTL, (size_t)0);
 }
 
 static void arduino_mega2560_init_communication(/*@partial@*/ struct arduino_mega2560 *ctx)
@@ -184,7 +184,7 @@ static void arduino_mega2560_init_communication(/*@partial@*/ struct arduino_meg
         false   /* 1 */
     };
 
-    (void)uart_avr_init(&ctx->SERIAL0, (struct USART_AVR*)ADDR_USART0, CLOCK_ATMEGA2560_CLKIO);
+    (void)uart_avr_init(&ctx->SERIAL0, ADDR_USART0, CLOCK_ATMEGA2560_CLKIO);
     (void)uart_setup(&ctx->SERIAL0, &UART_settings);
 
     /* I2C */
@@ -194,7 +194,7 @@ static void arduino_mega2560_init_communication(/*@partial@*/ struct arduino_meg
         (twi_addr_t)0x69
     };
 
-    (void)twi_avr_init(&ctx->I2C, (struct TWI_AVR*)ADDR_TWI, CLOCK_ATMEGA2560_CLKIO);
+    (void)twi_avr_init(&ctx->I2C, ADDR_TWI, CLOCK_ATMEGA2560_CLKIO);
     (void)twi_setup(&ctx->I2C, &TWI_settings);
 }
 
@@ -219,15 +219,15 @@ static void arduino_mega2560_init_pwm(/*@partial@*/ struct arduino_mega2560 *ctx
     };
 
     /* parent */
-    (void)pwm_avr_init(&TC1, (struct PWM_AVR*)ADDR_TC1, CLOCK_ATMEGA2560_CLKIO);
+    (void)pwm_avr_init(&TC1, ADDR_TC1, CLOCK_ATMEGA2560_CLKIO);
     (void)pwm_avr_setup(&TC1, &TCn_settings_ICRn);
-    (void)pwm_avr_init(&TC2, (struct PWM_AVR*)ADDR_TC2, CLOCK_ATMEGA2560_CLKIO);
+    (void)pwm_avr_init(&TC2, ADDR_TC2, CLOCK_ATMEGA2560_CLKIO);
     (void)pwm_avr_setup(&TC2, &TCn_settings);
-    (void)pwm_avr_init(&TC3, (struct PWM_AVR*)ADDR_TC3, CLOCK_ATMEGA2560_CLKIO);
+    (void)pwm_avr_init(&TC3, ADDR_TC3, CLOCK_ATMEGA2560_CLKIO);
     (void)pwm_avr_setup(&TC3, &TCn_settings_ICRn);
-    (void)pwm_avr_init(&TC4, (struct PWM_AVR*)ADDR_TC4, CLOCK_ATMEGA2560_CLKIO);
+    (void)pwm_avr_init(&TC4, ADDR_TC4, CLOCK_ATMEGA2560_CLKIO);
     (void)pwm_avr_setup(&TC4, &TCn_settings);
-    (void)pwm_avr_init(&TC5, (struct PWM_AVR*)ADDR_TC5, CLOCK_ATMEGA2560_CLKIO);
+    (void)pwm_avr_init(&TC5, ADDR_TC5, CLOCK_ATMEGA2560_CLKIO);
     (void)pwm_avr_setup(&TC5, &TCn_settings);
 
     /* pwm */
@@ -272,15 +272,13 @@ static void arduino_mega2560_init_icsp(/*@partial@*/ struct arduino_mega2560 *ct
         (size_t)0   /* CS */
     };
 
-    (void)spi_avr_init(&ctx->SPI, (struct SPI_AVR*)ADDR_SPI, SPI_AVR_SPEED_SPI1X);
+    (void)spi_avr_init(&ctx->SPI, ADDR_SPI, SPI_AVR_SPEED_SPI1X);
     (void)spi_setup(&ctx->SPI, &SPI_settings);
 }
 
 static void arduino_mega2560_init_eeprom(/*@partial@*/ struct arduino_mega2560 *ctx)
 {
-    (void)eeprom_avr_init(&ctx->C99_EEPROM,
-                          (struct C99_EEPROM_AVR*)ADDR_EEPROM,
-                          (uint8_t*)ADDR_SPMCSR);
+    (void)eeprom_avr_init(&ctx->C99_EEPROM, ADDR_EEPROM, ADDR_SPMCSR);
 }
 
 static void arduino_mega2560_init_wdt(/*@partial@*/ struct arduino_mega2560 *ctx)
@@ -289,7 +287,7 @@ static void arduino_mega2560_init_wdt(/*@partial@*/ struct arduino_mega2560 *ctx
         WD_AVR_CYCLES_4K
     };
 
-    (void)wd_avr_init(&ctx->WDT, (struct WDT_AVR*)ADDR_WDT);
+    (void)wd_avr_init(&ctx->WDT, ADDR_WDT);
     (void)wd_avr_setup(&ctx->WDT, &WD_settings);
 }
 
