@@ -30,8 +30,8 @@ static void mux_init(void)
     (void)clock_gd32vf103_enable(CLOCK_GD32VF103_CLK_PA);
     (void)clock_gd32vf103_enable(CLOCK_GD32VF103_CLK_PC);
 
-    (void)mux_gd32vf103_init(&MUXA, (struct MUX_GD32VF103_GPIO*)ADDR_GPIOA);
-    (void)mux_gd32vf103_init(&MUXC, (struct MUX_GD32VF103_GPIO*)ADDR_GPIOC);
+    (void)mux_gd32vf103_init(&MUXA, ADDR_GPIOA);
+    (void)mux_gd32vf103_init(&MUXC, ADDR_GPIOC);
 
     (void)mux_gd32vf103_output(&MUXC, (size_t)15, MUX_GD32VF103_MODE_OPEN_DRAIN);   /* TICK */
     (void)mux_gd32vf103_output(&MUXA, (size_t)1, MUX_GD32VF103_MODE_OPEN_DRAIN);    /* LED_G */
@@ -41,10 +41,10 @@ static void mux_init(void)
 
 static int gpio_init(/*@partial@*/ struct longan_nano *ctx)
 {
-    (void)gpio_gd32vf103_init(&ctx->TICK, (struct GPIO_GD32VF103*)ADDR_GPIOC, (size_t)15);
-    (void)gpio_gd32vf103_init(&ctx->LED_R, (struct GPIO_GD32VF103*)ADDR_GPIOC, (size_t)13);
-    (void)gpio_gd32vf103_init(&ctx->LED_G, (struct GPIO_GD32VF103*)ADDR_GPIOA, (size_t)1);
-    (void)gpio_gd32vf103_init(&ctx->LED_B, (struct GPIO_GD32VF103*)ADDR_GPIOA, (size_t)2);
+    (void)gpio_gd32vf103_init(&ctx->TICK, ADDR_GPIOC, (size_t)15);
+    (void)gpio_gd32vf103_init(&ctx->LED_R, ADDR_GPIOC, (size_t)13);
+    (void)gpio_gd32vf103_init(&ctx->LED_G, ADDR_GPIOA, (size_t)1);
+    (void)gpio_gd32vf103_init(&ctx->LED_B, ADDR_GPIOA, (size_t)2);
 
     return 0;
 }
