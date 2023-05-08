@@ -159,6 +159,16 @@ int twi_setup(struct twi *ctx, struct twi_settings *settings)
     return 0;
 }
 
+int twi_poll(struct twi *ctx)
+{
+    if ((ctx->base->I2C_STAT0 & I2C_STAT0_ADDSEND) != 0) {
+        if ((ctx->base->I2C_STAT1 & I2C_STAT1_TR) != 0) return TWI_READ;
+        else return TWI_WRITE;
+    }
+
+    return -EAGAIN;
+}
+
 /* active operations */
 
 static int twi_rw_as_master_idle(struct twi *ctx)
