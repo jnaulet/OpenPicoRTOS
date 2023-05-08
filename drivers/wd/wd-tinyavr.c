@@ -30,9 +30,9 @@ struct WDT_TINYAVR {
  * Returns:
  * Always 0
  */
-int wd_tinyavr_init(struct wd *ctx, struct WDT_TINYAVR *base)
+int wd_tinyavr_init(struct wd *ctx, int base)
 {
-    ctx->base = base;
+    ctx->base = (struct WDT_TINYAVR*)base;
     ctx->ctrla = 0;
     return 0;
 }

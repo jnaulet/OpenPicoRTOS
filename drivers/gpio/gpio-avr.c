@@ -20,11 +20,11 @@ struct GPIO_AVR {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int gpio_avr_init(struct gpio *ctx, struct GPIO_AVR *base, size_t pin)
+int gpio_avr_init(struct gpio *ctx, int base, size_t pin)
 {
     if (!picoRTOS_assert(pin < (size_t)8)) return -EINVAL;
 
-    ctx->base = base;
+    ctx->base = (struct GPIO_AVR*)base;
     ctx->pin = pin;
 
     return 0;

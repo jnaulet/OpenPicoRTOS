@@ -170,21 +170,20 @@ static int request_intflg(struct adc_ti_type4 *ctx, size_t soc,
  * Parameters:
  *  ctx - The ADC block to init
  *  base - The ADC block base address
- *  result - The ADC block result register base address
+ *  result_base - The ADC block result register base address
  *  cal_inl_addr - The INL calibration address
  *
  * Returns:
  * 0 if success, -errno otherwise
  */
 int adc_ti_type4_init(struct adc_ti_type4 *ctx,
-                      struct ADC_REGS *base,
-                      struct ADC_RESULT_REGS *result,
+                      int base, int result_base,
                       unsigned long cal_inl_addr)
 {
     int res;
 
-    ctx->base = base;
-    ctx->result = result;
+    ctx->base = (struct ADC_REGS*)base;
+    ctx->result = (struct ADC_RESULT_REGS*)result_base;
     ctx->acqps_min = (size_t)ADC_TI_TYPE4_ACQPS_MIN_16BIT;
     ctx->sample_count = 0;
 

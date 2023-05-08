@@ -18,7 +18,7 @@ struct spi {
     spi_avr_usart_state_t state;
 };
 
-int spi_avr_usart_init(/*@out@*/ struct spi *ctx, struct MSPIM_AVR_USART *base, clock_id_t clkid);
+int spi_avr_usart_init(/*@out@*/ struct spi *ctx, int base, clock_id_t clkid);
 
 /* Runtime calls:
  * int spi_setup(struct spi *ctx, const struct spi_settings *settings);

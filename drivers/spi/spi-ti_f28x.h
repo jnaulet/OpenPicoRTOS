@@ -19,7 +19,7 @@ struct spi {
     size_t lshift;
 };
 
-int spi_ti_f28x_init(/*@out@*/ struct spi *ctx, struct SPI_REGS *base, clock_id_t clkid);
+int spi_ti_f28x_init(/*@out@*/ struct spi *ctx, int base, clock_id_t clkid);
 
 /* options */
 int spi_ti_f28x_set_loopback(struct spi *ctx, bool loopback);

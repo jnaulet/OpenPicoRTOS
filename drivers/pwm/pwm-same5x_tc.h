@@ -50,7 +50,7 @@ struct pwm_same5x_tc_settings {
     pwm_same5x_tc_wavegen_t wavegen;
 };
 
-int pwm_same5x_tc_init(/*@out@*/ struct pwm_same5x_tc *ctx, struct PWM_SAME5X_TC *base, clock_id_t clkid);
+int pwm_same5x_tc_init(/*@out@*/ struct pwm_same5x_tc *ctx, int base, clock_id_t clkid);
 int pwm_same5x_tc_setup(struct pwm_same5x_tc *ctx, struct pwm_same5x_tc_settings *settings);
 
 /* channel */

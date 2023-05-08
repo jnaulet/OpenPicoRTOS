@@ -60,9 +60,9 @@ struct PWM_TINYAVR_TCA {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_tinyavr_tca_init(struct pwm_tinyavr_tca *ctx, struct PWM_TINYAVR_TCA *base, clock_id_t clkid)
+int pwm_tinyavr_tca_init(struct pwm_tinyavr_tca *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct PWM_TINYAVR_TCA*)base;
     ctx->freq = clock_get_freq(clkid);
     ctx->div = 1ul;
 

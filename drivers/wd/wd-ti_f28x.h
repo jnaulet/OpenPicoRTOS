@@ -28,7 +28,7 @@ struct wd_ti_f28x_settings {
     unsigned int wdwcr_min;
 };
 
-int wd_ti_f28x_init(/*@out@*/ struct wd *ctx, struct WD_REGS *base, clock_id_t clkid);
+int wd_ti_f28x_init(/*@out@*/ struct wd *ctx, int base, clock_id_t clkid);
 int wd_ti_f28x_setup(struct wd *ctx, struct wd_ti_f28x_settings *settings);
 
 /* Runtime calls:

@@ -19,7 +19,7 @@ struct twi {
     twi_ti_f28x_state_t state;
 };
 
-int twi_ti_f28x_init(/*@out@*/ struct twi *ctx, struct I2C_REGS *base, clock_id_t clkid);
+int twi_ti_f28x_init(/*@out@*/ struct twi *ctx, int base, clock_id_t clkid);
 
 /* Runtime calls:
  * int twi_setup(struct twi *ctx, struct twi_settings *settings);

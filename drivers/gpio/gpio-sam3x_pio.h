@@ -13,7 +13,7 @@ struct gpio {
     uint32_t mask;
 };
 
-int gpio_sam3x_pio_init(/*@out@*/ struct gpio *ctx, struct GPIO_SAM3X_PIO *base, size_t pin);
+int gpio_sam3x_pio_init(/*@out@*/ struct gpio *ctx, int base, size_t pin);
 
 /* Runtime calls:
  * void gpio_write(struct gpio *ctx, bool value);

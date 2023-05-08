@@ -12,9 +12,9 @@ struct RP2040_RESET {
 #define RESET_RESET_M  0x1fffffffu
 #define RESET_RESET(x) ((x) & RESET_RESET_M)
 
-int rp2040_reset_init(struct rp2040_reset *ctx, struct RP2040_RESET *base)
+int rp2040_reset_init(struct rp2040_reset *ctx, int base)
 {
-    ctx->base = base;
+    ctx->base = (struct RP2040_RESET*)base;
     /* reset all non-essential peripherals to put the system in a known state */
     ctx->base->RESET = (uint32_t)RESET_RESET(~((1 << RP2040_RESET_IO_QSPI) |
                                                (1 << RP2040_RESET_PADS_QSPI) |

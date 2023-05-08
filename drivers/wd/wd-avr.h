@@ -28,7 +28,7 @@ struct wd_avr_settings {
     wd_avr_cycles_t cycles;
 };
 
-int wd_avr_init(/*@out@*/ struct wd *ctx, struct WDT_AVR *base);
+int wd_avr_init(/*@out@*/ struct wd *ctx, int base);
 int wd_avr_setup(struct wd *ctx, struct wd_avr_settings *settings);
 
 /* Runtime calls:

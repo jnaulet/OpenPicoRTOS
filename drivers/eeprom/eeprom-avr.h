@@ -13,7 +13,7 @@ struct eeprom {
     /*@temp@*/ volatile uint8_t *SPMCSR;
 };
 
-int eeprom_avr_init(/*@out@*/ struct eeprom *ctx, struct C99_EEPROM_AVR *base, uint8_t *SPMCSR);
+int eeprom_avr_init(/*@out@*/ struct eeprom *ctx, int base, int SPMCSR_base);
 
 /* Runtime calls:
  * int eeprom_read(struct eeprom *ctx, size_t addr, void *buf, size_t n);

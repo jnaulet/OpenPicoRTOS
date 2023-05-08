@@ -13,7 +13,7 @@ struct mux {
     /*@temp@*/ struct MUX_TINYAVR *base;
 };
 
-int mux_tinyavr_init(/*@out@*/ struct mux *ctx, struct MUX_TINYAVR *base);
+int mux_tinyavr_init(/*@out@*/ struct mux *ctx, int base);
 
 int mux_tinyavr_input(struct mux *ctx, size_t pin);
 int mux_tinyavr_output(struct mux *ctx, size_t pin);

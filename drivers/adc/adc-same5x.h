@@ -48,7 +48,7 @@ struct adc {
     int offset;
 };
 
-int adc_same5x_init(/*@out@*/ struct adc *ctx, struct ADC_SAME5X *base, adc_same5x_channel_t channel);
+int adc_same5x_init(/*@out@*/ struct adc *ctx, int base, adc_same5x_channel_t channel);
 
 /* Runtime calls:
  * int adc_setup(struct adc *ctx, struct adc_settings *settings);

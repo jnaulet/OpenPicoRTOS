@@ -17,7 +17,7 @@ struct flash {
     size_t block_count;
 };
 
-int flash_pic32mx_init(/*@out@*/ struct flash *ctx, struct FLASH_PIC32MX *base, size_t block_count);
+int flash_pic32mx_init(/*@out@*/ struct flash *ctx, int base, size_t block_count);
 
 /* Implements:
  * int flash_erase_sector(struct flash *ctx, size_t sector);

@@ -13,7 +13,7 @@ struct mux {
     /*@temp@*/ struct MUX_AVR *base;
 };
 
-int mux_avr_init(/*@out@*/ struct mux *ctx, struct MUX_AVR *base);
+int mux_avr_init(/*@out@*/ struct mux *ctx, int base);
 
 int mux_avr_input(struct mux *ctx, size_t pin);
 int mux_avr_output(struct mux *ctx, size_t pin, bool value);

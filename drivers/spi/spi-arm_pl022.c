@@ -61,9 +61,9 @@ struct SPI_ARM_PL022 {
  * Returns:
  * Always 0
  */
-int spi_arm_pl022_init(struct spi *ctx, struct SPI_ARM_PL022 *base, clock_id_t clkid)
+int spi_arm_pl022_init(struct spi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct SPI_ARM_PL022*)base;
     ctx->clkid = clkid;
     ctx->balance = 0;
     ctx->frame_size = 0;

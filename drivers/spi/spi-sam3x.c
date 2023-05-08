@@ -72,9 +72,9 @@ struct SPI_SAM3X {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int spi_sam3x_init(struct spi *ctx, struct SPI_SAM3X *base, clock_id_t clkid)
+int spi_sam3x_init(struct spi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct SPI_SAM3X*)base;
     ctx->clkid = clkid;
     ctx->frame_size = 0;
     ctx->balance = 0;

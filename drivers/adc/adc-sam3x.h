@@ -12,7 +12,7 @@ struct adc_sam3x {
     /*@temp@*/ struct ADC_SAM3X *base;
 };
 
-int adc_sam3x_init(/*@out@*/ struct adc_sam3x *ctx, struct ADC_SAM3X *base);
+int adc_sam3x_init(/*@out@*/ struct adc_sam3x *ctx, int base);
 
 struct adc {
     /*@temp@*/ struct adc_sam3x *parent;

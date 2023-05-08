@@ -11,7 +11,7 @@ struct usart {
     clock_id_t clkid;
 };
 
-int usart_sam3x_init(/*@out@*/ struct usart *ctx, struct USART_SAM3X *base, clock_id_t clkid);
+int usart_sam3x_init(/*@out@*/ struct usart *ctx, int base, clock_id_t clkid);
 
 /* Runtime calls:
  * usart_setup(struct usart *ctx, struct usart_settings *settings);

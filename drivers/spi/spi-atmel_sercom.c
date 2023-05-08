@@ -101,11 +101,11 @@ static int sync_busywait(struct spi *ctx, uint32_t mask)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int spi_atmel_sercom_init(struct spi *ctx, struct SPI_ATMEL_SERCOM *base, clock_id_t clkid)
+int spi_atmel_sercom_init(struct spi *ctx, int base, clock_id_t clkid)
 {
     int res;
 
-    ctx->base = base;
+    ctx->base = (struct SPI_ATMEL_SERCOM*)base;
     ctx->clkid = clkid;
     ctx->balance = 0;
     ctx->frame_size = 0;

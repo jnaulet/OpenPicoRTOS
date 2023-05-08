@@ -43,9 +43,9 @@ struct PWM_RP2040 {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_rp2040_init(struct pwm_rp2040 *ctx, struct PWM_RP2040 *base, clock_id_t clkid)
+int pwm_rp2040_init(struct pwm_rp2040 *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct PWM_RP2040*)base;
     ctx->freq = clock_get_freq(clkid);
 
     if (!picoRTOS_assert(ctx->freq > 0))

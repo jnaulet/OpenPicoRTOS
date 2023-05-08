@@ -53,9 +53,9 @@ static int set_baudrate(struct uart *ctx, unsigned long baud)
  * Returns:
  * Always 0
  */
-int uart_avr_init(struct uart *ctx, struct USART_AVR *base, clock_id_t clkid)
+int uart_avr_init(struct uart *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct USART_AVR*)base;
     ctx->clkid = clkid;
 
     /* turn on */

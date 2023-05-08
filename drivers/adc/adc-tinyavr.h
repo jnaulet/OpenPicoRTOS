@@ -45,7 +45,7 @@ struct adc_tinyavr_settings {
     unsigned long clk_freq; /* Warning: this will be approximative */
 };
 
-int adc_tinyavr_init(/*@out@*/ struct adc_tinyavr *ctx, struct ADC_TINYAVR *base, clock_id_t clkid);
+int adc_tinyavr_init(/*@out@*/ struct adc_tinyavr *ctx, int base, clock_id_t clkid);
 int adc_tinyavr_setup(struct adc_tinyavr *ctx, struct adc_tinyavr_settings *settings);
 
 /* ADC channels */

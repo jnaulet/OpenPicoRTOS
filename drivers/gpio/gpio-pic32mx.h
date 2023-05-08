@@ -14,7 +14,7 @@ struct gpio {
     uint32_t mask;
 };
 
-int gpio_pic32mx_init(/*@out@*/ struct gpio *ctx, struct GPIO_PIC32MX *base, size_t pin);
+int gpio_pic32mx_init(/*@out@*/ struct gpio *ctx, int base, size_t pin);
 
 /* Runtime calls:
  * void gpio_write(struct gpio *ctx, bool value);

@@ -23,9 +23,9 @@ struct WDT_AVR {
  * Returns:
  * Always 0
  */
-int wd_avr_init(struct wd *ctx, struct WDT_AVR *base)
+int wd_avr_init(struct wd *ctx, int base)
 {
-    ctx->base = base;
+    ctx->base = (struct WDT_AVR*)base;
     return 0;
 }
 

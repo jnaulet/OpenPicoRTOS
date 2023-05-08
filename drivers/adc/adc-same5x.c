@@ -123,11 +123,11 @@ static int sync_busywait(struct adc *ctx, uint32_t mask)
  * Returns:
  * Always 0
  */
-int adc_same5x_init(struct adc *ctx, struct ADC_SAME5X *base, adc_same5x_channel_t channel)
+int adc_same5x_init(struct adc *ctx, int base, adc_same5x_channel_t channel)
 {
     if (!picoRTOS_assert(channel < ADC_SAME5X_CHANNEL_COUNT)) return -EINVAL;
 
-    ctx->base = base;
+    ctx->base = (struct ADC_SAME5X*)base;
     ctx->channel = channel;
     ctx->state = ADC_SAME5X_STATE_IDLE;
     ctx->multiplier = 1;

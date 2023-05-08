@@ -69,11 +69,11 @@ struct GPIO_SAM3X_PIO {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int gpio_sam3x_pio_init(struct gpio *ctx, struct GPIO_SAM3X_PIO *base, size_t pin)
+int gpio_sam3x_pio_init(struct gpio *ctx, int base, size_t pin)
 {
     if (!picoRTOS_assert(pin < (size_t)GPIO_SAM3X_PIO_PIN_COUNT)) return -EINVAL;
 
-    ctx->base = base;
+    ctx->base = (struct GPIO_SAM3X_PIO*)base;
     ctx->mask = (uint32_t)(1ul << pin);
 
     return 0;

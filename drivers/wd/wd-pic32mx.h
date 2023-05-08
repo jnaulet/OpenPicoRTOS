@@ -40,7 +40,7 @@ struct wd_pic32mx_settings {
     bool enable_windowed;
 };
 
-int wd_pic32mx_init(/*@out@*/ struct wd *ctx, struct WD_PIC32MX *base);
+int wd_pic32mx_init(/*@out@*/ struct wd *ctx, int base);
 int wd_pic32mx_setup(struct wd *ctx, struct wd_pic32mx_settings *settings);
 
 /* Runtime calls:

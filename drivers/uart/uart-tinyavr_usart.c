@@ -69,11 +69,9 @@ struct USART_TINYAVR_UART {
  * Returns:
  * Always 0
  */
-int uart_tinyavr_usart_init(struct uart *ctx,
-                            struct USART_TINYAVR_UART *base,
-                            clock_id_t clkid)
+int uart_tinyavr_usart_init(struct uart *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct USART_TINYAVR_UART*)base;
     ctx->clkid = clkid;
 
     /* turn on (double-speed mode) */

@@ -18,7 +18,7 @@ struct spi {
     int balance;
 };
 
-int spi_arm_pl022_init(/*@out@*/ struct spi *ctx, struct SPI_ARM_PL022 *base, clock_id_t clkid);
+int spi_arm_pl022_init(/*@out@*/ struct spi *ctx, int base, clock_id_t clkid);
 
 /* for tests */
 int spi_arm_pl022_set_loopback(struct spi *ctx, bool loopback);

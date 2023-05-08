@@ -29,13 +29,11 @@ struct GPIO_TINYAVR {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int gpio_tinyavr_init(struct gpio *ctx,
-                      struct GPIO_TINYAVR *base,
-                      size_t pin)
+int gpio_tinyavr_init(struct gpio *ctx, int base, size_t pin)
 {
     if (!picoRTOS_assert(pin < (size_t)GPIO_TINYAVR_PIN_COUNT)) return -EINVAL;
 
-    ctx->base = base;
+    ctx->base = (struct GPIO_TINYAVR*)base;
     ctx->pin = pin;
     ctx->mask = (uint8_t)(1 << pin);
 

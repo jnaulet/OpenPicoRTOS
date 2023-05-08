@@ -18,7 +18,7 @@ struct uart {
     clock_id_t clkid;
 };
 
-int uart_arm_pl011_init(struct uart *ctx, struct UART_ARM_PL011 *base, clock_id_t clkid);
+int uart_arm_pl011_init(struct uart *ctx, int base, clock_id_t clkid);
 
 /* test */
 int uart_arm_pl011_set_loopback(struct uart *ctx, bool loopback);

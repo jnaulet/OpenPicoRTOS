@@ -30,7 +30,7 @@ struct pwm_pic32mx_settings {
     bool invert;
 };
 
-int pwm_pic32mx_init(/*@out@*/ struct pwm *ctx, struct PWM_PIC32MX_OC *oc, struct PWM_PIC32MX_TC *tc, clock_id_t clkid);
+int pwm_pic32mx_init(/*@out@*/ struct pwm *ctx, int oc_base, int tc_base, clock_id_t clkid);
 int pwm_pic32mx_setup(struct pwm *ctx, struct pwm_pic32mx_settings *settings);
 
 /* Runtime calls:

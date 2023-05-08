@@ -33,7 +33,7 @@ typedef enum {
     PWM_TI_EPWM_AQ_COUNT
 } pwm_ti_epwm_aq_t;
 
-int pwm_ti_epwm_init(/*@out@*/ struct pwm_ti_epwm *ctx, struct C99_EPWM_REGS *base, clock_id_t clkid);
+int pwm_ti_epwm_init(/*@out@*/ struct pwm_ti_epwm *ctx, int base, clock_id_t clkid);
 int pwm_ti_epwm_setup(struct pwm_ti_epwm *ctx, struct pwm_ti_epwm_settings *settings);
 
 typedef enum {

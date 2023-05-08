@@ -21,7 +21,7 @@ struct flash {
     size_t block_count;
 };
 
-int flash_same5x_init(/*@out@*/ struct flash *ctx, struct FLASH_SAME5X *base);
+int flash_same5x_init(/*@out@*/ struct flash *ctx, int base);
 
 /* Implements:
  * int flash_erase_sector(struct flash *ctx, size_t sector);

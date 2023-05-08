@@ -23,7 +23,7 @@ struct twi {
     int last;
 };
 
-int twi_atmel_sercom_init(/*@out@*/ struct twi *ctx, struct TWI_ATMEL_SERCOM *base, clock_id_t clkid);
+int twi_atmel_sercom_init(/*@out@*/ struct twi *ctx, int base, clock_id_t clkid);
 
 /* Runtime calls:
  * int twi_setup(struct twi *ctx, struct twi_settings *settings);

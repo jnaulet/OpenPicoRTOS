@@ -129,9 +129,9 @@ struct TWI_DW_APB_I2C {
  * Returns:
  * Always 0
  */
-int twi_dw_apb_i2c_init(struct twi *ctx, struct TWI_DW_APB_I2C *base, clock_id_t clkid)
+int twi_dw_apb_i2c_init(struct twi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct TWI_DW_APB_I2C*)base;
     ctx->clkid = clkid;
     ctx->mode = TWI_MODE_IGNORE;
     ctx->state = TWI_DW_APB_I2C_STATE_IDLE;

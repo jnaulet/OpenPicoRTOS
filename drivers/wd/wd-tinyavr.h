@@ -34,7 +34,7 @@ struct wd_tinyavr_settings {
     wd_tinyavr_period_t period;
 };
 
-int wd_tinyavr_init(/*@out@*/ struct wd *ctx, struct WDT_TINYAVR *base);
+int wd_tinyavr_init(/*@out@*/ struct wd *ctx, int base);
 int wd_tinyavr_setup(struct wd *ctx, struct wd_tinyavr_settings *settings);
 
 /* Runtime calls:

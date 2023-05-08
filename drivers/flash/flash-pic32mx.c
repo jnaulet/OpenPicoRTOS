@@ -73,9 +73,9 @@ struct FLASH_PIC32MX {
  * Returns:
  * Always 0
  */
-int flash_pic32mx_init(struct flash *ctx, struct FLASH_PIC32MX *base, size_t block_count)
+int flash_pic32mx_init(struct flash *ctx, int base, size_t block_count)
 {
-    ctx->base = base;
+    ctx->base = (struct FLASH_PIC32MX*)base;
     ctx->state = FLASH_PIC32MX_STATE_IDLE;
     ctx->block_count = block_count;
 

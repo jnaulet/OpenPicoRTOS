@@ -16,6 +16,6 @@ struct gpio {
     /*@temp@*/ struct GPIO_DATA_REGS *base;
 };
 
-int gpio_ti_f28x_init(/*@out@*/ struct gpio *ctx, struct GPIO_DATA_REGS *base, size_t pin);
+int gpio_ti_f28x_init(/*@out@*/ struct gpio *ctx, int base, size_t pin);
 
 #endif

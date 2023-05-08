@@ -58,9 +58,9 @@ struct UART_PIC32MX {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int uart_pic32mx_init(struct uart *ctx, struct UART_PIC32MX *base, clock_id_t clkid)
+int uart_pic32mx_init(struct uart *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct UART_PIC32MX*)base;
     ctx->clkid = clkid;
 
     /* turn on */

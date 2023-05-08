@@ -42,9 +42,9 @@ struct MUX_PIC32MX {
  * Returns:
  * Always 0
  */
-int mux_pic32mx_init(struct mux_pic32mx *ctx, struct MUX_PIC32MX *base)
+int mux_pic32mx_init(struct mux_pic32mx *ctx, int base)
 {
-    ctx->base = base;
+    ctx->base = (struct MUX_PIC32MX*)base;
     return 0;
 }
 

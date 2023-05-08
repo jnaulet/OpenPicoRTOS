@@ -33,12 +33,12 @@ struct SPI_AVR {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int spi_avr_init(struct spi *ctx, struct SPI_AVR *base, spi_avr_speed_t speed)
+int spi_avr_init(struct spi *ctx, int base, spi_avr_speed_t speed)
 {
     if (!picoRTOS_assert(speed < SPI_AVR_SPEED_COUNT)) return -EINVAL;
 
     /* internals */
-    ctx->base = base;
+    ctx->base = (struct SPI_AVR*)base;
     ctx->state = SPI_AVR_STATE_START;
 
     if (speed == SPI_AVR_SPEED_SPI2X)

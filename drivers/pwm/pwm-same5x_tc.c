@@ -118,9 +118,9 @@ static int sync_busywait(struct pwm_same5x_tc *ctx, uint32_t mask)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_same5x_tc_init(struct pwm_same5x_tc *ctx, struct PWM_SAME5X_TC *base, clock_id_t clkid)
+int pwm_same5x_tc_init(struct pwm_same5x_tc *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct PWM_SAME5X_TC*)base;
     ctx->freq = clock_get_freq(clkid);
     ctx->prescaler = 1ul;
     ctx->mode = PWM_SAME5X_TC_MODE_16;

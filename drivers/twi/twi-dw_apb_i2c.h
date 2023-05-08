@@ -27,7 +27,7 @@ struct twi {
     int last;
 };
 
-int twi_dw_apb_i2c_init(/*@out@*/ struct twi *ctx, struct TWI_DW_APB_I2C *base, clock_id_t clkid);
+int twi_dw_apb_i2c_init(/*@out@*/ struct twi *ctx, int base, clock_id_t clkid);
 
 /* Runtime calls:
  * int twi_setup(struct twi *ctx, struct twi_settings *settings);

@@ -17,7 +17,7 @@ struct pwm_rp2040 {
     clock_freq_t freq;
 };
 
-int pwm_rp2040_init(/*@out@*/ struct pwm_rp2040 *ctx, struct PWM_RP2040 *base, clock_id_t clkid);
+int pwm_rp2040_init(/*@out@*/ struct pwm_rp2040 *ctx, int base, clock_id_t clkid);
 
 #define PWM_RP2040_PWM_CHANNEL_COUNT 8
 

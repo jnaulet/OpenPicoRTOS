@@ -15,7 +15,7 @@ struct wd_sam3x_settings {
     unsigned long timeout_ms;
 };
 
-int wd_sam3x_init(/*@out@*/ struct wd *ctx, struct WD_SAM3X *base, clock_id_t clkid);
+int wd_sam3x_init(/*@out@*/ struct wd *ctx, int base, clock_id_t clkid);
 int wd_sam3x_setup(struct wd *ctx, struct wd_sam3x_settings *settings);
 
 /* Runtime calls:

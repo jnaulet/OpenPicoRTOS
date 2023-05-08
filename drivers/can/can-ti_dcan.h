@@ -23,7 +23,7 @@ struct can {
     bool rx_overwrite;
 };
 
-int can_ti_dcan_init(/*@out@*/ struct can *ctx, struct CAN_REGS *base, clock_id_t clkid);
+int can_ti_dcan_init(/*@out@*/ struct can *ctx, long base, clock_id_t clkid);
 
 /* Runtime calls:
  * int can_setup(struct can *ctx, struct can_settings *settings);

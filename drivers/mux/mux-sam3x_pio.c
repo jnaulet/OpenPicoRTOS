@@ -70,9 +70,9 @@ struct MUX_SAM3X_PIO {
  * Returns:
  * Always 0
  */
-int mux_sam3x_pio_init(struct mux_sam3x_pio *ctx, struct MUX_SAM3X_PIO *base)
+int mux_sam3x_pio_init(struct mux_sam3x_pio *ctx, int base)
 {
-    ctx->base = base;
+    ctx->base = (struct MUX_SAM3X_PIO*)base;
     return 0;
 }
 

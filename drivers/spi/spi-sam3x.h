@@ -21,7 +21,7 @@ struct spi {
     uint32_t pcs;
 };
 
-int spi_sam3x_init(/*@out@*/ struct spi *ctx, struct SPI_SAM3X *base, clock_id_t clkid);
+int spi_sam3x_init(/*@out@*/ struct spi *ctx, int base, clock_id_t clkid);
 
 /* for tests */
 int spi_sam3x_set_loopback(struct spi *ctx, bool loopback);

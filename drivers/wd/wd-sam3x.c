@@ -38,9 +38,9 @@ struct WD_SAM3X {
  * Returns:
  * Always 0
  */
-int wd_sam3x_init(struct wd *ctx, struct WD_SAM3X *base, clock_id_t clkid)
+int wd_sam3x_init(struct wd *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct WD_SAM3X*)base;
     ctx->clkid = clkid;
 
     /* disable & setup for external reset */

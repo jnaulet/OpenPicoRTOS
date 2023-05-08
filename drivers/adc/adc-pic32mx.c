@@ -243,9 +243,9 @@ static int vref_ready_busywait(struct adc_pic32mx *ctx)
  * Returns:
  * Awlays 0
  */
-int adc_pic32mx_init(struct adc_pic32mx *ctx, struct ADC_PIC32MX *base)
+int adc_pic32mx_init(struct adc_pic32mx *ctx, int base)
 {
-    ctx->base = base;
+    ctx->base = (struct ADC_PIC32MX*)base;
     ctx->strgsrc = ADC_PIC32MX_STRGSRC_NONE;
 
     /* init ADC calibration settings */

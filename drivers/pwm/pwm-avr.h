@@ -67,7 +67,7 @@ struct pwm_avr_settings {
     pwm_avr_waveform_t waveform;
 };
 
-int pwm_avr_init(/*@out@*/ struct pwm_avr *ctx, struct PWM_AVR *base, clock_id_t clkid);
+int pwm_avr_init(/*@out@*/ struct pwm_avr *ctx, int base, clock_id_t clkid);
 int pwm_avr_setup(struct pwm_avr *ctx, struct pwm_avr_settings *settings);
 
 struct pwm_settings {

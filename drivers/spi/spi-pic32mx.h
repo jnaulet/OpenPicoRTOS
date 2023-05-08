@@ -13,7 +13,7 @@ struct spi {
     int balance;
 };
 
-int spi_pic32mx_init(/*@out@*/ struct spi *ctx, struct SPI_PIC32MX *base, clock_id_t clkid);
+int spi_pic32mx_init(/*@out@*/ struct spi *ctx, int base, clock_id_t clkid);
 
 /* Runtime calls:
  * int spi_setup(struct spi *ctx, const struct spi_settings *settings);

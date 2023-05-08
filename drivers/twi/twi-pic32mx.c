@@ -63,9 +63,9 @@ struct TWI_PIC32MX {
  * Returns:
  * Always 0
  */
-int twi_pic32mx_init(struct twi *ctx, struct TWI_PIC32MX *base, clock_id_t clkid)
+int twi_pic32mx_init(struct twi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct TWI_PIC32MX*)base;
     ctx->clkid = clkid;
     ctx->mode = TWI_MODE_SLAVE;
     ctx->state = TWI_PIC32MX_STATE_IDLE;

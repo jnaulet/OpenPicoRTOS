@@ -19,11 +19,11 @@ struct GPIO_DATA_REGS {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int gpio_ti_f28x_init(struct gpio *ctx, struct GPIO_DATA_REGS *base, size_t pin)
+int gpio_ti_f28x_init(struct gpio *ctx, int base, size_t pin)
 {
     if (!picoRTOS_assert(pin < (size_t)GPIO_TI_F28X_PIN_COUNT)) return -EINVAL;
 
-    ctx->base = base;
+    ctx->base = (struct GPIO_DATA_REGS*)base;
     /* compute pin mask */
     ctx->mask = (uint32_t)(1ul << pin);
 

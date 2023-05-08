@@ -122,7 +122,7 @@ struct adc_avr_settings {
     bool left_adjust_result;
 };
 
-int adc_avr_init(/*@out@*/ struct adc_avr *ctx, struct ADC_AVR *base);
+int adc_avr_init(/*@out@*/ struct adc_avr *ctx, int base);
 int adc_avr_setup(struct adc_avr *ctx, struct adc_avr_settings *settings);
 
 /* channels */

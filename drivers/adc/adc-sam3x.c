@@ -64,9 +64,9 @@ struct ADC_SAM3X {
  * Returns:
  * Always 0
  */
-int adc_sam3x_init(struct adc_sam3x *ctx, struct ADC_SAM3X *base)
+int adc_sam3x_init(struct adc_sam3x *ctx, int base)
 {
-    ctx->base = base;
+    ctx->base = (struct ADC_SAM3X*)base;
 
     /* enable & freerun */
     ctx->base->ADC_CR |= ADC_CR_START;

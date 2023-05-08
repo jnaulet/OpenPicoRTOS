@@ -35,13 +35,13 @@ struct GPIO_RP2040_SIO {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int gpio_rp2040_sio_init(struct gpio *ctx, struct GPIO_RP2040_SIO *base,
+int gpio_rp2040_sio_init(struct gpio *ctx, int base,
                          size_t pin, gpio_rp2040_sio_dir_t dir)
 {
     if (!picoRTOS_assert(pin < (size_t)GPIO_RP2040_SIO_PIN_COUNT)) return -EINVAL;
     if (!picoRTOS_assert(dir < GPIO_RP2040_SIO_DIR_COUNT)) return -EINVAL;
 
-    ctx->base = base;
+    ctx->base = (struct GPIO_RP2040_SIO*)base;
     ctx->mask = (uint32_t)(1 << pin);
 
     if (dir == GPIO_RP2040_SIO_DIR_OUTPUT)

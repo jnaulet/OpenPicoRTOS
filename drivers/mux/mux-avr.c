@@ -23,9 +23,9 @@ struct MUX_AVR {
  * Manual multiplexing is not really required on AVR platforms as they self-mux,
  * except for some SPI pins as far as i know
  */
-int mux_avr_init(struct mux *ctx, struct MUX_AVR *base)
+int mux_avr_init(struct mux *ctx, int base)
 {
-    ctx->base = base;
+    ctx->base = (struct MUX_AVR*)base;
     return 0;
 }
 

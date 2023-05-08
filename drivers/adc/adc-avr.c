@@ -39,9 +39,9 @@ struct ADC_AVR {
  * Returns:
  * always 0
  */
-int adc_avr_init(struct adc_avr *ctx, struct ADC_AVR *base)
+int adc_avr_init(struct adc_avr *ctx, int base)
 {
-    ctx->base = base;
+    ctx->base = (struct ADC_AVR*)base;
     ctx->state = ADC_AVR_STATE_IDLE;
 
     /* enable */

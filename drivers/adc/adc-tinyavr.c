@@ -51,9 +51,9 @@ struct ADC_TINYAVR {
  * Returns:
  * always 0
  */
-int adc_tinyavr_init(struct adc_tinyavr *ctx, struct ADC_TINYAVR *base, clock_id_t clkid)
+int adc_tinyavr_init(struct adc_tinyavr *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct ADC_TINYAVR*)base;
     ctx->clkid = clkid;
     ctx->state = ADC_TINYAVR_STATE_IDLE;
 

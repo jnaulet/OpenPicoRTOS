@@ -27,10 +27,10 @@ struct C99_EEPROM_AVR {
  * Returns:
  * Always 0
  */
-int eeprom_avr_init(struct eeprom *ctx, struct C99_EEPROM_AVR *base, uint8_t *SPMCSR)
+int eeprom_avr_init(struct eeprom *ctx, int base, int SPMCSR_base)
 {
-    ctx->base = base;
-    ctx->SPMCSR = SPMCSR;
+    ctx->base = (struct C99_EEPROM_AVR*)base;
+    ctx->SPMCSR = (uint8_t*)SPMCSR_base;
 
     return 0;
 }

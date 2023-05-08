@@ -18,7 +18,7 @@ struct wd_rp2040_settings {
     unsigned long timeout_us;
 };
 
-int wd_rp2040_init(/*@out@*/ struct wd *ctx, struct WD_RP2040 *base, clock_id_t clkid);
+int wd_rp2040_init(/*@out@*/ struct wd *ctx, int base, clock_id_t clkid);
 int wd_rp2040_setup(struct wd *ctx, struct wd_rp2040_settings *settings);
 
 /* Runtime calls:

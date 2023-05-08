@@ -114,9 +114,9 @@ struct TWI_ATMEL_SERCOM {
  * Returns:
  * Always 0
  */
-int twi_atmel_sercom_init(struct twi *ctx, struct TWI_ATMEL_SERCOM *base, clock_id_t clkid)
+int twi_atmel_sercom_init(struct twi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct TWI_ATMEL_SERCOM*)base;
     ctx->clkid = clkid;
     ctx->state = TWI_ATMEL_SERCOM_STATE_IDLE;
     ctx->slave_addr = 0;

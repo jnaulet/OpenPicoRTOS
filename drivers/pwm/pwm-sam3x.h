@@ -41,7 +41,7 @@ struct pwm_sam3x_settings {
     unsigned long clock_b_div;
 };
 
-int pwm_sam3x_init(/*@out@*/ struct pwm_sam *ctx, struct PWM_SAM3X *base, clock_id_t clkid);
+int pwm_sam3x_init(/*@out@*/ struct pwm_sam *ctx, int base, clock_id_t clkid);
 int pwm_sam3x_setup(struct pwm_sam *ctx, struct pwm_sam_settings *settings);
 
 /* channels */

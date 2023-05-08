@@ -30,7 +30,7 @@ typedef enum {
     MUX_TI_F28X_QSEL_COUNT
 } mux_ti_f28x_qsel_t;
 
-int mux_ti_f28x_init(/*@out@*/ struct mux *ctx, struct GPIO_CTRL_REGS *base);
+int mux_ti_f28x_init(/*@out@*/ struct mux *ctx, int base);
 
 int mux_ti_f28x_output(struct mux *ctx, size_t pin, mux_ti_f28x_t gmux, mux_ti_f28x_t mux);
 int mux_ti_f28x_input(struct mux *ctx, size_t pin, mux_ti_f28x_t gmux, mux_ti_f28x_t mux);

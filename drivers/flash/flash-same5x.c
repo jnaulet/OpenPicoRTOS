@@ -119,11 +119,11 @@ struct FLASH_SAME5X {
  * Returns:
  * Always 0
  */
-int flash_same5x_init(struct flash *ctx, struct FLASH_SAME5X *base)
+int flash_same5x_init(struct flash *ctx, int base)
 {
     uint32_t psz;
 
-    ctx->base = base;
+    ctx->base = (struct FLASH_SAME5X*)base;
     ctx->state = FLASH_SAME5X_STATE_IDLE;
 
     /* extract info */

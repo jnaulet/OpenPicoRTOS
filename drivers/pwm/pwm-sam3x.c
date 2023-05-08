@@ -122,9 +122,9 @@ struct PWM_SAM3X {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_sam3x_init(struct pwm_sam *ctx, struct PWM_SAM3X *base, clock_id_t clkid)
+int pwm_sam3x_init(struct pwm_sam *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct PWM_SAM3X*)base;
     ctx->freq = clock_get_freq(clkid);
 
     if (!picoRTOS_assert(ctx->freq > 0))

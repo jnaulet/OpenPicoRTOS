@@ -63,7 +63,7 @@ struct adc_pic32mx_settings {
     adc_pic32mx_strgsrc_t strgsrc;  /* scan trigger source */
 };
 
-int adc_pic32mx_init(/*@out@*/ struct adc_pic32mx *ctx, struct ADC_PIC32MX *base);
+int adc_pic32mx_init(/*@out@*/ struct adc_pic32mx *ctx, int base);
 int adc_pic32mx_setup(struct adc_pic32mx *ctx, struct adc_pic32mx_settings *settings);
 
 typedef enum {

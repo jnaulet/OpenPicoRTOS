@@ -11,9 +11,7 @@ struct gpio {
     size_t pin;
 };
 
-int gpio_avr_init(/*@out@*/ struct gpio *ctx,
-                  struct GPIO_AVR *base,
-                  size_t pin);
+int gpio_avr_init(/*@out@*/ struct gpio *ctx, int base, size_t pin);
 
 /* Runtime calls:
  * void gpio_write(struct gpio *ctx, bool value);

@@ -60,16 +60,16 @@ struct MUX_RP2040_PADS {
  *
  * Parameters:
  *  ctx - The mux object to init
- *  io - The IO port base address
- *  pads - The address of the pads associated with the IO port
+ *  io_base - The IO port base address
+ *  pads_base - The address of the pads associated with the IO port
  *
  * Returns:
  * Always 0
  */
-int mux_rp2040_init(struct mux *ctx, struct MUX_RP2040_IO *io, struct MUX_RP2040_PADS *pads)
+int mux_rp2040_init(struct mux *ctx, int io_base, int pads_base)
 {
-    ctx->io = io;
-    ctx->pads = pads;
+    ctx->io = (struct MUX_RP2040_IO*)io_base;
+    ctx->pads = (struct MUX_RP2040_PADS*)pads_base;
     return 0;
 }
 

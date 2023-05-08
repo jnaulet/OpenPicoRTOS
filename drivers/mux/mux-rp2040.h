@@ -45,7 +45,7 @@ typedef enum {
     MUX_RP2040_DRIVE_COUNT
 } mux_rp2040_drive_t;
 
-int mux_rp2040_init(/*@out@*/ struct mux *ctx, struct MUX_RP2040_IO *io, struct MUX_RP2040_PADS *pads);
+int mux_rp2040_init(/*@out@*/ struct mux *ctx, int io_base, int pads_base);
 
 int mux_rp2040_io(struct mux *ctx, size_t pin, mux_rp2040_t funcsel);
 int mux_rp2040_input(struct mux *ctx, size_t pin, mux_rp2040_t funcsel);

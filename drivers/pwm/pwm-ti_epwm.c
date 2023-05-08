@@ -176,9 +176,9 @@ typedef enum {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_ti_epwm_init(struct pwm_ti_epwm *ctx, struct C99_EPWM_REGS *base, clock_id_t clkid)
+int pwm_ti_epwm_init(struct pwm_ti_epwm *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct C99_EPWM_REGS*)base;
     ctx->clk_freq = clock_get_freq(clkid);
     ctx->waveform = PWM_TI_EPWM_WAVEFORM_COUNT;
     ctx->freq = 0;

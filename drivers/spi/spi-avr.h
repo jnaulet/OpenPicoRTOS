@@ -22,7 +22,7 @@ struct spi {
     spi_avr_state_t state;
 };
 
-int spi_avr_init(/*@out@*/ struct spi *ctx, struct SPI_AVR *base, spi_avr_speed_t speed);
+int spi_avr_init(/*@out@*/ struct spi *ctx, int base, spi_avr_speed_t speed);
 
 /* Runtime calls:
  * int spi_setup(struct spi *ctx, const struct spi_settings *settings);

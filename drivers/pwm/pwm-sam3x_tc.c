@@ -130,9 +130,9 @@ static clock_freq_t pwm_sam3x_tc_get_freq(clock_id_t clkid,
     return (clock_freq_t)-ENOSYS;
 }
 
-int pwm_sam3x_tc_init(struct pwm *ctx, struct PWM_SAM3X_TC *base, clock_id_t clkid)
+int pwm_sam3x_tc_init(struct pwm *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct PWM_SAM3X_TC*)base;
     ctx->clkid = clkid;
     ctx->tio = PWM_SAM3X_TC_TIOA;
     ctx->ncycles = 0;
@@ -212,9 +212,9 @@ void pwm_stop(struct pwm *ctx)
 
 /* ipwm */
 
-int ipwm_sam3x_tc_init(struct ipwm *ctx, struct PWM_SAM3X_TC *base, clock_id_t clkid)
+int ipwm_sam3x_tc_init(struct ipwm *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct PWM_SAM3X_TC*)base;
     ctx->clkid = clkid;
     ctx->state = IPWM_SAM3X_TC_STATE_IDLE;
     ctx->ldr = IPWM_SAM3X_TC_LDR_NONE;

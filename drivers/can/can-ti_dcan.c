@@ -186,11 +186,11 @@ static int set_tx_mailboxes(/*@partial@*/ struct can *ctx, size_t n)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int can_ti_dcan_init(struct can * ctx, struct CAN_REGS *base, clock_id_t clkid)
+int can_ti_dcan_init(struct can * ctx, long base, clock_id_t clkid)
 {
     int res;
 
-    ctx->base = base;
+    ctx->base = (struct CAN_REGS*)base;
     ctx->clkid = clkid;
     /* mb allocation */
     ctx->rx_mailbox_index = 0;

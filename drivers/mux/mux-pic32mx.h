@@ -150,7 +150,7 @@ typedef enum {
     MUX_PIC32MX_PPSO_COUNT
 } mux_pic32mx_ppso_t;
 
-int mux_pic32mx_init(/*@out@*/ struct mux_pic32mx *ctx, struct MUX_PIC32MX *base);
+int mux_pic32mx_init(/*@out@*/ struct mux_pic32mx *ctx, int base);
 
 int mux_pic32mx_analog(struct mux_pic32mx *ctx, size_t pin);
 int mux_pic32mx_input(struct mux_pic32mx *ctx, size_t pin);

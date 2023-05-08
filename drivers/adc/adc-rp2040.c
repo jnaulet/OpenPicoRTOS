@@ -53,9 +53,9 @@ struct ADC_RP2040 {
  * Returns:
  * Always 0
  */
-int adc_rp2040_init(struct adc_rp2040 *ctx,  struct ADC_RP2040 *base)
+int adc_rp2040_init(struct adc_rp2040 *ctx, int base)
 {
-    ctx->base = base;
+    ctx->base = (struct ADC_RP2040*)base;
 
     /* No support for DMA and FIFOs yet */
 

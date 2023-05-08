@@ -38,7 +38,7 @@ typedef enum {
     RP2040_RESET_COUNT
 } rp2040_reset_t;
 
-int rp2040_reset_init(struct rp2040_reset *ctx, struct RP2040_RESET *base);
+int rp2040_reset_init(struct rp2040_reset *ctx, int base);
 
 int rp2040_reset(struct rp2040_reset *ctx, rp2040_reset_t ss);
 int rp2040_unreset(struct rp2040_reset *ctx, rp2040_reset_t ss);

@@ -20,7 +20,7 @@ typedef enum {
     GPIO_RP2040_SIO_DIR_COUNT
 } gpio_rp2040_sio_dir_t;
 
-int gpio_rp2040_sio_init(/*@out@*/ struct gpio *ctx, struct GPIO_RP2040_SIO *base,
+int gpio_rp2040_sio_init(/*@out@*/ struct gpio *ctx, int base,
                          size_t pin, gpio_rp2040_sio_dir_t dir);
 
 /* Runtime calls:

@@ -41,7 +41,7 @@ struct pwm_tinyavr_tca_settings {
     pwm_tinyavr_tca_wgmode_t wgmode;
 };
 
-int pwm_tinyavr_tca_init(/*@out@*/ struct pwm_tinyavr_tca *ctx, struct PWM_TINYAVR_TCA *base, clock_id_t clkid);
+int pwm_tinyavr_tca_init(/*@out@*/ struct pwm_tinyavr_tca *ctx, int base, clock_id_t clkid);
 int pwm_tinyavr_tca_setup(struct pwm_tinyavr_tca *ctx, struct pwm_tinyavr_tca_settings *settings);
 
 /* PWM channels */

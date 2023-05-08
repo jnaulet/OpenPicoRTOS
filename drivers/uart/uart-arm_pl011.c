@@ -94,9 +94,9 @@ struct UART_ARM_PL011 {
  * Returns:
  * Always 0
  */
-int uart_arm_pl011_init(struct uart *ctx, struct UART_ARM_PL011 *base, clock_id_t clkid)
+int uart_arm_pl011_init(struct uart *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct UART_ARM_PL011*)base;
     ctx->clkid = clkid;
 
     /* turn on fifos */

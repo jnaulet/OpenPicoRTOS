@@ -11,7 +11,7 @@ struct adc_rp2040 {
     /*@temp@*/ struct ADC_RP2040 *base;
 };
 
-int adc_rp2040_init(/*@out@*/ struct adc_rp2040 *ctx,  struct ADC_RP2040 *base);
+int adc_rp2040_init(/*@out@*/ struct adc_rp2040 *ctx, int base);
 
 #define ADC_RP2040_CHANNEL_COUNT 5
 

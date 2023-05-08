@@ -42,9 +42,9 @@ struct MUX_SAME5X {
  * Returns:
  * Always 0
  */
-int mux_same5x_init(struct mux_same5x *ctx, struct MUX_SAME5X *base)
+int mux_same5x_init(struct mux_same5x *ctx, int base)
 {
-    ctx->base = base;
+    ctx->base = (struct MUX_SAME5X*)base;
     return 0;
 }
 

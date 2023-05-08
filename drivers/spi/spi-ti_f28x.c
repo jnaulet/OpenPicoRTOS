@@ -83,7 +83,7 @@ static int init_fifos(struct spi *ctx)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int spi_ti_f28x_init(struct spi *ctx, struct SPI_REGS *base, clock_id_t clkid)
+int spi_ti_f28x_init(struct spi *ctx, int base, clock_id_t clkid)
 {
     int res;
 

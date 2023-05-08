@@ -57,7 +57,7 @@ struct pwm_sam3x_tc_settings {
     pwm_sam3x_tc_cp_t ncpc;
 };
 
-int pwm_sam3x_tc_init(/*@out@*/ struct pwm *ctx, struct PWM_SAM3X_TC *base, clock_id_t clkid);
+int pwm_sam3x_tc_init(/*@out@*/ struct pwm *ctx, int base, clock_id_t clkid);
 int pwm_sam3x_tc_setup(struct pwm *ctx, struct pwm_sam3x_tc_settings *settings);
 
 /* Runtime calls:
@@ -96,7 +96,7 @@ struct ipwm_sam3x_tc_settings {
     ipwm_sam3x_tc_ldr_t ldr;
 };
 
-int ipwm_sam3x_tc_init(/*@out@*/ struct ipwm *ctx, struct PWM_SAM3X_TC *base, clock_id_t clkid);
+int ipwm_sam3x_tc_init(/*@out@*/ struct ipwm *ctx, int base, clock_id_t clkid);
 int ipwm_sam3x_tc_setup(struct ipwm *ctx, struct ipwm_sam3x_tc_settings *settings);
 
 /* Runtime calls:

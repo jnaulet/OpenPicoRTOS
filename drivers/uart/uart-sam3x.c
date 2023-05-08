@@ -53,9 +53,9 @@ struct UART_SAM3X {
  * Returns:
  * Always 0
  */
-int uart_sam3x_init(struct uart *ctx, struct UART_SAM3X *base, clock_id_t clkid)
+int uart_sam3x_init(struct uart *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct UART_SAM3X*)base;
     ctx->clkid = clkid;
 
     /* reset */

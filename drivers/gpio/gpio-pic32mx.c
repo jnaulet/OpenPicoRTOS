@@ -21,11 +21,11 @@ struct GPIO_PIC32MX {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int gpio_pic32mx_init(struct gpio *ctx, struct GPIO_PIC32MX *base, size_t pin)
+int gpio_pic32mx_init(struct gpio *ctx, int base, size_t pin)
 {
     if (!picoRTOS_assert(pin < (size_t)GPIO_PIC32MX_PIN_COUNT)) return -EINVAL;
 
-    ctx->base = base;
+    ctx->base = (struct GPIO_PIC32MX*)base;
     ctx->mask = (uint32_t)(1 << pin);
 
     return 0;

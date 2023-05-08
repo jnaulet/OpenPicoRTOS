@@ -61,18 +61,17 @@ struct PWM_PIC32MX_OC {
  *
  * Parameters:
  *  ctx - The PWM to init
- *  oc - The output compare block address
- *  tc - The corresponding timer register
+ *  oc_base - The output compare block address
+ *  tc_base - The corresponding timer address
  *  clkid - The timer clock id
  *
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_pic32mx_init(struct pwm *ctx, struct PWM_PIC32MX_OC *oc,
-                     struct PWM_PIC32MX_TC *tc, clock_id_t clkid)
+int pwm_pic32mx_init(struct pwm *ctx, int oc_base, int tc_base, clock_id_t clkid)
 {
-    ctx->oc = oc;
-    ctx->tc = tc;
+    ctx->oc = (struct PWM_PIC32MX_OC*)oc_base;
+    ctx->tc = (struct PWM_PIC32MX_TC*)tc_base;
     ctx->clkid = clkid;
     ctx->ncycles = 0;
     ctx->invert = false;

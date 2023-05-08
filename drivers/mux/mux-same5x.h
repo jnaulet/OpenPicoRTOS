@@ -30,7 +30,7 @@ typedef enum {
     MUX_PMUX_COUNT
 } mux_pmux_t;
 
-int mux_same5x_init(/*@out@*/ struct mux_same5x *ctx, struct MUX_SAME5X *base);
+int mux_same5x_init(/*@out@*/ struct mux_same5x *ctx, int base);
 
 int mux_same5x_input(struct mux_same5x *ctx, size_t pin, mux_pmux_t pmux);
 int mux_same5x_output(struct mux_same5x *ctx, size_t pin, mux_pmux_t pmux);

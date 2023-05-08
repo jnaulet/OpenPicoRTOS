@@ -25,9 +25,9 @@ struct WD_PIC32MX {
  * Returns:
  * Always 0
  */
-int wd_pic32mx_init(struct wd *ctx, struct WD_PIC32MX *base)
+int wd_pic32mx_init(struct wd *ctx, int base)
 {
-    ctx->base = base;
+    ctx->base = (struct WD_PIC32MX*)base;
     return 0;
 }
 

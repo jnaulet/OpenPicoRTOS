@@ -74,9 +74,9 @@ struct SPI_PIC32MX {
  * Returns:
  * 0 in case of success, -errno otherwise
  */
-int spi_pic32mx_init(struct spi *ctx, struct SPI_PIC32MX *base, clock_id_t clkid)
+int spi_pic32mx_init(struct spi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct SPI_PIC32MX*)base;
     ctx->clkid = clkid;
     ctx->frame_size = (size_t)8;
     ctx->balance = 0;

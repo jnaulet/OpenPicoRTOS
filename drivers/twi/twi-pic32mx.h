@@ -24,7 +24,7 @@ struct twi {
     int last;
 };
 
-int twi_pic32mx_init(/*@out@*/ struct twi *ctx, struct TWI_PIC32MX *base, clock_id_t clkid);
+int twi_pic32mx_init(/*@out@*/ struct twi *ctx, int base, clock_id_t clkid);
 
 /* Runtime calls:
  * int twi_setup(struct twi *ctx, struct twi_settings *settings);

@@ -29,9 +29,9 @@ struct WD_RP2040 {
  * Returns:
  * Always 0
  */
-int wd_rp2040_init(struct wd *ctx, struct WD_RP2040 *base, clock_id_t clkid)
+int wd_rp2040_init(struct wd *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct WD_RP2040*)base;
     ctx->clkid = clkid;
     ctx->load = (uint32_t)(WD_RP2040_LOAD_COUNT * 2 - 1);
 

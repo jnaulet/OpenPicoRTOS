@@ -41,9 +41,9 @@ struct WD_REGS {
  * Returns:
  * Always 0
  */
-int wd_ti_f28x_init(struct wd *ctx, struct WD_REGS *base, clock_id_t clkid)
+int wd_ti_f28x_init(struct wd *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = base;
+    ctx->base = (struct WD_REGS*)base;
     ctx->clkid = clkid;
     return 0;
 }

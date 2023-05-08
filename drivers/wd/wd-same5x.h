@@ -32,7 +32,7 @@ struct wd_same5x_settings {
     wd_same5x_period_t window;
 };
 
-int wd_same5x_init(/*@out@*/ struct wd *ctx, struct WD_SAME5X *base);
+int wd_same5x_init(/*@out@*/ struct wd *ctx, int base);
 int wd_same5x_setup(struct wd *ctx, struct wd_same5x_settings *settings);
 
 /* Runtime calls:

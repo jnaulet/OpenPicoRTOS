@@ -14,7 +14,7 @@ struct uart {
     clock_id_t clkid;
 };
 
-int uart_atmel_sercom_init(/*@out@*/ struct uart *ctx, struct UART_ATMEL_SERCOM *base, clock_id_t clkid);
+int uart_atmel_sercom_init(/*@out@*/ struct uart *ctx, int base, clock_id_t clkid);
 
 /* Implements:
  *

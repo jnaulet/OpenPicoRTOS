@@ -80,8 +80,7 @@ struct adc_ti_type4_settings {
 };
 
 int adc_ti_type4_init(/*@out@*/ struct adc_ti_type4 *ctx,
-                      struct ADC_REGS *base,
-                      struct ADC_RESULT_REGS *result,
+                      int base, int result_base,
                       unsigned long cal_inl_addr);
 
 int adc_ti_type4_setup(struct adc_ti_type4 *ctx, struct adc_ti_type4_settings *settings);

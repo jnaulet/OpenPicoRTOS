@@ -22,7 +22,7 @@ struct twi {
     uint32_t twi_cr;
 };
 
-int twi_sam3x_init(/*@out@*/ struct twi *ctx, struct TWI_SAM3X *base, clock_id_t clkid);
+int twi_sam3x_init(/*@out@*/ struct twi *ctx, int base, clock_id_t clkid);
 
 /* Runtime calls:
  * int twi_setup(struct twi *ctx, struct twi_settings *settings);
