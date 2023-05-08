@@ -66,10 +66,7 @@
 	.endm
 
 	/* RESET_CACHE */
-	.equ OP_INDEX_STORE_TAG_I, 0x8
-	.equ OP_INDEX_STORE_TAG_D, 0x9
-
-	.macro RESET_CACHE start, size, lsize, op
+	.macro RESET_CACHE start, size, lsize, cache
 	mtc0 zero, CP0_TAGLO
 	la t0, \start
 	la t1, \size
@@ -80,7 +77,7 @@
 	addiu t1, t1, -\lsize
 2:
 	bne t1, zero, 1b
-	cache \op, -4 (t0)
+	cache (\cache | Index_Store_Tag), -4 (t0)
 	.endm
 
 	/* SET_CACHE_COHERENCY */

@@ -168,4 +168,31 @@
 #define CP0_KSCRATCH0 $31, 2
 #define CP0_KSCRATCH1 $31, 3
 
+/* CACHE OPERATIONS */
+
+#define Cache_I 0x00
+#define Cache_D 0x01
+#define Cache_T 0x02
+#define Cache_S 0x03
+
+#define Index_Writeback_Inv 0x00
+#define Index_Load_Tag      0x04
+#define Index_Store_Tag     0x08
+#define Hit_Invalidate      0x10
+#define Hit_Writeback_Inv   0x14
+#define Hit_Writeback       0x18
+
+#define Index_Invalidate_I    (Cache_I | Index_Writeback_Inv)
+#define Index_Writeback_Inv_D (Cache_D | Index_Writeback_Inv)
+#define Index_Load_Tag_I      (Cache_I | Index_Load_Tag)
+#define Index_Load_Tag_D      (Cache_D | Index_Load_Tag)
+#define Index_Store_Tag_I     (Cache_I | Index_Store_Tag)
+#define Index_Store_Tag_D     (Cache_D | Index_Store_Tag)
+#define Hit_Invalidate_I      (Cache_I | Hit_Invalidate)
+#define Hit_Invalidate_D      (Cache_D | Hit_Invalidate)
+#define Fill_I                (Cache_I | Hit_Writeback_Inv)
+#define Hit_Writeback_Inv_D   (Cache_D | Hit_Writeback_Inv)
+#define Hit_Writeback_I       (Cache_I | Hit_Writeback)
+#define Hit_Writeback_D       (Cache_D | Hit_Writeback)
+
 #endif

@@ -45,8 +45,8 @@ Reset_Handler:
 	ALLOW_DSP_ACCESS
 
 	/* caches */
-	RESET_CACHE __text_start__, DEVICE_ICACHE_SIZE, 16, OP_INDEX_STORE_TAG_I
-	RESET_CACHE __data_start__, DEVICE_DCACHE_SIZE, 16, OP_INDEX_STORE_TAG_D
+	RESET_CACHE __text_start__, DEVICE_ICACHE_SIZE, 16, Cache_I
+	RESET_CACHE __data_start__, DEVICE_DCACHE_SIZE, 16, Cache_D
 	SET_CACHE_COHERENCY CACHE_WBACK_WALLOC
 
 	/* last, clear bev & jump to main() */
