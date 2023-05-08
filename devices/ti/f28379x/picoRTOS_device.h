@@ -62,12 +62,12 @@
 #define ADDR_ADCC 0x7500
 #define ADDR_ADCD 0x7580
 
-#define ADDR_CANA 0x48000ul
-#define ADDR_CANB 0x4a000ul
+#define ADDR_CANA 0x48000l
+#define ADDR_CANB 0x4a000l
 
-#define ADDR_ANALOGSUBSYS 0x5d180ul
-#define ADDR_CLKCFG       0x5d200ul
-#define ADDR_CPUSYS       0x5d300ul
+#define ADDR_ANALOGSUBSYS 0x5d180l
+#define ADDR_CLKCFG       0x5d200l
+#define ADDR_CPUSYS       0x5d300l
 
 /* IRQs */
 
