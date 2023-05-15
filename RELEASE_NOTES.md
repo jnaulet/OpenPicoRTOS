@@ -1,5 +1,19 @@
 # Release notes
 
+## picoRTOS v1.8.1
+### What's new ?
+
+OpenPicoRTOS now supports software cache synchronization through new
+interfaces in the ports new arch_invalidate_dcache() and arch_flush_dcache().
+These have not effect on CPUs with no cache.
+
+Casting types in drivers inits have been deemed unnecessary & misleading and
+have been converted to integers to allow direct use of defines in
+picoRTOS_device.h.
+
+Some small bug fixes have been added to the mix, as well as some minor
+structural improvements in the schedulers, especially syscalls.
+
 ## picoRTOS v1.8.0
 ### What's new ?
 
