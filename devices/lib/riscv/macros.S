@@ -12,8 +12,8 @@
 	la t2, \end
 	j 2f
 1:
-	lw t3, (t1)
-	sw t3, (t2)
+	lw t3, (t0)
+	sw t3, (t1)
 	addi t0, t0, 4
 	addi t1, t1, 4
 2:

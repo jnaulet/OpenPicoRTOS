@@ -9,8 +9,8 @@ typedef unsigned long picoRTOS_atomic_t;
 typedef unsigned long picoRTOS_irq_t;
 typedef unsigned long picoRTOS_cycles_t;
 
-#define ARCH_INITIAL_STACK_COUNT 28
-#define ARCH_MIN_STACK_COUNT     (ARCH_INITIAL_STACK_COUNT + 4)
+#define ARCH_INITIAL_STACK_COUNT 29
+#define ARCH_MIN_STACK_COUNT     (ARCH_INITIAL_STACK_COUNT + 8)
 
 /* no cache */
 #define ARCH_L1_DCACHE_LINESIZE sizeof(unsigned long)

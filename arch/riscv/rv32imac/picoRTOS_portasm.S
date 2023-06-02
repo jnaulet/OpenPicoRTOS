@@ -88,39 +88,19 @@
 	.macro INCREASE_MTIMECMP src
 	la t0, TIMER_CORE_PERIOD
 	la t1, \src
-	lw a0, 0 (t1) /* srcl */
-	lw a1, 4 (t1) /* srch */
-	add a0, t0, a0
-	bgeu t0, a0, 1f
+	lw t2, 0 (t1) /* srcl */
+	lw t3, 4 (t1) /* srch */
+	add t2, t0, t2
+	bltu t0, t2, 1f
 	/* propagate carry */
-	addi a1, a1, 1
+	addi t3, t3, 1
 1:
 	li t0, -1
 	la t1, mtimecmp
 	sw t0, 0 (t1)
-	sw a1, 4 (t1)
-	sw a0, 0 (t1)
+	sw t3, 4 (t1)
+	sw t2, 0 (t1)
 	.endm
-
-	.align 4
-	.type arch_suspend, %function
-	.global arch_suspend
-arch_suspend:
-	la t0, ~(1 << 3) /* ~MIE */
-	csrr t1, mstatus
-	and t1, t1, t0
-	csrw mstatus, t1
-	jr ra
-
-	.align 4
-	.type arch_resume, %function
-	.global arch_resume
-arch_resume:
-	li t0, (1 << 3) /* MIE */
-	csrr t1, mstatus
-	or t1, t1, t0
-	csrw mstatus, t1
-	jr ra
 
 	.align 4
 	.type MachineTimerInterrupt_Handler, %function
@@ -130,30 +110,41 @@ MachineTimerInterrupt_Handler:
 	/* tick */
 	csrr a0, mscratch
 	jal picoRTOS_tick
+	csrw mscratch, a0
 	/* reset timer */
 	INCREASE_MTIMECMP mtimecmp
+	/* epilogue */
+	RESTORE_CONTEXT
+	mret
+
+	.align 8
+	.type GeneralException_Handler, %function
+	.global GeneralException_Handler
+GeneralException_Handler:
+	SAVE_CONTEXT
+	/* check if it's a syscall or stall */
+	csrr t0, mcause
+	andi t0, t0, 0x7ff
+	li t1, 0xb	/* only ecall for now */
+	bne t0, t1, GeneralException_Unhandled
+	/* fish for parameters */
+	csrr a0, mscratch
+	lw a1, 24 (a0)
+	lw a2, 28 (a0)
+	/* mepc point to ecall instr, increment it by 4 */
+	lw t0, 112 (a0)
+	addi t0, t0, 4
+	sw t0, 112 (a0)
+	/* finally, syscall */
+	jal picoRTOS_syscall
 	/* epilogue */
 	csrw mscratch, a0
 	RESTORE_CONTEXT
 	mret
 
-	.align 4
-	.type MachineSoftwareInterrupt_Handler, %function
-	.global MachineSoftwareInterrupt_Handler
-MachineSoftwareInterrupt_Handler:
-	SAVE_CONTEXT
-	/* syscall */
-	csrr a0, mscratch
-	/* fish for parameters */
-	lw a1, 28 (a0)
-	lw a2, 32 (a0)
-	jal picoRTOS_syscall
-	/* ack irq */
-	csrw msip, zero
-	/* epilogue */
-	csrw mscratch, a0
-	RESTORE_CONTEXT
-	mret
+GeneralException_Unhandled:
+	ebreak
+	j GeneralException_Unhandled
 
 	.align 4
 	.type arch_save_first_context, %function
@@ -169,34 +160,28 @@ arch_save_first_context:
 	and a2, a2, zero
 	SAVE_CONTEXT
 	csrr a0, mscratch
-	jr ra
+	ret
 
 	.align 4
 	.type arch_start_first_task, %function
 	.global arch_start_first_task
 arch_start_first_task:
-	/* set first tick to now + period */
-	INCREASE_MTIMECMP mtime
 	/* restore first context */
 	csrw mscratch, a0
+	/* set first tick to now + period */
+	INCREASE_MTIMECMP mtime
 	RESTORE_CONTEXT
 	/* emulate return from exception */
 	li t0, (1 << 7) /* MPIE */
-	csrr t1, mstatus
-	or t1, t1, t0
-	csrw mstatus, t1
+	csrs mstatus, t0
 	mret
 
 	.align 4
 	.type arch_syscall, %function
 	.global arch_syscall
 arch_syscall:
-	/* set msip */
-	li t0, 1
-	csrw msip, t0
-	/* wait. TODO: is this necessary ? */
-	wfi
-	jr ra
+	ecall
+	ret
 
 	.align 4
 	.type arch_compare_and_swap, %function
@@ -208,12 +193,12 @@ arch_compare_and_swap:
 	beq a0, zero, .arch_compare_and_swap_fail_sc
 	/* success */
 	or a0, a1, zero
-	jr ra
+	ret
 .arch_compare_and_swap_fail_cmp:
 	sc.w t0, t0, (a0)	/* turn off reservation bit */
 .arch_compare_and_swap_fail_sc:
 	or a0, a2, zero
-	jr ra
+	ret
 
 	.align 4
 	.type PlatformDefined_Handler, %function
@@ -249,7 +234,7 @@ isr_fn_is_null:
 	.type arch_counter, %function
 	.global arch_counter
 arch_counter:
-	jr ra
+	ret
 
 	.bss
 
