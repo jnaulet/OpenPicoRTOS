@@ -4,8 +4,15 @@
 
 #include <stdint.h>
 
-#define CLOCK_GD32VF103_IRC8M_FREQ  8000000
-#define CLOCK_GD32VF103_PLLMAX_FREQ 108000000
+#define IRC8M_FREQ  8000000
+#define PLLMAX_FREQ 108000000
+#define IRC40K_FREQ 40000
+
+/* Bus max values */
+#define AHB_MAX  108000000
+#define APB1_MAX 54000000
+#define APB2_MAX AHB_MAX
+#define ADC_MAX  14000000
 
 struct RCU {
     volatile uint32_t RCU_CTL;
@@ -124,7 +131,7 @@ static int setup_pll(clock_gd32vf103_pllsel_t pllsel,
 {
     if (!picoRTOS_assert(pllsel < CLOCK_GD32VF103_PLLSEL_COUNT)) return -EINVAL;
     if (!picoRTOS_assert(freq > 0)) return -EINVAL;
-    if (!picoRTOS_assert(freq <= (unsigned long)CLOCK_GD32VF103_PLLMAX_FREQ)) return -EINVAL;
+    if (!picoRTOS_assert(freq <= (unsigned long)PLLMAX_FREQ)) return -EINVAL;
 
     unsigned long input;
     unsigned long pllmf;
@@ -135,7 +142,7 @@ static int setup_pll(clock_gd32vf103_pllsel_t pllsel,
 
     /* pllsel */
     if (pllsel == CLOCK_GD32VF103_PLLSEL_IRC8M) {
-        input = (unsigned long)CLOCK_GD32VF103_IRC8M_FREQ;
+        input = (unsigned long)IRC8M_FREQ;
         rcu_cfg0 &= ~RCU_CFG0_PLLSEL;
     }else{
         input = (unsigned long)clocks.hxtal;
@@ -153,13 +160,12 @@ static int setup_pll(clock_gd32vf103_pllsel_t pllsel,
                               RCU_CFG0_PLLMF(RCU_CFG0_PLLMF_M) |
                               RCU_CFG0_PREDV0_LSB(RCU_CFG0_PREDV0_LSB_M));
                 /* set values */
-                rcu_cfg1 |= RCU_CFG1_PREDV0((predv0 - 1ul) >> 1);
-                rcu_cfg0 |= (RCU_CFG0_PLLMF4((pllmf - 2ul) >> 4) |
-                             RCU_CFG0_PLLMF(pllmf - 2ul) |
-                             RCU_CFG0_PREDV0_LSB(predv0 - 1ul));
+                rcu_cfg1 |= RCU_CFG1_PREDV0(predv0 - 1ul);
+                rcu_cfg0 |= (RCU_CFG0_PLLMF4((pllmf - 1ul) >> 4) |
+                             RCU_CFG0_PLLMF(pllmf - 1ul));
 
-                RCU->RCU_CFG1 = rcu_cfg1;
                 RCU->RCU_CFG0 = rcu_cfg0;
+                RCU->RCU_CFG1 = rcu_cfg1;
                 clocks.ck_sys = (clock_freq_t)freq;
                 return 0;
             }
@@ -186,7 +192,13 @@ static int enable_pll_busywait(void)
 
 static int setup_ahb_div(unsigned long ahb_div)
 {
+    if (!picoRTOS_assert(ahb_div > 0)) return -EINVAL;
+
     uint32_t rcu_cfg0 = RCU->RCU_CFG0;
+    clock_freq_t ck_ahb = clocks.ck_sys / (clock_freq_t)ahb_div;
+
+    if (!picoRTOS_assert(ck_ahb <= (clock_freq_t)AHB_MAX))
+        return -EIO;
 
     /* reset field */
     rcu_cfg0 &= ~RCU_CFG0_AHBPSC(RCU_CFG0_AHBPSC_M);
@@ -206,15 +218,21 @@ static int setup_ahb_div(unsigned long ahb_div)
         /*@notreached@*/ return -EINVAL;
     }
 
+    clocks.ahb = ck_ahb;
     RCU->RCU_CFG0 = rcu_cfg0;
-    clocks.ahb = clocks.ck_sys / (clock_freq_t)ahb_div;
 
     return 0;
 }
 
 static int setup_apb1_div(unsigned long apb1_div)
 {
+    if (!picoRTOS_assert(apb1_div > 0)) return -EINVAL;
+
     uint32_t rcu_cfg0 = RCU->RCU_CFG0;
+    clock_freq_t ck_apb1 = clocks.ahb / (clock_freq_t)apb1_div;
+
+    if (!picoRTOS_assert(ck_apb1 <= (clock_freq_t)APB1_MAX))
+        return -EIO;
 
     /* reset field */
     rcu_cfg0 &= ~RCU_CFG0_APB1PSC(RCU_CFG0_APB1PSC_M);
@@ -230,15 +248,21 @@ static int setup_apb1_div(unsigned long apb1_div)
         /*@notreached@*/ return -EINVAL;
     }
 
+    clocks.apb1 = ck_apb1;
     RCU->RCU_CFG0 = rcu_cfg0;
-    clocks.apb1 = clocks.ahb / (clock_freq_t)apb1_div;
 
     return 0;
 }
 
 static int setup_apb2_div(unsigned long apb2_div)
 {
+    if (!picoRTOS_assert(apb2_div > 0)) return -EINVAL;
+
     uint32_t rcu_cfg0 = RCU->RCU_CFG0;
+    clock_freq_t ck_apb2 = clocks.ahb / (clock_freq_t)apb2_div;
+
+    if (!picoRTOS_assert(ck_apb2 <= (clock_freq_t)APB2_MAX))
+        return -EIO;
 
     /* reset field */
     rcu_cfg0 &= ~RCU_CFG0_APB2PSC(RCU_CFG0_APB2PSC_M);
@@ -254,15 +278,21 @@ static int setup_apb2_div(unsigned long apb2_div)
         /*@notreached@*/ return -EINVAL;
     }
 
+    clocks.apb2 = ck_apb2;
     RCU->RCU_CFG0 = rcu_cfg0;
-    clocks.apb2 = clocks.ahb / (clock_freq_t)apb2_div;
 
     return 0;
 }
 
 static int setup_adc_div(unsigned long adc_div)
 {
+    if (!picoRTOS_assert(adc_div > 0)) return -EINVAL;
+
     uint32_t rcu_cfg0 = RCU->RCU_CFG0;
+    clock_freq_t ck_adc = clocks.apb2 / (clock_freq_t)adc_div;
+
+    if (!picoRTOS_assert(ck_adc <= (clock_freq_t)ADC_MAX))
+        return -EIO;
 
     /* reset field */
     rcu_cfg0 &= ~(RCU_CFG0_ADCPSC(RCU_CFG0_ADCPSC_M) | RCU_CFG0_ADCPSC2);
@@ -287,12 +317,21 @@ static int setup_adc_div(unsigned long adc_div)
         /*@notreached@*/ return -EINVAL;
     }
 
+    clocks.adc = ck_adc;
     RCU->RCU_CFG0 = rcu_cfg0;
-    clocks.adc = clocks.apb2 / (clock_freq_t)adc_div;
 
     return 0;
 }
 
+/* Function: clock_gd32vf103_init
+ * Initialises the GD32VF103 clock system
+ *
+ * Parameters:
+ *  settings - The settings to apply
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int clock_gd32vf103_init(struct clock_settings *settings)
 {
     if (!picoRTOS_assert(settings->ck_sys < CLOCK_GD32VF103_CK_SYS_COUNT)) return -EINVAL;
@@ -306,7 +345,7 @@ int clock_gd32vf103_init(struct clock_settings *settings)
 
     switch (settings->ck_sys) {
     case CLOCK_GD32VF103_CK_SYS_IRC8M:
-        clocks.ck_sys = (clock_freq_t)CLOCK_GD32VF103_IRC8M_FREQ;
+        clocks.ck_sys = (clock_freq_t)IRC8M_FREQ;
         break;
 
     case CLOCK_GD32VF103_CK_SYS_HXTAL:
@@ -314,19 +353,16 @@ int clock_gd32vf103_init(struct clock_settings *settings)
         break;
 
     case CLOCK_GD32VF103_CK_SYS_PLL:
-        if ((res = setup_pll(settings->pllsel, settings->pll)) < 0)
+        if ((res = setup_pll(settings->pllsel, settings->pll)) < 0 ||
+            (res = enable_pll_busywait()) < 0)
             return res;
 
-        res = enable_pll_busywait();
         break;
 
     default:
         picoRTOS_break();
         /*@notreached@*/ return -EIO;
     }
-
-    if (!picoRTOS_assert(res == 0))
-        return -EIO;
 
     /* switch to selected clock */
     if ((res = switch_system_clock(settings->ck_sys)) < 0)
@@ -342,12 +378,21 @@ int clock_gd32vf103_init(struct clock_settings *settings)
     return 0;
 }
 
+/* Function: clock_gd32vf103_enable
+ * Enables a particular clock
+ *
+ * Parameters:
+ *  clk - The clock identifier
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int clock_gd32vf103_enable(clock_gd32vf103_clk_t clk)
 {
     if (!picoRTOS_assert(clk < CLOCK_GD32VF103_CLK_COUNT)) return -EINVAL;
 
-    size_t bus = (size_t)(clk >> 4);
-    size_t bit = (size_t)(0xf & clk);
+    size_t bus = (size_t)(clk >> 5);
+    size_t bit = (size_t)(0x1f & clk);
 
     switch (bus) {
     /* AHB */
@@ -365,12 +410,21 @@ int clock_gd32vf103_enable(clock_gd32vf103_clk_t clk)
     return 0;
 }
 
+/* Function: clock_gd32vf103_disable
+ * Disables a particular clock
+ *
+ * Parameters:
+ *  clk - The clock identifier
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int clock_gd32vf103_disable(clock_gd32vf103_clk_t clk)
 {
     if (!picoRTOS_assert(clk < CLOCK_GD32VF103_CLK_COUNT)) return -EINVAL;
 
-    size_t bus = (size_t)(clk >> 4);
-    size_t bit = (size_t)(0xf & clk);
+    size_t bus = (size_t)(clk >> 5);
+    size_t bit = (size_t)(0x1f & clk);
 
     switch (bus) {
     /* AHB */
@@ -401,6 +455,7 @@ clock_freq_t clock_get_freq(clock_id_t clkid)
     case CLOCK_GD32VF103_APB1: return clocks.apb1;
     case CLOCK_GD32VF103_APB2: return clocks.apb2;
     case CLOCK_GD32VF103_ADC: return clocks.adc;
+    case CLOCK_GD32VF103_CK_FWDGT: return (clock_freq_t)IRC40K_FREQ;
     default: break;
     }
 
