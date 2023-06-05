@@ -5,6 +5,10 @@
 	.extern picoRTOS_tick
 	.extern picoRTOS_syscall
 
+	/* intc interface */
+	.extern arch_ack_interrupt
+	.extern arch_get_interrupt
+
 	#include "picoRTOSConfig.h"
 	#include "picoRTOS_device.h"
 	/* MIPS specifics */
@@ -12,9 +16,6 @@
 
 	/* counter increments every other clock */
 	.equ TIMER_CORE_PERIOD, (CONFIG_SYSCLK_HZ / CONFIG_TICK_HZ) / 2
-	/* interrupt control */
-	.equ INTC_INTSTAT, ADDR_INTC + 0x20
-	.equ INTC_IFS0, ADDR_INTC + 0x40
 	/* syscall cause */
 	.equ CP0_CAUSE_EXCCODE_SYS, 8
 
@@ -252,19 +253,15 @@
 CoreTimer_Handler:
 	SAVE_CONTEXT
 	/* tick */
-	mfc0 a0, CP0_KSCRATCH0
 	jal picoRTOS_tick
-	nop
+	mfc0 a0, CP0_KSCRATCH0
+	mtc0 v0, CP0_KSCRATCH0
 	/* reset timer */
 	INCREMENT_CP0_COMPARE CP0_COMPARE
-	/* ack irq.
-	 * FIXME: probably requires an interface */
-	la fp, INTC_IFS0
-	lw k0, (fp)
-	ins k0, zero, 0, 1
-	sw k0, (fp)
+	/* ack irq */
+	jal arch_ack_interrupt
+	li a0, 0
 	/* epilogue */
-	mtc0 v0, CP0_KSCRATCH0
 	RESTORE_CONTEXT
 	eret
 
@@ -378,36 +375,23 @@ arch_compare_and_swap:
 Interrupt_Handler:
 	SAVE_CONTEXT
 	/* extract irq parameters */
-	la fp, INTC_INTSTAT
-	lw k0, (fp)
-	andi k0, k0, 0xff   /* k0: irq */
-	sll t0, k0, 3	    /* t0: ISR_TABLE index */
-	andi t1, k0, 0x1f   /* t1: bit mask */
-	addiu at, zero, 1
-	sllv t1, at, t1
-	sra t2, k0, 5	    /* t2: IFSx offset */
-	sll t2, t2, 4
-
+	jal arch_get_interrupt
+	nop
 	/* find isr table entry */
 	la fp, ISR_TABLE
+	sll t0, v0, 3	/* t0: ISR_TABLE index */
 	addu fp, fp, t0
 	lw k0, 0(fp)	/* fn to k0 */
 	lw a0, 4(fp)	/* priv to a0 */
 	/* check fn */
 	beq k0, zero, isr_fn_is_null
 	nop
-
 	/* finally branch to isr */
 	jr k0
-	nop
-
-	/* ack IFSx */
-	la fp, INTC_IFS0
-	addu fp, fp, t2
-	lw k0, (fp)
-	xor k0, k0, t1	/* flip IFSx bit */
-	sw k0, (fp)
-
+	or k1, v0, zero /* k1: irq */
+	/* ack */
+	jal arch_ack_interrupt
+	or a0, k1, zero
 	/* epilogue */
 	RESTORE_CONTEXT
 	eret
