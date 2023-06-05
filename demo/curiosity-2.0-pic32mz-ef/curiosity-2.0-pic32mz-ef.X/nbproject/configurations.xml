@@ -39,6 +39,7 @@
           <itemPath>../../../arch/mips32/m51xx/picoRTOS_port.c</itemPath>
           <itemPath>../../../arch/mips32/m51xx/picoRTOS_portasm.S</itemPath>
           <itemPath>../../../arch/mips32/m51xx/picoRTOS_types.h</itemPath>
+          <itemPath>../../../arch/mips32/common/intc-pic32mx.c</itemPath>
         </logicalFolder>
         <logicalFolder name="f2" displayName="ipc" projectFiles="true">
           <itemPath>../../../ipc/picoRTOS_cond.c</itemPath>
