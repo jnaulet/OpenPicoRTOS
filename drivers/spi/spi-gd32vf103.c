@@ -31,6 +31,15 @@ struct SPI_GD32VF103 {
 #define SPI_CTL0_CKPL    (1 << 1)
 #define SPI_CTL0_CKPH    (1 << 0)
 
+#define SPI_CTL1_TBEIE  (1 << 7)
+#define SPI_CTL1_RNBEIE (1 << 6)
+#define SPI_CTL1_ERRIE  (1 << 5)
+#define SPI_CTL1_TMOD   (1 << 4)
+#define SPI_CTL1_NSSP   (1 << 3)
+#define SPI_CTL1_NSSDRV (1 << 2)
+#define SPI_CTL1_DMATEN (1 << 1)
+#define SPI_CTL1_DMAREN (1 << 0)
+
 #define SPI_STAT_FERR    (1 << 8)
 #define SPI_STAT_TRANS   (1 << 7)
 #define SPI_STAT_RXOERR  (1 << 6)
@@ -41,13 +50,24 @@ struct SPI_GD32VF103 {
 #define SPI_STAT_TBE     (1 << 1)
 #define SPI_STAT_RBNE    (1 << 0)
 
+/* Function: spi_gd32vf103_init
+ * Initializes a SPI
+ *
+ * Parameters:
+ *  ctx - The SPI to init
+ *  base - The SPI base address
+ *  clkid - The clock id for this SPI
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int spi_gd32vf103_init(struct spi *ctx, int base, clock_id_t clkid)
 {
     ctx->base = (struct SPI_GD32VF103*)base;
     ctx->clkid = clkid;
 
-    /* turn on */
-    ctx->base->SPI_CTL0 = (uint32_t)SPI_CTL0_SPIEN;
+    /* disable */
+    ctx->base->SPI_CTL0 = (uint32_t)0;
 
     return 0;
 }
@@ -130,8 +150,27 @@ static int set_mode(struct spi *ctx, spi_mode_t mode)
     if (!picoRTOS_assert(mode != SPI_MODE_IGNORE)) return -EINVAL;
     if (!picoRTOS_assert(mode < SPI_MODE_COUNT)) return -EINVAL;
 
-    if (mode == SPI_MODE_MASTER) ctx->base->SPI_CTL0 |= SPI_CTL0_MSTMOD;
-    else ctx->base->SPI_CTL0 &= ~SPI_CTL0_MSTMOD;
+    if (mode == SPI_MODE_MASTER) {
+        ctx->base->SPI_CTL0 |= SPI_CTL0_MSTMOD;
+        ctx->base->SPI_CTL1 |= SPI_CTL1_NSSDRV;
+    }else
+        ctx->base->SPI_CTL0 &= ~SPI_CTL0_MSTMOD;
+
+    return 0;
+}
+
+static int spi_enable(struct spi *ctx)
+{
+    int deadlock = CONFIG_DEADLOCK_COUNT;
+
+    /* turn on */
+    while ((ctx->base->SPI_CTL0 & SPI_CTL0_SPIEN) == 0 && deadlock-- != 0) {
+        /*@i@*/ (void)ctx->base->SPI_STAT;
+        ctx->base->SPI_CTL0 |= SPI_CTL0_SPIEN;
+    }
+
+    if (!picoRTOS_assert(deadlock != -1))
+        return -EBUSY;
 
     return 0;
 }
@@ -139,6 +178,8 @@ static int set_mode(struct spi *ctx, spi_mode_t mode)
 int spi_setup(struct spi *ctx, const struct spi_settings *settings)
 {
     int res;
+
+    ctx->base->SPI_CTL0 &= ~SPI_CTL0_SPIEN;
 
     if (settings->bitrate != 0 &&
         (res = set_bitrate(ctx, settings->bitrate)) < 0)
@@ -158,7 +199,7 @@ int spi_setup(struct spi *ctx, const struct spi_settings *settings)
 
     /* ignore cs & cs_pol */
 
-    return 0;
+    return spi_enable(ctx);
 }
 
 static int receive_data(struct spi *ctx, uint8_t *data)
@@ -209,7 +250,8 @@ int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
         bool xfer_occurred = false;
         size_t tx_n = recv + ctx->balance;
 
-        if (tx_n < n) {
+        /* balance should never exceed 1 on this chip */
+        if (ctx->balance == 0) {
             /* fill up TX FIFO */
             if ((res = transmit_data(ctx, &tx8[tx_n])) > 0) {
                 ctx->balance += res;
