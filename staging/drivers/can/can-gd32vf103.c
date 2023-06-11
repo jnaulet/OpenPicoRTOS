@@ -31,9 +31,13 @@ struct CAN_GD32VF103 {
     uint32_t RESERVED2[12];
     volatile uint32_t CAN_FCTL;             /* CAN0 only */
     volatile uint32_t CAN_FMCFG;            /* CAN0 only */
+    uint32_t RESERVED3;
     volatile uint32_t CAN_FSCFG;            /* CAN0 only */
+    uint32_t RESERVED4;
     volatile uint32_t CAN_FAFIFO;           /* CAN0 only */
+    uint32_t RESERVED5;
     volatile uint32_t CAN_FW;               /* CAN0 only */
+    uint32_t RESERVED6[8];
     struct CAN_GD32VF103_FILTER {
         volatile uint32_t CAN_FxDATAy[CAN_GD32VF103_RFIFO_COUNT];
     } FILTER[CAN_GD32VF103_FILTER_COUNT];
@@ -189,7 +193,7 @@ static int set_psc_and_seg(struct can *ctx, size_t psc, size_t tq)
         bs2 < (size_t)BS2_MIN || bs2 > (size_t)BS2_MAX)
         return -EINVAL;
 
-    ctx->base->CAN_BT = (uint32_t)(CAN_BT_SJW(0) |
+    ctx->base->CAN_BT = (uint32_t)(CAN_BT_SJW(1) |
                                    CAN_BT_BS1(bs1 - 1) |
                                    CAN_BT_BS2(bs2 - 1) |
                                    CAN_BT_BAUDPSC(psc));
@@ -233,11 +237,29 @@ static int set_bitrate(struct can *ctx, unsigned long bitrate)
     return -EINVAL;
 }
 
+static int sleep_to_initial_working_mode(struct can *ctx)
+{
+    int deadlock = CONFIG_DEADLOCK_COUNT;
+
+    ctx->base->CAN_CTL |= CAN_CTL_IWMOD;
+    ctx->base->CAN_CTL &= ~CAN_CTL_SLPWMOD;
+
+    while (deadlock-- != 0)
+        if ((ctx->base->CAN_STAT & CAN_STAT_IWS) != 0)
+            break;
+
+    if (!picoRTOS_assert(deadlock != -1))
+        return -EBUSY;
+
+    return 0;
+}
+
 int can_setup(struct can *ctx, struct can_settings *settings)
 {
     int res;
 
-    if ((res = set_bitrate(ctx, settings->bitrate)) < 0)
+    if ((res = sleep_to_initial_working_mode(ctx)) < 0 ||
+        (res = set_bitrate(ctx, settings->bitrate)) < 0)
         return res;
 
     if (settings->tx_auto_abort) ctx->base->CAN_CTL |= CAN_CTL_ABOR;
@@ -251,6 +273,9 @@ int can_setup(struct can *ctx, struct can_settings *settings)
     else ctx->base->CAN_BT &= ~CAN_BT_LCMOD;
 
     /* ignore tx_mailboxes (set to 3 by hw) */
+
+    /* normal mode */
+    ctx->base->CAN_CTL &= ~CAN_CTL_IWMOD;
 
     return 0;
 }
