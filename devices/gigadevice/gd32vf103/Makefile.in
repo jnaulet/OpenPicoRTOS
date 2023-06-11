@@ -1,6 +1,6 @@
 # Device configuration file for GD32VF103
-ARCH_DIR := $(PICORTOS_DIR)/staging/arch/riscv/rv32imac
-DEVICE_DIR := $(PICORTOS_DIR)/staging/devices/gigadevice/gd32vf103
+ARCH_DIR := $(PICORTOS_DIR)/arch/riscv/rv32imac
+DEVICE_DIR := $(PICORTOS_DIR)/devices/gigadevice/gd32vf103
 
 DEFINE := -DGD32VF103
 
@@ -9,6 +9,7 @@ INCLUDE += -I$(DEVICE_DIR) -I$(ARCH_DIR)
 
 SRC_C := $(PICORTOS_DIR)/picoRTOS.c
 SRC_C += $(ARCH_DIR)/picoRTOS_port.c
+SRC_C += $(PICORTOS_DIR)/arch/riscv/drivers/intc-eclic.c
 
 SRC_S := $(DEVICE_DIR)/startup.S
 SRC_S += $(ARCH_DIR)/picoRTOS_portasm.S

@@ -67,7 +67,15 @@
 
 #define ADDR_USBFS  0x50000000
 
+#define ADDR_MTIME  0xd1000000
+#define ADDR_ECLIC  0xd2000000
+
 /* IRQs */
+
+#define IRQ_SFT   3
+#define IRQ_TMR   7
+#define IRQ_BWEI  17
+#define IRQ_PMOVI 18
 
 #define DEVICE_INTERRUPT_VECTOR_COUNT 68
 
@@ -79,9 +87,11 @@
 
 /* ARCH */
 
-#define mtime    0x0
-#define mtimecmp 0x8
-#define mstop    0xff8
-#define msip     0xffc
+#define mtime    0xd1000000
+#define mtimecmp 0xd1000008
+#define mstop    0xd1000ff8
+#define msip     0xd1000ffc
+
+#define mtvt     0x307
 
 #endif

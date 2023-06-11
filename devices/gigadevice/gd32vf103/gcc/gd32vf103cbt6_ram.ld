@@ -1,15 +1,15 @@
 /*
- * GD32VF103C8T6 (lite) memory mapping for ROM
+ * GD32VF103CBT6 memory mapping for RAM
  */
 
 MEMORY
 {
     boot(rx)    : ORIGIN = 0x1fffb000, LENGTH = 18k
-    rom(rx)     : ORIGIN = 0x08000000, LENGTH = 64k
-    ram(rwx)    : ORIGIN = 0x20000000, LENGTH = 20k
+    rom(rx)     : ORIGIN = 0x08000000, LENGTH = 128k
+    ram(rwx)    : ORIGIN = 0x20000000, LENGTH = 32k
 }
 
-PROVIDE(__relocate_text = 0x0);
+PROVIDE(__relocate_text = 0x1);
 STACK_SIZE = DEFINED(STACK_SIZE) ? STACK_SIZE : DEFINED(__stack_size__) ? __stack_size__ : 0x100;
 
 ENTRY(Reset_Handler)
@@ -17,20 +17,15 @@ ENTRY(Reset_Handler)
 /* Section Definitions */
 SECTIONS
 {
-    .text :
+    .init :
     {
-        __text_start__ = .;
+        __init_start__ = .;
+        *(.rodata .rodata* .gnu.linkonce.r.*)
+
         . = ALIGN(4);
         KEEP(*(.init))
-
-        . = ALIGN(64);
-        __vectors_start__ = .;
         KEEP(*(.vectors .vectors.*))
-        __vectors_end__ = .;
 
-        *(.text .text.* .gnu.linkonce.t.*)
-        *(.rodata .rodata* .gnu.linkonce.r.*)
-        
         . = ALIGN(4);
         KEEP (*crtbegin.o(.ctors))
         KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
@@ -50,18 +45,34 @@ SECTIONS
         *(.eh_frame*)
 
         . = ALIGN(4);
-        __text_end__ = .;
+        __init_end__ = .;
     } > rom
 
     . = ALIGN(4);
     __etext = .;
-    __sdata = .;
+
+    .text : AT (__etext)
+    {
+        __text_start__ = .;
+        *(.text .text.* .gnu.linkonce.t.*)
+
+        . = ALIGN(512);
+        __vectors_start__ = .;
+        . = . + 348;
+        __vectors_end__ = .;
+
+        . = ALIGN(4);
+        __text_end__ = .;
+    } > ram
+
+    __sdata = __etext + (__text_end__ - __text_start__);
 
     .data : AT (__sdata)
     {
         . = ALIGN(4);
         __data_start__ = .;
         *(.data .data.*);
+        *(.sdata .sdata.* .gnu.linkonce.s.*);
 
         . = ALIGN(4);
         __preinit_array_start = .;
