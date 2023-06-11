@@ -51,7 +51,7 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - Atmel ATMega (AVR5+)
  - Atmel TinyAVR (0+) Series
  - MIPS M51xx / PIC32Mx
- - RISC-V RV32IMAC (staging)
+ - RISC-V RV32IMAC
  - TI C2000 / c28x
 
 ### Multi-core SMP
@@ -71,7 +71,7 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - Atmel ATSAMD5x/E5x
  - Atmel ATtiny817
  - Atmel ATtiny1607
- - GigaDevice GD32VF103 (staging)
+ - GigaDevice GD32VF103
  - Microchip PIC32MZ-EF
  - Raspberry Pico RP2040
  - Texas Instruments TMS320F2737xD
@@ -153,7 +153,8 @@ Basic demo code is provided for the following boards:
   - ATtiny817-Xplained Mini
   - ATtiny1607 Curiosity Nano
   - Curiosity 2.0 PIC32 MZ EF
-  - Sipeed Longan Nano (staging)
+  - Sipeed Longan Nano
+  - Sipeed Longan Nano + LCD
   - Texas Instruments Launchxl-f28379d
   - Raspberry Pi Pico (single core)
   - Raspberry Pi Pico (dual-core SMP)
