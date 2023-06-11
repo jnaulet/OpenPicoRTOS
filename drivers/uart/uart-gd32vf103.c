@@ -73,6 +73,17 @@ struct UART_GD32VF103_USART {
 #define USART_GP_PSC_M   0xffu
 #define USART_GP_PSC(x)  ((x) & USART_GP_PSC_M)
 
+/* Function: uart_gd32vf103_init
+ * Initializes an UART
+ *
+ * Parameters:
+ *  ctx - The UART context to init
+ *  base - The UART module base address
+ *  clkid - The UART input clock ID
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int uart_gd32vf103_init(struct uart *ctx, int base, clock_id_t clkid)
 {
     ctx->base = (struct UART_GD32VF103_USART*)base;
@@ -97,8 +108,8 @@ static int set_baudrate(struct uart *ctx, unsigned long baudrate)
     if (!picoRTOS_assert(freq > 0))
         return (int)freq;
 
-    intdiv = (unsigned long)freq / baudrate;
-    modulo = (unsigned long)freq % baudrate;
+    intdiv = (unsigned long)freq / (16ul * baudrate);
+    modulo = (unsigned long)freq % (16ul * baudrate);
     ctx->base->USART_BAUD = (uint32_t)(USART_BAUD_INTDIV(intdiv) |
                                        USART_BAUD_FRADIV((modulo * 16) / intdiv));
 
