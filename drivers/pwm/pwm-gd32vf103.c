@@ -131,6 +131,17 @@ struct PWM_GD32VF103_TIMER {
 #define TIMERx_CHxCV_CHxVAL_M  0xffffu
 #define TIMERx_CHxCV_CHxVAL(x) ((x) & TIMERx_CHxCV_CHxVAL_M)
 
+/* Function: pwm_gd32vf103_init
+ * Inits an GD32VF103 TIMER as PWM
+ *
+ * Parameters:
+ *  ctx - The PWM to init
+ *  base - The timer base address
+ *  clkid - The timer input clock id
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int pwm_gd32vf103_init(struct pwm_gd32vf103 *ctx, int base, clock_id_t clkid)
 {
     ctx->base = (struct PWM_GD32VF103_TIMER*)base;
@@ -162,6 +173,16 @@ static int set_frequency(struct pwm_gd32vf103 *ctx, unsigned long frequency)
     return 0;
 }
 
+/* Function: pwm_gd32vf103_setup
+ * Configures an TIMER / PWM
+ *
+ * Parameters:
+ *  ctx - The pwm to configure
+ *  settings - The pwm specific parameters
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int pwm_gd32vf103_setup(struct pwm_gd32vf103 *ctx, struct pwm_gd32vf103_settings *settings)
 {
     if (!picoRTOS_assert(settings->waveform < PWM_GD32VF103_WAVEFORM_COUNT)) return -EINVAL;
@@ -175,8 +196,11 @@ int pwm_gd32vf103_setup(struct pwm_gd32vf103 *ctx, struct pwm_gd32vf103_settings
     ctx->base->TIMERx_CTL0 &= ~TIMERx_CTL0_CAM(TIMERx_CTL0_CAM_M);
 
     switch (settings->waveform) {
-    case PWM_GD32VF103_WAVEFORM_EAPWM: ctx->base->TIMERx_CTL0 |= TIMERx_CTL0_DIR; break;
-    case PWM_GD32VF103_WAVEFORM_CAPWM: ctx->base->TIMERx_CTL0 |= TIMERx_CTL0_CAM(1); break;
+    case PWM_GD32VF103_WAVEFORM_EAPWM_UP: ctx->base->TIMERx_CTL0 &= ~TIMERx_CTL0_DIR; break;
+    case PWM_GD32VF103_WAVEFORM_EAPWM_DOWN: ctx->base->TIMERx_CTL0 |= TIMERx_CTL0_DIR; break;
+    case PWM_GD32VF103_WAVEFORM_CAPWM_UP: ctx->base->TIMERx_CTL0 |= TIMERx_CTL0_CAM(2); break;
+    case PWM_GD32VF103_WAVEFORM_CAPWM_DOWN: ctx->base->TIMERx_CTL0 |= TIMERx_CTL0_CAM(1); break;
+    case PWM_GD32VF103_WAVEFORM_CAPWM_UP_DOWN: ctx->base->TIMERx_CTL0 |= TIMERx_CTL0_CAM(3); break;
     default:
         picoRTOS_break();
         /*@notreached@*/ return -EIO;
@@ -185,7 +209,18 @@ int pwm_gd32vf103_setup(struct pwm_gd32vf103 *ctx, struct pwm_gd32vf103_settings
     return 0;
 }
 
-int pwm_gd32vf103_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_gd32vf103 *parent, size_t channel)
+/* Function: pwm_gd32vf103_pwm_init
+ * Creates a PWM output from an PWM / TIMER block
+ *
+ * Parameters:
+ *  ctx - The pwm to init
+ *  parent - The parent PWM / TIMER
+ *  channel - The PWM output channel
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
+int pwm_gd32vf103_pwm_init(struct pwm *ctx, struct pwm_gd32vf103 *parent, size_t channel)
 {
     if (!picoRTOS_assert(channel < (size_t)PWM_GD32VF103_MAX_CH_COUNT)) return -EINVAL;
 
@@ -225,6 +260,16 @@ int pwm_gd32vf103_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_gd32vf103 *pare
     return 0;
 }
 
+/* Function: pwm_gd32vf103_pwm_setup
+ * Configures a PWM output
+ *
+ * Parameters:
+ *  ctx - The pwm to configure
+ *  settings - The pwm output settings
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int pwm_gd32vf103_pwm_setup(struct pwm *ctx, struct pwm_gd32vf103_pwm_settings *settings)
 {
     if (!picoRTOS_assert(settings->mode < PWM_GD32VF103_PWM_MODE_COUNT)) return -EINVAL;
