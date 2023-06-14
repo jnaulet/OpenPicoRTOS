@@ -52,10 +52,22 @@ struct FLASH_GD32VF103 {
 #define FMC_OBSTAT_SPC     (1 << 1)
 #define FMC_OBSTAT_OBERR   (1 << 0)
 
+/* Function: flash_gd32vf103_init
+ * Initializes a GD32VF103 FMC
+ *
+ * Parameters:
+ *  ctx - The flash controller to init
+ *  base - The flash controller base address
+ *  block_count - The number of blocks in the flash
+ *
+ * Returns:
+ * Always 0
+ */
 int flash_gd32vf103_init(struct flash *ctx, int base, size_t block_count)
 {
     ctx->base = (struct FLASH_GD32VF103*)base;
     ctx->block_count = block_count;
+    ctx->state = FLASH_GD32VF103_STATE_IDLE;
 
     return 0;
 }
@@ -94,7 +106,7 @@ static void lock_fmc_ctl(struct flash *ctx)
     ctx->base->FMC_CTL |= FMC_CTL_LK;
 }
 
-int flash_erase(struct flash *ctx, size_t block)
+static int flash_erase_idle(struct flash *ctx, size_t block)
 {
     if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
 
@@ -110,8 +122,33 @@ int flash_erase(struct flash *ctx, size_t block)
     /* start erase */
     ctx->base->FMC_CTL |= FMC_CTL_START;
 
+    ctx->state = FLASH_GD32VF103_STATE_BUSY;
+    return -EAGAIN;
+}
+
+static int flash_erase_busy(struct flash *ctx)
+{
+    if ((ctx->base->FMC_STAT & FMC_STAT_BUSY) != 0)
+        return -EAGAIN;
+
     lock_fmc_ctl(ctx);
+
+    ctx->state = FLASH_GD32VF103_STATE_IDLE;
     return 0;
+}
+
+int flash_erase(struct flash *ctx, size_t block)
+{
+    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+
+    switch (ctx->state) {
+    case FLASH_GD32VF103_STATE_IDLE: return flash_erase_idle(ctx, block);
+    case FLASH_GD32VF103_STATE_BUSY: return flash_erase_busy(ctx);
+    default: break;
+    }
+
+    picoRTOS_break();
+    /*@notreached@*/ return -EIO;
 }
 
 int flash_blankcheck(struct flash *ctx, size_t block)
