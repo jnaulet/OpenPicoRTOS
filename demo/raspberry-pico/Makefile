@@ -1,5 +1,10 @@
-ELF_RAM := raspberry-pico_ram.elf
-ELF_FLASH := raspberry-pico_flash.elf
+ifneq ($(SMP),)
+POSTFIX := -SMP
+SUPPORT_FOR_SMP := -DSUPPORT_FOR_SMP
+endif
+
+ELF_RAM := raspberry-pico$(POSTFIX)_ram.elf
+ELF_FLASH := raspberry-pico$(POSTFIX)_flash.elf
 
 CC := gcc
 CROSS := arm-none-eabi-
@@ -8,7 +13,7 @@ ELF2UF2 := $(BUILD)/elf2uf2
 
 # picoRTOS
 PICORTOS_DIR := $(abspath ../..)
--include $(PICORTOS_DIR)/devices/raspberry/rp2040/Makefile.in
+-include $(PICORTOS_DIR)/devices/raspberry/rp2040/Makefile$(POSTFIX).in
 
 SPLINTFLAGS := -checks +unixlib
 CPPCHECKFLAGS += --enable=all --inline-suppr -DNDEBUG
@@ -17,7 +22,7 @@ CPPCHECKFLAGS += --suppress=unusedFunction
 CPPCHECKFLAGS += --suppress=unusedStructMember
 
 CFLAGS += -Wall -Wextra -std=c99 $(INCLUDE) -O0 -g3 $(DEFINE)
-CFLAGS += -mcpu=cortex-m0plus
+CFLAGS += -mcpu=cortex-m0plus $(SUPPORT_FOR_SMP)
 
 SFLAGS += -x assembler-with-cpp -g3 $(DEFINE) $(INCLUDE)
 SFLAGS += -mcpu=cortex-m0plus
@@ -100,6 +105,6 @@ cppcheck:
 
 clean:
 	-rm -fR $(BUILD)
-	-rm -f *.elf
+	-rm -f *.elf *.uf2 *.map
 
 .PHONY: splint

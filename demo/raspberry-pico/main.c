@@ -1,4 +1,9 @@
-#include "picoRTOS.h"
+#ifndef SUPPORT_FOR_SMP
+# include "picoRTOS.h"
+#else
+# include "picoRTOS-SMP.h"
+#endif
+
 #include "raspberry-pico.h"
 
 #include "adc.h"
@@ -313,10 +318,19 @@ int main(void)
     picoRTOS_add_task(&task, TASK_TICK_PRIO);
 
     /* LEDs, strict deadlines, no round-robin */
+#ifndef SUPPORT_FOR_SMP
     picoRTOS_task_init(&task, led0_main, pico.PWM4B, stack1, PICORTOS_STACK_COUNT(stack1));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
     picoRTOS_task_init(&task, led1_main, pico.PWM4B, stack2, PICORTOS_STACK_COUNT(stack2));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+#else
+    prio = picoRTOS_get_next_available_priority();
+    picoRTOS_task_init(&task, led0_main, pico.PWM4B, stack1, PICORTOS_STACK_COUNT(stack1));
+    picoRTOS_SMP_add_task(&task, prio, (picoRTOS_mask_t)(1 << 0));  /* LED0: core #0 */
+    prio = picoRTOS_get_next_available_priority();
+    picoRTOS_task_init(&task, led1_main, pico.PWM4B, stack2, PICORTOS_STACK_COUNT(stack2));
+    picoRTOS_SMP_add_task(&task, prio, (picoRTOS_mask_t)(1 << 1));  /* LED1: core #1 */
+#endif
 
     /* SPI & ADC (round-robin) */
     prio = picoRTOS_get_next_available_priority();
@@ -327,10 +341,17 @@ int main(void)
 
     /* I2C (round-robin) */
     prio = picoRTOS_get_next_available_priority();
+#ifndef SUPPORT_FOR_SMP
     picoRTOS_task_init(&task, twi_master_main, pico.I2C0, stack5, PICORTOS_STACK_COUNT(stack5));
     (void)picoRTOS_add_task(&task, prio);
     picoRTOS_task_init(&task, twi_slave_main, pico.I2C1, stack6, PICORTOS_STACK_COUNT(stack6));
     (void)picoRTOS_add_task(&task, prio);
+#else
+    picoRTOS_task_init(&task, twi_master_main, pico.I2C0, stack5, PICORTOS_STACK_COUNT(stack5));
+    picoRTOS_SMP_add_task(&task, prio, (picoRTOS_mask_t)(1 << 0));  /* I2C0: core #0 */
+    picoRTOS_task_init(&task, twi_slave_main, pico.I2C1, stack6, PICORTOS_STACK_COUNT(stack6));
+    picoRTOS_SMP_add_task(&task, prio, (picoRTOS_mask_t)(1 << 1));  /* I2C1: core #1 */
+#endif
 
     /* PWM */
     picoRTOS_task_init(&task, pwm_main, pico.PWM5A, stack7, PICORTOS_STACK_COUNT(stack7));

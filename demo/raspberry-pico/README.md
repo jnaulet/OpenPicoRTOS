@@ -1,4 +1,4 @@
-# picoRTOS Raspberry Pico single core demo
+# picoRTOS Raspberry Pico single core / SMP demo
 
 ## Description
 
@@ -20,3 +20,12 @@ Some wiring is required to perform this standalone test:
   - GP21 to GP7 (SCL)
   - GP27 to GP5 (IPWM)
 
+## How to build
+
+To build for single-core, type:
+
+    # make
+
+To build with support for SMP, type:
+
+    make SMP=1
