@@ -234,6 +234,19 @@ isr_fn_is_null:
 	.type arch_counter, %function
 	.global arch_counter
 arch_counter:
+	/* mtimel */
+	la t0, mtime
+	lw a0, 0 (t0)
+	/* mtimecmpl */
+	la t0, mtimecmp
+	lw a1, 0 (t0)
+	/* compute difference only */
+	bltu a0, a1, .arch_counter_over
+.arch_counter_under:
+	sub a0, a0, a1
+	ret
+.arch_counter_over:
+	sub a0, a1, a0
 	ret
 
 	.bss
