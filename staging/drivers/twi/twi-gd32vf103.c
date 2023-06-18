@@ -90,9 +90,6 @@ int twi_gd32vf103_init(struct twi *ctx, int base, clock_id_t clkid)
     ctx->base = (struct TWI_GD32VF103_I2C*)base;
     ctx->clkid = clkid;
 
-    /* turn on */
-    ctx->base->I2C_CTL0 |= I2C_CTL0_I2CEN;
-
     return 0;
 }
 
@@ -142,6 +139,9 @@ int twi_setup(struct twi *ctx, struct twi_settings *settings)
 
     int res;
 
+    /* disable */
+    ctx->base->I2C_CTL0 &= ~I2C_CTL0_I2CEN;
+
     /* bitrate */
     if (settings->bitrate != 0 &&
         (res = set_bitrate(ctx, settings->bitrate)) < 0)
@@ -154,6 +154,9 @@ int twi_setup(struct twi *ctx, struct twi_settings *settings)
 
     if (ctx->mode == TWI_MODE_SLAVE)
         ctx->base->I2C_SADDR0 = (uint32_t)I2C_SADDR0_ADDRESS7(settings->slave_addr);
+
+    /* enable */
+    ctx->base->I2C_CTL0 |= I2C_CTL0_I2CEN;
 
     ctx->slave_addr = settings->slave_addr;
     return 0;
@@ -173,7 +176,7 @@ int twi_poll(struct twi *ctx)
 
 static int twi_rw_as_master_idle(struct twi *ctx)
 {
-    if ((ctx->base->I2C_STAT1 & I2C_STAT1_I2CBSY) == 0)
+    if ((ctx->base->I2C_STAT1 & I2C_STAT1_I2CBSY) != 0)
         return -EAGAIN;
 
     /* send start condition */
@@ -201,8 +204,16 @@ static int twi_write_as_master_sla(struct twi *ctx)
 
 static int twi_rw_as_master_ack(struct twi *ctx)
 {
-    if ((ctx->base->I2C_STAT0 & I2C_STAT0_ADDSEND) == 0)
+    if ((ctx->base->I2C_STAT0 & I2C_STAT0_ADDSEND) == 0) {
+        /* ack error */
+        if ((ctx->base->I2C_STAT0 & I2C_STAT0_AERR) != 0) {
+            ctx->base->I2C_STAT0 &= ~I2C_STAT0_AERR;
+            ctx->state = TWI_GD32VF103_STATE_IDLE;
+            return -EIO;
+        }
+
         return -EAGAIN;
+    }
 
     /* clear ADDSEND flag */
     /*@i@*/ (void)ctx->base->I2C_STAT1;
