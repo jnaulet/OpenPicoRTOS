@@ -1,39 +1,29 @@
 PICORTOS_DIR := $(abspath ../../..)
+DEVICES := $(shell find $(PICORTOS_DIR)/devices -name "Makefile.in")
 
-CHECK += arch/arm/cm0+
-CHECK += arch/arm/cm3
-CHECK += arch/avr/avrmega
-CHECK += arch/avr/avrxmega3
-CHECK += arch/c2000/c28x
-CHECK += arch/mips32/m51xx
+# recursion...
+-include $(DEVICE)
+
+INCLUDE += -I.
 
 SPLINT := splint
-SPLINTFLAGS := -checks -unixlib -I. -I$(PICORTOS_DIR)
-SPLINTFLAGS += -I$(PICORTOS_DIR)/arch/include
+SPLINTFLAGS := -checks -unixlib
 
 CPPCHECK := cppcheck
 CPPCHECKFLAGS := --enable=all --inline-suppr
-CPPCHECKFLAGS += -DNDEBUG -I. -I$(PICORTOS_DIR)
-CPPCHECKFLAGS += -I$(PICORTOS_DIR)/arch/include
-CPPCHECKFLAGS += --suppress=missingIncludeSystem
+CPPCHECKFLAGS += -DNDEBUG --suppress=missingIncludeSystem
 
-SRC += $(PICORTOS_DIR)/picoRTOS.c
-SRC += $(PICORTOS_DIR)/ipc/picoRTOS_futex.c
-SRC += $(PICORTOS_DIR)/ipc/picoRTOS_mutex.c
-SRC += $(PICORTOS_DIR)/ipc/picoRTOS_cond.c
-SRC += $(PICORTOS_DIR)/ipc/picoRTOS_queue.c
-SRC += test.c
+SRC_C += $(PICORTOS_DIR)/ipc/picoRTOS_futex.c
+SRC_C += $(PICORTOS_DIR)/ipc/picoRTOS_mutex.c
+SRC_C += $(PICORTOS_DIR)/ipc/picoRTOS_cond.c
+SRC_C += $(PICORTOS_DIR)/ipc/picoRTOS_queue.c
+SRC_C += test.c
 
-splint: SA := $(SPLINT)
-splint: SAFLAGS := $(SPLINTFLAGS)
-splint: $(CHECK)
+all:
+	for d in $(DEVICES); do \
+	$(MAKE) check DEVICE=$$d || exit; \
+	done
 
-cppcheck: SA := $(CPPCHECK)
-cppcheck: SAFLAGS := $(CPPCHECKFLAGS)
-cppcheck: $(CHECK)
-
-arch/%:
-	$(SA) $(SAFLAGS) $(SRC) \
-	  -I$(PICORTOS_DIR)/$@ \
-	  -I$(PICORTOS_DIR)/$@/samples \
-	  $(PICORTOS_DIR)/$@/picoRTOS_port.c
+check:
+	$(SPLINT) $(SPLINTFLAGS) $(INCLUDE) $(SRC_C)
+	$(CPPCHECK) $(CPPCHECKFLAGS) $(INCLUDE) $(SRC_C)

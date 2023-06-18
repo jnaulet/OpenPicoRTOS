@@ -3,13 +3,9 @@
 # STATIC ANALYSIS
 DIR=static_analysis
 
-# single core
+# Scheduler
 make -C $DIR/picoRTOS || exit 1
-make -C $DIR/picoRTOS cppcheck || exit 1
-
-# multi-core
 make -C $DIR/picoRTOS-SMP || exit 1
-make -C $DIR/picoRTOS-SMP cppcheck || exit 1
 
 # UNIT TESTS
 DIR=unit_tests
