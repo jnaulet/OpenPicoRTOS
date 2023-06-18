@@ -100,8 +100,8 @@ int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
     if ((res = dma_prepare(ctx, xfer)) < 0)
         return res;
 
-    /* start in circular mode */
-    ctx->ch->DMA_CHxCTL |= (DMA_CHxCTL_CMEN | DMA_CHxCTL_CHEN);
+    /* start in linear mode */
+    ctx->ch->DMA_CHxCTL |= DMA_CHxCTL_CHEN;
     return 0;
 }
 
@@ -119,12 +119,8 @@ int dma_xfer(struct dma *ctx, struct dma_xfer *xfer)
 
 int dma_xfer_done(struct dma *ctx)
 {
-    size_t shift = ctx->channel * (size_t)4;
-    uint32_t mask = (uint32_t)DMA_INTF_FTFIF0 << shift;
-
-    if ((ctx->base->DMA_INTF & mask) == 0)
+    if (ctx->ch->DMA_CHxCNT != 0)
         return -EAGAIN;
 
-    ctx->base->DMA_INTC = (uint32_t)mask;
     return 0;
 }

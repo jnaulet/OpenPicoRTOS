@@ -18,7 +18,7 @@ struct dma {
 int dma_gd32vf103_init(/*@out@*/ struct dma *ctx, int base, size_t channel);
 
 /* Runtime calls:
- * int dma_setup((struct dma *ctx, struct dma_xfer *xfer);
+ * int dma_setup(struct dma *ctx, struct dma_xfer *xfer);
  * int dma_xfer(struct dma *ctx, struct dma_xfer *xfer);
  * int dma_xfer_done(struct dma *ctx);
  */
