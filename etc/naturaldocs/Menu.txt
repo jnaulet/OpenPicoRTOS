@@ -82,6 +82,18 @@ Group: hw-specific  {
       File: Watchdog  (no auto-title, drivers/wd/wd-ti_f28x.c)
       }  # Group: C2000
 
+   Group: GD32VF103  {
+
+      File: Clocks  (no auto-title, drivers/clock/clock-gd32vf103.c)
+      File: Flash  (no auto-title, drivers/flash/flash-gd32vf103.c)
+      File: GPIO  (no auto-title, drivers/gpio/gpio-gd32vf103.c)
+      File: MUX  (no auto-title, drivers/mux/mux-gd32vf103.c)
+      File: PWM  (no auto-title, drivers/pwm/pwm-gd32vf103.c)
+      File: SPI  (no auto-title, drivers/spi/spi-gd32vf103.c)
+      File: UART  (no auto-title, drivers/uart/uart-gd32vf103.c)
+      File: Watchdog  (no auto-title, drivers/wd/wd-gd32vf103_fwdgt.c)
+      }  # Group: GD32VF103
+
    Group: PIC32MX  {
 
       File: ADC  (no auto-title, drivers/adc/adc-pic32mx.c)

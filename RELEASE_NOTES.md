@@ -1,5 +1,22 @@
 # Release notes
 
+## picoRTOS v1.8.2
+### What's new ?
+
+The main change in this release is the support for RISC-V RV32IMAC architectures.
+This has been tested on the GD32VF103 (Bumblebee core) & 2 demos are provided: one for the peripherals
+and one for fun (LCD).
+
+A bunch of drivers has been partially tested & moved out of staging for this device.
+
+A new concept has been added, architecture drivers. This is mostly for interrupt controllers.   
+An example is provided as the support for intc-pic32mx in the mips32/m51xx architecture directory.
+
+Raspberry Pico demos (single-core and SMP) have been merged to avoid too much code duplication.
+
+Tests have been improved, now the static analysis happens on all available devices, not only
+the architectures.
+
 ## picoRTOS v1.8.1
 ### What's new ?
 
