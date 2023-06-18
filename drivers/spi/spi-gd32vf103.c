@@ -66,8 +66,23 @@ int spi_gd32vf103_init(struct spi *ctx, int base, clock_id_t clkid)
     ctx->base = (struct SPI_GD32VF103*)base;
     ctx->clkid = clkid;
 
+    /* dma opt */
+    ctx->state = SPI_GD32VF103_STATE_DMA_START;
+    ctx->fill = NULL;
+    ctx->drain = NULL;
+    ctx->threshold = 0;
+
     /* disable */
     ctx->base->SPI_CTL0 = (uint32_t)0;
+
+    return 0;
+}
+
+int spi_gd32vf103_setup(struct spi *ctx, struct spi_gd32vf103_settings *settings)
+{
+    ctx->threshold = settings->threshold;
+    ctx->fill = settings->fill;
+    ctx->drain = settings->drain;
 
     return 0;
 }
@@ -232,7 +247,78 @@ static int transmit_data(struct spi *ctx, const uint8_t *data)
     return (int)sizeof(uint16_t);
 }
 
-int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
+static int spi_xfer_dma_start(struct spi *ctx, void *rx, const void *tx, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    /* null check */
+    if ( !picoRTOS_assert(ctx->fill != NULL)) return -EIO;
+    if ( !picoRTOS_assert(ctx->drain != NULL)) return -EIO;
+
+    /* fill xfer */
+    struct dma_xfer fill = {
+        (intptr_t)tx,                   /* source address */
+        (intptr_t)&ctx->base->SPI_DATA, /* destination addresss */
+        true,                           /* incr_read */
+        false,                          /* incr_write */
+        ctx->frame_size / (size_t)8,    /* size */
+        n                               /* byte count */
+    };
+
+    /* drain xfer */
+    struct dma_xfer drain = {
+        (intptr_t)&ctx->base->SPI_DATA, /* source addresss */
+        (intptr_t)rx,                   /* destination address */
+        false,                          /* incr_read */
+        true,                           /* incr_write */
+        ctx->frame_size / (size_t)8,    /* size */
+        n                               /* byte count */
+    };
+
+    /* register xfers */
+    (void)dma_setup(ctx->fill, &fill);
+    (void)dma_setup(ctx->drain, &drain);
+
+    /* trigger xfers */
+    ctx->base->SPI_CTL1 |= (SPI_CTL1_DMATEN | SPI_CTL1_DMAREN);
+
+    ctx->state = SPI_GD32VF103_STATE_DMA_WAIT;
+    return -EAGAIN;
+}
+
+static int spi_xfer_dma_wait(struct spi *ctx, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    /* null check */
+    if ( !picoRTOS_assert(ctx->fill != NULL)) return -EIO;
+    if ( !picoRTOS_assert(ctx->drain != NULL)) return -EIO;
+
+    if (dma_xfer_done(ctx->fill) == 0 &&
+        dma_xfer_done(ctx->drain) == 0) {
+        /* end xfers */
+        ctx->base->SPI_CTL1 &= ~(SPI_CTL1_DMATEN | SPI_CTL1_DMAREN);
+        /* back to normal */
+        ctx->state = SPI_GD32VF103_STATE_DMA_START;
+        return (int)n;
+    }
+
+    return -EAGAIN;
+}
+
+static int spi_xfer_dma(struct spi *ctx, void *rx, const void *tx, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+
+    switch (ctx->state) {
+    case SPI_GD32VF103_STATE_DMA_START: return spi_xfer_dma_start(ctx, rx, tx, n);
+    case SPI_GD32VF103_STATE_DMA_WAIT: return spi_xfer_dma_wait(ctx, n);
+    default: break;
+    }
+
+    picoRTOS_break();
+    /*@notreached@*/ return -EIO;
+}
+
+static int spi_xfer_nodma(struct spi *ctx, void *rx, const void *tx, size_t n)
 {
     if (!picoRTOS_assert(n > 0)) return -EINVAL;
 
@@ -274,4 +360,17 @@ int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
         return -EAGAIN;
 
     return (int)recv;
+}
+
+int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+
+    /* DMA */
+    if (ctx->fill != NULL && ctx->drain != NULL &&
+        n >= ctx->threshold)
+        return spi_xfer_dma(ctx, rx, tx, n);
+
+    /* NO DMA */
+    return spi_xfer_nodma(ctx, rx, tx, n);
 }
