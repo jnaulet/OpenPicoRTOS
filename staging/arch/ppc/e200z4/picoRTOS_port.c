@@ -86,7 +86,7 @@ picoRTOS_cycles_t arch_counter(void)
 
 /* CACHE OPS */
 
-#ifdef DEVICE_HAS_SOFTWARE_CACHE_COHERENCY
+/* cppcheck-suppress [unusedFunction,unmatchedSuppression] */
 void arch_invalidate_dcache(void *addr, size_t n)
 {
     if (!picoRTOS_assert_fatal(n > 0)) return;
@@ -100,6 +100,7 @@ void arch_invalidate_dcache(void *addr, size_t n)
     ASM("mbar");
 }
 
+/* cppcheck-suppress [unusedFunction,unmatchedSuppression] */
 void arch_flush_dcache(void *addr, size_t n)
 {
     if (!picoRTOS_assert_fatal(n > 0)) return;
@@ -112,18 +113,3 @@ void arch_flush_dcache(void *addr, size_t n)
 
     ASM("mbar");
 }
-
-#else
-
-void arch_invalidate_dcache(/*@unused@*/ void *addr __attribute__((unused)),
-                            /*@unused@*/ size_t n __attribute__((unused)))
-{
-    ASM("mbar");
-}
-
-void arch_flush_dcache(/*@unused@*/ void *addr __attribute__((unused)),
-                       /*@unused@*/ size_t n __attribute__((unused)))
-{
-    ASM("mbar");
-}
-#endif
