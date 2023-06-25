@@ -132,15 +132,3 @@ picoRTOS_cycles_t arch_counter(void)
     return (picoRTOS_cycles_t)SYSTICK_RVR_VALUE -
            (picoRTOS_cycles_t)*SYSTICK_CVR;
 }
-
-/* CACHES (dummy) */
-
-void arch_invalidate_dcache(/*@unused@*/ void *addr __attribute__((unused)),
-                            /*@unused@*/ size_t n __attribute__((unused)))
-{
-}
-
-void arch_flush_dcache(/*@unused@*/ void *addr __attribute__((unused)),
-                       /*@unused@*/ size_t n __attribute__((unused)))
-{
-}
