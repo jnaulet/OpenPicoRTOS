@@ -1,0 +1,101 @@
+#include "picoRTOS.h"
+#include "picoRTOS_device.h"
+
+#include <stdint.h>
+
+#ifndef CONFIG_DEADLOCK_COUNT
+# error CONFIG_DEADLOCK_COUNT is not defined
+#endif
+
+#define MCTL_KEY          0x5af0
+#define MCTL_INVERTED_KEY 0xa50f
+
+struct CORE_MC_ME {
+    volatile uint32_t GS;
+    volatile uint32_t MCTL;
+    volatile uint32_t ME;
+    volatile uint32_t IS;
+    volatile uint32_t IM;
+    volatile uint32_t IMTS;
+    volatile uint32_t DMTS;
+    uint32_t RESERVED0;
+    volatile uint32_t RESET_MC;
+    uint32_t RESERVED1;
+    volatile uint32_t SAFE_MC;
+    volatile uint32_t DRUN_MC;
+    volatile uint32_t RUN0_MC;
+    volatile uint32_t RUN1_MC;
+    volatile uint32_t RUN2_MC;
+    volatile uint32_t RUN3_MC;
+    uint32_t RESERVED2[2];
+    volatile uint32_t STOP_MC;
+    uint32_t RESERVED3[2];
+    volatile uint32_t STANDBY_MC;
+    uint32_t RESERVED4[2];
+    volatile uint32_t PSn[4];
+    uint32_t RESERVED5[4];
+    volatile uint32_t RUN_PC[8];
+    volatile uint32_t LP_PC[8];
+    volatile uint8_t PCTLn[106];
+    uint16_t RESERVED6[75];
+    volatile uint32_t CS;
+    uint16_t RESERVED7;
+    volatile uint16_t CCTL[3];
+    uint32_t RESERVED8[6];
+    volatile uint32_t CADDR[3];
+};
+
+#define GS_S_MTRANS (1 << 27)
+
+#define MCTL_TARGET_MODE_M  0xfu
+#define MCTL_TARGET_MODE(x) (((x) & MCTL_TARGET_MODE_M) << 24)
+
+#define CCTL_RUN3  (1 << 7)
+#define CCTL_RUN2  (1 << 6)
+#define CCTL_RUN1  (1 << 5)
+#define CCTL_RUN0  (1 << 4)
+#define CCTL_DRUN  (1 << 3)
+#define CCTL_SAFE  (1 << 2)
+#define CCTL_RESET (1 << 0)
+
+#define CADDR_RMC (1 << 0)
+
+static struct CORE_MC_ME *MC_ME = (struct CORE_MC_ME*)ADDR_MC_ME;
+
+/* ASM */
+/*@external@*/ extern void arch_core_start(void);
+
+static void transition_complete_busywait(void)
+{
+    int deadlock = CONFIG_DEADLOCK_COUNT;
+
+    while (deadlock-- != 0)
+        if ((MC_ME->GS & GS_S_MTRANS) == 0)
+            break;
+
+    if (!picoRTOS_assert_fatal(deadlock != -1))
+        return;
+}
+
+void arch_core_run(picoRTOS_core_t core)
+{
+    if (!picoRTOS_assert_fatal(core < (picoRTOS_core_t)CONFIG_SMP_CORES))
+        return;
+
+    uint32_t mctl = MC_ME->MCTL;
+
+    /* zero key, keep target mode */
+    mctl &= MCTL_TARGET_MODE(MCTL_TARGET_MODE_M);
+
+    /* run in all modes & start */
+    MC_ME->CADDR[core] = (uint32_t)arch_core_start | CADDR_RMC;
+    MC_ME->CCTL[core] = (uint16_t)(CCTL_RUN3 | CCTL_RUN2 | CCTL_RUN1 |
+                                   CCTL_RUN0 | CCTL_DRUN | CCTL_SAFE);
+
+    /* trigger start */
+    MC_ME->MCTL = mctl | MCTL_KEY;
+    MC_ME->MCTL = mctl | MCTL_INVERTED_KEY;
+
+    /* wait for transition complete */
+    transition_complete_busywait();
+}

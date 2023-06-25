@@ -6,7 +6,6 @@
 	#include "picoRTOS_device.h"
 	#include "../../lib/ppc/vle/macros.S"
 
-	.equ INTC_SSCIR0, ADDR_INTC + 0x40
 	.equ DECAR, (CONFIG_SYSCLK_HZ / CONFIG_TICK_HZ)
 
 	.macro ARCH_INIT_CORE_STACK

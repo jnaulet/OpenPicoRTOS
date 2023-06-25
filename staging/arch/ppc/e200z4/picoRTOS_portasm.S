@@ -5,8 +5,8 @@
 	#include "picoRTOS_device.h"
 	#include "../../lib/ppc/vle/macros.S"
 
-	.equ INTC_IACKR, ADDR_INTC + 0x20
-	.equ INTC_EOIR, ADDR_INTC + 0x30
+	.extern arch_get_interrupt
+	.extern arch_ack_interrupt
 
 	/* macros */
 
@@ -184,9 +184,7 @@ arch_dcbf:
 ExternalInput_Handler:
 	SAVE_CONTEXT
 	/* isr fn in r4 */
-	e_lis r3, INTC_IACKR@ha
-	ADD_CORE_OFFSET r3
-	e_lwz r3, INTC_IACKR@l(r3)
+	e_bl arch_get_interrupt
 	se_lwz r4, 0 (r3)
 	/* check fn */
 	se_cmp r4, 0
@@ -202,9 +200,7 @@ ExternalInput_Handler:
 	se_blrl
 	mbar
 	/* ack */
-	e_lis r3, INTC_EOIR@ha
-	ADD_CORE_OFFSET r3
-	e_stw r3, INTC_EOIR@l(r3)
+	e_bl arch_ack_interrupt
 	mbar
 	/* epilogue */
 	RESTORE_CONTEXT
