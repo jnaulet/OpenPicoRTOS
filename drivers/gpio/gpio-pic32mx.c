@@ -27,19 +27,26 @@ int gpio_pic32mx_init(struct gpio *ctx, int base, size_t pin)
 
     ctx->base = (struct GPIO_PIC32MX*)base;
     ctx->mask = (uint32_t)(1 << pin);
+    ctx->invert = false;
 
+    return 0;
+}
+
+int gpio_setup(struct gpio *ctx, struct gpio_settings *settings)
+{
+    ctx->invert = settings->invert;
     return 0;
 }
 
 void gpio_write(struct gpio *ctx, bool value)
 {
-    if (value) ctx->base->LAT.SET = ctx->mask;
+    if (value ^ ctx->invert) ctx->base->LAT.SET = ctx->mask;
     else ctx->base->LAT.CLR = ctx->mask;
 }
 
 bool gpio_read(struct gpio *ctx)
 {
-    return (ctx->base->PORT.REG & ctx->mask) != 0;
+    return ((ctx->base->PORT.REG & ctx->mask) != 0) ^ ctx->invert;
 }
 
 void gpio_toggle(struct gpio *ctx)
