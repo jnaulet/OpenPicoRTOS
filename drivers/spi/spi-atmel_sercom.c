@@ -189,9 +189,10 @@ static int set_frame_size(struct spi *ctx, size_t frame_size)
     if (!picoRTOS_assert(frame_size >= (size_t)SPI_ATMEL_SERCOM_FRAME_SIZE_MIN)) return -EINVAL;
     if (!picoRTOS_assert(frame_size <= (size_t)SPI_ATMEL_SERCOM_FRAME_SIZE_MAX)) return -EINVAL;
 
-    if (frame_size <= (size_t)8)
+    if (frame_size <= (size_t)8) {
         ctx->base->CTRLC &= ~CTRLC_DATA32B;
-    else{
+        ctx->frame_size = (size_t)8;
+    }else{
         size_t len = ((frame_size - 1) >> 3) + 1;
         ctx->base->LENGTH = (uint16_t)(LENGTH_LENEN | LENGTH_LEN(len));
         ctx->base->CTRLC |= CTRLC_DATA32B;
@@ -240,12 +241,13 @@ static int write_data(struct spi *ctx, const uint8_t *data)
         return (int)sizeof(uint8_t);
     }
 
+    /* byte order: 3 - 2 - 1 - 0 */
     if (ctx->frame_size <= (size_t)16) {
-        ctx->base->DATA = (uint32_t)*(uint16_t*)data;
+        /*@i@*/ ctx->base->DATA = (uint32_t)__builtin_bswap16(*(uint16_t*)data);
         return (int)sizeof(uint16_t);
     }
 
-    ctx->base->DATA = *(uint32_t*)data;
+    /*@i@*/ ctx->base->DATA = __builtin_bswap32(*(uint32_t*)data);
     return (int)sizeof(uint32_t);
 }
 
@@ -260,11 +262,11 @@ static int read_data(struct spi *ctx, uint8_t *data)
     }
 
     if (ctx->frame_size <= (size_t)16) {
-        *data = (uint16_t)ctx->base->DATA;
+        /*@i@*/ *(uint16_t*)data = __builtin_bswap16((uint16_t)ctx->base->DATA);
         return (int)sizeof(uint16_t);
     }
 
-    *(uint32_t*)data = ctx->base->DATA;
+    /*@i@*/ *(uint32_t*)data = __builtin_bswap32(ctx->base->DATA);
     return (int)sizeof(uint32_t);
 }
 
