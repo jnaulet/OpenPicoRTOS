@@ -379,7 +379,7 @@ void picoRTOS_start(void)
     }
 
     /* start scheduler on core #0 */
-    arch_flush_dcache(&picoRTOS, sizeof(picoRTOS));
+    picoRTOS_flush_dcache(&picoRTOS, sizeof(picoRTOS));
     arch_start_first_task(TASK_BY_PID(TASK_IDLE_PID).sp);
 }
 
@@ -509,7 +509,7 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, picoRTOS_syscall_t sysc
     if (!picoRTOS_assert_fatal(syscall < PICORTOS_SYSCALL_COUNT)) return NULL;
 
     arch_spin_lock();
-    arch_invalidate_dcache(&picoRTOS, sizeof(picoRTOS));
+    picoRTOS_invalidate_dcache(&picoRTOS, sizeof(picoRTOS));
 
     struct picoRTOS_task_core *task = &TASK_CURRENT();
 
@@ -518,7 +518,7 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, picoRTOS_syscall_t sysc
 
     /* store current sp & flush */
     task->sp = sp;
-    arch_flush_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);
+    picoRTOS_flush_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);
 
     switch (syscall) {
     case PICORTOS_SYSCALL_SLEEP: syscall_sleep(task, (picoRTOS_tick_t)priv); break;
@@ -528,8 +528,8 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, picoRTOS_syscall_t sysc
 
     task = syscall_switch_context(task);
 
-    arch_flush_dcache(&picoRTOS, sizeof(picoRTOS));
-    arch_invalidate_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);
+    picoRTOS_flush_dcache(&picoRTOS, sizeof(picoRTOS));
+    picoRTOS_invalidate_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);
     arch_spin_unlock();
 
     return task->sp;
@@ -595,7 +595,7 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
     picoRTOS_core_t core = arch_core();
 
     arch_spin_lock();
-    arch_invalidate_dcache(&picoRTOS, sizeof(picoRTOS));
+    picoRTOS_invalidate_dcache(&picoRTOS, sizeof(picoRTOS));
 
     struct picoRTOS_task_core *task = &TASK_CURRENT_CORE(core);
 
@@ -604,7 +604,7 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
 
     /* store current sp & flush */
     task->sp = sp;
-    arch_flush_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);
+    picoRTOS_flush_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);
 
     /* mask task as immediately ready */
     task->state = PICORTOS_TASK_STATE_READY;
@@ -625,8 +625,8 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
     task->state = PICORTOS_TASK_STATE_BUSY;
     task_core_stat_begin(task);
 
-    arch_flush_dcache(&picoRTOS, sizeof(picoRTOS));
-    arch_invalidate_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);
+    picoRTOS_flush_dcache(&picoRTOS, sizeof(picoRTOS));
+    picoRTOS_invalidate_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);
     arch_spin_unlock();
 
     return task->sp;
