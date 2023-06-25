@@ -74,6 +74,7 @@ picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr)
 
 /* CACHE */
 
+/* cppcheck-suppress [unusedFunction,unmatchedSuppression] */
 void arch_invalidate_dcache(void *addr, size_t n)
 {
     if (!picoRTOS_assert_fatal(n > 0)) return;
@@ -87,6 +88,7 @@ void arch_invalidate_dcache(void *addr, size_t n)
     ASM("ehb");
 }
 
+/* cppcheck-suppress [unusedFunction,unmatchedSuppression] */
 void arch_flush_dcache(void *addr, size_t n)
 {
     if (!picoRTOS_assert_fatal(n > 0)) return;
