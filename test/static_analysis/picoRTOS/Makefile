@@ -12,7 +12,7 @@ SPLINT := splint
 SPLINTFLAGS := -checks -unixlib
 
 CPPCHECK := cppcheck
-CPPCHECKFLAGS := --enable=all --inline-suppr
+CPPCHECKFLAGS := --enable=all --inline-suppr --error-exitcode=1
 CPPCHECKFLAGS += -DNDEBUG --suppress=missingIncludeSystem
 
 SRC_C += $(PICORTOS_DIR)/ipc/picoRTOS_futex.c
