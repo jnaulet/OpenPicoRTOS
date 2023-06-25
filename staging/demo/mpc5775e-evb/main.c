@@ -1,4 +1,9 @@
-#include "picoRTOS-SMP.h"
+#ifndef SUPPORT_FOR_SMP
+# include "picoRTOS.h"
+#else
+# include "picoRTOS-SMP.h"
+#endif
+
 #include "mpc5775e-evb.h"
 
 #include "ipc/picoRTOS_mutex.h"
@@ -138,10 +143,17 @@ int main(void)
     picoRTOS_task_init(&task, tick_main, &evb.TICK, stack0, (size_t)CONFIG_DEFAULT_STACK_COUNT);
     picoRTOS_add_task(&task, (picoRTOS_priority_t)TASK_TICK_PRIO);
 
+#ifndef SUPPORT_FOR_SMP
+    picoRTOS_task_init(&task, led0_main, evb.LED, stack1, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_add_task(&task, (picoRTOS_priority_t)TASK_LED0_PRIO);
+    picoRTOS_task_init(&task, led1_main, evb.LED, stack2, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_add_task(&task, (picoRTOS_priority_t)TASK_LED1_PRIO);
+#else
     picoRTOS_task_init(&task, led0_main, evb.LED, stack1, (size_t)CONFIG_DEFAULT_STACK_COUNT);
     picoRTOS_SMP_add_task(&task, (picoRTOS_priority_t)TASK_LED0_PRIO, (picoRTOS_mask_t)0x1);
     picoRTOS_task_init(&task, led1_main, evb.LED, stack2, (size_t)CONFIG_DEFAULT_STACK_COUNT);
     picoRTOS_SMP_add_task(&task, (picoRTOS_priority_t)TASK_LED1_PRIO, (picoRTOS_mask_t)0x2);
+#endif
 
     picoRTOS_task_init(&task, adc_main, &evb.ADC, stack3, (size_t)CONFIG_DEFAULT_STACK_COUNT);
     picoRTOS_add_task(&task, (picoRTOS_priority_t)TASK_ADC_PRIO);

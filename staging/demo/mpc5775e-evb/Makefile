@@ -1,6 +1,11 @@
+ifneq ($(SMP),)
+POSTFIX := -SMP
+SUPPORT_FOR_SMP := -DSUPPORT_FOR_SMP
+endif
+
 # MPC5775E SMP test
-ELF_RAM := mpc5775e-SMP_ram.elf
-ELF_FLASH := mpc5775e-SMP_flash.elf
+ELF_RAM := mpc5775e-evb$(POSTFIX)_ram.elf
+ELF_FLASH := mpc5775e-evb$(POSTFIX)_flash.elf
 
 CC := gcc
 CROSS := powerpc-eabivle-
@@ -8,7 +13,7 @@ BUILD := build
 
 # picoRTOS
 PICORTOS_DIR := $(abspath ../../..)
--include $(PICORTOS_DIR)/staging/devices/nxp/mpc5775e/Makefile-SMP.in
+-include $(PICORTOS_DIR)/staging/devices/nxp/mpc5775e/Makefile$(POSTFIX).in
 
 # static anaylzers
 SPLINTFLAGS := -checks +unixlib
@@ -22,7 +27,7 @@ INCLUDE += -I.
 CFLAGS += -Wall -Wextra -std=c99 $(INCLUDE) -O0 -g3 $(DEFINE)
 CFLAGS += -fmessage-length=0 -msdata=eabi -mlra -funsigned-bitfields
 CFLAGS += -ffunction-sections -fdata-sections -fno-common -mcpu=e200z7
-CFLAGS += -mbig -mvle -mregnames -mhard-float
+CFLAGS += -mbig -mvle -mregnames -mhard-float $(SUPPORT_FOR_SMP)
 
 SFLAGS += -x assembler-with-cpp -g3 $(DEFINE) $(INCLUDE)
 SFLAGS += -g3 -mcpu=e200z7 -mbig -mvle -mregnames
