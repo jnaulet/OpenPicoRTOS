@@ -109,10 +109,34 @@ int spi_atmel_sercom_init(struct spi *ctx, int base, clock_id_t clkid)
     ctx->clkid = clkid;
     ctx->balance = 0;
     ctx->frame_size = 0;
+    /* dma opt */
+    ctx->state = SPI_ATMEL_SERCOM_STATE_DMA_START;
+    ctx->fill = NULL;
+    ctx->drain = NULL;
+    ctx->threshold = (size_t)0;
 
     ctx->base->CTRLB |= (CTRLB_RXEN | CTRLB_MSSEN | CTRLB_PLOADEN);
     if ((res = sync_busywait(ctx, (uint32_t)SYNCBUSY_CTRLB)) < 0)
         return res;
+
+    return 0;
+}
+
+/* Function: spi_atmel_sercom_setup
+ * Configures a SERCOM SPI
+ *
+ * Parameters:
+ *  ctx - The SPI to init
+ *  settings - The settings to apply
+ *
+ * Returns:
+ * Always 0
+ */
+int spi_atmel_sercom_setup(struct spi *ctx, struct spi_atmel_sercom_settings *settings)
+{
+    ctx->fill = settings->fill;
+    ctx->drain = settings->drain;
+    ctx->threshold = settings->threshold;
 
     return 0;
 }
@@ -270,7 +294,76 @@ static int read_data(struct spi *ctx, uint8_t *data)
     return (int)sizeof(uint32_t);
 }
 
-int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
+static int spi_xfer_dma_start(struct spi *ctx, void *rx, const void *tx, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    /* null check */
+    if (!picoRTOS_assert(ctx->fill != NULL)) return -EIO;
+    if (!picoRTOS_assert(ctx->drain != NULL)) return -EIO;
+
+    int res;
+
+    /* fill xfer */
+    struct dma_xfer fill = {
+        (intptr_t)tx,                   /* source address */
+        (intptr_t)&ctx->base->DATA,     /* destination addresss */
+        true,                           /* incr_read */
+        false,                          /* incr_write */
+        ctx->frame_size / (size_t)8,    /* size */
+        n                               /* byte count */
+    };
+
+    /* drain xfer */
+    struct dma_xfer drain = {
+        (intptr_t)&ctx->base->DATA,     /* source address */
+        (intptr_t)rx,                   /* destination address */
+        false,                          /* incr_read */
+        true,                           /* incr_write */
+        ctx->frame_size / (size_t)8,    /* size */
+        n                               /* byte count */
+    };
+
+    /* register xfers */
+    if ((res = dma_setup(ctx->drain, &drain)) < 0 ||
+        (res = dma_setup(ctx->fill, &fill)) < 0)
+        return res;
+
+    ctx->state = SPI_ATMEL_SERCOM_STATE_DMA_WAIT;
+    return -EAGAIN;
+}
+
+static int spi_xfer_dma_wait(struct spi *ctx, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    /* null check */
+    if (!picoRTOS_assert(ctx->fill != NULL)) return -EIO;
+    if (!picoRTOS_assert(ctx->drain != NULL)) return -EIO;
+
+    if (dma_xfer_done(ctx->fill) == 0 &&
+        dma_xfer_done(ctx->drain) == 0) {
+        /* back to normal */
+        ctx->state = SPI_ATMEL_SERCOM_STATE_DMA_START;
+        return (int)n;
+    }
+
+    return -EAGAIN;
+}
+
+static int spi_xfer_dma(struct spi *ctx, void *rx, const void *tx, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+
+    switch (ctx->state) {
+    case SPI_ATMEL_SERCOM_STATE_DMA_START: return spi_xfer_dma_start(ctx, rx, tx, n);
+    case SPI_ATMEL_SERCOM_STATE_DMA_WAIT: return spi_xfer_dma_wait(ctx, n);
+    default: break;
+    }
+
+    picoRTOS_break();
+    /*@notreached@*/ return -EIO;
+}
+
+static int spi_xfer_nodma(struct spi *ctx, void *rx, const void *tx, size_t n)
 {
     if (!picoRTOS_assert(n > 0)) return -EINVAL;
 
@@ -311,4 +404,17 @@ int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
         return -EAGAIN;
 
     return (int)recv;
+}
+
+int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+
+    /* DMA */
+    if (ctx->fill != NULL && ctx->drain != NULL &&
+        n >= ctx->threshold)
+        return spi_xfer_dma(ctx, rx, tx, n);
+
+    /* NO DMA */
+    return spi_xfer_nodma(ctx, rx, tx, n);
 }
