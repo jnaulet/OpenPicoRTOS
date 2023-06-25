@@ -33,19 +33,26 @@ int gpio_same5x_init(struct gpio *ctx, int base, size_t pin)
 
     ctx->base = (struct GPIO_SAME5X*)base;
     ctx->mask = (uint32_t)1 << pin;
+    ctx->invert = false;
 
+    return 0;
+}
+
+int gpio_setup(struct gpio *ctx, struct gpio_settings *settings)
+{
+    ctx->invert = settings->invert;
     return 0;
 }
 
 void gpio_write(struct gpio *ctx, bool value)
 {
-    if (value) ctx->base->OUTSET = ctx->mask;
+    if (value ^ ctx->invert) ctx->base->OUTSET = ctx->mask;
     else ctx->base->OUTCLR = ctx->mask;
 }
 
 bool gpio_read(struct gpio *ctx)
 {
-    return (ctx->base->IN & ctx->mask) != 0;
+    return ((ctx->base->IN & ctx->mask) != 0) ^ ctx->invert;
 }
 
 void gpio_toggle(struct gpio *ctx)
