@@ -15,11 +15,6 @@ void arch_init_intc(void)
     /* set multi-vector mode */
     *INTC_INTCON |= (1 << 12);
 
-    /* ack timer interrupt, this is only done to prevent cppcheck
-     * from complaining these functions are never called. Find a better fix */
-    (void)arch_get_interrupt();
-    arch_ack_interrupt(0);
-
     /* enable interrupts */
     INTC_IFSn[0] &= ~0x1;
     INTC_IECn[0] |= 0x1;
@@ -72,6 +67,13 @@ void arch_disable_interrupt(picoRTOS_irq_t irq)
     INTC_IECn[IEC_index << 2] &= ~(1 << IEC_bit);
 }
 
+/* Beware:
+ * These functions are called from the assembly only,
+ * we need to setup the static analysis accordingly
+ */
+
+/*@external@*/
+/* cppcheck-suppress [unusedFunction,unmatchedSuppression] */
 void arch_ack_interrupt(picoRTOS_irq_t irq)
 {
     if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT)) return;
@@ -83,6 +85,8 @@ void arch_ack_interrupt(picoRTOS_irq_t irq)
     INTC_IFSn[IFS_index << 2] &= ~(1 << IFS_bit);
 }
 
+/*@external@*/
+/* cppcheck-suppress [unusedFunction,unmatchedSuppression] */
 picoRTOS_irq_t arch_get_interrupt(void)
 {
     return (picoRTOS_irq_t)(0xffu & *INTC_INTSTAT);
