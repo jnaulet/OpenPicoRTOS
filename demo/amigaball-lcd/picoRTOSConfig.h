@@ -1,15 +1,18 @@
 #ifndef PICORTOSCONFIG_H
 #define PICORTOSCONFIG_H
 
-/* CLOCKS */
-#define CONFIG_SYSCLK_HZ        (108000000 / 4) /* According to clock tree */
-#define CONFIG_TICK_HZ          1000
+#ifndef CONFIG_SYSCLK_HZ
+# error CONFIG_SYSCLK_HZ is undefined
+#endif
+
+#define CONFIG_TICK_HZ 10000
 
 /* TASKS */
-#define CONFIG_TASK_COUNT 2
+#define CONFIG_TASK_COUNT 3
 
 /* STACK */
 #define CONFIG_DEFAULT_STACK_COUNT 256
+#define CONFIG_SHORT_STACK_COUNT   128
 
 /* DEADLOCK */
 #define CONFIG_DEADLOCK_COUNT     CONFIG_TICK_HZ

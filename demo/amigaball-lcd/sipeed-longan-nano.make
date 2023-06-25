@@ -1,10 +1,10 @@
 # Longan Nano eval board
-# ELF_RAM := sipeed-longan-nano-lcd_ram.elf
 ELF_FLASH := sipeed-longan-nano-lcd_rom.elf
 
 CC := gcc
+OBJCOPY := objcopy
 CROSS := riscv64-unknown-elf-
-BUILD := build
+BUILD := build/sipeed-longan-nano
 
 # picoRTOS
 PICORTOS_DIR := $(abspath ../..)
@@ -17,7 +17,11 @@ CPPCHECKFLAGS += --suppress=missingIncludeSystem
 CPPCHECKFLAGS += --suppress=unusedFunction
 CPPCHECKFLAGS += --suppress=unusedStructMember
 
-INCLUDE += -I.
+INCLUDE += -I. -Iboard
+
+# config
+DEFINE += -DCONFIG_SYSCLK_HZ=27000000
+DEFINE += -DLCD_FPS=25
 
 CFLAGS += -Wall -Wextra -std=c99 $(INCLUDE) -O3 -g3 $(DEFINE)
 CFLAGS += -ffreestanding -fmessage-length=0
@@ -39,15 +43,17 @@ INCLUDE += -I$(PICORTOS_DIR)/drivers/dma
 INCLUDE += -I$(PICORTOS_DIR)/drivers/gpio
 INCLUDE += -I$(PICORTOS_DIR)/drivers/mux
 INCLUDE += -I$(PICORTOS_DIR)/drivers/spi
+INCLUDE += -I$(PICORTOS_DIR)/drivers/wd
 
 SRC_C += $(PICORTOS_DIR)/drivers/clock/clock-gd32vf103.c
 SRC_C += $(PICORTOS_DIR)/drivers/dma/dma-gd32vf103.c
 SRC_C += $(PICORTOS_DIR)/drivers/gpio/gpio-gd32vf103.c
 SRC_C += $(PICORTOS_DIR)/drivers/mux/mux-gd32vf103.c
 SRC_C += $(PICORTOS_DIR)/drivers/spi/spi-gd32vf103.c
+SRC_C += $(PICORTOS_DIR)/drivers/wd/wd-gd32vf103_fwdgt.c
 
 # demo
-SRC_C += sipeed-longan-nano.c
+SRC_C += board/sipeed-longan-nano.c
 SRC_C += amigaball.c
 SRC_C += lcd.c
 SRC_C += main.c
@@ -73,6 +79,10 @@ $(BUILD)/%.o: %.S
 	-mkdir -p $(@D)
 	$(CROSS)$(CC) $(SFLAGS) -c $< -o $@
 
+upload:
+	$(CROSS)$(OBJCOPY) -O binary $(ELF_FLASH) $(ELF_FLASH).bin
+	dfu-util -d 28e9:0189 -a 0 -D $(ELF_FLASH).bin
+
 splint:
 	splint $(SPLINTFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
 
@@ -81,6 +91,6 @@ cppcheck:
 
 clean:
 	-rm -rf $(BUILD)
-	-rm -f $(ELF_RAM) $(ELF_FLASH)
+	-rm -f $(ELF_RAM) $(ELF_FLASH) *.bin *.map
 
 .PHONY: clean splint
