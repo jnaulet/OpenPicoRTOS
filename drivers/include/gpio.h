@@ -6,6 +6,22 @@
 
 struct gpio;
 
+struct gpio_settings {
+    bool invert;
+};
+
+/* Function: gpio_setup
+ * Configures a gpio
+ *
+ * Parameters:
+ *  gpio - A gpio instance
+ *  settings - The settings to apply
+ *
+ * Returns:
+ * Always 0
+ */
+int gpio_setup(struct gpio *ctx, struct gpio_settings *settings);
+
 /* Function: gpio_write
  * Sets a gpio to a value
  *
