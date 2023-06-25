@@ -1,5 +1,6 @@
 # Device configuration file for NXP MPC5748G
 ARCH_DIR := $(PICORTOS_DIR)/staging/arch/ppc/e200z4
+DRIVERS_DIR := $(PICORTOS_DIR)/staging/arch/ppc/drivers
 DEVICE_DIR := $(PICORTOS_DIR)/staging/devices/nxp/mpc5748g
 
 DEFINE := -D__PPC_EABI__ -DCPU_MPC5748G
@@ -10,5 +11,8 @@ INCLUDE += -I$(DEVICE_DIR) -I$(ARCH_DIR)
 SRC_C := $(PICORTOS_DIR)/picoRTOS.c
 SRC_C += $(ARCH_DIR)/picoRTOS_port.c
 
-SRC_S := $(DEVICE_DIR)/startup.s
+SRC_S := $(DEVICE_DIR)/startup.S
 SRC_S += $(ARCH_DIR)/picoRTOS_portasm.S
+
+# drivers
+SRC_C += $(DRIVERS_DIR)/intc-siul2.c
