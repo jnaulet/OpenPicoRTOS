@@ -1,0 +1,77 @@
+#ifndef DMA_RP2040_H
+#define DMA_RP2040_H
+
+#include "dma.h"
+
+struct DMA_RP2040;
+struct DMA_RP2040_CH;
+
+#define DMA_RP2040_CHANNEL_COUNT 12
+
+typedef enum {
+    DMA_RP2040_TREQ_SEL_DREQ_PIO0_TX0   = 0,
+    DMA_RP2040_TREQ_SEL_DREQ_PIO0_TX1   = 1,
+    DMA_RP2040_TREQ_SEL_DREQ_PIO0_TX2   = 2,
+    DMA_RP2040_TREQ_SEL_DREQ_PIO0_TX3   = 3,
+    DMA_RP2040_TREQ_SEL_DREQ_PIO0_RX0   = 4,
+    DMA_RP2040_TREQ_SEL_DREQ_PIO0_RX1   = 5,
+    DMA_RP2040_TREQ_SEL_DREQ_PIO0_RX2   = 6,
+    DMA_RP2040_TREQ_SEL_DREQ_PIO0_RX3   = 7,
+    DMA_RP2040_TREQ_SEL_DREQ_PIO1_TX0   = 8,
+    DMA_RP2040_TREQ_SEL_DREQ_PIO1_TX1   = 9,
+    DMA_RP2040_TREQ_SEL_DREQ_PIO1_TX2   = 10,
+    DMA_RP2040_TREQ_SEL_DREQ_PIO1_TX3   = 11,
+    DMA_RP2040_TREQ_SEL_DREQ_PIO1_RX0   = 12,
+    DMA_RP2040_TREQ_SEL_DREQ_PIO1_RX1   = 13,
+    DMA_RP2040_TREQ_SEL_DREQ_PIO1_RX2   = 14,
+    DMA_RP2040_TREQ_SEL_DREQ_PIO1_RX3   = 15,
+    DMA_RP2040_TREQ_SEL_DREQ_SPI0_TX    = 16,
+    DMA_RP2040_TREQ_SEL_DREQ_SPI0_RX    = 17,
+    DMA_RP2040_TREQ_SEL_DREQ_SPI1_TX    = 18,
+    DMA_RP2040_TREQ_SEL_DREQ_SPI1_RX    = 19,
+    DMA_RP2040_TREQ_SEL_DREQ_UART0_TX   = 20,
+    DMA_RP2040_TREQ_SEL_DREQ_UART0_RX   = 21,
+    DMA_RP2040_TREQ_SEL_DREQ_UART1_TX   = 22,
+    DMA_RP2040_TREQ_SEL_DREQ_UART1_RX   = 23,
+    DMA_RP2040_TREQ_SEL_DREQ_PWM_WRAP0  = 24,
+    DMA_RP2040_TREQ_SEL_DREQ_PWM_WRAP1  = 25,
+    DMA_RP2040_TREQ_SEL_DREQ_PWM_WRAP2  = 26,
+    DMA_RP2040_TREQ_SEL_DREQ_PWM_WRAP3  = 27,
+    DMA_RP2040_TREQ_SEL_DREQ_PWM_WRAP4  = 28,
+    DMA_RP2040_TREQ_SEL_DREQ_PWM_WRAP5  = 29,
+    DMA_RP2040_TREQ_SEL_DREQ_PWM_WRAP6  = 30,
+    DMA_RP2040_TREQ_SEL_DREQ_PWM_WRAP7  = 31,
+    DMA_RP2040_TREQ_SEL_DREQ_I2C0_TX    = 32,
+    DMA_RP2040_TREQ_SEL_DREQ_I2C0_RX    = 33,
+    DMA_RP2040_TREQ_SEL_DREQ_I2C1_TX    = 34,
+    DMA_RP2040_TREQ_SEL_DREQ_I2C1_RX    = 35,
+    DMA_RP2040_TREQ_SEL_DREQ_ADC        = 36,
+    DMA_RP2040_TREQ_SEL_DREQ_XIP_STREAM = 37,
+    DMA_RP2040_TREQ_SEL_DREQ_XIP_SSITX  = 38,
+    DMA_RP2040_TREQ_SEL_DREQ_XIP_SSIRX  = 39,
+    DMA_RP2040_TREQ_SEL_TIMER0          = 0x3b,
+    DMA_RP2040_TREQ_SEL_TIMER1          = 0x3c,
+    DMA_RP2040_TREQ_SEL_TIMER2          = 0x3d,
+    DMA_RP2040_TREQ_SEL_TIMER3          = 0x3e,
+    DMA_RP2040_TREQ_SEL_PERMANENT_REQ   = 0x3f,
+    /* To be continued */
+    DMA_RP2040_TREQ_SEL_COUNT
+} dma_rp2040_treq_sel_t;
+
+struct dma {
+    /*@temp@*/ struct DMA_RP2040 *base;
+    /*@temp@*/ struct DMA_RP2040_CH *ch;
+    dma_rp2040_treq_sel_t treq_sel;
+    uint32_t CTRL_TRIG;
+};
+
+int dma_r2040_init(/*@out@*/ struct dma *ctx, int base, size_t channel,
+                   dma_rp2040_treq_sel_t treq_sel);
+
+/* Runtime calls:
+ * int dma_setup((struct dma *ctx, struct dma_xfer *xfer);
+ * int dma_xfer(struct dma *ctx, struct dma_xfer *xfer);
+ * int dma_xfer_done(struct dma *ctx);
+ */
+
+#endif

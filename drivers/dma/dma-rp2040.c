@@ -45,6 +45,8 @@ struct DMA_RP2040 {
 };
 
 #define CTRL_TRIG_BUSY         (1 << 24)
+#define CTRL_TRIG_TREQ_SEL_M   0x3fu
+#define CTRL_TRIG_TREQ_SEL(x)  (((x) & CTRL_TRIG_TREQ_SEL_M) << 15)
 #define CTRL_TRIG_CHAIN_TO_M   0xfu
 #define CTRL_TRIG_CHAIN_TO(x)  (((x) & CTRL_TRIG_CHAIN_TO_M) << 11)
 #define CTRL_TRIG_INCR_WRITE   (1 << 5)
@@ -60,19 +62,29 @@ struct DMA_RP2040 {
  *  ctx - The DMA channel to init
  *  base - The DMA block base address
  *  channel - The DMA channel number
+ *  treq_sel - The TREQ_SEL / DREQ associated with this channel
  *
  * Returns:
  * 0 if success, -errno otherwise
  */
-int dma_r2040_init(struct dma *ctx, int base, size_t channel)
+int dma_r2040_init(struct dma *ctx, int base, size_t channel,
+                   dma_rp2040_treq_sel_t treq_sel)
 {
     if (!picoRTOS_assert(channel < (size_t)DMA_RP2040_CHANNEL_COUNT)) return -EINVAL;
+    if (!picoRTOS_assert(treq_sel < DMA_RP2040_TREQ_SEL_COUNT)) return -EINVAL;
 
     ctx->base = (struct DMA_RP2040*)base;
     ctx->ch = &ctx->base->CH[channel];
+    ctx->treq_sel = treq_sel;
+    ctx->CTRL_TRIG = 0;
 
-    /* enable channel */
-    ctx->ch->CTRL_TRIG |= CTRL_TRIG_EN;
+    /* disable channel */
+    ctx->ch->CTRL_TRIG &= ~CTRL_TRIG_EN;
+
+    /* data req */
+    ctx->ch->CTRL_TRIG &= ~CTRL_TRIG_TREQ_SEL(CTRL_TRIG_TREQ_SEL_M);
+    ctx->ch->CTRL_TRIG |= CTRL_TRIG_TREQ_SEL(treq_sel);
+
     /* disable chain to */
     ctx->ch->CTRL_TRIG &= ~CTRL_TRIG_CHAIN_TO(CTRL_TRIG_CHAIN_TO_M);
     ctx->ch->CTRL_TRIG |= CTRL_TRIG_CHAIN_TO(channel);
@@ -88,20 +100,22 @@ int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
     if (!picoRTOS_assert(xfer->size != (size_t)3)) return -EINVAL;
     if (!picoRTOS_assert(xfer->size < (size_t)5)) return -EINVAL;
 
-    uint32_t CTRL_TRIG = (uint32_t)0;
-
     ctx->ch->READ_ADDR = (uint32_t)xfer->saddr;
     ctx->ch->WRITE_ADDR = (uint32_t)xfer->daddr;
     ctx->ch->TRANS_COUNT = (uint32_t)(xfer->byte_count / xfer->size);
 
-    if (xfer->incr_read) CTRL_TRIG |= CTRL_TRIG_INCR_READ;
-    if (xfer->incr_write) CTRL_TRIG |= CTRL_TRIG_INCR_WRITE;
+    if (xfer->incr_read) ctx->ch->CTRL_TRIG |= CTRL_TRIG_INCR_READ;
+    else ctx->ch->CTRL_TRIG &= ~CTRL_TRIG_INCR_READ;
+
+    if (xfer->incr_write) ctx->ch->CTRL_TRIG |= CTRL_TRIG_INCR_WRITE;
+    else ctx->ch->CTRL_TRIG &= ~CTRL_TRIG_INCR_WRITE;
 
     /* xfer size, default to byte */
-    if (xfer->size == (size_t)2) CTRL_TRIG |= CTRL_TRIG_DATA_SIZE(0x1);
-    if (xfer->size == (size_t)4) CTRL_TRIG |= CTRL_TRIG_DATA_SIZE(0x2);
+    ctx->ch->CTRL_TRIG &= ~CTRL_TRIG_DATA_SIZE(CTRL_TRIG_DATA_SIZE_M);
+    if (xfer->size == (size_t)2) ctx->ch->CTRL_TRIG |= CTRL_TRIG_DATA_SIZE(0x1);
+    if (xfer->size == (size_t)4) ctx->ch->CTRL_TRIG |= CTRL_TRIG_DATA_SIZE(0x2);
 
-    ctx->ch->CTRL_TRIG = CTRL_TRIG;
+    ctx->ch->CTRL_TRIG |= CTRL_TRIG_EN;
     return 0;
 }
 
@@ -116,7 +130,8 @@ int dma_xfer(struct dma *ctx, struct dma_xfer *xfer)
     if ((res = dma_setup(ctx, xfer)) < 0)
         return res;
 
-    /* trigger ? */
+    /* trig permanently */
+    ctx->ch->CTRL_TRIG |= CTRL_TRIG_TREQ_SEL(0x3f);
 
     return 0;
 }
@@ -126,5 +141,7 @@ int dma_xfer_done(struct dma *ctx)
     if ((ctx->ch->CTRL_TRIG & CTRL_TRIG_BUSY) != 0)
         return -EAGAIN;
 
+    /* disable channel */
+    ctx->ch->CTRL_TRIG &= ~CTRL_TRIG_EN;
     return 0;
 }
