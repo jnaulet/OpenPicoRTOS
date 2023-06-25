@@ -26,15 +26,22 @@ int gpio_avr_init(struct gpio *ctx, int base, size_t pin)
 
     ctx->base = (struct GPIO_AVR*)base;
     ctx->pin = pin;
+    ctx->invert = false;
 
     return 0;
 }
 
 /* HAL */
 
+int gpio_setup(struct gpio *ctx, struct gpio_settings *settings)
+{
+    ctx->invert = settings->invert;
+    return 0;
+}
+
 void gpio_write(struct gpio *ctx, bool value)
 {
-    if (value) ctx->base->PORT |= (1 << ctx->pin);
+    if (value ^ ctx->invert) ctx->base->PORT |= (1 << ctx->pin);
     else ctx->base->PORT &= ~(1 << ctx->pin);
 }
 
@@ -42,7 +49,7 @@ bool gpio_read(struct gpio *ctx)
 {
     uint8_t mask = (uint8_t)(1 << ctx->pin);
 
-    return (ctx->base->PIN & mask) != 0;
+    return ((ctx->base->PIN & mask) != 0) ^ ctx->invert;
 }
 
 void gpio_toggle(struct gpio *ctx)
