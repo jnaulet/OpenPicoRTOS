@@ -1,5 +1,7 @@
 PICORTOS_DIR := $(abspath ../../..)
+
 DEVICES := $(shell find $(PICORTOS_DIR)/devices -name "Makefile.in")
+DEVICES += $(shell find $(PICORTOS_DIR)/staging/devices -name "Makefile.in")
 
 # recursion...
 -include $(DEVICE)
@@ -25,5 +27,5 @@ all:
 	done
 
 check:
-	$(SPLINT) $(SPLINTFLAGS) $(INCLUDE) $(SRC_C)
-	$(CPPCHECK) $(CPPCHECKFLAGS) $(INCLUDE) $(SRC_C)
+	$(SPLINT) $(SPLINTFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
+	$(CPPCHECK) $(CPPCHECKFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
