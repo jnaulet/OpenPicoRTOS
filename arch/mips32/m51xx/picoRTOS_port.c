@@ -74,7 +74,6 @@ picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr)
 
 /* CACHE */
 
-#ifdef DEVICE_HAS_SOFTWARE_CACHE_COHERENCY
 void arch_invalidate_dcache(void *addr, size_t n)
 {
     if (!picoRTOS_assert_fatal(n > 0)) return;
@@ -100,14 +99,3 @@ void arch_flush_dcache(void *addr, size_t n)
 
     ASM("ehb");
 }
-#else
-void arch_invalidate_dcache(/*@unused@*/ void *addr __attribute__((unused)),
-                            /*@unused@*/ size_t n __attribute__((unused)))
-{
-}
-
-void arch_flush_dcache(/*@unused@*/ void *addr __attribute__((unused)),
-                       /*@unused@*/ size_t n __attribute__((unused)))
-{
-}
-#endif
