@@ -206,7 +206,7 @@ extern picoRTOS_cycles_t arch_counter(void);
  *  addr - A cacheable address in RAM
  *  n - The number of bytes to invalidate
  */
-extern /*@unused@*/ void arch_invalidate_dcache(void *addr, size_t n);
+extern /*@external@*/ void arch_invalidate_dcache(void *addr, size_t n);
 
 /* Function: arch_flush_dcache
  * Flushes one or more cache lines
@@ -215,6 +215,6 @@ extern /*@unused@*/ void arch_invalidate_dcache(void *addr, size_t n);
  *  addr - A cacheable address in RAM
  *  n - The number of bytes to flush
  */
-extern /*@unused@*/ void arch_flush_dcache(void *addr, size_t n);
+extern /*@external@*/ void arch_flush_dcache(void *addr, size_t n);
 
 #endif
