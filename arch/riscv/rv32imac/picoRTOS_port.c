@@ -57,15 +57,3 @@ picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr)
 {
     return arch_compare_and_swap(ptr, 0, (picoRTOS_atomic_t)1);
 }
-
-/* CACHES (dummy) */
-
-void arch_invalidate_dcache(/*@unused@*/ void *addr __attribute__((unused)),
-                            /*@unused@*/ size_t n __attribute__((unused)))
-{
-}
-
-void arch_flush_dcache(/*@unused@*/ void *addr __attribute__((unused)),
-                       /*@unused@*/ size_t n __attribute__((unused)))
-{
-}
