@@ -50,6 +50,9 @@ struct SPI_ARM_PL022 {
 #define SSPCPSR_CPSDVSR_M  0xffu
 #define SSPCPSR_CPSDVSR(x) ((x) & SSPCPSR_CPSDVSR_M)
 
+#define SSPDMACR_TXDMAE (1 << 1)
+#define SSPDMACR_RXDMAE (1 << 0)
+
 /* Function: spi_arm_pl022_init
  * Initializes a SPI
  *
@@ -74,17 +77,7 @@ int spi_arm_pl022_init(struct spi *ctx, int base, clock_id_t clkid)
     return 0;
 }
 
-/* Function: spi_arm_pl022_set_loopback
- * Sets the SPI in loopback mode (for tests)
- *
- * Parameters:
- *  ctx - The SPI instance
- *  loopback - true or false
- *
- * Returns:
- * Always 0
- */
-int spi_arm_pl022_set_loopback(struct spi *ctx, bool loopback)
+static int set_loopback(struct spi *ctx, bool loopback)
 {
     /* disable SSP */
     ctx->base->SSPCR1 &= ~SSPCR1_SSE;
@@ -96,6 +89,25 @@ int spi_arm_pl022_set_loopback(struct spi *ctx, bool loopback)
     ctx->base->SSPCR1 |= SSPCR1_SSE;
 
     return 0;
+}
+
+/* Function: spi_arm_pl022_setup
+ * Configures a ARM PL022 SPI
+ *
+ * Parameters:
+ *  ctx - The SPI to init
+ *  settings - The settings to apply
+ *
+ * Returns:
+ * Always 0
+ */
+int spi_arm_pl022_setup(struct spi *ctx, struct spi_arm_pl022_settings *settings)
+{
+    ctx->fill = settings->fill;
+    ctx->drain = settings->drain;
+    ctx->threshold = settings->threshold;
+
+    return set_loopback(ctx, settings->loopback);
 }
 
 static int set_bitrate(struct spi *ctx, unsigned long bitrate)
@@ -259,7 +271,81 @@ static int read_data(struct spi *ctx, uint8_t *data)
     return (int)sizeof(uint16_t);
 }
 
-int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
+static int spi_xfer_dma_start(struct spi *ctx, void *rx, const void *tx, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    /* null check */
+    if (!picoRTOS_assert(ctx->fill != NULL)) return -EIO;
+    if (!picoRTOS_assert(ctx->drain != NULL)) return -EIO;
+
+    int res;
+
+    /* fill xfer */
+    struct dma_xfer fill = {
+        (intptr_t)tx,                   /* source address */
+        (intptr_t)&ctx->base->SSPDR,    /* destination addresss */
+        true,                           /* incr_read */
+        false,                          /* incr_write */
+        ctx->frame_size / (size_t)8,    /* size */
+        n                               /* byte count */
+    };
+
+    /* drain xfer */
+    struct dma_xfer drain = {
+        (intptr_t)&ctx->base->SSPDR,    /* source addresss */
+        (intptr_t)rx,                   /* destination address */
+        false,                          /* incr_read */
+        true,                           /* incr_write */
+        ctx->frame_size / (size_t)8,    /* size */
+        n                               /* byte count */
+    };
+
+    /* register xfers */
+    if ((res = dma_setup(ctx->fill, &fill)) < 0 ||
+        (res = dma_setup(ctx->drain, &drain)) < 0)
+        return res;
+
+    /* trigger xfers */
+    ctx->base->SSPDMACR |= (SSPDMACR_TXDMAE | SSPDMACR_RXDMAE);
+
+    ctx->state = SPI_ARM_PL022_STATE_DMA_WAIT;
+    return -EAGAIN;
+}
+
+static int spi_xfer_dma_wait(struct spi *ctx, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    /* null check */
+    if (!picoRTOS_assert(ctx->fill != NULL)) return -EIO;
+    if (!picoRTOS_assert(ctx->drain != NULL)) return -EIO;
+
+    if (dma_xfer_done(ctx->fill) == 0 &&
+        dma_xfer_done(ctx->drain) == 0) {
+        /* end xfers */
+        ctx->base->SSPDMACR &= ~(SSPDMACR_TXDMAE | SSPDMACR_RXDMAE);
+        /* back to normal */
+        ctx->state = SPI_ARM_PL022_STATE_DMA_START;
+        return (int)n;
+    }
+
+    return -EAGAIN;
+}
+
+static int spi_xfer_dma(struct spi *ctx, void *rx, const void *tx, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+
+    switch (ctx->state) {
+    case SPI_ARM_PL022_STATE_DMA_START: return spi_xfer_dma_start(ctx, rx, tx, n);
+    case SPI_ARM_PL022_STATE_DMA_WAIT: return spi_xfer_dma_wait(ctx, n);
+    default: break;
+    }
+
+    picoRTOS_break();
+    /*@notreached@*/ return -EIO;
+}
+
+static int spi_xfer_nodma(struct spi *ctx, void *rx, const void *tx, size_t n)
 {
     if (!picoRTOS_assert(n > 0)) return -EINVAL;
 
@@ -300,4 +386,17 @@ int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
         return -EAGAIN;
 
     return (int)recv;
+}
+
+int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+
+    /* DMA */
+    if (ctx->fill != NULL && ctx->drain != NULL &&
+        n >= ctx->threshold)
+        return spi_xfer_dma(ctx, rx, tx, n);
+
+    /* NO DMA */
+    return spi_xfer_nodma(ctx, rx, tx, n);
 }
