@@ -15,6 +15,8 @@
 #define ADDR_PIECTRL      0xce0
 #define ADDR_PIEVECTTABLE 0xd00
 
+#define ADDR_DMA 0x1000
+
 #define ADDR_EPWM1  0x4000
 #define ADDR_EPWM2  0x4100
 #define ADDR_EPWM3  0x4200
@@ -42,6 +44,8 @@
 
 #define ADDR_I2CA 0x7300
 #define ADDR_I2CB 0x7340
+
+#define ADDR_DMA_CLA_SRC_SEL 0x7980
 
 #define ADDR_GPIOCTRL_A 0x7c00
 #define ADDR_GPIOCTRL_B 0x7c40

@@ -16,7 +16,7 @@
 	.global _RamfuncsRunStart
 	.global _RamfuncsRunEnd
 
-	.ref _c_int00
+	.ref _args_main
 
 	.global Reset_Handler
 Reset_Handler:
@@ -44,7 +44,7 @@ Reset_Handler:
 	TURN_WATCHDOG_ON
 
 	;; branch to main through RTS library
-	lb _c_int00
+	lb _args_main
 
 _exit:
 	estop0
