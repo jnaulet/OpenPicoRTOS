@@ -26,23 +26,30 @@ int gpio_ti_f28x_init(struct gpio *ctx, int base, size_t pin)
     ctx->base = (struct GPIO_DATA_REGS*)base;
     /* compute pin mask */
     ctx->mask = (uint32_t)(1ul << pin);
+    ctx->invert = false;
 
     return 0;
 }
 
 /* hooks */
 
+int gpio_setup(struct gpio *ctx, struct gpio_settings *settings)
+{
+    ctx->invert = settings->invert;
+    return 0;
+}
+
 void gpio_write(struct gpio *ctx, bool value)
 {
     ASM(" eallow");
-    if (value) ctx->base->GPnSET = ctx->mask;
+    if (value ^ ctx->invert) ctx->base->GPnSET = ctx->mask;
     else ctx->base->GPnCLEAR = ctx->mask;
     ASM(" edis");
 }
 
 bool gpio_read(struct gpio *ctx)
 {
-    return (ctx->mask & ctx->base->GPnDAT) != 0;
+    return ((ctx->mask & ctx->base->GPnDAT) != 0) ^ ctx->invert;
 }
 
 void gpio_toggle(struct gpio *ctx)
