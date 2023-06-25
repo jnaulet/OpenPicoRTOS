@@ -75,19 +75,26 @@ int gpio_sam3x_pio_init(struct gpio *ctx, int base, size_t pin)
 
     ctx->base = (struct GPIO_SAM3X_PIO*)base;
     ctx->mask = (uint32_t)(1ul << pin);
+    ctx->invert = false;
 
+    return 0;
+}
+
+int gpio_setup(struct gpio *ctx, struct gpio_settings *settings)
+{
+    ctx->invert = settings->invert;
     return 0;
 }
 
 void gpio_write(struct gpio *ctx, bool value)
 {
-    if (value) ctx->base->PIO_SODR = ctx->mask;
+    if (value ^ ctx->invert) ctx->base->PIO_SODR = ctx->mask;
     else ctx->base->PIO_CODR = ctx->mask;
 }
 
 bool gpio_read(struct gpio *ctx)
 {
-    return (ctx->base->PIO_PDSR & ctx->mask) != 0;
+    return ((ctx->base->PIO_PDSR & ctx->mask) != 0) ^ ctx->invert;
 }
 
 void gpio_toggle(struct gpio *ctx)
