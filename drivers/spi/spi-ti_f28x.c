@@ -42,6 +42,8 @@ struct SPI_REGS {
 #define SPIFFTX_TXFIFO     (1 << 13)
 #define SPIFFTX_TXFFINT    (1 << 7)
 #define SPIFFTX_TXFFINTCLR (1 << 6)
+#define SPIFFTX_TXFFIL_M    0x1fu
+#define SPIFFTX_TXFFIL(x)   ((x) & SPIFFTX_TXFFIL_M)
 
 #define SPIFFRX_RXFIFORESET (1 << 13)
 #define SPIFFRX_RXFFST_M    0x1fu
@@ -61,7 +63,8 @@ static int init_fifos(struct spi *ctx)
 
     /* start tx fifo */
     ctx->base->SPIFFTX = (uint16_t)(SPIFFTX_TXFFINTCLR | SPIFFTX_TXFIFO |
-                                    SPIFFTX_SPIFFENA | SPIFFTX_SPIRST);
+                                    SPIFFTX_SPIFFENA | SPIFFTX_SPIRST |
+                                    SPIFFTX_TXFFIL(15));
     /* start rx fifo */
     ctx->base->SPIFFRX = (uint16_t)(SPIFFRX_RXFIFORESET | SPIFFRX_RXFFINTCLR |
                                     SPIFFRX_RXFFIL(1));
@@ -246,27 +249,23 @@ int spi_setup(struct spi *ctx, const struct spi_settings *settings)
 
 static int write_char(struct spi *ctx, uint16_t data)
 {
-    if ((ctx->base->SPISTS & SPISTS_BUFFULL) != 0)
+    if ((ctx->base->SPIFFTX & SPIFFTX_TXFFINT) == 0)
         return -EAGAIN;
 
     /* data is left-justified on tx */
     ctx->base->SPITXBUF = (data << ctx->lshift);
+    ctx->base->SPIFFTX |= SPIFFTX_TXFFINTCLR;
     return 1;
 }
 
 static int read_char(struct spi *ctx, uint16_t *data)
 {
-    if ((ctx->base->SPISTS & SPISTS_INT_FLAG) == 0)
+    if ((ctx->base->SPIFFRX & SPIFFRX_RXFFINT) == 0)
         return -EAGAIN;
-
-    /* overrun */
-    if ((ctx->base->SPISTS & SPISTS_OVERRUN) != 0) {
-        ctx->base->SPISTS |= SPISTS_OVERRUN;
-        return -EPIPE;
-    }
 
     /* data is right-justified on rx */
     *data = ctx->base->SPIRXBUF;
+    ctx->base->SPIFFRX |= SPIFFRX_RXFFINTCLR;
     return 1;
 }
 
