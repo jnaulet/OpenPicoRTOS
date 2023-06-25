@@ -12,7 +12,7 @@ PICORTOS_DIR := $(abspath ../..)
 
 # static anaylyzer
 SPLINTFLAGS := -D__PIC32MZ_EF__ -checks +unixlib
-CPPCHECKFLAGS += --enable=all --inline-suppr -DNDEBUG
+CPPCHECKFLAGS += --enable=all --platform=mips32 --inline-suppr -DNDEBUG
 CPPCHECKFLAGS += --suppress=missingIncludeSystem
 CPPCHECKFLAGS += --suppress=unusedFunction
 CPPCHECKFLAGS += --suppress=unusedStructMember
