@@ -4,17 +4,6 @@
 
 #include <stdint.h>
 
-#define INTC_MCR   ((volatile uint32_t*)(ADDR_INTC))
-#define INTC_CPR   ((volatile uint32_t*)(ADDR_INTC + 0x8))
-#define INTC_IACKR ((volatile uint32_t*)(ADDR_INTC + 0x10))
-#define INTC_EOIR  ((volatile uint32_t*)(ADDR_INTC + 0x18))
-#define INTC_PSR   ((volatile uint8_t*)(ADDR_INTC + 0x40))
-
-#define INTC_PSR_PRC_SELn_M  0x3u
-#define INTC_PSR_PRC_SELn(x) (((x) & INTC_PSR_PRC_SELn_M) << 5)
-#define INTC_PSR_PRC_PRIn_M  0xfu
-#define INTC_PSR_PRC_PRIn(x) ((x) & INTC_PSR_PRC_PRIn_M)
-
 #define DEC_VALUE PICORTOS_CYCLES_PER_TICK
 
 /* ASM */
@@ -24,7 +13,6 @@ picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
                                           void *priv);
 
 /*@external@*/ extern picoRTOS_cycles_t arch_DEC(void);
-/*@external@*/ extern picoRTOS_core_t arch_core(void);
 /*@external@*/ extern void arch_dcbi(uint32_t addr);
 /*@external@*/ extern void arch_dcbf(uint32_t addr);
 /*@external@*/ extern void arch_dec_init(uint32_t value);
@@ -34,8 +22,8 @@ picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
                                                               picoRTOS_atomic_t old,
                                                               picoRTOS_atomic_t val);
 
-/* INTC */
-/*@external@*/ extern unsigned long __intc_vectors_start__[];
+/* DRIVERS */
+/*@external@*/ extern void arch_intc_init(void);
 
 /* FUNCTIONS TO IMPLEMENT */
 
@@ -45,9 +33,7 @@ void arch_init(void)
     ASM("wrteei 0");
 
     /* reset intc */
-    *INTC_MCR = 0;
-    *INTC_CPR = 0;
-    *INTC_IACKR = (uint32_t)__intc_vectors_start__;
+    arch_intc_init();
 
     /* init periodic timer */
     arch_dec_init((uint32_t)DEC_VALUE);
@@ -89,46 +75,6 @@ void __attribute__((weak)) arch_idle(void *null)
 picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr)
 {
     return arch_compare_and_swap(ptr, 0, (picoRTOS_atomic_t)1);
-}
-
-/* INTERRUPT OPS */
-
-/*@external@*/
-extern unsigned long ISR_TABLE_priv[DEVICE_INTERRUPT_VECTOR_COUNT];
-
-void arch_register_interrupt(picoRTOS_irq_t irq, picoRTOS_isr_fn fn, void *priv)
-{
-    if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT))
-        return;
-
-    __intc_vectors_start__[irq] = (unsigned long)fn;
-    ISR_TABLE_priv[irq] = (unsigned long)priv;
-}
-
-#define PRC_SELn_PROC_0 0x0
-#define PRC_SELn_PROC_1 0x3
-
-void arch_enable_interrupt(picoRTOS_irq_t irq)
-{
-    if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT))
-        return;
-
-    uint8_t psr = (uint8_t)INTC_PSR_PRC_SELn(PRC_SELn_PROC_0);
-
-    if (arch_core() != 0)
-        psr = (uint8_t)INTC_PSR_PRC_SELn(PRC_SELn_PROC_1);
-
-    /* only support for priority 1 yet */
-    INTC_PSR[irq] = psr | (uint8_t)INTC_PSR_PRC_PRIn(1);
-}
-
-void arch_disable_interrupt(picoRTOS_irq_t irq)
-{
-    if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT))
-        return;
-
-    /* disable by setting prio to 0 */
-    INTC_PSR[irq] &= ~(uint8_t)INTC_PSR_PRC_PRIn(INTC_PSR_PRC_PRIn_M);
 }
 
 /* STAT OPS */

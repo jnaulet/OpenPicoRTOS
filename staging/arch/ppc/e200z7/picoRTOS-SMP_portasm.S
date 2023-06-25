@@ -7,7 +7,6 @@
 	#include "picoRTOS_device.h"
 	#include "../../lib/ppc/vle/macros.S"
 
-	.equ INTC_SSCIR0, ADDR_INTC + 0x20
 	.equ DECAR, (CONFIG_SYSCLK_HZ / CONFIG_TICK_HZ)
 
 	.macro ARCH_INIT_CORE_STACK
@@ -62,10 +61,6 @@ arch_core_start:
 	.type arch_SSCIR0, %function
 	.global arch_SSCIR0
 arch_SSCIR0:
-	/* clear interrupt */
-	E_LIW r3, INTC_SSCIR0
-	se_li r4, 0x1
-	se_stb r4, 0 (r3)
 	/* reset DEC */
 	E_LIW r3, DECAR
 	mtdec r3
