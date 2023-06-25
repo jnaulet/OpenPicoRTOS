@@ -20,14 +20,14 @@ SECTIONS
     .text :
     {
         __text_start__ = .;
-        . = ALIGN(4);
-        KEEP(*(.init))
-
-        . = ALIGN(512);
         __vectors_start__ = .;
         KEEP(*(.vectors .vectors.*))
         __vectors_end__ = .;
 
+        . = ALIGN(4);
+        KEEP(*(.init))
+
+        . = ALIGN(4);
         *(.text .text.* .gnu.linkonce.t.*)
         *(.rodata .rodata* .gnu.linkonce.r.*)
         
@@ -62,8 +62,15 @@ SECTIONS
         . = ALIGN(4);
         __data_start__ = .;
         *(.data .data.*);
+
+        . = ALIGN(8);
+        __gp = . + 0x800;
         *(.sdata .sdata.* .gnu.linkonce.s.*);
-        
+
+        . = ALIGN(8);
+        __tp = .;
+         *(.tdata .tdata.* .gnu.linkonce.td.*)
+
         . = ALIGN(4);
         __preinit_array_start = .;
         KEEP (*(.preinit_array))

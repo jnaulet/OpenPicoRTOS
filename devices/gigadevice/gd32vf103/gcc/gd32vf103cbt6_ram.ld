@@ -20,12 +20,14 @@ SECTIONS
     .init :
     {
         __init_start__ = .;
-        *(.rodata .rodata* .gnu.linkonce.r.*)
+        KEEP(*(.vectors .vectors.*))
 
         . = ALIGN(4);
         KEEP(*(.init))
-        KEEP(*(.vectors .vectors.*))
 
+        . = ALIGN(4);
+        *(.rodata .rodata* .gnu.linkonce.r.*)
+        
         . = ALIGN(4);
         KEEP (*crtbegin.o(.ctors))
         KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
@@ -54,12 +56,12 @@ SECTIONS
     .text : AT (__etext)
     {
         __text_start__ = .;
-        *(.text .text.* .gnu.linkonce.t.*)
-
-        . = ALIGN(512);
         __vectors_start__ = .;
         . = . + 348;
         __vectors_end__ = .;
+
+	. = ALIGN(4);
+        *(.text .text.* .gnu.linkonce.t.*)
 
         . = ALIGN(4);
         __text_end__ = .;
@@ -72,7 +74,14 @@ SECTIONS
         . = ALIGN(4);
         __data_start__ = .;
         *(.data .data.*);
+
+        . = ALIGN(8);
+        __gp = . + 0x800;
         *(.sdata .sdata.* .gnu.linkonce.s.*);
+
+        . = ALIGN(8);
+        __tp = .;
+         *(.tdata .tdata.* .gnu.linkonce.td.*)
 
         . = ALIGN(4);
         __preinit_array_start = .;

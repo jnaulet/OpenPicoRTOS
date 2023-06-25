@@ -17,13 +17,50 @@
 	csrw mtvec, t0
 	.endm
 
+	.section .vectors
+__vectors:
+	j Reset_Handler
+	.word 0
+	.word 0
+	.word MachineSoftwareInterrupt_Handler
+	.word 0
+	.word 0
+	.word 0
+	.word MachineTimerInterrupt_Handler
+	.word 0
+	.word 0
+	.word 0
+	.word 0
+	.word 0
+	.word 0
+	.word 0
+	.word 0
+	.rept DEVICE_INTERRUPT_VECTOR_COUNT
+	.word PlatformDefined_Handler
+	.endr
+
 	.section .init, "ax"
 
 	.align 4
 	.global Reset_Handler
 Reset_Handler:
 	csrci mstatus, 0x8	/* disable interrupts */
-	la sp, __StackTop	/* stack */
+	/* Jump to logical address first to ensure correct
+	 * operation of RAM region  */
+	la a0, Reset_Handler
+	li a1, 1
+	slli a1, a1, 29
+	bleu a1, a0, .Reset_Handler_Step2
+	srli a1, a1, 2
+	bleu a1, a0, .Reset_Handler_Step2
+	la a0, .Reset_Handler_Step2
+	add a0, a0, a1
+	jr a0
+
+.Reset_Handler_Step2:
+	la gp, __gp
+	la tp, __tp
+	la sp, __StackTop
 
 	/* relocate text section if needed */
 	la t0, __relocate_text
@@ -51,29 +88,4 @@ _exit:
 	ebreak
 	j _exit
 
-	.section .vectors
-__vectors:
-	.word 0
-	.word 0
-	.word 0
-	.word MachineSoftwareInterrupt_Handler
-	.word 0
-	.word 0
-	.word 0
-	.word MachineTimerInterrupt_Handler
-	.word 0
-	.word 0
-	.word 0
-	.word 0
-	.word 0
-	.word 0
-	.word 0
-	.word 0
-	.rept DEVICE_INTERRUPT_VECTOR_COUNT
-	.word PlatformDefined_Handler
-	.endr
-
-	.section .text
-
 	def_irq_handler MachineSoftwareInterrupt_Handler
-
