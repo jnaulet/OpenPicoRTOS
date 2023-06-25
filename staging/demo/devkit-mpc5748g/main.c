@@ -1,9 +1,13 @@
-#include "picoRTOS-SMP.h"
-#include <stdbool.h>
+#ifndef SUPPORT_FOR_SMP
+# include "picoRTOS.h"
+#else
+# include "picoRTOS-SMP.h"
+#endif
 
 #include "ipc/picoRTOS_mutex.h"
 #include "ipc/picoRTOS_cond.h"
 
+#include <stdbool.h>
 #include "devkit-mpc5748g.h"
 
 #define LED_DELAY_SHORT PICORTOS_DELAY_MSEC(30)
@@ -117,11 +121,18 @@ int main(void)
     picoRTOS_task_init(&task, tick_main, &board.TICK, stack0, PICORTOS_STACK_COUNT(stack0));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
 
+#ifndef SUPPORT_FOR_SMP
+    picoRTOS_task_init(&task, led0_main, board.LED, stack1, PICORTOS_STACK_COUNT(stack1));
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+    picoRTOS_task_init(&task, led1_main, board.LED, stack2, PICORTOS_STACK_COUNT(stack2));
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+#else
     /* per core tasks */
     picoRTOS_task_init(&task, led0_main, board.LED, stack1, PICORTOS_STACK_COUNT(stack1));
     picoRTOS_SMP_add_task(&task, picoRTOS_get_next_available_priority(), (picoRTOS_mask_t)0x1);
     picoRTOS_task_init(&task, led1_main, board.LED, stack2, PICORTOS_STACK_COUNT(stack2));
     picoRTOS_SMP_add_task(&task, picoRTOS_get_next_available_priority(), (picoRTOS_mask_t)0x2);
+#endif
 
     picoRTOS_start();
 
