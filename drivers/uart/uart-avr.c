@@ -86,7 +86,7 @@ int uart_setup(struct uart *ctx, const struct uart_settings *settings)
     case 7: ucsrxc |= 0x4; break;
     case 8: ucsrxc |= 0X6; break;
     default:
-        arch_break();
+        picoRTOS_break();
         /*@notreached@*/
         return -EIO;
     }
