@@ -143,13 +143,17 @@ static void raspberry_pico_init_spi(/*@partial@*/ struct raspberry_pico *ctx)
         (size_t)0,
     };
 
+    struct spi_arm_pl022_settings loopback = {
+        NULL, NULL, (size_t)0, true
+    };
+
     (void)rp2040_unreset(&RESET, RP2040_RESET_SPI1);
 
     (void)spi_arm_pl022_init(&SPI, ADDR_SPI1, CLOCK_RP2040_PERI);
     (void)spi_setup(&SPI, &SPI_settings);
 
     /* loopback mode for tests */
-    (void)spi_arm_pl022_set_loopback(&SPI, true);
+    (void)spi_arm_pl022_setup(&SPI, &loopback);
 
     ctx->SPI = &SPI;
 }
