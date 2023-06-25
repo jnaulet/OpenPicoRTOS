@@ -158,9 +158,9 @@ Basic demo code is provided for the following boards:
   - ATtiny1607 Curiosity Nano
   - Curiosity 2.0 PIC32 MZ EF
   - NXP Devkit MPC5748G (dual-core SMP) (staging)
-  - NXP MPC575E-EVB (dual-core SMP) (staging)
+  - NXP MPC5775E-EVB (dual-core SMP) (staging)
   - Sipeed Longan Nano
   - Sipeed Longan Nano + LCD
   - Texas Instruments Launchxl-f28379d
-  - Raspberry Pi Pico (single core)
-  - Raspberry Pi Pico (dual-core SMP)
+  - Raspberry Pi Pico (single core & SMP)
+
