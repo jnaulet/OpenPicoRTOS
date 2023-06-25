@@ -1,5 +1,6 @@
 # Device configuration file for NXP MPC5775E
 ARCH_DIR := $(PICORTOS_DIR)/staging/arch/ppc/e200z7
+DRIVERS_DIR := $(PICORTOS_DIR)/staging/arch/ppc/drivers
 DEVICE_DIR := $(PICORTOS_DIR)/staging/devices/nxp/mpc5775e
 
 DEFINE := -D__PPC_EABI__ -DCPU_MPC5775E
@@ -12,3 +13,6 @@ SRC_C += $(ARCH_DIR)/picoRTOS_port.c
 
 SRC_S := $(DEVICE_DIR)/startup.S
 SRC_S += $(ARCH_DIR)/picoRTOS_portasm.S
+
+# drivers
+SRC_C += $(DRIVERS_DIR)/intc-siu.c
