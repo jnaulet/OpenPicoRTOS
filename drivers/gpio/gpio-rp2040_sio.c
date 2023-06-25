@@ -43,6 +43,7 @@ int gpio_rp2040_sio_init(struct gpio *ctx, int base,
 
     ctx->base = (struct GPIO_RP2040_SIO*)base;
     ctx->mask = (uint32_t)(1 << pin);
+    ctx->invert = false;
 
     if (dir == GPIO_RP2040_SIO_DIR_OUTPUT)
         ctx->base->GPIO_OE_SET = ctx->mask;
@@ -52,15 +53,21 @@ int gpio_rp2040_sio_init(struct gpio *ctx, int base,
     return 0;
 }
 
+int gpio_setup(struct gpio *ctx, struct gpio_settings *settings)
+{
+    ctx->invert = settings->invert;
+    return 0;
+}
+
 void gpio_write(struct gpio *ctx, bool value)
 {
-    if (value) ctx->base->GPIO_OUT_SET = ctx->mask;
+    if (value ^ ctx->invert) ctx->base->GPIO_OUT_SET = ctx->mask;
     else ctx->base->GPIO_OUT_CLR = ctx->mask;
 }
 
 bool gpio_read(struct gpio *ctx)
 {
-    return (ctx->base->GPIO_IN & ctx->mask) != 0;
+    return ((ctx->base->GPIO_IN & ctx->mask) != 0) ^ ctx->invert;
 }
 
 void gpio_toggle(struct gpio *ctx)

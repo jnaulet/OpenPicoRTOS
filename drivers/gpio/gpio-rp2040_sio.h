@@ -12,6 +12,7 @@ struct GPIO_RP2040_SIO;
 struct gpio {
     /*@temp@*/ struct GPIO_RP2040_SIO *base;
     uint32_t mask;
+    bool invert;
 };
 
 typedef enum {
@@ -24,6 +25,7 @@ int gpio_rp2040_sio_init(/*@out@*/ struct gpio *ctx, int base,
                          size_t pin, gpio_rp2040_sio_dir_t dir);
 
 /* Runtime calls:
+ * int gpio_setup(struct gpio *ctx, struct gpio_settings *settings);
  * void gpio_write(struct gpio *ctx, bool value);
  * bool gpio_read(struct gpio *ctx);
  * void gpio_toggle(struct gpio *ctx);
