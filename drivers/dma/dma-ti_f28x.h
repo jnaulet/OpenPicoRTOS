@@ -1,0 +1,116 @@
+#ifndef DMA_TI_F28X_H
+#define DMA_TI_F28X_H
+
+#include "dma.h"
+
+#define DMA_TI_F28X_CHANNEL_COUNT 6
+
+struct DMA_REGS;
+struct DMA_CH_REGS;
+
+struct dma {
+    /*@temp@*/ struct DMA_REGS *base;
+    /*@temp@*/ struct DMA_CH_REGS *ch;
+    size_t channel;
+};
+
+typedef enum {
+    DMA_TI_F28X_CHSRCSEL_NO_PERIPHERAL  = 0,
+    DMA_TI_F28X_CHSRCSEL_ADCA_1         = 1,
+    DMA_TI_F28X_CHSRCSEL_ADCA_2         = 2,
+    DMA_TI_F28X_CHSRCSEL_ADCA_3         = 3,
+    DMA_TI_F28X_CHSRCSEL_ADCA_4         = 4,
+    DMA_TI_F28X_CHSRCSEL_ADCAEVT        = 5,
+    DMA_TI_F28X_CHSRCSEL_ADCB_1         = 6,
+    DMA_TI_F28X_CHSRCSEL_ADCB_2         = 7,
+    DMA_TI_F28X_CHSRCSEL_ADCB_3         = 8,
+    DMA_TI_F28X_CHSRCSEL_ADCB_4         = 9,
+    DMA_TI_F28X_CHSRCSEL_ADCBEVT        = 10,
+    DMA_TI_F28X_CHSRCSEL_ADCC_1         = 11,
+    DMA_TI_F28X_CHSRCSEL_ADCC_2         = 12,
+    DMA_TI_F28X_CHSRCSEL_ADCC_3         = 13,
+    DMA_TI_F28X_CHSRCSEL_ADCC_4         = 14,
+    DMA_TI_F28X_CHSRCSEL_ADCCEVT        = 15,
+    DMA_TI_F28X_CHSRCSEL_ADCD_1         = 16,
+    DMA_TI_F28X_CHSRCSEL_ADCD_2         = 17,
+    DMA_TI_F28X_CHSRCSEL_ADCD_3         = 18,
+    DMA_TI_F28X_CHSRCSEL_ADCD_4         = 19,
+    DMA_TI_F28X_CHSRCSEL_ADCDEVT        = 20,
+    /* no peripheral */
+    DMA_TI_F28X_CHSRCSEL_XINT1          = 29,
+    DMA_TI_F28X_CHSRCSEL_XINT2          = 30,
+    DMA_TI_F28X_CHSRCSEL_XINT3          = 31,
+    DMA_TI_F28X_CHSRCSEL_XINT4          = 32,
+    DMA_TI_F28X_CHSRCSEL_XINT5          = 33,
+    /* no perihperal */
+    DMA_TI_F28X_CHSRCSEL_EPWM1_SOCA     = 36,
+    DMA_TI_F28X_CHSRCSEL_EPWM1_SOCB     = 37,
+    DMA_TI_F28X_CHSRCSEL_EPWM2_SOCA     = 38,
+    DMA_TI_F28X_CHSRCSEL_EPWM2_SOCB     = 39,
+    DMA_TI_F28X_CHSRCSEL_EPWM3_SOCA     = 40,
+    DMA_TI_F28X_CHSRCSEL_EPWM3_SOCB     = 41,
+    DMA_TI_F28X_CHSRCSEL_EPWM4_SOCA     = 42,
+    DMA_TI_F28X_CHSRCSEL_EPWM4_SOCB     = 43,
+    DMA_TI_F28X_CHSRCSEL_EPWM5_SOCA     = 44,
+    DMA_TI_F28X_CHSRCSEL_EPWM5_SOCB     = 45,
+    DMA_TI_F28X_CHSRCSEL_EPWM6_SOCA     = 46,
+    DMA_TI_F28X_CHSRCSEL_EPWM6_SOCB     = 47,
+    DMA_TI_F28X_CHSRCSEL_EPWM7_SOCA     = 48,
+    DMA_TI_F28X_CHSRCSEL_EPWM7_SOCB     = 49,
+    DMA_TI_F28X_CHSRCSEL_EPWM8_SOCA     = 50,
+    DMA_TI_F28X_CHSRCSEL_EPWM8_SOCB     = 51,
+    DMA_TI_F28X_CHSRCSEL_EPWM9_SOCA     = 52,
+    DMA_TI_F28X_CHSRCSEL_EPWM9_SOCB     = 53,
+    DMA_TI_F28X_CHSRCSEL_EPWM10_SOCA    = 54,
+    DMA_TI_F28X_CHSRCSEL_EPWM10_SOCB    = 55,
+    DMA_TI_F28X_CHSRCSEL_EPWM11_SOCA    = 56,
+    DMA_TI_F28X_CHSRCSEL_EPWM11_SOCB    = 57,
+    DMA_TI_F28X_CHSRCSEL_EPWM12_SOCA    = 58,
+    DMA_TI_F28X_CHSRCSEL_EPWM12_SOCB    = 59,
+    /* no peripheral */
+    DMA_TI_F28X_CHSRCSEL_TINT0          = 68,
+    DMA_TI_F28X_CHSRCSEL_TINT1          = 69,
+    DMA_TI_F28X_CHSRCSEL_TINT2          = 70,
+    DMA_TI_F28X_CHSRCSEL_MXEVTA         = 71,
+    DMA_TI_F28X_CHSRCSEL_MREVTA         = 72,
+    DMA_TI_F28X_CHSRCSEL_MVEVTB         = 73,
+    DMA_TI_F28X_CHSRCSEL_MREVTB         = 74,
+    /* no peripheral */
+    DMA_TI_F28X_CHSRCSEL_SD1FLT1        = 95,
+    DMA_TI_F28X_CHSRCSEL_SD1FLT2        = 96,
+    DMA_TI_F28X_CHSRCSEL_SD1FLT3        = 97,
+    DMA_TI_F28X_CHSRCSEL_SD1FLT4        = 98,
+    DMA_TI_F28X_CHSRCSEL_SD2FLT1        = 99,
+    DMA_TI_F28X_CHSRCSEL_SD2FLT2        = 100,
+    DMA_TI_F28X_CHSRCSEL_SD2FLT3        = 101,
+    DMA_TI_F28X_CHSRCSEL_SD2FLT4        = 102,
+    /* no peripheral */
+    DMA_TI_F28X_CHSRCSEL_SPITXDMAA      = 109,
+    DMA_TI_F28X_CHSRCSEL_SPIRXDMAA      = 110,
+    DMA_TI_F28X_CHSRCSEL_SPITXDMAB      = 111,
+    DMA_TI_F28X_CHSRCSEL_SPIRXDMAB      = 112,
+    DMA_TI_F28X_CHSRCSEL_SPITXDMAC      = 113,
+    DMA_TI_F28X_CHSRCSEL_SPIRXDMAC      = 114,
+    /* no peripheral */
+    DMA_TI_F28X_CHSRCSEL_CLB1INT        = 127,
+    DMA_TI_F28X_CHSRCSEL_CLB2INT        = 128,
+    DMA_TI_F28X_CHSRCSEL_CLB3INT        = 129,
+    DMA_TI_F28X_CHSRCSEL_CLB4INT        = 130,
+    DMA_TI_F28X_CHSRCSEL_USBA_EPx_RX1   = 131,
+    DMA_TI_F28X_CHSRCSEL_USBA_EPx_TX1   = 132,
+    DMA_TI_F28X_CHSRCSEL_USBA_EPx_RX2   = 133,
+    DMA_TI_F28X_CHSRCSEL_USBA_EPx_TX2   = 134,
+    DMA_TI_F28X_CHSRCSEL_USBA_EPx_RX3   = 135,
+    DMA_TI_F28X_CHSRCSEL_USBA_EPx_TX3   = 136,
+    DMA_TI_F28X_CHSRCSEL_COUNT
+} dma_ti_f28x_chsrcsel_t;
+
+int dma_ti_f28x_init(/*@out@*/ struct dma *ctx, int base, size_t channel, dma_ti_f28x_chsrcsel_t chsrcsel);
+
+/* Runtime calls:
+ * int dma_setup(struct dma *ctx, struct dma_xfer *xfer);
+ * int dma_xfer(struct dma *ctx, struct dma_xfer *xfer);
+ * int dma_xfer_done(struct dma *ctx);
+ */
+
+#endif
