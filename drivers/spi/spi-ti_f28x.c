@@ -1,6 +1,8 @@
 #include "spi-ti_f28x.h"
 #include "picoRTOS.h"
 
+#define SPI_TI_F28X_FIFO_COUNT 16
+
 struct SPI_REGS {
     volatile uint16_t SPICCR;
     volatile uint16_t SPICTL;
@@ -37,11 +39,13 @@ struct SPI_REGS {
 #define SPIBRR_SPIBITRATE_M  0x7fu
 #define SPIBRR_SPIBITRATE(x) ((x) & SPIBRR_SPIBITRATE_M)
 
-#define SPIFFTX_SPIRST     (1 << 15)
-#define SPIFFTX_SPIFFENA   (1 << 14)
-#define SPIFFTX_TXFIFO     (1 << 13)
-#define SPIFFTX_TXFFINT    (1 << 7)
-#define SPIFFTX_TXFFINTCLR (1 << 6)
+#define SPIFFTX_SPIRST      (1 << 15)
+#define SPIFFTX_SPIFFENA    (1 << 14)
+#define SPIFFTX_TXFIFO      (1 << 13)
+#define SPIFFTX_TXFFST_M    0x1fu
+#define SPIFFTX_TXFFST(x)   (((x) & SPIFFTX_TXFFST_M) << 8)
+#define SPIFFTX_TXFFINT     (1 << 7)
+#define SPIFFTX_TXFFINTCLR  (1 << 6)
 #define SPIFFTX_TXFFIL_M    0x1fu
 #define SPIFFTX_TXFFIL(x)   ((x) & SPIFFTX_TXFFIL_M)
 
@@ -64,7 +68,7 @@ static int init_fifos(struct spi *ctx)
     /* start tx fifo */
     ctx->base->SPIFFTX = (uint16_t)(SPIFFTX_TXFFINTCLR | SPIFFTX_TXFIFO |
                                     SPIFFTX_SPIFFENA | SPIFFTX_SPIRST |
-                                    SPIFFTX_TXFFIL(15));
+                                    SPIFFTX_TXFFIL(SPI_TI_F28X_FIFO_COUNT - 1));
     /* start rx fifo */
     ctx->base->SPIFFRX = (uint16_t)(SPIFFRX_RXFIFORESET | SPIFFRX_RXFFINTCLR |
                                     SPIFFRX_RXFFIL(1));
@@ -94,6 +98,13 @@ int spi_ti_f28x_init(struct spi *ctx, int base, clock_id_t clkid)
     ctx->clkid = clkid;
     ctx->balance = 0;
     ctx->lshift = 0;
+    ctx->frame_size = (size_t)16;
+
+    /* dma opt */
+    ctx->state = SPI_TI_F28X_STATE_DMA_START;
+    ctx->fill = NULL;
+    ctx->drain = NULL;
+    ctx->threshold = (size_t)0;
 
     /* fifos */
     if ((res = init_fifos(ctx)) < 0)
@@ -112,17 +123,7 @@ int spi_ti_f28x_init(struct spi *ctx, int base, clock_id_t clkid)
     return 0;
 }
 
-/* Function: spi_ti_f28x_set_loopback
- * Sets the SPI in loopback mode (for debug)
- *
- * Parameters:
- *  ctx - The spi to setup
- *  loopback - enable/disable loopback mode
- *
- * Returns:
- * 0 if success, -errno otherwise
- */
-int spi_ti_f28x_set_loopback(struct spi *ctx, bool loopback)
+static int set_loopback(struct spi *ctx, bool loopback)
 {
     /* hold reset low for programming */
     ctx->base->SPICCR &= ~SPICCR_SPISWRESET;
@@ -135,6 +136,25 @@ int spi_ti_f28x_set_loopback(struct spi *ctx, bool loopback)
     ctx->base->SPICCR |= SPICCR_SPISWRESET;
 
     return 0;
+}
+
+/* Function: spi_ti_f28x_setup
+ * Configures SPI specifics (DMA, loopback)
+ *
+ * Parameters:
+ *  ctx - The spi to setup
+ *  settings - The settings to apply
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
+int spi_ti_f28x_setup(struct spi *ctx, struct spi_ti_f28x_settings *settings)
+{
+    ctx->fill = settings->fill;
+    ctx->drain = settings->drain;
+    ctx->threshold = settings->threshold;
+
+    return set_loopback(ctx, settings->loopback);
 }
 
 /* hooks */
@@ -209,6 +229,7 @@ static int set_frame_size(struct spi *ctx, size_t frame_size)
     ctx->base->SPICCR &= ~SPICCR_SPICHAR_M;
     ctx->base->SPICCR |= SPICCR_SPICHAR(frame_size - 1);
 
+    ctx->frame_size = frame_size;
     ctx->lshift = (size_t)16 - frame_size;
 
     return 0;
@@ -269,7 +290,76 @@ static int read_char(struct spi *ctx, uint16_t *data)
     return 1;
 }
 
-int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
+static int spi_xfer_dma_start(struct spi *ctx, void *rx, const void *tx, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    /* null check */
+    if (!picoRTOS_assert(ctx->fill != NULL)) return -EIO;
+    if (!picoRTOS_assert(ctx->drain != NULL)) return -EIO;
+
+    int res;
+
+    /* fill xfer */
+    struct dma_xfer fill = {
+        (intptr_t)tx,                   /* source address */
+        (intptr_t)&ctx->base->SPITXBUF, /* destination address */
+        true,                           /* incr_read */
+        false,                          /* incr_write */
+        ctx->frame_size / (size_t)16,   /* size */
+        n                               /* byte count */
+    };
+
+    /* drain xfer */
+    struct dma_xfer drain = {
+        (intptr_t)&ctx->base->SPIRXBUF, /* source address */
+        (intptr_t)rx,                   /* destination address */
+        false,                          /* incr_read */
+        true,                           /* incr_write */
+        ctx->frame_size / (size_t)16,   /* size */
+        n                               /* byte count */
+    };
+
+    /* register xfers */
+    if ((res = dma_setup(ctx->drain, &drain)) < 0 ||
+        (res = dma_setup(ctx->fill, &fill)) < 0)
+        return res;
+
+    ctx->state = SPI_TI_F28X_STATE_DMA_WAIT;
+    return -EAGAIN;
+}
+
+static int spi_xfer_dma_wait(struct spi *ctx, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    /* null check */
+    if (!picoRTOS_assert(ctx->fill != NULL)) return -EIO;
+    if (!picoRTOS_assert(ctx->drain != NULL)) return -EIO;
+
+    if (dma_xfer_done(ctx->fill) == 0 &&
+        dma_xfer_done(ctx->drain) == 0) {
+        /* back to normal */
+        ctx->state = SPI_TI_F28X_STATE_DMA_START;
+        return (int)n;
+    }
+
+    return -EAGAIN;
+}
+
+static int spi_xfer_dma(struct spi *ctx, void *rx, const void *tx, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+
+    switch (ctx->state) {
+    case SPI_TI_F28X_STATE_DMA_START: return spi_xfer_dma_start(ctx, rx, tx, n);
+    case SPI_TI_F28X_STATE_DMA_WAIT: return spi_xfer_dma_wait(ctx, n);
+    default: break;
+    }
+
+    picoRTOS_break();
+    /*@notreached@*/ return -EIO;
+}
+
+static int spi_xfer_nodma(struct spi *ctx, void *rx, const void *tx, size_t n)
 {
     if (!picoRTOS_assert(n > 0)) return -EINVAL;
 
@@ -306,4 +396,17 @@ int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
         return -EAGAIN;
 
     return (int)recv;
+}
+
+int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
+{
+    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+
+    /* DMA */
+    if (ctx->fill != NULL && ctx->drain != NULL &&
+        n >= ctx->threshold)
+        return spi_xfer_dma(ctx, rx, tx, n);
+
+    /* NO DMA */
+    return spi_xfer_nodma(ctx, rx, tx, n);
 }
