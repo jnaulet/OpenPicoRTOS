@@ -89,9 +89,14 @@ static void spi_init(/*@partial@*/ struct launchxl_f28379d *ctx)
         (size_t)0
     };
 
+    struct spi_ti_f28x_settings loopback = {
+        NULL, NULL, (size_t)0, true,
+    };
+
     (void)spi_ti_f28x_init(&ctx->SPI, ADDR_SPIA, CLOCK_F28379X_LSPCLK);
+    /* loopback mode */
+    (void)spi_ti_f28x_setup(&ctx->SPI, &loopback);
     (void)spi_setup(&ctx->SPI, &SPI_settings);
-    (void)spi_ti_f28x_set_loopback(&ctx->SPI, true);
 }
 
 static void pwm_init(/*@partial@*/ struct launchxl_f28379d *ctx)

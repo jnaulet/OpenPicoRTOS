@@ -38,6 +38,7 @@ CPPCHECKFLAGS += --suppress=unusedStructMember
 SRC_C += $(PICORTOS_DIR)/drivers/clock/clock-f28379x.c
 SRC_C += $(PICORTOS_DIR)/drivers/adc/adc-ti_type4.c
 SRC_C += $(PICORTOS_DIR)/drivers/can/can-ti_dcan.c
+SRC_C += $(PICORTOS_DIR)/drivers/dma/dma-ti_f28x.c
 SRC_C += $(PICORTOS_DIR)/drivers/gpio/gpio-ti_f28x.c
 SRC_C += $(PICORTOS_DIR)/drivers/mux/mux-ti_f28x.c
 SRC_C += $(PICORTOS_DIR)/drivers/pwm/pwm-ti_epwm.c
@@ -49,6 +50,7 @@ INCLUDE += -I$(PICORTOS_DIR)/drivers/include
 INCLUDE += -I$(PICORTOS_DIR)/drivers/devices
 INCLUDE += -I$(PICORTOS_DIR)/drivers/adc
 INCLUDE += -I$(PICORTOS_DIR)/drivers/can
+INCLUDE += -I$(PICORTOS_DIR)/drivers/dma
 INCLUDE += -I$(PICORTOS_DIR)/drivers/clock
 INCLUDE += -I$(PICORTOS_DIR)/drivers/gpio
 INCLUDE += -I$(PICORTOS_DIR)/drivers/mux
