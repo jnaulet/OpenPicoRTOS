@@ -27,6 +27,7 @@ INCLUDE += -I$(PICORTOS_DIR)/arch/include
 INCLUDE += -I$(PICORTOS_DIR)/drivers/include
 INCLUDE += -I$(PICORTOS_DIR)/drivers/adc
 INCLUDE += -I$(PICORTOS_DIR)/drivers/clock
+INCLUDE += -I$(PICORTOS_DIR)/drivers/dma
 INCLUDE += -I$(PICORTOS_DIR)/drivers/flash
 INCLUDE += -I$(PICORTOS_DIR)/drivers/gpio
 INCLUDE += -I$(PICORTOS_DIR)/drivers/mux
@@ -39,6 +40,7 @@ INCLUDE += -I$(PICORTOS_DIR)/drivers/wd
 # drivers
 SRC_C += $(PICORTOS_DIR)/drivers/adc/adc-same5x.c
 SRC_C += $(PICORTOS_DIR)/drivers/clock/clock-same5x.c
+SRC_C += $(PICORTOS_DIR)/drivers/dma/dma-same5x.c
 SRC_C += $(PICORTOS_DIR)/drivers/flash/flash-same5x.c
 SRC_C += $(PICORTOS_DIR)/drivers/gpio/gpio-same5x.c
 SRC_C += $(PICORTOS_DIR)/drivers/mux/mux-same5x.c
