@@ -124,10 +124,7 @@ void picoRTOS_disable_interrupt(picoRTOS_irq_t irq);
 /* ASSERT */
 
 #ifndef arch_break
-# define arch_break() ({ for (;;) {} })
-# define arch_break_false() (false)
-#else
-# define arch_break_false() (arch_break(), false)
+# define arch_break() ({ for (;;) {} /*@i@*/ })
 #endif
 
 /* Group: picoRTOS assert API */
@@ -138,7 +135,7 @@ void picoRTOS_disable_interrupt(picoRTOS_irq_t irq);
 # define picoRTOS_break() arch_break()
 /* Macro: picoRTOS_assert(x)
  * Returns x, throws a debug exception if x is false, unless -DNDEBUG */
-# define picoRTOS_assert(x) ((x) ? (true) : arch_break_false())
+# define picoRTOS_assert(x) ((x) ? (true) : (arch_break(), false))
 /* Macro: picoRTOS_assert_void(x)
  * Throws a debug exception if x is false, unless -DNDEBUG */
 # define picoRTOS_assert_void(x) if (!(x)) arch_break()
