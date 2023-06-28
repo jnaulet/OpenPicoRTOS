@@ -267,7 +267,7 @@ int adc_read(struct adc *ctx, int *data)
     uint32_t *result = &parent->result[ctx->channel_index];
 
     /* get channel corresponding value */
-    arch_invalidate_dcache(result, sizeof(*result));
+    picoRTOS_invalidate_dcache(result, sizeof(*result));
     value = (int)*result;
 
     if ((value & RESULT_EMPTY) != 0) {
