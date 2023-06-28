@@ -213,10 +213,9 @@ static int set_frame_size(struct spi *ctx, size_t frame_size)
     if (!picoRTOS_assert(frame_size >= (size_t)SPI_ATMEL_SERCOM_FRAME_SIZE_MIN)) return -EINVAL;
     if (!picoRTOS_assert(frame_size <= (size_t)SPI_ATMEL_SERCOM_FRAME_SIZE_MAX)) return -EINVAL;
 
-    if (frame_size <= (size_t)8) {
+    if (frame_size <= (size_t)8)
         ctx->base->CTRLC &= ~CTRLC_DATA32B;
-        ctx->frame_size = (size_t)8;
-    }else{
+    else{
         size_t len = ((frame_size - 1) >> 3) + 1;
         ctx->base->LENGTH = (uint16_t)(LENGTH_LENEN | LENGTH_LEN(len));
         ctx->base->CTRLC |= CTRLC_DATA32B;
