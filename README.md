@@ -160,7 +160,12 @@ Basic demo code is provided for the following boards:
   - NXP Devkit MPC5748G (dual-core SMP) (staging)
   - NXP MPC5775E-EVB (dual-core SMP) (staging)
   - Sipeed Longan Nano
-  - Sipeed Longan Nano + LCD
   - Texas Instruments Launchxl-f28379d
   - Raspberry Pi Pico (single core & SMP)
 
+A portability demo is available in demo/amigaball-lcd and works with the
+follwing boards (+0.96" LCD):
+  - Adafruit ItsyBitsy M4 Express
+  - Sipeed Longan Nano
+  - Texas Instruments Launchxl-f28379d
+  - Raspberry Pi Pico SMP

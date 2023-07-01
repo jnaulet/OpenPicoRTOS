@@ -1,5 +1,16 @@
 # Release notes
 
+## picoRTOS v1.8.3
+### What's new ?
+
+Mostly, the AmigaBall LCD demo, courtesy of slmisc on github.
+This demo has allwoed to put a series of board to a real test & imporve on the DMA for most of
+them (except c2000, which is a pain anyway).
+
+A more satsifying way to manage caches has been found, hopefully.
+
+PowerPC plaftorms have been added to staging and deserve a huge amount of testing.
+
 ## picoRTOS v1.8.2
 ### What's new ?
 
