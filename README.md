@@ -48,6 +48,7 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - ARM Cortex-M0+
  - ARM Cortex-M3
  - ARM Cortex-M4/F
+ - ARM Cortex-M7 (staging)
  - Atmel ATMega (AVR5+)
  - Atmel TinyAVR (0+) Series
  - MIPS M51xx / PIC32Mx
@@ -78,7 +79,8 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - GigaDevice GD32VF103
  - Microchip PIC32MZ-EF
  - Raspberry Pico RP2040
- - Texas Instruments TMS320F2737xD
+ - STMicro STM32H743/750 (staging)
+ - Texas Instruments TMS320F2837xD
 
 ## Working principle
 
@@ -160,6 +162,7 @@ Basic demo code is provided for the following boards:
   - NXP Devkit MPC5748G (dual-core SMP) (staging)
   - NXP MPC5775E-EVB (dual-core SMP) (staging)
   - Sipeed Longan Nano
+  - DevEBox STM32H7xx_M (staging)
   - Texas Instruments Launchxl-f28379d
   - Raspberry Pi Pico (single core & SMP)
 
@@ -169,3 +172,4 @@ follwing boards (+0.96" LCD):
   - Sipeed Longan Nano
   - Texas Instruments Launchxl-f28379d
   - Raspberry Pi Pico SMP
+  - DevEBox STM32H7xx_M / STM32H743VIT6
