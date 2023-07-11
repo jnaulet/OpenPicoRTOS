@@ -48,6 +48,19 @@ typedef enum {
     SPI_CS_POL_COUNT
 } spi_cs_pol_t;
 
+/* Enum: SPI endianness
+ *
+ * SPI_ENDIANNESS_IGNORE - Ignore endianness
+ * SPI_ENDIANNESS_MSB_FIRST - MSB first
+ * SPI_ENDIANNESS_LSB_FIRST - LSB first
+ */
+typedef enum {
+    SPI_ENDIANNESS_IGNORE,
+    SPI_ENDIANNESS_MSB_FIRST,
+    SPI_ENDIANNESS_LSB_FIRST,
+    SPI_ENDIANNESS_COUNT
+} spi_endianness_t;
+
 /* Constants: Bitrate configuration
  *
  * SPI_BITRATE_IGNORE - Ignore SPI bitrate
