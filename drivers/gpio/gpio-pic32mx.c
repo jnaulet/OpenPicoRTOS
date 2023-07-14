@@ -32,9 +32,23 @@ int gpio_pic32mx_init(struct gpio *ctx, int base, size_t pin)
     return 0;
 }
 
+static int set_invert(struct gpio *ctx, gpio_invert_t invert)
+{
+    if (!picoRTOS_assert(invert != GPIO_INVERT_IGNORE)) return -EINVAL;
+    if (!picoRTOS_assert(invert < GPIO_INVERT_COUNT)) return -EINVAL;
+
+    ctx->invert = (invert == GPIO_INVERT_ENABLE);
+    return 0;
+}
+
 int gpio_setup(struct gpio *ctx, struct gpio_settings *settings)
 {
-    ctx->invert = settings->invert;
+    int res;
+
+    if (settings->invert != GPIO_INVERT_IGNORE &&
+        (res = set_invert(ctx, settings->invert)) < 0)
+        return res;
+
     return 0;
 }
 
