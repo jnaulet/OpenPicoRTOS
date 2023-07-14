@@ -1,6 +1,6 @@
 # Raspberry pico board
 ELF_RAM := raspberry-pico-lcd_ram.elf
-ELF_FLASH := raspberry-pico-lcd_rom.elf
+ELF_FLASH := raspberry-pico-lcd_flash-xip.elf
 
 CC := gcc
 CROSS := arm-none-eabi-

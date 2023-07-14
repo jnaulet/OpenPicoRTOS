@@ -109,7 +109,7 @@ static int gpio_init(/*@partial@*/ struct board *ctx)
     static struct gpio LED;
 
     struct gpio_settings LED_settings = {
-        true, /* invert */
+        GPIO_INVERT_ENABLE,
     };
 
     static struct gpio RST;

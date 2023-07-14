@@ -9,6 +9,7 @@ Currently it runs on the following platforms:
   - SiPeed Longan Nano (GD32VF103)
   - Raspberry Pi Pico (RP2040)
   - Adafruit ItsyBitsy M4 Express (SAMD51)
+  - DevEPort STM32H7xx_M (STM32H743, STM32H750)
   - TI TMS320F28379D (C2000/c28x)
 
 ## How to build
@@ -38,22 +39,17 @@ after switching the board to bootloader mode.
 Just like the RPi Pico, the Adafruit build generates 2 files, 1 XIP and one that runs from RAM.
 If you have arduino-cli & the necessary extensions, after the build, just type:
 
-    # maker -f adafruit-itsybitsy-m4.make upload
+    # make -f adafruit-itsybitsy-m4.make upload
 
 You can use a SWD probe like PicoProbe and directly run the .elf files, too. OpenOCD config file is in openocd/
 
+### DevEPort STM32H7xx_M
+
+Only tested with a regular ARM CMSIS DAP & openOCD so far.
+
 ### TI LAUNCHXL-F28379D
 
-```
-LAUNCHXL | 0.96" LCD
-   3V3   -    VCC
-   GND   -    GND
-   P60   -    SCL
-   P58   -    SDA
-   P22   -    RES
-   P105  -    DC
-   P104  -    CS
-```
+Use Code Composer Studio & the integrated probe
 
 ## Wiring
 
@@ -76,6 +72,20 @@ Adafruit | 0.96" LCD
    A5    -    RST
    A4    -    DC
    A3    -    CS
+```
+
+### DevEPort STM32H7xx_M
+
+```
+LCD/OLED | 0.96" LCD
+   3V3   -    VCC
+   GND   -    GND
+   SDI   -    SDA
+   SCL   -    SCL
+   CS    -    CS
+   SDO   -    RES
+   DC    -    DC
+   BLK   -    BLK
 ```
 
 ### TI LAUNCHXL-F28379D
