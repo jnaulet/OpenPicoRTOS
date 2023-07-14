@@ -92,9 +92,8 @@ static int uart_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
     const struct uart_settings UART_settings = {
         9600ul,
         (size_t)8,
-        false,  /* N */
-        false,  /* - */
-        false,  /* 1 */
+        UART_PAR_NONE,
+        UART_CSTOPB_1BIT
     };
 
     (void)uart_pic32mx_init(&ctx->UART1, ADDR_UART1, CLOCK_PIC32MX_PBCLK2);

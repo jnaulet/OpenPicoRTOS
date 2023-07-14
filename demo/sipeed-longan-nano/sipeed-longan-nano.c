@@ -113,9 +113,8 @@ static int uart_init(/*@partial@*/ struct sipeed_longan_nano *ctx)
     struct uart_settings UART_settings = {
         9600ul,     /* baudrate */
         (size_t)8,  /* character size */
-        false,      /* parenb */
-        false,      /* parodd */
-        false       /* cstopb */
+        UART_PAR_NONE,
+        UART_CSTOPB_1BIT,
     };
 
     (void)uart_gd32vf103_init(&ctx->USART0, ADDR_USART0, CLOCK_GD32VF103_APB2);

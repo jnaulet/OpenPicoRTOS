@@ -94,9 +94,8 @@ static void raspberry_pico_init_uart(/*@partial@*/ struct raspberry_pico *ctx)
     struct uart_settings UART_settings = {
         9600ul,     /* baudrate */
         (size_t)8,  /* character size */
-        false,      /* parenb */
-        false,      /* parodd */
-        false       /* cstopb */
+        UART_PAR_NONE,
+        UART_CSTOPB_1BIT
     };
 
     (void)rp2040_unreset(&RESET, RP2040_RESET_UART0);

@@ -63,9 +63,8 @@ static int uart_init(/*@partial@*/ struct attiny1607_cnano *ctx)
     const struct uart_settings UART_settings = {
         9600ul,
         (size_t)8,
-        false,  /* N */
-        false,  /* - */
-        false,  /* 1 */
+        UART_PAR_NONE,
+        UART_CSTOPB_1BIT,
     };
 
     (void)uart_tinyavr_usart_init(&ctx->UART, ADDR_USART0, CLOCK_TINYAVR_CLK_PER);

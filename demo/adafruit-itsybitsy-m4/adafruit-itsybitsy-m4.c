@@ -164,9 +164,8 @@ static int uart_init(/*@partial@*/ struct adafruit_itsybitsy_m4 *ctx)
     struct uart_settings UART_settings = {
         115200ul,
         (size_t)8,
-        false,
-        false,
-        false,
+        UART_PAR_NONE,
+        UART_CSTOPB_1BIT
     };
 
     (void)uart_atmel_sercom_init(&ctx->UART, ADDR_SERCOM3, CLOCK_SAME5X_SERCOM3_CORE);

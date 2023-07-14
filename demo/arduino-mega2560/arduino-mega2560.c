@@ -179,9 +179,8 @@ static void arduino_mega2560_init_communication(/*@partial@*/ struct arduino_meg
     struct uart_settings UART_settings = {
         9600ul,
         (size_t)8,
-        false,  /* N */
-        false,  /* x */
-        false   /* 1 */
+        UART_PAR_NONE,
+        UART_CSTOPB_1BIT
     };
 
     (void)uart_avr_init(&ctx->SERIAL0, ADDR_USART0, CLOCK_ATMEGA2560_CLKIO);

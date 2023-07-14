@@ -72,9 +72,8 @@ static void arduino_uno_init_uart(/*@partial@*/ struct arduino_uno *ctx)
     struct uart_settings UART_settings = {
         9600ul,
         (size_t)8,
-        false,  /* N */
-        false,  /* x */
-        false   /* 1 */
+        UART_PAR_NONE,
+        UART_CSTOPB_1BIT
     };
 
     (void)uart_avr_init(&ctx->SERIAL, ADDR_USART, CLOCK_ATMEGA328P_CLKIO);

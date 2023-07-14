@@ -332,9 +332,8 @@ static void arduino_due_init_communication(/*@partial@*/ struct arduino_due *ctx
     struct uart_settings UART_settings = {
         9600ul,     /* baudrate */
         (size_t)8,  /* character size */
-        false,      /* parenb */
-        false,      /* parodd */
-        false       /* cstopb */
+        UART_PAR_NONE,
+        UART_CSTOPB_1BIT,
     };
 
     (void)uart_sam3x_init(&SERIAL0, ADDR_UART, CLOCK_SAM3X_PMC_PERIPH(PID_UART));
