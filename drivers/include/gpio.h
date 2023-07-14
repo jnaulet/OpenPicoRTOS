@@ -6,8 +6,21 @@
 
 struct gpio;
 
+/* Enum: GPIO inversion
+ *
+ * GPIO_INVERT_IGNORE - Ignore GPIO inversion req
+ * GPIO_INVERT_DISABLE - Disable inversion
+ * GPIO_INVERT_ENABLE - Enable inversion
+ */
+typedef enum {
+    GPIO_INVERT_IGNORE,
+    GPIO_INVERT_DISABLE,
+    GPIO_INVERT_ENABLE,
+    GPIO_INVERT_COUNT
+} gpio_invert_t;
+
 struct gpio_settings {
-    bool invert;
+    gpio_invert_t invert;
 };
 
 /* Function: gpio_setup
