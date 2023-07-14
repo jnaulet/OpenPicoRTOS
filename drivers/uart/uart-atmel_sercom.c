@@ -175,22 +175,28 @@ static int set_cs(struct uart *ctx, size_t cs)
     return 0;
 }
 
-static int set_parity(struct uart *ctx, bool parenb, bool parodd)
+static int set_parity(struct uart *ctx, uart_par_t par)
 {
-    ctx->base->CTRLA &= ~CTRLA_FORM(CTRLA_FORM_M);
+    if (!picoRTOS_assert(par != UART_PAR_IGNORE)) return -EINVAL;
+    if (!picoRTOS_assert(par < UART_PAR_COUNT)) return -EINVAL;
 
-    if (parenb) {
-        ctx->base->CTRLA |= CTRLA_FORM(0x1);
-        if (parodd) ctx->base->CTRLB |= CTRLB_PMODE;
-        else ctx->base->CTRLB &= ~CTRLB_PMODE;
-    }
+    ctx->base->CTRLA &= ~CTRLA_FORM(CTRLA_FORM_M);
+    if (par == UART_PAR_NONE)
+        return 0;
+
+    ctx->base->CTRLA |= CTRLA_FORM(0x1);
+    if (par == UART_PAR_ODD) ctx->base->CTRLB |= CTRLB_PMODE;
+    else ctx->base->CTRLB &= ~CTRLB_PMODE;
 
     return 0;
 }
 
-static int set_stopb(struct uart *ctx, bool cstopb)
+static int set_cstopb(struct uart *ctx, uart_cstopb_t cstopb)
 {
-    if (cstopb) ctx->base->CTRLB |= CTRLB_SBMODE;
+    if (!picoRTOS_assert(cstopb != UART_CSTOPB_IGNORE)) return -EINVAL;
+    if (!picoRTOS_assert(cstopb < UART_CSTOPB_COUNT)) return -EINVAL;
+
+    if (cstopb == UART_CSTOPB_2BIT) ctx->base->CTRLB |= CTRLB_SBMODE;
     else ctx->base->CTRLB &= ~CTRLB_SBMODE;
 
     return 0;
@@ -202,10 +208,24 @@ int uart_setup(struct uart *ctx, const struct uart_settings *settings)
 
     ctx->base->CTRLA &= ~CTRLA_ENABLE;
 
-    if ((res = set_baudrate(ctx, settings->baudrate)) < 0 ||
-        (res = set_cs(ctx, settings->cs)) < 0 ||
-        (res = set_parity(ctx, settings->parenb, settings->parodd)) < 0 ||
-        (res = set_stopb(ctx, settings->cstopb)) < 0)
+    /* baudrate */
+    if (settings->baudrate != 0 &&
+        (res = set_baudrate(ctx, settings->baudrate)) < 0)
+        return res;
+
+    /* cs */
+    if (settings->cs != 0 &&
+        (res = set_cs(ctx, settings->cs)) < 0)
+        return res;
+
+    /* parity */
+    if (settings->par != UART_PAR_IGNORE &&
+        (res = set_parity(ctx, settings->par)) < 0)
+        return res;
+
+    /* cstopb */
+    if (settings->cstopb != UART_CSTOPB_IGNORE &&
+        (res = set_cstopb(ctx, settings->cstopb)) < 0)
         return res;
 
     ctx->base->CTRLA |= CTRLA_ENABLE;

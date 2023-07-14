@@ -155,23 +155,31 @@ static int set_cs(struct uart *ctx, size_t cs)
     return 0;
 }
 
-static int set_parity(struct uart *ctx, bool parenb, bool parodd)
+static int set_parity(struct uart *ctx, uart_par_t par)
 {
-    if (parenb) {
-        ctx->base->UARTLCR_H |= UARTLCR_H_PEN;
+    if (!picoRTOS_assert(par != UART_PAR_IGNORE)) return -EINVAL;
+    if (!picoRTOS_assert(par < UART_PAR_COUNT)) return -EINVAL;
 
-        if (parodd) ctx->base->UARTLCR_H &= ~UARTLCR_H_EPS;
-        else ctx->base->UARTLCR_H |= UARTLCR_H_EPS;
-
-    }else
+    /* no parity */
+    if (par == UART_PAR_NONE) {
         ctx->base->UARTLCR_H &= ~UARTLCR_H_PEN;
+        return 0;
+    }
+
+    /* parity */
+    ctx->base->UARTLCR_H |= UARTLCR_H_PEN;
+    if (par == UART_PAR_ODD) ctx->base->UARTLCR_H &= ~UARTLCR_H_EPS;
+    else ctx->base->UARTLCR_H |= UARTLCR_H_EPS;
 
     return 0;
 }
 
-static int set_stopb(struct uart *ctx, bool cstopb)
+static int set_cstopb(struct uart *ctx, uart_cstopb_t cstopb)
 {
-    if (cstopb) ctx->base->UARTLCR_H |= UARTLCR_H_STP2;
+    if (!picoRTOS_assert(cstopb != UART_CSTOPB_IGNORE)) return -EINVAL;
+    if (!picoRTOS_assert(cstopb < UART_CSTOPB_COUNT)) return -EINVAL;
+
+    if (cstopb == UART_CSTOPB_2BIT) ctx->base->UARTLCR_H |= UARTLCR_H_STP2;
     else ctx->base->UARTLCR_H &= ~UARTLCR_H_STP2;
 
     return 0;
@@ -181,10 +189,24 @@ int uart_setup(struct uart *ctx, const struct uart_settings *settings)
 {
     int res;
 
-    if ((res = set_baudrate(ctx, settings->baudrate)) < 0 ||
-        (res = set_cs(ctx, settings->cs)) < 0 ||
-        (res = set_parity(ctx, settings->parenb, settings->parodd)) < 0 ||
-        (res = set_stopb(ctx, settings->cstopb)) < 0)
+    /* baudrate */
+    if (settings->baudrate != 0 &&
+        (res = set_baudrate(ctx, settings->baudrate)) < 0)
+        return res;
+
+    /* cs */
+    if (settings->cs != 0 &&
+        (res = set_cs(ctx, settings->cs)) < 0)
+        return res;
+
+    /* parity */
+    if (settings->par != UART_PAR_IGNORE &&
+        (res = set_parity(ctx, settings->par)) < 0)
+        return res;
+
+    /* cstopb */
+    if (settings->cstopb != UART_CSTOPB_IGNORE &&
+        (res = set_cstopb(ctx, settings->cstopb)) < 0)
         return res;
 
     return 0;

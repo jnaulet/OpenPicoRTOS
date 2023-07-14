@@ -100,25 +100,18 @@ static int set_baudrate(struct uart *ctx, unsigned long baud)
     return 0;
 }
 
-int uart_setup(struct uart *ctx, const struct uart_settings *settings)
+static int set_cs(struct uart *ctx, size_t cs)
 {
-    int res;
-    uint8_t ctrlc = (uint8_t)0;
+    if (!picoRTOS_assert(cs >= (size_t)USART_TINYAVR_CS_MIN)) return -EINVAL;
+    if (!picoRTOS_assert(cs <= (size_t)USART_TINYAVR_CS_MAX)) return -EINVAL;
 
-    if ((res = set_baudrate(ctx, settings->baudrate)) < 0)
-        return res;
+    ctx->base->CTRLC &= ~CTRLC_CHSIZE(CTRLC_CHSIZE_M);
 
-    if (settings->cstopb) ctrlc |= CTRLC_SBMODE;
-    if (settings->parenb) {
-        if (settings->parodd) ctrlc |= CTRLC_PMODE(0x3);
-        else ctrlc |= CTRLC_PMODE(0x2);
-    }
-
-    switch (settings->cs) {
-    case 5: ctrlc |= CTRLC_CHSIZE(0); break;
-    case 6: ctrlc |= CTRLC_CHSIZE(1); break;
-    case 7: ctrlc |= CTRLC_CHSIZE(2); break;
-    case 8: ctrlc |= CTRLC_CHSIZE(3); break;
+    switch (cs) {
+    case 5: ctx->base->CTRLC |= CTRLC_CHSIZE(0); break;
+    case 6: ctx->base->CTRLC |= CTRLC_CHSIZE(1); break;
+    case 7: ctx->base->CTRLC |= CTRLC_CHSIZE(2); break;
+    case 8: ctx->base->CTRLC |= CTRLC_CHSIZE(3); break;
     // case 9: ctrlc |= CTRLC_CHSIZE(6); break;
     default:
         picoRTOS_break();
@@ -126,7 +119,59 @@ int uart_setup(struct uart *ctx, const struct uart_settings *settings)
         return -EIO;
     }
 
-    ctx->base->CTRLC = ctrlc;
+    return 0;
+}
+
+static int set_parity(struct uart *ctx, uart_par_t par)
+{
+    if (!picoRTOS_assert(par != UART_PAR_IGNORE)) return -EINVAL;
+    if (!picoRTOS_assert(par < UART_PAR_COUNT)) return -EINVAL;
+
+    ctx->base->CTRLC &= ~CTRLC_PMODE(CTRLC_PMODE_M);
+    if (par == UART_PAR_NONE)
+        return 0;
+
+    if (par == UART_PAR_ODD) ctx->base->CTRLC |= CTRLC_PMODE(0x3);
+    else ctx->base->CTRLC |= CTRLC_PMODE(0x2);
+
+    return 0;
+}
+
+static int set_cstopb(struct uart *ctx, uart_cstopb_t cstopb)
+{
+    if (!picoRTOS_assert(cstopb != UART_CSTOPB_IGNORE)) return -EINVAL;
+    if (!picoRTOS_assert(cstopb < UART_CSTOPB_COUNT)) return -EINVAL;
+
+    if (cstopb == UART_CSTOPB_2BIT) ctx->base->CTRLC |= CTRLC_SBMODE;
+    else ctx->base->CTRLC &= ~CTRLC_SBMODE;
+
+    return 0;
+}
+
+int uart_setup(struct uart *ctx, const struct uart_settings *settings)
+{
+    int res;
+
+    /* baudrate */
+    if (settings->baudrate != 0 &&
+        (res = set_baudrate(ctx, settings->baudrate)) < 0)
+        return res;
+
+    /* cs */
+    if (settings->cs != 0 &&
+        (res = set_cs(ctx, settings->cs)) < 0)
+        return res;
+
+    /* parity */
+    if (settings->par != UART_PAR_IGNORE &&
+        (res = set_parity(ctx, settings->par)) < 0)
+        return res;
+
+    /* cstopb */
+    if (settings->cstopb != UART_CSTOPB_IGNORE &&
+        (res = set_cstopb(ctx, settings->cstopb)) < 0)
+        return res;
+
     return 0;
 }
 

@@ -4,6 +4,9 @@
 #include "uart.h"
 #include "clock.h"
 
+#define UART_AVR_CS_MIN 5
+#define UART_AVR_CS_MAX 8
+
 struct USART_AVR;
 
 struct uart {

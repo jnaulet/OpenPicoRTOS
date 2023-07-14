@@ -89,21 +89,27 @@ static int set_baudrate(struct uart *ctx, unsigned long baudrate)
     return 0;
 }
 
-static int set_parity(struct uart *ctx, bool parenb, bool parodd)
+static int set_parity(struct uart *ctx, uart_par_t par)
 {
-    ctx->base->UxMODE.CLR = (uint32_t)UxMODE_PDSEL(UxMODE_PDSEL_M);
+    if (!picoRTOS_assert(par != UART_PAR_IGNORE)) return -EINVAL;
+    if (!picoRTOS_assert(par < UART_PAR_COUNT)) return -EINVAL;
 
-    if (parenb) {
-        if (parodd) ctx->base->UxMODE.SET = (uint32_t)UxMODE_PDSEL(0x2);
-        else ctx->base->UxMODE.SET = (uint32_t)UxMODE_PDSEL(0x1);
-    }
+    ctx->base->UxMODE.CLR = (uint32_t)UxMODE_PDSEL(UxMODE_PDSEL_M);
+    if (par == UART_PAR_NONE)
+        return 0;
+
+    if (par == UART_PAR_ODD) ctx->base->UxMODE.SET = (uint32_t)UxMODE_PDSEL(0x2);
+    else ctx->base->UxMODE.SET = (uint32_t)UxMODE_PDSEL(0x1);
 
     return 0;
 }
 
-static int set_stopb(struct uart *ctx, bool cstopb)
+static int set_cstopb(struct uart *ctx, uart_cstopb_t cstopb)
 {
-    if (cstopb) ctx->base->UxMODE.SET = (uint32_t)UxMODE_STSEL;
+    if (!picoRTOS_assert(cstopb != UART_CSTOPB_IGNORE)) return -EINVAL;
+    if (!picoRTOS_assert(cstopb < UART_CSTOPB_COUNT)) return -EINVAL;
+
+    if (cstopb == UART_CSTOPB_2BIT) ctx->base->UxMODE.SET = (uint32_t)UxMODE_STSEL;
     else ctx->base->UxMODE.CLR = (uint32_t)UxMODE_STSEL;
 
     return 0;
@@ -113,9 +119,19 @@ int uart_setup(struct uart *ctx, const struct uart_settings *settings)
 {
     int res;
 
-    if ((res = set_baudrate(ctx, settings->baudrate)) < 0 ||
-        (res = set_parity(ctx, settings->parenb, settings->parodd)) < 0 ||
-        (res = set_stopb(ctx, settings->cstopb)) < 0)
+    /* baudrate */
+    if (settings->baudrate != 0 &&
+        (res = set_baudrate(ctx, settings->baudrate)) < 0)
+        return res;
+
+    /* parity */
+    if (settings->par != UART_PAR_IGNORE &&
+        (res = set_parity(ctx, settings->par)) < 0)
+        return res;
+
+    /* cstopb */
+    if (settings->cstopb != UART_CSTOPB_IGNORE &&
+        (res = set_cstopb(ctx, settings->cstopb)) < 0)
         return res;
 
     /* ignore cs */

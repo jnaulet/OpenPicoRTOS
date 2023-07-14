@@ -84,15 +84,20 @@ static int set_baudrate(struct uart *ctx, unsigned long baudrate)
     return 0;
 }
 
-static int set_parity(struct uart *ctx, bool parenb, bool parodd)
+static int set_parity(struct uart *ctx, uart_par_t par)
 {
+    if (!picoRTOS_assert(par != UART_PAR_IGNORE)) return -EINVAL;
+    if (!picoRTOS_assert(par < UART_PAR_COUNT)) return -EINVAL;
+
     ctx->base->UART_MR &= ~UART_MR_PAR(UART_MR_PAR_M);
 
-    if (parenb) {
-        if (parodd) ctx->base->UART_MR |= UART_MR_PAR(1);
-        else ctx->base->UART_MR |= UART_MR_PAR(0);
-    }else
+    if (par == UART_PAR_NONE) {
         ctx->base->UART_MR |= UART_MR_PAR(4);
+        return 0;
+    }
+
+    if (par == UART_PAR_ODD) ctx->base->UART_MR |= UART_MR_PAR(1);
+    else ctx->base->UART_MR |= UART_MR_PAR(0);
 
     return 0;
 }
@@ -101,8 +106,14 @@ int uart_setup(struct uart *ctx, const struct uart_settings *settings)
 {
     int res;
 
-    if ((res = set_baudrate(ctx, settings->baudrate)) < 0 ||
-        (res = set_parity(ctx, settings->parenb, settings->parodd)) < 0)
+    /* baudrate */
+    if (settings->baudrate != 0 &&
+        (res = set_baudrate(ctx, settings->baudrate)) < 0)
+        return res;
+
+    /* parity */
+    if (settings->par != UART_PAR_IGNORE &&
+        (res = set_parity(ctx, settings->par)) < 0)
         return res;
 
     /* ignore cs and stopb */
