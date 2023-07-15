@@ -31,6 +31,7 @@ struct spi {
     /*@temp@*/ struct SPI_ARM_PL022 *base;
     clock_id_t clkid;
     size_t frame_size;
+    size_t frame_width;
     int balance;
     /* dma opt. */
     spi_arm_pl022_state_t state;

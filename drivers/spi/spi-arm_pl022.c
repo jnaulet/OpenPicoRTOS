@@ -69,7 +69,8 @@ int spi_arm_pl022_init(struct spi *ctx, int base, clock_id_t clkid)
     ctx->base = (struct SPI_ARM_PL022*)base;
     ctx->clkid = clkid;
     ctx->balance = 0;
-    ctx->frame_size = 0;
+    ctx->frame_size = (size_t)8;
+    ctx->frame_width = (size_t)1;
 
     /* Motorola frame format */
     ctx->base->SSPCR0 &= ~SSPCR0_FRF(SSPCR0_FRF_M);
@@ -200,6 +201,8 @@ static int set_clkmode(struct spi *ctx, spi_clock_mode_t clkmode)
 
 static int set_frame_size(struct spi *ctx, size_t frame_size)
 {
+#define div_ceil(x, y) (((x) + ((y) - 1)) / (y))
+
     if (!picoRTOS_assert(frame_size >= (size_t)SPI_ARM_PL022_FRAME_SIZE_MIN)) return -EINVAL;
     if (!picoRTOS_assert(frame_size <= (size_t)SPI_ARM_PL022_FRAME_SIZE_MAX)) return -EINVAL;
 
@@ -207,6 +210,7 @@ static int set_frame_size(struct spi *ctx, size_t frame_size)
     ctx->base->SSPCR0 |= SSPCR0_DSS(frame_size - 1);
 
     ctx->frame_size = frame_size;
+    ctx->frame_width = div_ceil(frame_size, (size_t)8);
 
     return 0;
 }
@@ -248,9 +252,13 @@ static int write_data(struct spi *ctx, const uint8_t *data)
     if ((ctx->base->SSPSR & SSPSR_TNF) == 0)
         return -EAGAIN;
 
-    if (ctx->frame_size <= (size_t)8) {
+    switch (ctx->frame_width) {
+    case sizeof(uint8_t):
         ctx->base->SSPDR = (uint32_t)*data;
         return (int)sizeof(uint8_t);
+
+    default:
+        break;
     }
 
     ctx->base->SSPDR = (uint32_t)*(uint16_t*)data;
@@ -262,9 +270,13 @@ static int read_data(struct spi *ctx, uint8_t *data)
     if ((ctx->base->SSPSR & SSPSR_RNE) == 0)
         return -EAGAIN;
 
-    if (ctx->frame_size <= (size_t)8) {
+    switch (ctx->frame_width) {
+    case sizeof(uint8_t):
         *data = (uint8_t)ctx->base->SSPDR;
         return (int)sizeof(uint8_t);
+
+    default:
+        break;
     }
 
     *(uint16_t*)data = (uint16_t)ctx->base->SSPDR;
@@ -286,7 +298,7 @@ static int spi_xfer_dma_start(struct spi *ctx, void *rx, const void *tx, size_t 
         (intptr_t)&ctx->base->SSPDR,    /* destination addresss */
         true,                           /* incr_read */
         false,                          /* incr_write */
-        ctx->frame_size / (size_t)8,    /* size */
+        ctx->frame_width,               /* size */
         n                               /* byte count */
     };
 
@@ -296,7 +308,7 @@ static int spi_xfer_dma_start(struct spi *ctx, void *rx, const void *tx, size_t 
         (intptr_t)rx,                   /* destination address */
         false,                          /* incr_read */
         true,                           /* incr_write */
-        ctx->frame_size / (size_t)8,    /* size */
+        ctx->frame_width,               /* size */
         n                               /* byte count */
     };
 
@@ -348,10 +360,7 @@ static int spi_xfer_dma(struct spi *ctx, void *rx, const void *tx, size_t n)
 static int spi_xfer_nodma(struct spi *ctx, void *rx, const void *tx, size_t n)
 {
     if (!picoRTOS_assert(n > 0)) return -EINVAL;
-
-    /* 16bit check */
-    if (ctx->frame_size > (size_t)8)
-        if (!picoRTOS_assert((n & 0x1) == 0)) return -EINVAL;
+    if (!picoRTOS_assert((n & (ctx->frame_width - 1)) == 0)) return -EINVAL;
 
     size_t recv = 0;
     uint8_t *rx8 = rx;
