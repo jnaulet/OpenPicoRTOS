@@ -79,6 +79,7 @@ int spi_pic32mx_init(struct spi *ctx, int base, clock_id_t clkid)
     ctx->base = (struct SPI_PIC32MX*)base;
     ctx->clkid = clkid;
     ctx->frame_size = (size_t)8;
+    ctx->frame_width = (size_t)1;
     ctx->balance = 0;
 
     /* turn on, enhanced mode */
@@ -149,6 +150,8 @@ static int set_clkmode(struct spi *ctx, spi_clock_mode_t clkmode)
 
 static int set_frame_size(struct spi *ctx, size_t frame_size)
 {
+#define div_ceil(x, y) (((x) + ((y) - 1)) / (y))
+
     ctx->base->SPIxCON.CLR = (uint32_t)(SPIxCON_MODE32 | SPIxCON_MODE16);
 
     switch (frame_size) {
@@ -161,6 +164,8 @@ static int set_frame_size(struct spi *ctx, size_t frame_size)
     }
 
     ctx->frame_size = frame_size;
+    ctx->frame_width = div_ceil(frame_size, (size_t)8);
+
     return 0;
 }
 
@@ -195,14 +200,17 @@ static int write_data(struct spi *ctx, const uint8_t *data)
     if ((ctx->base->SPIxSTAT.REG & SPIxSTAT_SPITBF) != 0)
         return -EAGAIN;
 
-    if (ctx->frame_size <= (size_t)8) {
+    switch (ctx->frame_width) {
+    case sizeof(uint8_t):
         ctx->base->SPIxBUF.REG = (uint32_t)*data;
         return (int)sizeof(uint8_t);
-    }
 
-    if (ctx->frame_size <= (size_t)16) {
+    case sizeof(uint16_t):
         ctx->base->SPIxBUF.REG = (uint32_t)*(uint16_t*)data;
         return (int)sizeof(uint16_t);
+
+    default:
+        break;
     }
 
     ctx->base->SPIxBUF.REG = *(uint32_t*)data;
@@ -214,14 +222,17 @@ static int read_data(struct spi *ctx, uint8_t *data)
     if ((ctx->base->SPIxSTAT.REG & SPIxSTAT_SPIRBE) != 0)
         return -EAGAIN;
 
-    if (ctx->frame_size <= (size_t)8) {
+    switch (ctx->frame_width) {
+    case sizeof(uint8_t):
         *data = (uint8_t)ctx->base->SPIxBUF.REG;
         return (int)sizeof(uint8_t);
-    }
 
-    if (ctx->frame_size <= (size_t)16) {
+    case sizeof(uint16_t):
         *data = (uint16_t)ctx->base->SPIxBUF.REG;
         return (int)sizeof(uint16_t);
+
+    default:
+        break;
     }
 
     *(uint32_t*)data = ctx->base->SPIxBUF.REG;
@@ -231,10 +242,7 @@ static int read_data(struct spi *ctx, uint8_t *data)
 int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
 {
     if (!picoRTOS_assert(n > 0)) return -EINVAL;
-
-    /* 16bit check */
-    if (ctx->frame_size > (size_t)8)
-        if (!picoRTOS_assert((n & 0x1) == 0)) return -EINVAL;
+    if (!picoRTOS_assert((n & (ctx->frame_width - 1)) == 0)) return -EINVAL;
 
     size_t recv = 0;
     uint8_t *rx8 = rx;
