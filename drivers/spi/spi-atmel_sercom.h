@@ -29,6 +29,7 @@ struct spi {
     /*@temp@*/ struct SPI_ATMEL_SERCOM *base;
     clock_id_t clkid;
     size_t frame_size;
+    size_t frame_width;
     int balance;
     /* dma opt. */
     spi_atmel_sercom_state_t state;
