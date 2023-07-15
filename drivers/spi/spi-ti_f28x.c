@@ -305,7 +305,7 @@ static int spi_xfer_dma_start(struct spi *ctx, void *rx, const void *tx, size_t 
         (intptr_t)&ctx->base->SPITXBUF, /* destination address */
         true,                           /* incr_read */
         false,                          /* incr_write */
-        ctx->frame_size / (size_t)16,   /* size */
+        sizeof(uint16_t),               /* size */
         n                               /* byte count */
     };
 
@@ -315,7 +315,7 @@ static int spi_xfer_dma_start(struct spi *ctx, void *rx, const void *tx, size_t 
         (intptr_t)rx,                   /* destination address */
         false,                          /* incr_read */
         true,                           /* incr_write */
-        ctx->frame_size / (size_t)16,   /* size */
+        sizeof(uint16_t),               /* size */
         n                               /* byte count */
     };
 
