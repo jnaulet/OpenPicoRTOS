@@ -18,6 +18,7 @@ struct spi {
     clock_id_t clkid;
     int balance;
     size_t frame_size;
+    size_t frame_width;
     uint32_t pcs;
 };
 

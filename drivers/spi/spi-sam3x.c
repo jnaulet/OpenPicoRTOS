@@ -76,7 +76,8 @@ int spi_sam3x_init(struct spi *ctx, int base, clock_id_t clkid)
 {
     ctx->base = (struct SPI_SAM3X*)base;
     ctx->clkid = clkid;
-    ctx->frame_size = 0;
+    ctx->frame_size = (size_t)8;
+    ctx->frame_width = (size_t)1;
     ctx->balance = 0;
     ctx->pcs = 0;
 
@@ -165,6 +166,8 @@ static int set_clkmode(struct spi *ctx, size_t cs, spi_clock_mode_t clkmode)
 
 static int set_frame_size(struct spi *ctx, size_t cs, size_t frame_size)
 {
+#define div_ceil(x, y) (((x) + ((y) - 1)) / (y))
+
     if (!picoRTOS_assert(cs < (size_t)SPI_SAM3X_CS_COUNT)) return -EINVAL;
     if (!picoRTOS_assert(frame_size >= (size_t)SPI_SAM3X_FRAME_SIZE_MIN)) return -EINVAL;
     if (!picoRTOS_assert(frame_size <= (size_t)SPI_SAM3X_FRAME_SIZE_MAX)) return -EINVAL;
@@ -175,6 +178,8 @@ static int set_frame_size(struct spi *ctx, size_t cs, size_t frame_size)
     ctx->base->SPI_CSR[cs] |= SPI_CSRn_BITS(bits);
 
     ctx->frame_size = frame_size;
+    ctx->frame_width = div_ceil(frame_size, (size_t)8);
+
     return 0;
 }
 
@@ -231,9 +236,13 @@ static int receive_data(struct spi *ctx, uint8_t *data)
     if (SPI_RDR_PCS_GET(spi_rdr) == SPI_RDR_PCS_M)
         return -EAGAIN;
 
-    if (ctx->frame_size <= (size_t)8) {
+    switch (ctx->frame_size) {
+    case sizeof(uint8_t):
         *data = (uint8_t)spi_rdr;
         return (int)sizeof(uint8_t);
+
+    default:
+        break;
     }
 
     *(uint16_t*)data = (uint16_t)spi_rdr;
@@ -245,9 +254,13 @@ static int transmit_data(struct spi *ctx, const uint8_t *data)
     if ((ctx->base->SPI_SR & SPI_SR_TDRE) == 0)
         return -EAGAIN;
 
-    if (ctx->frame_size <= (size_t)8) {
+    switch (ctx->frame_size) {
+    case sizeof(uint8_t):
         ctx->base->SPI_TDR = (uint32_t)*data;
         return (int)sizeof(uint8_t);
+
+    default:
+        break;
     }
 
     ctx->base->SPI_TDR = (uint32_t)*(uint16_t*)data;
@@ -257,10 +270,7 @@ static int transmit_data(struct spi *ctx, const uint8_t *data)
 int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
 {
     if (!picoRTOS_assert(n > 0)) return -EINVAL;
-
-    /* 16bit check */
-    if (ctx->frame_size > (size_t)8)
-        if (!picoRTOS_assert((n & 0x1) == 0)) return -EINVAL;
+    if (!picoRTOS_assert((n & (ctx->frame_width - 1)) == 0)) return -EINVAL;
 
     size_t recv = 0;
     uint8_t *rx8 = rx;
