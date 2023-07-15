@@ -24,6 +24,7 @@ struct spi {
     clock_id_t clkid;
     int balance;
     size_t frame_size;
+    size_t frame_width;
     /* dma opt. */
     spi_gd32vf103_state_t state;
     /*@temp@*/ /*@null@*/ struct dma *fill;
