@@ -15,3 +15,5 @@ SRC_S += $(ARCH_DIR)/picoRTOS_portasm.S
 
 LDRAM := $(DEVICE_DIR)/gcc/rp2040_ram.ld
 LDFLASH := $(DEVICE_DIR)/gcc/rp2040_rom.ld
+
+MCPU_MFLOAT := -mcpu=cortex-m0plus -mfloat-abi=soft
