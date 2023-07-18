@@ -52,7 +52,8 @@ SECTIONS
 
         . = ALIGN(4);
         *(.eh_frame*)
-        
+        *(.note.gnu.*)
+
         . = ALIGN(4);
         __text_end__ = .;
     } > rom

@@ -3,31 +3,51 @@
 
 /* MEMORY MAPPING */
 
-#define ADDR_RESET      0x4000c000
+#define ADDR_XIP     0x10000000
+#define ADDR_XIP_SSI 0x18000000
 
-#define ADDR_IO_BANK0   0x40014000
-#define ADDR_PADS_BANK0 0x4001c000
+#define ADDR_SYSINFO             0x40000000
+#define ADDR_SYSCFG              0x40004000
+#define ADDR_CLOCKS              0x40008000
+#define ADDR_RESET               0x4000c000
+#define ADDR_PSM                 0x40010000
+#define ADDR_IO_BANK0            0x40014000
+#define ADDR_IO_QSPI             0x40018000
+#define ADDR_PADS_BANK0          0x4001c000
+#define ADDR_PADS_QSPI           0x40020000
+#define ADDR_XOSC                0x40024000
+#define ADDR_PLL_SYS             0x40028000
+#define ADDR_PLL_USB             0x4002c000
+#define ADDR_BUSCTRL             0x40030000
+#define ADDR_UART0               0x40034000
+#define ADDR_UART1               0x40038000
+#define ADDR_SPI0                0x4003c000
+#define ADDR_SPI1                0x40040000
+#define ADDR_I2C0                0x40044000
+#define ADDR_I2C1                0x40048000
+#define ADDR_ADC                 0x4004c000
+#define ADDR_PWM                 0x40050000
+#define ADDR_TIMER               0x40054000
+#define ADDR_WATCHDOG            0x40058000
+#define ADDR_RTC                 0x4005c000
+#define ADDR_ROSC                0x40060000
+#define ADDR_VREG_AND_CHIP_RESET 0x40064000
+#define ADDR_TBMAN               0x4006c000
 
-#define ADDR_UART0      0x40034000
-#define ADDR_UART1      0x40038000
+#define ADDR_DMA 0x50000000
 
-#define ADDR_SPI0       0x4003c000
-#define ADDR_SPI1       0x40040000
+#define ADDR_USBCTRL       0x50100000
+#define ADDR_USBCTRL_DPRAM 0x50100000
+#define ADDR_USBCTRL_REGS  0x50110000
 
-#define ADDR_I2C0       0x40044000
-#define ADDR_I2C1       0x40048000
+#define ADDR_PIO0    0x50200000
+#define ADDR_PIO1    0x50300000
+#define ADDR_XIP_AUX 0x50400000
 
-#define ADDR_PWM        0x40050000
+#define ADDR_SIO      0xd0000000
+#define ADDR_SIO_GPIO 0xd0000004
 
-#define ADDR_WATCHDOG   0x40058000
-
-#define ADDR_ADC        0x4004c000
-
-#define ADDR_DMA        0x50000000
-
-#define ADDR_SIO        0xd0000000
-
-#define ADDR_SIO_GPIO   0xd0000004
+#define ADDR_PPB 0xe0000000
 
 /* IRQs */
 
