@@ -25,12 +25,12 @@ DEFINE += -DCONFIG_SYSCLK_HZ=125000000 -DCONFIG_SMP_CORES=2
 DEFINE += -DLCD_FPS=25
 
 CFLAGS += -Wall -Wextra -std=c99 $(INCLUDE) -O3 -g3 $(DEFINE)
-CFLAGS += -mcpu=cortex-m0plus
+CFLAGS += $(MCPU_MFLOAT)
 
 SFLAGS += -x assembler-with-cpp -g3 $(DEFINE) $(INCLUDE)
-SFLAGS += -mcpu=cortex-m0plus
+SFLAGS += $(MCPU_MFLOAT)
 
-LDFLAGS += -mcpu=cortex-m0plus
+LDFLAGS += $(MCPU_MFLOAT)
 
 # drivers
 INCLUDE += -I$(PICORTOS_DIR)/drivers/include

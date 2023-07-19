@@ -22,12 +22,12 @@ CPPCHECKFLAGS += --suppress=unusedFunction
 CPPCHECKFLAGS += --suppress=unusedStructMember
 
 CFLAGS += -Wall -Wextra -std=c99 $(INCLUDE) -O0 -g3 $(DEFINE)
-CFLAGS += -mcpu=cortex-m0plus $(SUPPORT_FOR_SMP)
+CFLAGS += $(MCPU_MFLOAT) $(SUPPORT_FOR_SMP)
 
 SFLAGS += -x assembler-with-cpp -g3 $(DEFINE) $(INCLUDE)
-SFLAGS += -mcpu=cortex-m0plus
+SFLAGS += $(MCPU_MFLOAT)
 
-LDFLAGS += -mcpu=cortex-m0plus
+LDFLAGS += $(MCPU_MFLOAT)
 
 INCLUDE += -I.
 
