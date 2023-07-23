@@ -1,6 +1,6 @@
 # Build file for Arduino (no probe required)
-ELF_RAM := adafruit-itsybitsy_ram.elf
-ELF_FLASH := adafruit-itsybitsy_flash.elf
+ELF_RAM := adafruit-itsybitsy-m4_ram.elf
+ELF_FLASH := adafruit-itsybitsy-m4_flash.elf
 
 CC := gcc
 OBJCOPY := objcopy
@@ -56,7 +56,7 @@ OBJ += $(SRC_S:%.S=$(BUILD)/%.o)
 
 # custom linker scripts for arduino-cli (bootloader)
 LDRAM := $(DEVICE_DIR)/gcc/atsamd51g19a_arduino-boot_ram.ld
-LDFLASH := $(DEVICE_DIR)/gcc/atsamd51g19a_arduino-boot_rom.ld
+LDFLASH := $(DEVICE_DIR)/gcc/atsamd51g19a_arduino-boot_flash_xip.ld
 
 all: $(ELF_RAM) $(ELF_FLASH)
 
