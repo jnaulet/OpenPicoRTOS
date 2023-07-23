@@ -74,7 +74,7 @@ Reset_Handler:
 	beq .ignore_text_relocation
 
 	/* copy .text to ram */
-	COPY_TO_RAM __etext, __text_start__, __text_end__
+	COPY_TO_RAM __edata, __text_start__, __text_end__
 	COPY_TO_RAM __vectors, __vectors_start__, __vectors_end__
 
 .ignore_text_relocation:
@@ -82,7 +82,7 @@ Reset_Handler:
 	INIT_VTOR __vectors_start__
 	INIT_STACK __StackTop
 	/* copy .data section */
-	COPY_TO_RAM __sdata, __data_start__, __data_end__
+	COPY_TO_RAM __etext, __data_start__, __data_end__
 	/* zero .bss section */
 	ZERO_RAM __bss_start__, __bss_end__
 

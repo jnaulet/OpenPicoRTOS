@@ -1,5 +1,5 @@
 /*
- * Memory map for RP2040 (RAM, copy)
+ * Memory map for RP2040 (FLASH, eXecute In Place)
  */
 MEMORY
 {
@@ -42,4 +42,4 @@ SECTIONS
 }
 
 /* common sections for cortex-m */
-INCLUDE sections_ram.ld
+INCLUDE sections_flash_xip.ld

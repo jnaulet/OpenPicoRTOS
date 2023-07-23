@@ -16,6 +16,7 @@ SRC_S := $(DEVICE_DIR)/startup.S
 SRC_S += $(ARCH_SMP_DIR)/picoRTOS-SMP_portasm.S
 
 LDRAM := $(DEVICE_DIR)/gcc/rp2040_ram.ld
-LDFLASH := $(DEVICE_DIR)/gcc/rp2040_rom.ld
+LDFLASH := $(DEVICE_DIR)/gcc/rp2040_flash_xip.ld
 
 MCPU_MFLOAT := -mcpu=cortex-m0plus -mfloat-abi=soft
+LDFLAGS := -L$(PICORTOS_DIR)/devices/lib/arm/cortex-m/ldscripts
