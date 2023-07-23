@@ -65,7 +65,7 @@ OBJ += $(SRC_S:%.S=$(BUILD)/%.o)
 # custom linker scripts for arduino-cli (bootloader)
 # Original files are in devices/atmel/atsame5x/gcc/samd51g_xxx.ld
 LDRAM := $(DEVICE_DIR)/gcc/atsamd51g19a_arduino-boot_ram.ld
-LDFLASH := $(DEVICE_DIR)/gcc/atsamd51g19a_arduino-boot_rom.ld
+LDFLASH := $(DEVICE_DIR)/gcc/atsamd51g19a_arduino-boot_flash_xip.ld
 
 all: $(ELF_RAM) $(ELF_FLASH)
 
