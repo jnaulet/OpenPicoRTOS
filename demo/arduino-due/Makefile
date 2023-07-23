@@ -67,7 +67,7 @@ OBJ += $(SRC_S:%.S=$(BUILD)/%.o)
 
 # custom linker scripts for arduino-cli (bootloader)
 LDRAM := $(DEVICE_DIR)/gcc/atsam3x8e_ram.ld
-LDFLASH := $(DEVICE_DIR)/gcc/atsam3x8e_rom.ld
+LDFLASH := $(DEVICE_DIR)/gcc/atsam3x8e_flash_xip.ld
 
 all: $(ELF_RAM) $(ELF_FLASH)
 
