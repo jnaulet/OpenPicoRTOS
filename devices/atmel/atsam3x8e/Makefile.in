@@ -12,3 +12,5 @@ SRC_C += $(ARCH_DIR)/picoRTOS_port.c
 
 SRC_S := $(DEVICE_DIR)/startup.S
 SRC_S += $(ARCH_DIR)/picoRTOS_portasm.S
+
+LDFLAGS := -L$(PICORTOS_DIR)/devices/lib/arm/cortex-m/ldscripts

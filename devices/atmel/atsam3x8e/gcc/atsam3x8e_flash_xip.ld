@@ -1,5 +1,5 @@
 /*
- * SAM3X8E memory mapping for RAM
+ * SAM3X8E memory mapping for ROM
  */
 
 MEMORY
@@ -8,7 +8,7 @@ MEMORY
     ram(rwx)     : ORIGIN = 0x20000000, LENGTH = 96k
 }
 
-PROVIDE(__relocate_text = 0x1);
+PROVIDE(__relocate_text = 0x0);
 STACK_SIZE = DEFINED(STACK_SIZE) ? STACK_SIZE : DEFINED(__stack_size__) ? __stack_size__ : 0x100;
 
 ENTRY(Reset_Handler)
@@ -16,7 +16,7 @@ REGION_ALIAS("FLASH", flash);
 REGION_ALIAS("RAM", ram);
 
 /* common sections definition */
-INCLUDE sections_ram.ld
+INCLUDE sections_flash_xip.ld
 /* user-defined sections definitions */
 SECTIONS
 {
