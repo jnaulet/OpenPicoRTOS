@@ -1,5 +1,5 @@
 # Device configuration file for STM32H743
-ARCH_DIR := $(PICORTOS_DIR)/staging/arch/arm/cm7
+ARCH_DIR := $(PICORTOS_DIR)/arch/arm/cm7
 DEVICE_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
 DEFINE := -DSTM32H743
