@@ -8,14 +8,15 @@ CROSS := arm-none-eabi-
 BUILD := build
 
 # Configure system
-PICORTOS_DIR := $(abspath ../../..)
--include $(PICORTOS_DIR)/staging/devices/stm/stm32h743/Makefile.in
+PICORTOS_DIR := $(abspath ../..)
+-include $(PICORTOS_DIR)/devices/stm/stm32h743/Makefile.in
 
 INCLUDE += -I.
 SPLINTFLAGS += -checks +unixlib
 CPPCHECKFLAGS += --enable=all --inline-suppr -DNDEBUG
 CPPCHECKFLAGS += --suppress=missingIncludeSystem
 CPPCHECKFLAGS += --suppress=unusedFunction
+CPPCHECKFLAGS += --suppress=unusedStructMember
 
 CFLAGS += -Wall -Wextra -std=c99 $(INCLUDE) -O0 -g3 $(DEFINE)
 CFLAGS += -mcpu=cortex-m7 -mthumb -mfpu=fpv5-sp-d16
@@ -24,22 +25,22 @@ SFLAGS += -mcpu=cortex-m7 -mthumb -mfpu=fpv5-sp-d16
 
 INCLUDE += -I$(PICORTOS_DIR)/arch/include
 INCLUDE += -I$(PICORTOS_DIR)/drivers/include
-INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/clock
-INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/gpio
-INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/mux
-INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/pwm
-INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/spi
-INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/uart
+INCLUDE += -I$(PICORTOS_DIR)/drivers/clock
+INCLUDE += -I$(PICORTOS_DIR)/drivers/gpio
+INCLUDE += -I$(PICORTOS_DIR)/drivers/mux
+INCLUDE += -I$(PICORTOS_DIR)/drivers/pwm
+INCLUDE += -I$(PICORTOS_DIR)/drivers/spi
+INCLUDE += -I$(PICORTOS_DIR)/drivers/uart
 
 # drivers
 # staging
-SRC_C += $(PICORTOS_DIR)/staging/drivers/clock/clock-stm32h7xx.c
-SRC_C += $(PICORTOS_DIR)/staging/drivers/dma/dma-stm32h7xx.c
-SRC_C += $(PICORTOS_DIR)/staging/drivers/gpio/gpio-stm32h7xx.c
-SRC_C += $(PICORTOS_DIR)/staging/drivers/mux/mux-stm32h7xx.c
-SRC_C += $(PICORTOS_DIR)/staging/drivers/pwm/pwm-stm32h7xx_tim.c
-SRC_C += $(PICORTOS_DIR)/staging/drivers/spi/spi-stm32h7xx.c
-SRC_C += $(PICORTOS_DIR)/staging/drivers/uart/uart-stm32h7xx.c
+SRC_C += $(PICORTOS_DIR)/drivers/clock/clock-stm32h7xx.c
+SRC_C += $(PICORTOS_DIR)/drivers/dma/dma-stm32h7xx.c
+SRC_C += $(PICORTOS_DIR)/drivers/gpio/gpio-stm32h7xx.c
+SRC_C += $(PICORTOS_DIR)/drivers/mux/mux-stm32h7xx.c
+SRC_C += $(PICORTOS_DIR)/drivers/pwm/pwm-stm32h7xx_tim.c
+SRC_C += $(PICORTOS_DIR)/drivers/spi/spi-stm32h7xx.c
+SRC_C += $(PICORTOS_DIR)/drivers/uart/uart-stm32h7xx.c
 
 # IPCs
 INCLUDE += -I$(PICORTOS_DIR)/ipc
