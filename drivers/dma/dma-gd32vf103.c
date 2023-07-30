@@ -41,6 +41,17 @@ struct DMA_GD32VF103 {
 #define DMA_CHxCTL_FTFIE     (1 << 1)
 #define DMA_CHxCTL_CHEN      (1 << 0)
 
+/* Function: dma_gd32vf103_init
+ * Initialises a GD32VF103 DMA channel
+ *
+ * Parameters:
+ *  ctx - The DMA channel to init
+ *  base - The DMA base address
+ *  channel - The DMA channel id
+ *
+ * Returns:
+ * always 0
+ */
 int dma_gd32vf103_init(struct dma *ctx, int base, size_t channel)
 {
     if (!picoRTOS_assert(channel < (size_t)DMA_GD32VF103_MAX_CH_COUNT)) return -EINVAL;
