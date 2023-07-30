@@ -38,6 +38,17 @@ struct DMAMUX_STM32H7XX {
 #define RGxCR_SIG_ID_M  0x1fu
 #define RGxCR_SIG_ID(x) ((x) & RGxCR_SIG_ID_M)
 
+/* Function: dmamux_stm32h7xx_init
+ * Inits the DMAMUX channel
+ *
+ * Parameters:
+ *  ctx - The DMAMUX channel to init
+ *  base - The DMAMUX base address
+ *  channel - The DMAMUX channel
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int dmamux_stm32h7xx_init(struct dmamux *ctx, int base, size_t channel)
 {
     if (!picoRTOS_assert(channel < (size_t)DMAMUX_STM32H7XX_CHANNEL_MAX)) return -EINVAL;
@@ -48,6 +59,16 @@ int dmamux_stm32h7xx_init(struct dmamux *ctx, int base, size_t channel)
     return 0;
 }
 
+/* Function: dmamux_stm32h7xx_set_dmareq_id
+ * Configures and DMAXMUX DMAREQ_ID
+ *
+ * Parameters:
+ *  ctx - The DMAMUX channel to configure
+ *  id - The DMAREQ_ID to setup
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int dmamux_stm32h7xx_set_dmareq_id(struct dmamux *ctx, unsigned long id)
 {
     if (!picoRTOS_assert(id <= (unsigned long)CxCR_DMAREQ_ID_M)) return -EINVAL;
