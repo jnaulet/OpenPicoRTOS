@@ -31,12 +31,32 @@ struct MUX_STM32H7XX {
 #define AFRH_AFR8_M  0xfu
 #define AFRH_AFR8(x) ((x) & AFRH_AFR8_M)
 
+/* Function: mux_stm32h7xx_init
+ * Initializes a port for muxing
+ *
+ * Parameters:
+ *  ctx - The mux object to init
+ *  base - The GPIO port base address
+ *
+ * Returns:
+ * Always 0
+ */
 int mux_stm32h7xx_init(struct mux *ctx, int base)
 {
     ctx->base = (struct MUX_STM32H7XX*)base;
     return 0;
 }
 
+/* Function: mux_stm32h7xx_analog
+ * Sets a pin as analog input
+ *
+ * Parameters:
+ *  ctx - A mux context/object previously initialized
+ *  pin - The pin number to setup on that particular port
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_stm32h7xx_analog(struct mux *ctx, size_t pin)
 {
     if (!picoRTOS_assert(pin < (size_t)MUX_STM32H7XX_PIN_COUNT)) return -EINVAL;
@@ -47,6 +67,16 @@ int mux_stm32h7xx_analog(struct mux *ctx, size_t pin)
     return 0;
 }
 
+/* Function: mux_stm32h7xx_output
+ * Sets a pin as discrete output
+ *
+ * Parameters:
+ *  ctx - A mux context/object previously initialized
+ *  pin - The pin number to setup on that particular port
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_stm32h7xx_output(struct mux *ctx, size_t pin)
 {
     if (!picoRTOS_assert(pin < (size_t)MUX_STM32H7XX_PIN_COUNT)) return -EINVAL;
@@ -58,6 +88,16 @@ int mux_stm32h7xx_output(struct mux *ctx, size_t pin)
     return 0;
 }
 
+/* Function: mux_stm32h7xx_input
+ * Sets a pin as discrete input
+ *
+ * Parameters:
+ *  ctx - A mux context/object previously initialized
+ *  pin - The pin number to setup on that particular port
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_stm32h7xx_input(struct mux *ctx, size_t pin)
 {
     if (!picoRTOS_assert(pin < (size_t)MUX_STM32H7XX_PIN_COUNT)) return -EINVAL;
@@ -68,6 +108,17 @@ int mux_stm32h7xx_input(struct mux *ctx, size_t pin)
     return 0;
 }
 
+/* Function: mux_stm32h7xx_alt
+ * Sets a pin as alternate function pin
+ *
+ * Parameters:
+ *  ctx - A mux context/object previously initialized
+ *  pin - The pin number to setup on that particular port
+ *  alt - The alternate function (0-15, see datasheet)
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_stm32h7xx_alt(struct mux *ctx, size_t pin, size_t alt)
 {
     if (!picoRTOS_assert(pin < (size_t)MUX_STM32H7XX_PIN_COUNT)) return -EINVAL;
@@ -92,6 +143,16 @@ int mux_stm32h7xx_alt(struct mux *ctx, size_t pin, size_t alt)
     return 0;
 }
 
+/* Function: mux_stm32h7xx_pull_up
+ * Pulls up a specific mux pin
+ *
+ * Parameters:
+ *  ctx - A mux context/object previously initialized
+ *  pin - The pin number to pull up
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_stm32h7xx_pull_up(struct mux *ctx, size_t pin)
 {
     if (!picoRTOS_assert(pin < (size_t)MUX_STM32H7XX_PIN_COUNT)) return -EINVAL;
@@ -103,6 +164,16 @@ int mux_stm32h7xx_pull_up(struct mux *ctx, size_t pin)
     return 0;
 }
 
+/* Function: mux_stm32h7xx_pull_down
+ * Pulls down a specific mux pin
+ *
+ * Parameters:
+ *  ctx - A mux context/object previously initialized
+ *  pin - The pin number to pull down
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_stm32h7xx_pull_down(struct mux *ctx, size_t pin)
 {
     if (!picoRTOS_assert(pin < (size_t)MUX_STM32H7XX_PIN_COUNT)) return -EINVAL;
