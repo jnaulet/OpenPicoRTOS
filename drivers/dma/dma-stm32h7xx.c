@@ -96,6 +96,17 @@ struct DMA_STM32H7XX {
 #define SxFCR_FTH_M  0x3u
 #define SxFCR_FTH(x) ((x) & SxFCR_FTH_M)
 
+/* Function: dma_stm32h7xx_init
+ * Initialises a STM32H7xx DMA channel
+ *
+ * Parameters:
+ *  ctx - The DMA channel to init
+ *  base - The DMA base address
+ *  channel - The DMA channel id
+ *
+ * Returns:
+ * always 0
+ */
 int dma_stm32h7xx_init(struct dma *ctx, int base, size_t channel)
 {
     ctx->base = (struct DMA_STM32H7XX*)base;
