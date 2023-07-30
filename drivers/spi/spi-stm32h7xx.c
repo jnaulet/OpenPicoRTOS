@@ -122,6 +122,17 @@ static int get_fifo_depth(struct spi *ctx)
     return depth / 2;
 }
 
+/* Function: spi_stm32h7xx_init
+ * Initializes a SPI
+ *
+ * Parameters:
+ *  ctx - The SPI to init
+ *  base - The SPI base address
+ *  clkid - The clock id for this SPI
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int spi_stm32h7xx_init(struct spi *ctx, int base, clock_id_t clkid)
 {
     int res;
@@ -144,6 +155,16 @@ int spi_stm32h7xx_init(struct spi *ctx, int base, clock_id_t clkid)
     return 0;
 }
 
+/* Function: spi_stm32h7xx_setup
+ * Configures a spi port
+ *
+ * Parameters:
+ *  ctx - The SPI instance
+ *  settings - The SPI settings (mostly DMA)
+ *
+ * Returns:
+ * Always 0
+ */
 int spi_stm32h7xx_setup(struct spi *ctx, struct spi_stm32h7xx_settings *settings)
 {
     ctx->fill = settings->fill;
