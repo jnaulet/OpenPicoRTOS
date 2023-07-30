@@ -9,7 +9,7 @@ BUILD := build
 
 # Configure system
 PICORTOS_DIR := $(abspath ../..)
--include $(PICORTOS_DIR)/staging/devices/stm/stm32h743/Makefile.in
+-include $(PICORTOS_DIR)/devices/stm/stm32h743/Makefile.in
 
 INCLUDE += -I. -Iboard
 
@@ -30,23 +30,23 @@ SFLAGS += -mcpu=cortex-m7 -mthumb -mfpu=fpv5-sp-d16
 
 INCLUDE += -I$(PICORTOS_DIR)/arch/include
 INCLUDE += -I$(PICORTOS_DIR)/drivers/include
-INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/clock
-INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/dma
-INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/gpio
-INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/misc
-INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/mux
-INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/spi
-INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/wd
+INCLUDE += -I$(PICORTOS_DIR)/drivers/clock
+INCLUDE += -I$(PICORTOS_DIR)/drivers/dma
+INCLUDE += -I$(PICORTOS_DIR)/drivers/gpio
+INCLUDE += -I$(PICORTOS_DIR)/drivers/misc
+INCLUDE += -I$(PICORTOS_DIR)/drivers/mux
+INCLUDE += -I$(PICORTOS_DIR)/drivers/spi
+INCLUDE += -I$(PICORTOS_DIR)/drivers/wd
 
 # drivers
 # staging
-SRC_C += $(PICORTOS_DIR)/staging/drivers/clock/clock-stm32h7xx.c
-SRC_C += $(PICORTOS_DIR)/staging/drivers/dma/dma-stm32h7xx.c
-SRC_C += $(PICORTOS_DIR)/staging/drivers/gpio/gpio-stm32h7xx.c
-SRC_C += $(PICORTOS_DIR)/staging/drivers/misc/misc-stm32h7xx_dmamux.c
-SRC_C += $(PICORTOS_DIR)/staging/drivers/mux/mux-stm32h7xx.c
-SRC_C += $(PICORTOS_DIR)/staging/drivers/spi/spi-stm32h7xx.c
-SRC_C += $(PICORTOS_DIR)/staging/drivers/wd/wd-stm32h7xx_iwdg.c
+SRC_C += $(PICORTOS_DIR)/drivers/clock/clock-stm32h7xx.c
+SRC_C += $(PICORTOS_DIR)/drivers/dma/dma-stm32h7xx.c
+SRC_C += $(PICORTOS_DIR)/drivers/gpio/gpio-stm32h7xx.c
+SRC_C += $(PICORTOS_DIR)/drivers/misc/misc-stm32h7xx_dmamux.c
+SRC_C += $(PICORTOS_DIR)/drivers/mux/mux-stm32h7xx.c
+SRC_C += $(PICORTOS_DIR)/drivers/spi/spi-stm32h7xx.c
+SRC_C += $(PICORTOS_DIR)/drivers/wd/wd-stm32h7xx_iwdg.c
 
 # demo
 SRC_C += board/devebox-stm32h7xx_m.c
