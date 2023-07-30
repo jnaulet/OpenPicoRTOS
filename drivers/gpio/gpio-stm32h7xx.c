@@ -16,6 +16,17 @@ struct GPIO_STM32H7XX {
     volatile uint32_t AFRH;
 };
 
+/* Function: gpio_stm32h7xx_init
+ * Initializes a GPIO
+ *
+ * Parameters:
+ *  ctx - The GPIO to init
+ *  base - The GPIO PORT base address
+ *  pin - The GPIO pin number on that PORT
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int gpio_stm32h7xx_init(struct gpio *ctx, int base, size_t pin)
 {
     if (!picoRTOS_assert(pin < (size_t)GPIO_STM32H7XX_PIN_COUNT)) return -EINVAL;
