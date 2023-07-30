@@ -31,6 +31,17 @@ struct WD_STM32H7XX_IWDG {
 #define WINR_WIN_M  0xfffu
 #define WINR_WIN(x) ((x) & WINR_WIN_M)
 
+/* Function: wd_stm32h7xx_iwdg_init
+ * Initializes a free-running watchdog timer
+ *
+ * Parameters:
+ *  ctx - The watchdog context to init
+ *  base - The WDT base address
+ *  clkid - The WDT input clock id
+ *
+ * Returns:
+ * Always 0
+ */
 int wd_stm32h7xx_iwdg_init(/*@out@*/ struct wd *ctx, int base, clock_id_t clkid)
 {
     ctx->base = (struct WD_STM32H7XX_IWDG*)base;
@@ -53,6 +64,16 @@ static int reg_update_busywait(struct wd *ctx)
     return 0;
 }
 
+/* Function: wd_stm32h7xx_iwdg_setup
+ * Configures a IWDG watchdog
+ *
+ * Parameters:
+ *  ctx - The watchdog to configure
+ *  settings - The parameters to set
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int wd_stm32h7xx_iwdg_setup(struct wd *ctx, struct wd_stm32h7xx_iwdg_settings *settings)
 {
     if (!picoRTOS_assert(settings->timeout_ms > 0)) return -EINVAL;
