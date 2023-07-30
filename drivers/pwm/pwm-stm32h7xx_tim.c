@@ -206,6 +206,18 @@ struct PWM_STM32H7XX_TIM {
 #define TISEL_TI1SEL_M  0xfu
 #define TISEL_TI1SEL(x) ((x) & TISEL_TI1SEL_M)
 
+/* Function: pwm_stm32h7xx_tim_init
+ * Initializes a STM32H7xx TIM for PWM
+ *
+ * Parameters:
+ *  ctx - The TIM/PWM to init
+ *  base - The TIM base address
+ *  clkid - The clock id for this TIM
+ *  channel_count - The number of channels supported by this TIM
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int pwm_stm32h7xx_tim_init(struct pwm_stm32h7xx_tim *ctx, int base, clock_id_t clkid,
                            size_t channel_count)
 {
@@ -222,6 +234,16 @@ int pwm_stm32h7xx_tim_init(struct pwm_stm32h7xx_tim *ctx, int base, clock_id_t c
     return 0;
 }
 
+/* Function: pwm_stm32h7xx_tim_setup
+ * Configures a STM32H7xx TIM used as PWM
+ *
+ * Parameters:
+ *  ctx - The TIM/PWM to configure
+ *  settings - The settings to apply
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int pwm_stm32h7xx_tim_setup(struct pwm_stm32h7xx_tim *ctx,
                             struct pwm_stm32h7xx_tim_settings *settings)
 {
@@ -245,6 +267,17 @@ int pwm_stm32h7xx_tim_setup(struct pwm_stm32h7xx_tim *ctx,
     return 0;
 }
 
+/* Function: pwm_stm32h7xx_tim_pwm_init
+ * Initializes a STM32H7xx PWM channel
+ *
+ * Parameters:
+ *  ctx - The PWM channel to init
+ *  parent - The parent STM32H7xx TIM base address
+ *  channel - The PWM channel number
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int pwm_stm32h7xx_tim_pwm_init(struct pwm *ctx,
                                struct pwm_stm32h7xx_tim *parent,
                                size_t channel)
@@ -319,12 +352,22 @@ static int set_oc(struct pwm *ctx, pwm_stm32h7xx_tim_oc_t oc)
     }
 
     /* enable preload */
-    *CCMRx |= (CCMRx_OCyPE << lshift);
+    *CCMRx |= ((size_t)CCMRx_OCyPE << lshift);
     parent->base->EGR = (uint32_t)C99_EGR_UG;
 
     return 0;
 }
 
+/* Function: pwm_stm32h7xx_tim_pwm_setup
+ * Configures a STM32H7xx PWM channel
+ *
+ * Parameters:
+ *  ctx - The PWM channel to configure
+ *  settings - The settings to apply
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int pwm_stm32h7xx_tim_pwm_setup(struct pwm *ctx, struct pwm_stm32h7xx_tim_pwm_settings *settings)
 {
     int res;
