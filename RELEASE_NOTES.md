@@ -1,5 +1,13 @@
 # Release notes
 
+## picoRTOS v1.8.4
+### What's new ?
+
+Support for ARM Cortex-M7 has been added, as well as some support for the stm32h742/750 series
+provided by DevEBox for its cheap chinese eval boards.
+
+Some refactoring has been done on the ARM linker files, but it's still not 100% satisfying.
+
 ## picoRTOS v1.8.3
 ### What's new ?
 

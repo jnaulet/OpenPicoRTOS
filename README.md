@@ -48,7 +48,7 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - ARM Cortex-M0+
  - ARM Cortex-M3
  - ARM Cortex-M4/F
- - ARM Cortex-M7 (staging)
+ - ARM Cortex-M7
  - Atmel ATMega (AVR5+)
  - Atmel TinyAVR (0+) Series
  - MIPS M51xx / PIC32Mx
@@ -79,7 +79,7 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - GigaDevice GD32VF103
  - Microchip PIC32MZ-EF
  - Raspberry Pico RP2040
- - STMicro STM32H743/750 (staging)
+ - STMicro STM32H743/750
  - Texas Instruments TMS320F2837xD
 
 ## Working principle
