@@ -155,6 +155,17 @@ struct UART_STM32H7XX {
 #define PRESC_PRESCALER_M  0xfu
 #define PRESC_PRESCALER(x) ((x) & PRESC_PRESCALER_M)
 
+/* Function: uart_stm32h7xx_init
+ * Initializes an UART/USART
+ *
+ * Parameters:
+ *  ctx - The UART to init
+ *  base - The UART base address
+ *  clkid - The UART clock ID
+ *
+ * Returns:
+ * Always 0
+ */
 int uart_stm32h7xx_init(struct uart *ctx, int base, clock_id_t clkid)
 {
     ctx->base = (struct UART_STM32H7XX*)base;
