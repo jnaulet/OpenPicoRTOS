@@ -888,6 +888,15 @@ static int sw_setup(clock_stm32h7xx_sw_t sw)
     return 0;
 }
 
+/* Function: clock_stm32h7xx_init
+ * Initialises the RCC clock system
+ *
+ * Parameters:
+ *  settings - The settings to apply
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int clock_stm32h7xx_init(struct clock_settings *settings)
 {
     int res;
@@ -913,6 +922,15 @@ int clock_stm32h7xx_init(struct clock_settings *settings)
     return 0;
 }
 
+/* Function: clock_stm32h7xx_enable
+ * Enables a specific clock
+ *
+ * Parameters:
+ *  clk - The clock identifier
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int clock_stm32h7xx_enable(clock_stm32h7xx_axb_t clk)
 {
     if (!picoRTOS_assert(clk < CLOCK_STM32H7XX_AXB_COUNT)) return -EINVAL;
@@ -926,6 +944,15 @@ int clock_stm32h7xx_enable(clock_stm32h7xx_axb_t clk)
     return 0;
 }
 
+/* Function: clock_stm32h7xx_disable
+ * Disables a specific clock
+ *
+ * Parameters:
+ *  clk - The clock identifier
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int clock_stm32h7xx_disable(clock_stm32h7xx_axb_t clk)
 {
     if (!picoRTOS_assert(clk < CLOCK_STM32H7XX_AXB_COUNT)) return -EINVAL;
@@ -939,6 +966,16 @@ int clock_stm32h7xx_disable(clock_stm32h7xx_axb_t clk)
     return 0;
 }
 
+/* Function: clock_stm32h7xx_ker_sel
+ * Selects the kernel clock for a specific peripheral
+ *
+ * Parameters:
+ *  ker - The peripheral kernel clock identitifer
+ *  value - The clock value (see reference manual for more info)
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int clock_stm32h7xx_ker_sel(clock_stm32h7xx_ker_t ker, unsigned int value)
 {
     size_t index = (size_t)(0x3 & (ker >> 8));
