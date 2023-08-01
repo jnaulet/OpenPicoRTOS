@@ -2,9 +2,10 @@ SECTIONS
 {
         .init :
         {
-                __vtable_start = .;
+		__vectors__ = .;
+		__vectors_init_start = .;
                 KEEP(*(.vectors))
-                __vtable_end = .;
+                __vectors_init_end = .;
 
                 KEEP(*(.init))
                 KEEP(*(.fini))
@@ -85,7 +86,7 @@ SECTIONS
         .vectors :
         {
                 __vectors_start__ = .;
-                . = . + (__vtable_end - __vtable_start);
+                . = . + (__vectors_init_end - __vectors_init_start);
                 . = ALIGN(4);
                 __vectors_end__ = .;
         } > RAM

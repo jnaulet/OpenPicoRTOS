@@ -4,6 +4,7 @@ SECTIONS
         {
                 __text_start__ = .;
                 __vectors_start__ = .;
+		__vectors__ = .;
                 KEEP(*(.vectors))
                 __vectors_end__ = .;
                 *(.text*)
