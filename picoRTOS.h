@@ -7,17 +7,17 @@
 #include "picoRTOS_types.h"
 
 /* TASKS */
-typedef void (*picoRTOS_task_fn_t)(void*);
+typedef void (*picoRTOS_task_fn)(void*);
 
 struct picoRTOS_task {
-    /*@temp@*/ picoRTOS_task_fn_t fn;
+    /*@temp@*/ picoRTOS_task_fn fn;
     /*@temp@*/ void *priv;
     /*@temp@*/ picoRTOS_stack_t *stack;
     size_t stack_count;
 };
 
 void picoRTOS_task_init(/*@out@*/ struct picoRTOS_task *task,
-                        picoRTOS_task_fn_t fn, /*@null@*/ void *priv,
+                        picoRTOS_task_fn fn, /*@null@*/ void *priv,
                         /*@reldef@*/ picoRTOS_stack_t *stack,
                         size_t stack_count);
 
@@ -117,36 +117,45 @@ void picoRTOS_disable_interrupt(picoRTOS_irq_t irq);
 # define picoRTOS_flush_dcache(addr, n)      arch_flush_dcache((addr), (n))
 #endif
 
-/* ASSERT */
-
-#ifndef arch_break
-# define arch_break() ({ for (;;) {} /*@i@*/ })
-#endif
-
 /* Group: picoRTOS assert API */
 
 #if !defined(NDEBUG)
 /* Macro: picoRTOS_break()
  * Throws a debug exception, ignored if -DNDEBUG */
 # define picoRTOS_break() arch_break()
-/* Macro: picoRTOS_assert(x)
- * Returns x, throws a debug exception if x is false, unless -DNDEBUG */
-# define picoRTOS_assert(x) ((x) ? (true) : (arch_break(), false))
+/* Macro: picoRTOS_assert(x, or_else)
+ * Returns x, throws a debug exception & executes or_else if x is false,
+ * unless -DNDEBUG */
+# define picoRTOS_assert(x, or_else)            \
+  if (!(x)) {                                   \
+    picoRTOS_break(); /*@notreached@*/          \
+    or_else;                                    \
+  }
 /* Macro: picoRTOS_assert_void(x)
  * Throws a debug exception if x is false, unless -DNDEBUG */
-# define picoRTOS_assert_void(x) if (!(x)) arch_break()
-/* Macro: picoRTOS_assert_fatal(x)
- * Returns x, throws a debug exception if x is false, stalls the system if -DNDEBUG */
-# define picoRTOS_assert_fatal(x) picoRTOS_assert(x)
+# define picoRTOS_assert_void(x) if (!(x)) picoRTOS_break()
+/* Macro: picoRTOS_assert_fatal(x, or_else)
+ * Returns x, throws a debug exception & executes or_else if x is false,
+ * stalls the system if -DNDEBUG */
+# define picoRTOS_assert_fatal(x, or_else) picoRTOS_assert(x, or_else)
 /* Macro: picoRTOS_assert_void_fatal(x)
  * Throws a debug exception if x is false, stalls the system if -DNDEBUG */
 # define picoRTOS_assert_void_fatal(x) picoRTOS_assert_void(x)
 #else
-# define picoRTOS_break()
-# define picoRTOS_assert(x) (x)
+# define picoRTOS_break() for (;;) {}
+# define picoRTOS_assert(x, or_else) if (!(x)) { or_else; }
 # define picoRTOS_assert_void(x) {}
-# define picoRTOS_assert_fatal(x) ((x) ? (true) : (({ picoRTOS_suspend(); arch_break(); }), false))
-# define picoRTOS_assert_void_fatal(x) if (!(x)) { picoRTOS_suspend(); arch_break(); }
+# define picoRTOS_assert_fatal(x, or_else)      \
+  if (!(x)) {                                   \
+    picoRTOS_suspend();                         \
+    picoRTOS_break(); /*@notreached@*/          \
+    or_else;                                    \
+  }
+# define picoRTOS_assert_void_fatal(x) \
+  if (!(x)) {                          \
+    picoRTOS_suspend();                \
+    picoRTOS_break();                  \
+  }
 #endif
 
 #endif

@@ -1,6 +1,9 @@
 #ifndef PICORTOS_PORT_H
 #define PICORTOS_PORT_H
 
+#include <stddef.h>
+#include <stdbool.h>
+
 #include "picoRTOS_types.h"
 
 /* Enum: picoRTOS syscalls
@@ -47,6 +50,34 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp,
 extern /*@exposed@*/ /*@null@*/
 picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp);
 
+typedef void (*arch_entry_point_fn)(void*);     /* entry point */
+typedef void (*arch_isr_fn)(void*);             /* interrupt service routine */
+
+#if defined(NDEBUG) || !defined(arch_break)
+# undef arch_break
+# define arch_break() for (;;) {}
+#endif
+
+/* Macro: arch_assert(x, or_else)
+ * Throws a debug exception & execute or_else if x is false, stalls if -DNDEBUG
+ *
+ * Parameters:
+ *  x - predicate
+ *  or_else - code to execute if predicate is false
+ *
+ * Returns:
+ * The value of the predicate
+ */
+#define arch_assert(x, or_else) if (!(x)) { arch_break(); /*@notreached@*/ or_else; }
+
+/* Macro: arch_assert_void(x)
+ * Throws a debug exception if x is false, stalls if -DNDEBUG
+ *
+ * Parameters:
+ *  x - predicate
+ */
+#define arch_assert_void(x) if (!(x)) arch_break()
+
 /* Function: arch_init
  * Architecture port initialization function
  *
@@ -77,12 +108,19 @@ extern void arch_resume(void);
  * This structure must match you context restoration procedure
  *
  * Parameters:
- *  task - A pointer to the task to prepare the stack for
+ *  stack - A pointer to the stack to prepare
+ *  stack_count - The size (in elements) of the stack
+ *  fn - The task/thread enytry point
+ *  priv - The task/thread private parameter
  *
  * Returns:
  * A pointer to the first element of the newly prepared stack
  */
-extern /*@temp@*/ picoRTOS_stack_t * arch_prepare_stack(struct picoRTOS_task *task);
+extern /*@temp@*/
+picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
+                                     size_t stack_count,
+                                     arch_entry_point_fn fn,
+                                     /*@null@*/ void *priv);
 
 /* Function: arch_start_first_task
  * Starts the first task on the system (idle) and bootstraps the scheduler
@@ -158,7 +196,7 @@ extern /*@unused@*/ picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *v
  *  <picoRTOS_register_interrupt>
  */
 extern /*@unused@*/ void arch_register_interrupt(picoRTOS_irq_t irq,
-                                                 picoRTOS_isr_fn fn,
+                                                 arch_isr_fn fn,
                                                  /*@null@*/ void *priv);
 
 /* Function: arch_enable_interrupt
