@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# Print elf memory usage estimate
+# Usage: memory_usage -s section [ - s section ] elf_file
+#
+total=0
+eval elf=\$$(($#))
+
+section_size()
+{
+    # $1: section
+    # $2: elf
+    
+    start=$(objdump -t $2 | grep "__${1}_start" | cut -d " " -f1 | tr 'a-f' 'A-F')
+    end=$(objdump -t $2 | grep "__${1}_end" | cut -d " " -f1 | tr 'a-f' 'A-F')
+    echo -n "ibase=16\n${end} - ${start}\n" | bc
+}
+
+while getopts 's:h' opt; do
+    case "$opt" in
+	s)
+	    section=$(section_size $OPTARG $elf)
+	    total=$(expr $total + $section)
+	    echo "$OPTARG: " $section
+	    ;;
+	
+	?)
+	echo "Usage: $(basename $0) -s section [ -s section ] elf_file"
+	exit 1
+      ;;
+    esac
+done
+
+echo "Total: " $total

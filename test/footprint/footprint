@@ -1,0 +1,52 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+
+package Main;
+
+use Carp;
+use Readonly;
+use Carp::Assert;
+
+# Version (required by perlcritic --brutal)
+our $VERSION = '0.1a';
+
+Readonly our $REGEX => '([.]\S+)\s+0x[A-Fa-f0-9]+\s+(\w+)(.+?)picoRTOS(?:-SMP)?[.]o$';
+
+sub file2array {
+    my $path = shift;
+
+    assert( -e $path );
+
+    open my $fd, '<', $path || croak 'Can\'t open file ' . $path;  # $OS_ERROR ?
+    my @lines = <$fd>;
+    close $fd || croak 'Can\'t close file ' . $path;
+
+    return @lines;
+}
+
+sub main {
+
+    my %hash;
+    my @lines = file2array( $ARGV[0] );
+
+    while ( my $line = shift @lines ) {
+
+        my ( $section, $hsize ) = $line =~ m/$REGEX/sxm;
+        if( defined $section && defined $hsize ){
+            my $size = hex ( $hsize );
+            # print $section . ': ' . $size . qq{\n};
+            # add numbers to section
+            if( !defined $hash{$section} ){ $hash{$section} = 0 };
+            $hash{$section} += $size;
+        }
+    }
+
+    # bootom line
+    foreach my $s ( keys %hash ) {
+        print $s . ': ' . $hash{$s} . qq{\n};
+    }
+}
+
+# run
+main;
