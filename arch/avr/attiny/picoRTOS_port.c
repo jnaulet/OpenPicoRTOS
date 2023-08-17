@@ -1,12 +1,13 @@
-#include "picoRTOS.h"
 #include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
+
+#include <generated/autoconf.h>
 
 /* ASM */
 /*@external@*/ extern /*@temp@*/
 picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
-                                          picoRTOS_task_fn_t fn,
-                                          void *priv);
+                                          arch_entry_point_fn fn,
+                                          /*@null@*/ void *priv);
 
 /*@external@*/ extern void arch_start_first_task(picoRTOS_stack_t *sp);
 /*@external@*/ extern void arch_SYSTICK(void *priv);
@@ -30,7 +31,7 @@ static void rtc_setup(void)
     *RTC_CNT = (unsigned char)0;
 
     /* set period & start */
-    *RTC_PER = (unsigned int)(PICORTOS_CYCLES_PER_TICK - 1);
+    *RTC_PER = (unsigned int)((CONFIG_SYSCLK_HZ / CONFIG_TICK_HZ) - 1);
     *RTC_CTRLA = (unsigned char)0x1;
 }
 
@@ -60,17 +61,19 @@ void arch_resume(void)
     ASM("sei");
 }
 
-picoRTOS_stack_t *arch_prepare_stack(struct picoRTOS_task *task)
+picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
+                                     size_t stack_count,
+                                     arch_entry_point_fn fn,
+                                     void *priv)
 {
     /* AVRs have a decrementing stack */
-    return arch_save_first_context(task->stack + task->stack_count,
-                                   task->fn, task->priv);
+    return arch_save_first_context(stack + stack_count, fn, priv);
 }
 
 /* cppcheck-suppress constParameter */
 void __attribute__((weak)) arch_idle(void *null)
 {
-    if (!picoRTOS_assert_fatal(null == NULL)) return;
+    arch_assert_void(null == NULL);
 
     for (;;)
         ASM("sleep");
@@ -103,14 +106,14 @@ picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr)
 
 /*@external@*/
 extern struct {
-    picoRTOS_isr_fn fn;
+    arch_isr_fn fn;
     /*@temp@*/ /*@null@*/ void *priv;
 } ISR_TABLE[DEVICE_INTERRUPT_VECTOR_COUNT];
 
-void arch_register_interrupt(picoRTOS_irq_t irq, picoRTOS_isr_fn fn, void *priv)
+void arch_register_interrupt(picoRTOS_irq_t irq, arch_isr_fn fn, void *priv)
 {
-    if (!picoRTOS_assert_fatal(irq > (picoRTOS_irq_t)0)) return;
-    if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)(DEVICE_INTERRUPT_VECTOR_COUNT + 1))) return;
+    arch_assert_void(irq > (picoRTOS_irq_t)0);
+    arch_assert_void(irq < (picoRTOS_irq_t)(DEVICE_INTERRUPT_VECTOR_COUNT + 1));
 
     ISR_TABLE[irq - 1].fn = fn;
     ISR_TABLE[irq - 1].priv = priv;
@@ -118,13 +121,13 @@ void arch_register_interrupt(picoRTOS_irq_t irq, picoRTOS_isr_fn fn, void *priv)
 
 void arch_enable_interrupt(picoRTOS_irq_t irq)
 {
-    if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT)) return;
+    arch_assert_void(irq < (picoRTOS_irq_t)(DEVICE_INTERRUPT_VECTOR_COUNT + 1));
     /* no effect */
 }
 
 void arch_disable_interrupt(picoRTOS_irq_t irq)
 {
-    if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT)) return;
+    arch_assert_void(irq < (picoRTOS_irq_t)(DEVICE_INTERRUPT_VECTOR_COUNT + 1));
     /* no effect */
 }
 

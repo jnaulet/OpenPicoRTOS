@@ -8,8 +8,6 @@
 	.equ SPH, 0x3e
 	.equ SREG, 0x3f
 
-	#include "picoRTOS_device.h"
-
 	.macro SWAP_STACK
 	in r23, GPIOR2
 	in r22, GPIOR1
@@ -185,6 +183,9 @@ arch_syscall:
 	reti	/* automatically re-activate interrupts */
 
 	/* INTERRUPTS */
+
+	#include "picoRTOS_device.h"
+	
 	.global ISR_TABLE
 	.comm ISR_TABLE, DEVICE_INTERRUPT_VECTOR_COUNT, 4
 

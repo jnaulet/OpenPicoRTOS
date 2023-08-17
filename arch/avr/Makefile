@@ -14,6 +14,10 @@ mcu-$(CONFIG_MACH_ATMEGA32U4) := -mmcu=atmega32u4 -D__ATmega32u4__
 mcu-$(CONFIG_MACH_ATTINY817)  := -mmcu=avrxmega3 -D__ATTiny817__
 mcu-$(CONFIG_MACH_ATTINY1607) := -mmcu=avrxmega3 -D__ATTiny1607__
 
+# required
+include-$(CONFIG_AVR) += -I$(arch-avr)/include \
+			 -include $(arch-avr)/include/errno.h
+
 # include atmega (needed cause no file is compiled from these directories)
 include-$(CONFIG_MACH_ATMEGA2560) += -I$(arch-avr)/atmega/mach-atmega2560
 include-$(CONFIG_MACH_ATMEGA328P) += -I$(arch-avr)/atmega/mach-atmega328p

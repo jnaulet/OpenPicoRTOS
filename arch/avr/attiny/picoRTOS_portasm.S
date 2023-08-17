@@ -2,13 +2,13 @@
 	.extern picoRTOS_tick
 	.extern picoRTOS_syscall
 
+	#include "picoRTOS_device.h"
+
 	.equ GPIOR1, 0x2a
 	.equ GPIOR2, 0x2b
 	.equ SPL, 0x3d
 	.equ SPH, 0x3e
 	.equ SREG, 0x3f
-
-	#include "picoRTOS_device.h"
 
 	.macro SWAP_STACK
 	in r23, GPIOR2
@@ -188,6 +188,9 @@ arch_syscall:
 	reti	/* automatically re-activate interrupts */
 
 	/* INTERRUPTS */
+
+	#include "picoRTOS_device.h"
+	
 	.global ISR_TABLE
 	.comm ISR_TABLE, DEVICE_INTERRUPT_VECTOR_COUNT, 4
 
