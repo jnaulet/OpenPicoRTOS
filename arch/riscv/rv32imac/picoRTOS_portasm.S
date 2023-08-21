@@ -2,10 +2,9 @@
 	.extern picoRTOS_tick
 	.extern picoRTOS_syscall
 
-	#include "picoRTOSConfig.h"
 	#include "picoRTOS_device.h"
-	/* RISC-V specifics */
-	#include "../../lib/riscv/regs.h"
+	#include "../include/regs.h"
+	#include <generated/autoconf.h>
 
 	.equ TIMER_CORE_PERIOD, (CONFIG_SYSCLK_HZ / CONFIG_TICK_HZ)
 
@@ -251,6 +250,8 @@ arch_counter:
 
 	.bss
 
+	#include "../../include/macros.S"
+
 	.align 4
 	.type ISR_TABLE, %object
 	.global ISR_TABLE
@@ -259,3 +260,27 @@ ISR_TABLE:
 	.long 0
 	.long 0
 	.endr
+
+	.section .vectors
+__vectors:
+	j Reset_Handler
+	.word 0
+	.word 0
+	.word MachineSoftwareInterrupt_Handler
+	.word 0
+	.word 0
+	.word 0
+	.word MachineTimerInterrupt_Handler
+	.word 0
+	.word 0
+	.word 0
+	.word 0
+	.word 0
+	.word 0
+	.word 0
+	.word 0
+	.rept DEVICE_INTERRUPT_VECTOR_COUNT
+	.word PlatformDefined_Handler
+	.endr
+
+	def_irq_handler MachineSoftwareInterrupt_Handler

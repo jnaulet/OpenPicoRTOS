@@ -1,11 +1,10 @@
-#include "picoRTOS.h"
 #include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
 /*@external@*/ extern /*@temp@*/
 picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
-                                          picoRTOS_task_fn_t fn,
-                                          void *priv);
+                                          arch_entry_point_fn fn,
+                                          /*@null@*/ void *priv);
 
 /*@external@*/ extern void arch_start_first_task(picoRTOS_stack_t *sp);
 /*@external@*/ extern void arch_syscall(picoRTOS_syscall_t syscall, void *priv);
@@ -35,17 +34,19 @@ void arch_resume(void)
     ASM("csrsi mstatus, 0x8");     /* MIE */
 }
 
-picoRTOS_stack_t *arch_prepare_stack(struct picoRTOS_task *task)
+picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
+                                     size_t stack_count,
+                                     arch_entry_point_fn fn,
+                                     void *priv)
 {
     /* RISC-Vs have a decrementing stack */
-    return arch_save_first_context(task->stack + task->stack_count,
-                                   task->fn, task->priv);
+    return arch_save_first_context(stack + stack_count, fn, priv);
 }
 
 /* cppcheck-suppress constParameter */
 void __attribute__((weak)) arch_idle(void *null)
 {
-    if (!picoRTOS_assert_fatal(null == NULL)) return;
+    arch_assert_void(null == NULL);
 
     for (;;)
         ASM("wfi");

@@ -1,6 +1,8 @@
 #ifndef PICORTOS_TYPES_H
 #define PICORTOS_TYPES_H
 
+#include <generated/autoconf.h>
+
 typedef unsigned long picoRTOS_stack_t;
 typedef unsigned long picoRTOS_tick_t;
 typedef unsigned long picoRTOS_priority_t;
@@ -19,8 +21,8 @@ typedef unsigned long picoRTOS_cycles_t;
 #ifdef S_SPLINT_S
 # define ASM(x) {}
 #else
-# define ASM(x) __asm__ volatile (x)
-# define arch_break() ({ ASM("ebreak"); })
+# define ASM(x) { __asm__ volatile (x); }
+# define arch_break() ASM("ebreak")
 #endif
 
 #endif
