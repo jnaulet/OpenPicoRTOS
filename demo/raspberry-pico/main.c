@@ -1,4 +1,6 @@
-#ifndef SUPPORT_FOR_SMP
+#include <generated/autoconf.h>
+
+#ifndef CONFIG_SMP
 # include "picoRTOS.h"
 #else
 # include "picoRTOS-SMP.h"
@@ -24,7 +26,7 @@ static struct picoRTOS_cond cond = PICORTOS_COND_INITIALIZER;
 
 static void tick_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct gpio *TICK = (struct gpio*)priv;
 
@@ -36,7 +38,7 @@ static void tick_main(void *priv)
 
 static void led0_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct pwm *PWM = (struct pwm*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -68,7 +70,7 @@ static void led0_main(void *priv)
 
 static void led1_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct pwm *PWM = (struct pwm*)priv;
 
@@ -93,7 +95,7 @@ static void led1_main(void *priv)
 
 static void spi_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     size_t xfered = 0;
     struct spi *SPI = (struct spi*)priv;
@@ -127,7 +129,7 @@ static void spi_main(void *priv)
 
 static void adc_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct adc *ADC = (struct adc*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -152,7 +154,7 @@ static void adc_main(void *priv)
  */
 static void twi_master_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct twi *TWI = (struct twi*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -181,7 +183,7 @@ static void twi_master_main(void *priv)
  */
 static void twi_slave_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct twi *TWI = (struct twi*)priv;
 
@@ -219,7 +221,7 @@ static void twi_slave_main(void *priv)
  */
 static void pwm_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     pwm_duty_cycle_t duty_cycle = 0;
     struct pwm *PWM = (struct pwm*)priv;
@@ -245,7 +247,7 @@ static void pwm_main(void *priv)
  */
 static void ipwm_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct ipwm *IPWM = (struct ipwm*)priv;
 
@@ -283,7 +285,7 @@ static void ipwm_main(void *priv)
 
 static void wd_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct wd *WD = (struct wd*)priv;
 
@@ -315,10 +317,10 @@ int main(void)
 
     /* TICK */
     picoRTOS_task_init(&task, tick_main, pico.GPIO19, stack0, PICORTOS_STACK_COUNT(stack0));
-    picoRTOS_add_task(&task, TASK_TICK_PRIO);
+    picoRTOS_add_task(&task, (picoRTOS_priority_t)0);
 
     /* LEDs, strict deadlines, no round-robin */
-#ifndef SUPPORT_FOR_SMP
+#ifndef CONFIG_SMP
     picoRTOS_task_init(&task, led0_main, pico.PWM4B, stack1, PICORTOS_STACK_COUNT(stack1));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
     picoRTOS_task_init(&task, led1_main, pico.PWM4B, stack2, PICORTOS_STACK_COUNT(stack2));
@@ -341,7 +343,7 @@ int main(void)
 
     /* I2C (round-robin) */
     prio = picoRTOS_get_next_available_priority();
-#ifndef SUPPORT_FOR_SMP
+#ifndef CONFIG_SMP
     picoRTOS_task_init(&task, twi_master_main, pico.I2C0, stack5, PICORTOS_STACK_COUNT(stack5));
     (void)picoRTOS_add_task(&task, prio);
     picoRTOS_task_init(&task, twi_slave_main, pico.I2C1, stack6, PICORTOS_STACK_COUNT(stack6));

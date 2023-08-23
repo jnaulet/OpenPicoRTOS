@@ -1,5 +1,5 @@
 #include "raspberry-pico.h"
-#include "picoRTOSConfig.h"
+#include <generated/autoconf.h>
 
 #include "adc-rp2040.h"
 #include "clock-rp2040.h"
