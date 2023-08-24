@@ -6,7 +6,7 @@
  */
 static void led_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     picoRTOS_tick_t ref = picoRTOS_get_tick();
     struct gpio *RED = (struct gpio*)priv;
@@ -31,7 +31,7 @@ static void led_main(void *priv)
  */
 static void spi_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     size_t xfered = 0;
     struct spi *SPI = (struct spi*)priv;
@@ -66,7 +66,7 @@ static void spi_main(void *priv)
  */
 static void uart_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     char tx = (char)0;
     struct uart *UART = (struct uart*)priv;
@@ -97,7 +97,7 @@ static void uart_main(void *priv)
  */
 static void pwm_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct pwm *PWM = (struct pwm*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -120,7 +120,7 @@ static void pwm_main(void *priv)
  */
 static void adc_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct adc *ADC = (struct adc*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -147,7 +147,7 @@ static void adc_main(void *priv)
  */
 static void wd_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct wd *WDT = (struct wd*)priv;
 
@@ -164,7 +164,7 @@ static void flash_main(void *priv)
 {
 #define BUF_COUNT   132 /* 1x512b page + qword */
 
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     int res;
     size_t n;
@@ -213,11 +213,11 @@ static void flash_main(void *priv)
     }
 
     /* page */
-    picoRTOS_assert_void(mem[0] == (uint32_t)0);
-    picoRTOS_assert_void(mem[127] == (uint32_t)127);
+    picoRTOS_assert_void_fatal(mem[0] == (uint32_t)0);
+    picoRTOS_assert_void_fatal(mem[127] == (uint32_t)127);
     /* qword */
-    picoRTOS_assert_void(mem[128] == (uint32_t)128);
-    picoRTOS_assert_void(mem[131] == (uint32_t)131);
+    picoRTOS_assert_void_fatal(mem[128] == (uint32_t)128);
+    picoRTOS_assert_void_fatal(mem[131] == (uint32_t)131);
 
     /* suicide */
     picoRTOS_kill();
@@ -228,7 +228,7 @@ static void flash_main(void *priv)
  */
 static void twi_slave_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct twi *TWI = (struct twi*)priv;
 
