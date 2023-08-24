@@ -1,5 +1,6 @@
 #include "picoRTOS_cond.h"
 #include "picoRTOS_port.h"
+#include <generated/autoconf.h>
 
 /* Function: picoRTOS_cond_init
  * Initialises a condition
@@ -82,7 +83,7 @@ void picoRTOS_cond_broadcast(struct picoRTOS_cond *cond)
 void picoRTOS_cond_wait(struct picoRTOS_cond *cond, struct picoRTOS_mutex *mutex)
 {
     picoRTOS_invalidate_dcache(cond, sizeof(*cond));
-    if (!picoRTOS_assert_fatal(cond->count < (size_t)CONFIG_TASK_COUNT)) return;
+    picoRTOS_assert_fatal(cond->count < (size_t)CONFIG_TASK_COUNT, return );
 
     /* we already own the mutex */
     cond->count++;

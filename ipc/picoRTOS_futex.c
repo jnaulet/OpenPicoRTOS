@@ -1,5 +1,6 @@
 #include "picoRTOS_futex.h"
 #include "picoRTOS_port.h"
+#include <generated/autoconf.h>
 
 /* check */
 #ifndef CONFIG_DEADLOCK_COUNT
@@ -60,7 +61,7 @@ void picoRTOS_futex_lock(picoRTOS_futex_t *futex)
         picoRTOS_schedule();
 
     /* check for deadlock */
-    if (picoRTOS_assert_fatal(loop != -1)) return;
+    picoRTOS_assert_void_fatal(loop != -1);
 }
 
 /* Function: picoRTOS_futex_unlock
@@ -76,7 +77,6 @@ void picoRTOS_futex_lock(picoRTOS_futex_t *futex)
  */
 void picoRTOS_futex_unlock(picoRTOS_futex_t *futex)
 {
-    if (!picoRTOS_assert_fatal(*futex != (picoRTOS_atomic_t)0)) return;
-
+    picoRTOS_assert_fatal(*futex != (picoRTOS_atomic_t)0, return );
     *futex = (picoRTOS_futex_t)0;
 }

@@ -6,7 +6,7 @@
 void picoRTOS_queue_head_init(struct picoRTOS_queue_head *ctx, size_t count)
 {
     /* count must be a power of 2 */
-    if (!picoRTOS_assert_fatal(IS_POW2(count))) return;
+    picoRTOS_assert_fatal(IS_POW2(count), return );
 
     ctx->lock = PICORTOS_FUTEX_INITIALIZER;
     ctx->mask = count - 1;
