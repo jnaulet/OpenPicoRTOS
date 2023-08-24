@@ -114,15 +114,13 @@ static int osccon_busywait(uint32_t mask)
         if ((OSCILLATOR->OSCCON.REG & mask) != 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
 static int configure_pll_input(clock_pic32mx_plliclk_t iclk)
 {
-    if (!picoRTOS_assert(iclk < CLOCK_PIC32MX_PLLICLK_COUNT)) return -EINVAL;
+    picoRTOS_assert(iclk < CLOCK_PIC32MX_PLLICLK_COUNT, return -EINVAL);
 
     int range;
 
@@ -162,7 +160,7 @@ static int configure_pll(clock_pic32mx_plliclk_t iclk,
 #define PLLMULT_MAX     128ul
 #define PLLIDIV_MAX     8ul
 
-    if (!picoRTOS_assert(iclk < CLOCK_PIC32MX_PLLICLK_COUNT)) return -EINVAL;
+    picoRTOS_assert(iclk < CLOCK_PIC32MX_PLLICLK_COUNT, return -EINVAL);
 
     int res;
     unsigned long pllodiv_p2;
@@ -200,8 +198,8 @@ static int configure_pll(clock_pic32mx_plliclk_t iclk,
 
 static int switch_osc(clock_pic32mx_osc_t osc)
 {
-    if (!picoRTOS_assert(osc < CLOCK_PIC32MX_OSC_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(osc != CLOCK_PIC32MX_OSC_RESERVED)) return -EINVAL;
+    picoRTOS_assert(osc < CLOCK_PIC32MX_OSC_COUNT, return -EINVAL);
+    picoRTOS_assert(osc != CLOCK_PIC32MX_OSC_RESERVED, return -EINVAL);
 
     OSCILLATOR->OSCCON.CLR = (uint32_t)OSCCON_NOSC(OSCCON_NOSC_M);
     OSCILLATOR->OSCCON.SET = (uint32_t)OSCCON_NOSC(osc);
@@ -273,9 +271,9 @@ int clock_pic32mx_init(struct clock_settings *settings)
  */
 int clock_pic32mx_pbclk_enable(clock_id_t clkid, unsigned long pbdiv)
 {
-    if (!picoRTOS_assert(clkid >= CLOCK_PIC32MX_PBCLK1)) return -EINVAL;
-    if (!picoRTOS_assert(clkid <= CLOCK_PIC32MX_PBCLK8)) return -EINVAL;
-    if (!picoRTOS_assert(pbdiv < CLOCK_PIC32MX_PBDIV_MAX)) return -EINVAL;
+    picoRTOS_assert(clkid >= CLOCK_PIC32MX_PBCLK1, return -EINVAL);
+    picoRTOS_assert(clkid <= CLOCK_PIC32MX_PBCLK8, return -EINVAL);
+    picoRTOS_assert(pbdiv < CLOCK_PIC32MX_PBDIV_MAX, return -EINVAL);
 
     size_t index = (size_t)clkid - (size_t)CLOCK_PIC32MX_PBCLK1;
 
@@ -298,8 +296,8 @@ int clock_pic32mx_pbclk_enable(clock_id_t clkid, unsigned long pbdiv)
  */
 int clock_pic32mx_pbclk_disable(clock_id_t clkid)
 {
-    if (!picoRTOS_assert(clkid >= CLOCK_PIC32MX_PBCLK1)) return -EINVAL;
-    if (!picoRTOS_assert(clkid <= CLOCK_PIC32MX_PBCLK8)) return -EINVAL;
+    picoRTOS_assert(clkid >= CLOCK_PIC32MX_PBCLK1, return -EINVAL);
+    picoRTOS_assert(clkid <= CLOCK_PIC32MX_PBCLK8, return -EINVAL);
 
     size_t index = (size_t)clkid - (size_t)CLOCK_PIC32MX_PBCLK1;
 
@@ -315,8 +313,8 @@ int clock_pic32mx_pbclk_disable(clock_id_t clkid)
 
 clock_freq_t clock_get_freq(clock_id_t clkid)
 {
-    if (!picoRTOS_assert(clkid < (clock_id_t)CLOCK_PIC32MX_COUNT))
-        return (clock_freq_t)-EINVAL;
+    picoRTOS_assert(clkid < (clock_id_t)CLOCK_PIC32MX_COUNT,
+                    return (clock_freq_t)-EINVAL);
 
     switch (clkid) {
     case CLOCK_PIC32MX_SYSCLK: return clocks.sysclk;

@@ -78,7 +78,7 @@ int mux_sam3x_pio_init(struct mux_sam3x_pio *ctx, int base)
 
 static int mux_sam3x_pio(struct mux_sam3x_pio *ctx, mux_sam3x_pio_t mux, uint32_t mask)
 {
-    if (!picoRTOS_assert(mux < MUX_SAM3X_PIO_COUNT)) return -EINVAL;
+    picoRTOS_assert(mux < MUX_SAM3X_PIO_COUNT, return -EINVAL);
 
     switch (mux) {
     case MUX_SAM3X_PIO_DISABLE:
@@ -121,8 +121,8 @@ static int mux_sam3x_pio(struct mux_sam3x_pio *ctx, mux_sam3x_pio_t mux, uint32_
  */
 int mux_sam3x_pio_input(struct mux_sam3x_pio *ctx, size_t pin, mux_sam3x_pio_t mux)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_SAM3X_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(mux < MUX_SAM3X_PIO_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_SAM3X_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(mux < MUX_SAM3X_PIO_COUNT, return -EINVAL);
 
     int res;
     uint32_t mask = (uint32_t)(1ul << pin);
@@ -147,8 +147,8 @@ int mux_sam3x_pio_input(struct mux_sam3x_pio *ctx, size_t pin, mux_sam3x_pio_t m
  */
 int mux_sam3x_pio_output(struct mux_sam3x_pio *ctx, size_t pin, mux_sam3x_pio_t mux)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_SAM3X_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(mux < MUX_SAM3X_PIO_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_SAM3X_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(mux < MUX_SAM3X_PIO_COUNT, return -EINVAL);
 
     int res;
     uint32_t mask = (uint32_t)(1ul << pin);
@@ -172,7 +172,7 @@ int mux_sam3x_pio_output(struct mux_sam3x_pio *ctx, size_t pin, mux_sam3x_pio_t 
  */
 int mux_sam3x_pio_pull_up(struct mux_sam3x_pio *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_SAM3X_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_SAM3X_PIN_COUNT, return -EINVAL);
 
     ctx->base->PIO_PUER = (uint32_t)(1ul << pin);
     return 0;

@@ -75,13 +75,12 @@ int uart_pic32mx_init(struct uart *ctx, int base, clock_id_t clkid)
 
 static int set_baudrate(struct uart *ctx, unsigned long baudrate)
 {
-    if (!picoRTOS_assert(baudrate > 0)) return -EINVAL;
+    picoRTOS_assert(baudrate > 0, return -EINVAL);
 
     unsigned long brg;
     clock_freq_t freq = clock_get_freq(ctx->clkid);
 
-    if (!picoRTOS_assert(freq > 0))
-        return (int)freq;
+    picoRTOS_assert(freq > 0, return (int)freq);
 
     brg = (unsigned long)freq / (baudrate * 16ul) - 1ul;
     ctx->base->UxBRG.REG = (uint32_t)brg;
@@ -91,8 +90,8 @@ static int set_baudrate(struct uart *ctx, unsigned long baudrate)
 
 static int set_parity(struct uart *ctx, uart_par_t par)
 {
-    if (!picoRTOS_assert(par != UART_PAR_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(par < UART_PAR_COUNT)) return -EINVAL;
+    picoRTOS_assert(par != UART_PAR_IGNORE, return -EINVAL);
+    picoRTOS_assert(par < UART_PAR_COUNT, return -EINVAL);
 
     ctx->base->UxMODE.CLR = (uint32_t)UxMODE_PDSEL(UxMODE_PDSEL_M);
     if (par == UART_PAR_NONE)
@@ -106,8 +105,8 @@ static int set_parity(struct uart *ctx, uart_par_t par)
 
 static int set_cstopb(struct uart *ctx, uart_cstopb_t cstopb)
 {
-    if (!picoRTOS_assert(cstopb != UART_CSTOPB_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(cstopb < UART_CSTOPB_COUNT)) return -EINVAL;
+    picoRTOS_assert(cstopb != UART_CSTOPB_IGNORE, return -EINVAL);
+    picoRTOS_assert(cstopb < UART_CSTOPB_COUNT, return -EINVAL);
 
     if (cstopb == UART_CSTOPB_2BIT) ctx->base->UxMODE.SET = (uint32_t)UxMODE_STSEL;
     else ctx->base->UxMODE.CLR = (uint32_t)UxMODE_STSEL;
@@ -141,7 +140,7 @@ int uart_setup(struct uart *ctx, const struct uart_settings *settings)
 
 int uart_write(struct uart *ctx, const char *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     int sent = 0;
 
@@ -160,7 +159,7 @@ int uart_write(struct uart *ctx, const char *buf, size_t n)
 
 int uart_read(struct uart *ctx, char *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     int recv = 0;
 

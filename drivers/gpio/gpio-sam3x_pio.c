@@ -71,7 +71,7 @@ struct GPIO_SAM3X_PIO {
  */
 int gpio_sam3x_pio_init(struct gpio *ctx, int base, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)GPIO_SAM3X_PIO_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)GPIO_SAM3X_PIO_PIN_COUNT, return -EINVAL);
 
     ctx->base = (struct GPIO_SAM3X_PIO*)base;
     ctx->mask = (uint32_t)(1ul << pin);
@@ -82,8 +82,8 @@ int gpio_sam3x_pio_init(struct gpio *ctx, int base, size_t pin)
 
 static int set_invert(struct gpio *ctx, gpio_invert_t invert)
 {
-    if (!picoRTOS_assert(invert != GPIO_INVERT_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(invert < GPIO_INVERT_COUNT)) return -EINVAL;
+    picoRTOS_assert(invert != GPIO_INVERT_IGNORE, return -EINVAL);
+    picoRTOS_assert(invert < GPIO_INVERT_COUNT, return -EINVAL);
 
     ctx->invert = (invert == GPIO_INVERT_ENABLE);
     return 0;

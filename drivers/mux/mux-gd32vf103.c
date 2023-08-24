@@ -55,7 +55,7 @@ int mux_gd32vf103_init(struct mux *ctx, int base)
  */
 int mux_gd32vf103_analog(struct mux *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_GD32VF103_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_GD32VF103_PIN_COUNT, return -EINVAL);
 
     size_t index = pin >> 3;
     size_t shift = (size_t)((0x7u & pin) * 4u);
@@ -81,8 +81,8 @@ int mux_gd32vf103_analog(struct mux *ctx, size_t pin)
  */
 int mux_gd32vf103_input(struct mux *ctx, size_t pin, mux_gd32vf103_input_t mode)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_GD32VF103_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(mode < MUX_GD32VF103_INPUT_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_GD32VF103_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(mode < MUX_GD32VF103_INPUT_COUNT, return -EINVAL);
 
     size_t index = pin >> 3;
     size_t shift = (size_t)((0x7u & pin) * 4u);
@@ -133,9 +133,9 @@ int mux_gd32vf103_output(struct mux *ctx, size_t pin,
                          mux_gd32vf103_output_t mode,
                          mux_gd32vf103_speed_t speed)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_GD32VF103_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(mode < MUX_GD32VF103_OUTPUT_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(speed < MUX_GD32VF103_SPEED_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_GD32VF103_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(mode < MUX_GD32VF103_OUTPUT_COUNT, return -EINVAL);
+    picoRTOS_assert(speed < MUX_GD32VF103_SPEED_COUNT, return -EINVAL);
 
     size_t index = pin >> 3;
     size_t shift = (size_t)((0x7u & pin) * 4u);
@@ -178,9 +178,9 @@ int mux_gd32vf103_afio(struct mux *ctx, size_t pin,
                        mux_gd32vf103_afio_t mode,
                        mux_gd32vf103_speed_t speed)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_GD32VF103_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(mode < MUX_GD32VF103_AFIO_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(speed < MUX_GD32VF103_SPEED_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_GD32VF103_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(mode < MUX_GD32VF103_AFIO_COUNT, return -EINVAL);
+    picoRTOS_assert(speed < MUX_GD32VF103_SPEED_COUNT, return -EINVAL);
 
     size_t index = pin >> 3;
     size_t shift = (size_t)((0x7u & pin) * 4u);
@@ -210,8 +210,8 @@ int mux_gd32vf103_afio(struct mux *ctx, size_t pin,
 
 static int set_afio_pcf0(size_t shift, uint32_t mask, uint32_t value)
 {
-    if (!picoRTOS_assert(shift < (size_t)32)) return -EINVAL;
-    if (!picoRTOS_assert(value <= mask)) return -EINVAL;
+    picoRTOS_assert(shift < (size_t)32, return -EINVAL);
+    picoRTOS_assert(value <= mask, return -EINVAL);
 
     uint32_t reg = AFIO->AFIO_PCF0;
 
@@ -234,7 +234,7 @@ static int set_afio_pcf0(size_t shift, uint32_t mask, uint32_t value)
  */
 int mux_gd32vf103_afio_remap(mux_gd32vf103_afio_remap_t remap, uint32_t value)
 {
-    if (!picoRTOS_assert(remap < MUX_GD32VF103_AFIO_REMAP_COUNT)) return -EINVAL;
+    picoRTOS_assert(remap < MUX_GD32VF103_AFIO_REMAP_COUNT, return -EINVAL);
 
     switch (remap) {
     case MUX_GD32VF103_AFIO_REMAP_TIMER1IT1:

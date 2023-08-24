@@ -89,13 +89,13 @@ int flash_get_nblocks(struct flash *ctx)
 
 int flash_get_erase_size(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
     return FLASH_PIC32MX_PAGE_SIZE;
 }
 
 int flash_get_write_size(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
 
     /* FIXME: depends on ECC */
     return QWORD_SIZE;
@@ -103,13 +103,13 @@ int flash_get_write_size(struct flash *ctx, size_t block)
 
 int flash_get_block_addr(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
     return FLASH_PIC32MX_ADDR_START + (int)block * FLASH_PIC32MX_PAGE_SIZE;
 }
 
 static int nvmop_idle(struct flash *ctx, int nvmop)
 {
-    if (!picoRTOS_assert(nvmop <= NVMOP_PROGRAM_ERASE)) return -EINVAL;
+    picoRTOS_assert(nvmop <= NVMOP_PROGRAM_ERASE, return -EINVAL);
 
     register uint32_t x = (uint32_t)NVMKEY_KEY1;
     register uint32_t y = (uint32_t)NVMKEY_KEY2;
@@ -148,7 +148,7 @@ static int nvmop_busy(struct flash *ctx)
 
 int flash_erase(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
 
     size_t addr = (size_t)flash_get_block_addr(ctx, block);
 
@@ -170,7 +170,7 @@ int flash_erase(struct flash *ctx, size_t block)
 
 int flash_blankcheck(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
 
     size_t n = (size_t)FLASH_PIC32MX_PAGE_SIZE / sizeof(uint32_t);
     size_t addr = (size_t)flash_get_block_addr(ctx, block);
@@ -253,8 +253,8 @@ static int flash_write_word(struct flash *ctx, const void *data)
 
 int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert((n % sizeof(uint32_t)) == 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert((n % sizeof(uint32_t)) == 0, return -EINVAL);
 
     int nwritten = 0;
     int res = -EAGAIN;
@@ -289,7 +289,7 @@ int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n)
 
 int flash_lock(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
 
     /* sector + 1 to include the selected one */
     size_t addr = (size_t)flash_get_block_addr(ctx, block + 1);
@@ -302,7 +302,7 @@ int flash_lock(struct flash *ctx, size_t block)
 
 int flash_unlock(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
 
     size_t addr = (size_t)flash_get_block_addr(ctx, block);
 

@@ -118,8 +118,8 @@ static struct DMA_CLA_SRC_SEL_REGS *DMA_CLA_SRC_SEL =
  */
 int dma_ti_f28x_init(struct dma *ctx, int base, size_t channel, dma_ti_f28x_chsrcsel_t chsrcsel)
 {
-    if (!picoRTOS_assert(channel < (size_t)DMA_TI_F28X_CHANNEL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(chsrcsel < DMA_TI_F28X_CHSRCSEL_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)DMA_TI_F28X_CHANNEL_COUNT, return -EINVAL);
+    picoRTOS_assert(chsrcsel < DMA_TI_F28X_CHSRCSEL_COUNT, return -EINVAL);
 
     size_t index = channel >> 2;
     size_t lshift = (channel & 0x3) * 8;
@@ -147,8 +147,8 @@ int dma_ti_f28x_init(struct dma *ctx, int base, size_t channel, dma_ti_f28x_chsr
 
 int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
 {
-    if (!picoRTOS_assert(xfer->size >= sizeof(uint16_t))) return -EINVAL;
-    if (!picoRTOS_assert(xfer->size <= sizeof(uint32_t))) return -EINVAL;
+    picoRTOS_assert(xfer->size >= sizeof(uint16_t), return -EINVAL);
+    picoRTOS_assert(xfer->size <= sizeof(uint32_t), return -EINVAL);
 
     ASM(" eallow");
 

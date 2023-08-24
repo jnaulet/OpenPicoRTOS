@@ -66,13 +66,12 @@ int wd_sam3x_setup(struct wd *ctx, struct wd_sam3x_settings *settings)
     uint32_t wdv;
     clock_freq_t freq = clock_get_freq(ctx->clkid) / (clock_freq_t)DEFAULT_DIVIDER;
 
-    if (!picoRTOS_assert(freq > 0))
-        return -EIO;
+    picoRTOS_assert(freq > 0, return -EIO);
 
     wdv = (uint32_t)(settings->timeout_ms / (1000ul / (unsigned long)freq));
 
-    if (!picoRTOS_assert(wdv != 0)) return -EINVAL;
-    if (!picoRTOS_assert(wdv <= (uint32_t)WDT_MR_WDV_M)) return -EINVAL;
+    picoRTOS_assert(wdv != 0, return -EINVAL);
+    picoRTOS_assert(wdv <= (uint32_t)WDT_MR_WDV_M, return -EINVAL);
 
     ctx->base->WDT_MR &= ~WDT_MR_WDV(WDT_MR_WDV_M);
     ctx->base->WDT_MR |= ~WDT_MR_WDV(wdv);

@@ -179,21 +179,19 @@ typedef enum {
 int pwm_ti_epwm_init(struct pwm_ti_epwm *ctx, int base, clock_id_t clkid)
 {
     ctx->base = (struct C99_EPWM_REGS*)base;
-    ctx->clk_freq = clock_get_freq(clkid);
     ctx->waveform = PWM_TI_EPWM_WAVEFORM_COUNT;
     ctx->freq = 0;
 
-    if (!picoRTOS_assert(ctx->clk_freq > 0))
-        return (int)ctx->freq;
+    ctx->clk_freq = clock_get_freq(clkid);
+    picoRTOS_assert(ctx->clk_freq > 0, return (int)ctx->freq);
 
     ctx->base->TBCTR = 0; /* zero-out counter */
-
     return 0;
 }
 
 static int set_tbclk(struct pwm_ti_epwm *ctx, unsigned long hz)
 {
-    if (!picoRTOS_assert(hz > 0)) return -EINVAL;
+    picoRTOS_assert(hz > 0, return -EINVAL);
 
     uint16_t i, j;
     uint32_t clkdiv = (uint32_t)1;
@@ -236,7 +234,7 @@ static int set_tbclk(struct pwm_ti_epwm *ctx, unsigned long hz)
 
 static int set_waveform(struct pwm_ti_epwm *ctx, pwm_ti_epwm_waveform_t wf)
 {
-    if (!picoRTOS_assert(wf < PWM_TI_EPWM_WAVEFORM_COUNT)) return -EINVAL;
+    picoRTOS_assert(wf < PWM_TI_EPWM_WAVEFORM_COUNT, return -EINVAL);
 
     switch (wf) {
     case PWM_TI_EPWM_WAVEFORM_UP:       /*@fallthrough@*/
@@ -256,8 +254,8 @@ static int set_waveform(struct pwm_ti_epwm *ctx, pwm_ti_epwm_waveform_t wf)
 
 static int set_output_a(struct pwm_ti_epwm *ctx, aqctl_action_t act, pwm_ti_epwm_aq_t aq)
 {
-    if (!picoRTOS_assert(act < AQCTLn_ACTION_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(aq < PWM_TI_EPWM_AQ_COUNT)) return -EINVAL;
+    picoRTOS_assert(act < AQCTLn_ACTION_COUNT, return -EINVAL);
+    picoRTOS_assert(aq < PWM_TI_EPWM_AQ_COUNT, return -EINVAL);
 
     switch (act) {
     case AQCTLn_ACTION_ZRO:
@@ -300,8 +298,8 @@ static int set_output_a(struct pwm_ti_epwm *ctx, aqctl_action_t act, pwm_ti_epwm
 
 static int set_output_b(struct pwm_ti_epwm *ctx, aqctl_action_t act, pwm_ti_epwm_aq_t aq)
 {
-    if (!picoRTOS_assert(act < AQCTLn_ACTION_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(aq < PWM_TI_EPWM_AQ_COUNT)) return -EINVAL;
+    picoRTOS_assert(act < AQCTLn_ACTION_COUNT, return -EINVAL);
+    picoRTOS_assert(aq < PWM_TI_EPWM_AQ_COUNT, return -EINVAL);
 
     switch (act) {
     case AQCTLn_ACTION_ZRO:
@@ -378,7 +376,7 @@ int pwm_ti_epwm_setup(struct pwm_ti_epwm *ctx, struct pwm_ti_epwm_settings *sett
  */
 int pwm_ti_epwm_pwm_init(struct pwm *ctx, struct pwm_ti_epwm *parent, pwm_ti_epwm_cmp_t cmp)
 {
-    if (!picoRTOS_assert(cmp < PWM_TI_EPWM_CMP_COUNT)) return -EINVAL;
+    picoRTOS_assert(cmp < PWM_TI_EPWM_CMP_COUNT, return -EINVAL);
 
     ctx->parent = parent;
     ctx->cmp = cmp;
@@ -441,19 +439,16 @@ int pwm_ti_epwm_pwm_setup(struct pwm *ctx, struct pwm_ti_epwm_pwm_settings *sett
 
 int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
 {
-    if (!picoRTOS_assert(period > 0)) return -EINVAL;
+    picoRTOS_assert(period > 0, return -EINVAL);
 
     struct pwm_ti_epwm *parent = ctx->parent;
 
     uint32_t hz = (uint32_t)parent->freq;
 
     ctx->ncycles = (hz / (uint32_t)1000000ul) * (uint32_t)period;
-
-    if (!picoRTOS_assert(ctx->ncycles > 0))
-        return -EINVAL;
+    picoRTOS_assert(ctx->ncycles > 0, return -EINVAL);
 
     parent->base->TBPRD = (uint16_t)ctx->ncycles;
-
     return 0;
 }
 

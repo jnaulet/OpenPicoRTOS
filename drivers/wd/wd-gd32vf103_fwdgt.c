@@ -55,8 +55,7 @@ int wd_gd32vf103_fwdgt_setup(struct wd *ctx, struct wd_gd32vf103_fwdgt_settings 
     clock_freq_t freq = clock_get_freq(ctx->clkid);
     unsigned long nclk = (unsigned long)freq * settings->timeout_us / 1000000ul;
 
-    if (!picoRTOS_assert(freq > 0))
-        return -EIO;
+    picoRTOS_assert(freq > 0, return -EIO);
 
     for (psc_p2 = 2ul; psc_p2 <= 8ul; psc_p2++) {
         unsigned long rld = nclk / (1ul << psc_p2);

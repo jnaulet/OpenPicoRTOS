@@ -60,7 +60,7 @@ int mux_pic32mx_init(struct mux_pic32mx *ctx, int base)
  */
 int mux_pic32mx_analog(struct mux_pic32mx *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_PIC32MX_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_PIC32MX_PIN_COUNT, return -EINVAL);
 
     ctx->base->ANSEL.SET = (uint32_t)(1 << pin);
     ctx->base->TRIS.SET = (uint32_t)(1 << pin);
@@ -79,7 +79,7 @@ int mux_pic32mx_analog(struct mux_pic32mx *ctx, size_t pin)
  */
 int mux_pic32mx_input(struct mux_pic32mx *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_PIC32MX_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_PIC32MX_PIN_COUNT, return -EINVAL);
 
     ctx->base->ANSEL.CLR = (uint32_t)(1 << pin);
     ctx->base->TRIS.SET = (uint32_t)(1 << pin);
@@ -98,7 +98,7 @@ int mux_pic32mx_input(struct mux_pic32mx *ctx, size_t pin)
  */
 int mux_pic32mx_output(struct mux_pic32mx *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_PIC32MX_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_PIC32MX_PIN_COUNT, return -EINVAL);
 
     ctx->base->ANSEL.CLR = (uint32_t)(1 << pin);
     ctx->base->TRIS.CLR = (uint32_t)(1 << pin);
@@ -117,8 +117,8 @@ int mux_pic32mx_output(struct mux_pic32mx *ctx, size_t pin)
  */
 int mux_pic32mx_peripheral_pin_select_input(mux_pic32mx_ppsi_t ppsi, size_t opt)
 {
-    if (!picoRTOS_assert(ppsi < MUX_PIC32MX_PPSI_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(opt < (size_t)MUX_PIC32MX_PPSx_OPT_COUNT)) return -EINVAL;
+    picoRTOS_assert(ppsi < MUX_PIC32MX_PPSI_COUNT, return -EINVAL);
+    picoRTOS_assert(opt < (size_t)MUX_PIC32MX_PPSx_OPT_COUNT, return -EINVAL);
 
     PPSI_REG[(size_t)ppsi] = (uint32_t)PPSI_INPUT(opt);
     return 0;
@@ -136,8 +136,8 @@ int mux_pic32mx_peripheral_pin_select_input(mux_pic32mx_ppsi_t ppsi, size_t opt)
  */
 int mux_pic32mx_peripheral_pin_select_output(mux_pic32mx_ppso_t ppso, size_t opt)
 {
-    if (!picoRTOS_assert(ppso < MUX_PIC32MX_PPSO_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(opt < (size_t)MUX_PIC32MX_PPSx_OPT_COUNT)) return -EINVAL;
+    picoRTOS_assert(ppso < MUX_PIC32MX_PPSO_COUNT, return -EINVAL);
+    picoRTOS_assert(opt < (size_t)MUX_PIC32MX_PPSx_OPT_COUNT, return -EINVAL);
 
     PPSO_REG[(size_t)ppso] = (uint32_t)PPSO_OUTPUT(opt);
     return 0;
@@ -155,7 +155,7 @@ int mux_pic32mx_peripheral_pin_select_output(mux_pic32mx_ppso_t ppso, size_t opt
  */
 int mux_pic32mx_pull_up(struct mux_pic32mx *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_PIC32MX_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_PIC32MX_PIN_COUNT, return -EINVAL);
 
     ctx->base->CNPU.SET = (uint32_t)(1 << pin);
     ctx->base->CNPD.CLR = (uint32_t)(1 << pin);
@@ -174,7 +174,7 @@ int mux_pic32mx_pull_up(struct mux_pic32mx *ctx, size_t pin)
  */
 int mux_pic32mx_pull_down(struct mux_pic32mx *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_PIC32MX_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_PIC32MX_PIN_COUNT, return -EINVAL);
 
     ctx->base->CNPD.SET = (uint32_t)(1 << pin);
     ctx->base->CNPU.CLR = (uint32_t)(1 << pin);

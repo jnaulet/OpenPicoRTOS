@@ -75,10 +75,10 @@ int adc_tinyavr_init(struct adc_tinyavr *ctx, int base, clock_id_t clkid)
  */
 int adc_tinyavr_setup(struct adc_tinyavr *ctx, struct adc_tinyavr_settings *settings)
 {
-    if (!picoRTOS_assert(settings->ressel < ADC_TINYAVR_RESSEL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->refsel < ADC_TINYAVR_REFSEL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->clk_freq >= (unsigned long)ADC_TINYAVR_CLK_FREQ_MIN)) return -EINVAL;
-    if (!picoRTOS_assert(settings->clk_freq <= (unsigned long)ADC_TINYAVR_CLK_FREQ_MAX)) return -EINVAL;
+    picoRTOS_assert(settings->ressel < ADC_TINYAVR_RESSEL_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->refsel < ADC_TINYAVR_REFSEL_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->clk_freq >= (unsigned long)ADC_TINYAVR_CLK_FREQ_MIN, return -EINVAL);
+    picoRTOS_assert(settings->clk_freq <= (unsigned long)ADC_TINYAVR_CLK_FREQ_MAX, return -EINVAL);
 
     if (settings->ressel == ADC_TINYAVR_RESSEL_8BIT) ctx->base->CTRLA |= CTRLA_RESSEL;
     else ctx->base->CTRLA &= ~CTRLA_RESSEL;
@@ -90,8 +90,7 @@ int adc_tinyavr_setup(struct adc_tinyavr *ctx, struct adc_tinyavr_settings *sett
     clock_freq_t clk_per = clock_get_freq(ctx->clkid);
     unsigned long pdiv = (unsigned long)clk_per / settings->clk_freq;
 
-    if (!picoRTOS_assert(clk_per > 0))
-        return -EIO;
+    picoRTOS_assert(clk_per > 0, return -EIO);
 
     /* get the closest power of 2 */
     ctx->base->CTRLC &= ~CTRLC_PRESC(CTRLC_PRESC_M);
@@ -128,7 +127,7 @@ int adc_tinyavr_setup(struct adc_tinyavr *ctx, struct adc_tinyavr_settings *sett
  */
 int adc_tinyavr_adc_init(struct adc *ctx, struct adc_tinyavr *parent, adc_tinyavr_muxpos_t muxpos)
 {
-    if (!picoRTOS_assert(muxpos < ADC_TINYAVR_MUXPOS_COUNT)) return -EINVAL;
+    picoRTOS_assert(muxpos < ADC_TINYAVR_MUXPOS_COUNT, return -EINVAL);
 
     ctx->parent = parent;
     ctx->muxpos = muxpos;
@@ -205,7 +204,7 @@ int adc_read(struct adc *ctx, int *data)
 
 int adc_read_multiple(struct adc *ctx, int *data, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     return adc_read(ctx, data);
 }

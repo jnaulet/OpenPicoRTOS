@@ -41,10 +41,9 @@ int mux_avr_init(struct mux *ctx, int base)
  */
 int mux_avr_input(struct mux *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_AVR_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_AVR_PIN_COUNT, return -EINVAL);
 
     ctx->base->DDR &= ~(uint8_t)(1u << pin);
-
     return 0;
 }
 
@@ -61,7 +60,7 @@ int mux_avr_input(struct mux *ctx, size_t pin)
  */
 int mux_avr_output(struct mux *ctx, size_t pin, bool value)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_AVR_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_AVR_PIN_COUNT, return -EINVAL);
 
     ctx->base->DDR |= (uint8_t)(1u << pin);
 

@@ -233,9 +233,7 @@ int clock_same5x_gclk_reset(void)
         if ((GCLK->SYNCBUSY & SYNCBUSY_SWRST) == 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -251,9 +249,9 @@ int clock_same5x_gclk_reset(void)
  */
 int clock_same5x_gclk_generator_setup(size_t index, struct clock_same5x_gclk_settings *settings)
 {
-    if (!picoRTOS_assert(index < (size_t)CLOCK_SAME5X_GCLK_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->src < CLOCK_SAME5X_GCLK_SRC_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->div < 65536ul)) return -EINVAL;
+    picoRTOS_assert(index < (size_t)CLOCK_SAME5X_GCLK_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->src < CLOCK_SAME5X_GCLK_SRC_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->div < 65536ul, return -EINVAL);
 
     clock_freq_t freq;
 
@@ -288,9 +286,7 @@ static int gclk_generator_sync_busywait(size_t index)
         if ((GCLK->SYNCBUSY & SYNCBUSY_GENCTRL(index)) == 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -305,7 +301,7 @@ static int gclk_generator_sync_busywait(size_t index)
  */
 int clock_same5x_gclk_generator_enable(size_t index)
 {
-    if (!picoRTOS_assert(index < (size_t)CLOCK_SAME5X_GCLK_COUNT)) return -EINVAL;
+    picoRTOS_assert(index < (size_t)CLOCK_SAME5X_GCLK_COUNT, return -EINVAL);
 
     GCLK->GENCTRLn[index] |= GENCTRLn_GENEN;
     return gclk_generator_sync_busywait(index);
@@ -322,7 +318,7 @@ int clock_same5x_gclk_generator_enable(size_t index)
  */
 int clock_same5x_gclk_generator_disable(size_t index)
 {
-    if (!picoRTOS_assert(index < (size_t)CLOCK_SAME5X_GCLK_COUNT)) return -EINVAL;
+    picoRTOS_assert(index < (size_t)CLOCK_SAME5X_GCLK_COUNT, return -EINVAL);
 
     GCLK->GENCTRLn[index] &= ~GENCTRLn_GENEN;
     return 0;
@@ -336,9 +332,7 @@ static int dfll_sync_busywait(uint32_t mask)
         if ((OSCCTRL->DFLLSYNC & mask) == 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -380,9 +374,7 @@ static int dfll_ready_busywait(void)
         if ((OSCCTRL->STATUS & STATUS_DFLLRDY) != 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -432,7 +424,7 @@ int clock_same5x_dfll_disable(void)
 
 static int dpll_sync_busywait(size_t index)
 {
-    if (!picoRTOS_assert(index < (size_t)CLOCK_SAME5X_DPLL_COUNT)) return -EINVAL;
+    picoRTOS_assert(index < (size_t)CLOCK_SAME5X_DPLL_COUNT, return -EINVAL);
 
     int deadlock = CLOCK_SAME5X_DEADLOCK_COUNT;
 
@@ -440,15 +432,13 @@ static int dpll_sync_busywait(size_t index)
         if ((OSCCTRL->DPLLn[index].SYNCBUSY & DPLLn_SYNCBUSY_DPLLRATIO) == 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
 static int dpll_lock_busywait(size_t index)
 {
-    if (!picoRTOS_assert(index < (size_t)CLOCK_SAME5X_DPLL_COUNT)) return -EINVAL;
+    picoRTOS_assert(index < (size_t)CLOCK_SAME5X_DPLL_COUNT, return -EINVAL);
 
     int deadlock = CLOCK_SAME5X_DEADLOCK_COUNT;
 
@@ -457,9 +447,7 @@ static int dpll_lock_busywait(size_t index)
             (OSCCTRL->DPLLn[index].STATUS & DPLLn_STATUS_LOCK) != 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -475,8 +463,8 @@ static int dpll_lock_busywait(size_t index)
  */
 int clock_same5x_dpll_setup(size_t index, struct clock_same5x_dpll_settings *settings)
 {
-    if (!picoRTOS_assert(index < (size_t)CLOCK_SAME5X_DPLL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->refclk < CLOCK_SAME5X_DPLL_REFCLK_COUNT)) return -EINVAL;
+    picoRTOS_assert(index < (size_t)CLOCK_SAME5X_DPLL_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->refclk < CLOCK_SAME5X_DPLL_REFCLK_COUNT, return -EINVAL);
 
     int res;
     clock_freq_t freq;
@@ -486,8 +474,7 @@ int clock_same5x_dpll_setup(size_t index, struct clock_same5x_dpll_settings *set
         clkid = CLOCK_SAME5X_FDPLL1;
 
     freq = clock_get_freq(clkid);
-    if (!picoRTOS_assert(freq > 0))
-        return -EIO;
+    picoRTOS_assert(freq > 0, return -EIO);
 
     /* LDR + LDRFRAC */
     unsigned long ldr = (unsigned long)(settings->freq / freq);
@@ -519,7 +506,7 @@ int clock_same5x_dpll_setup(size_t index, struct clock_same5x_dpll_settings *set
  */
 int clock_same5x_dpll_enable(size_t index)
 {
-    if (!picoRTOS_assert(index < (size_t)CLOCK_SAME5X_DPLL_COUNT)) return -EINVAL;
+    picoRTOS_assert(index < (size_t)CLOCK_SAME5X_DPLL_COUNT, return -EINVAL);
 
     OSCCTRL->DPLLn[index].CTRLA = (uint32_t)DPLLn_CTRLA_ENABLE;
     return dpll_lock_busywait(index);
@@ -536,7 +523,7 @@ int clock_same5x_dpll_enable(size_t index)
  */
 int clock_same5x_dpll_disable(size_t index)
 {
-    if (!picoRTOS_assert(index < (size_t)CLOCK_SAME5X_DPLL_COUNT)) return -EINVAL;
+    picoRTOS_assert(index < (size_t)CLOCK_SAME5X_DPLL_COUNT, return -EINVAL);
 
     OSCCTRL->DPLLn[index].CTRLA &= ~DPLLn_CTRLA_ENABLE;
     return 0;
@@ -553,7 +540,7 @@ int clock_same5x_dpll_disable(size_t index)
  */
 int clock_same5x_mclk_enable(clock_same5x_mclk_t mclk)
 {
-    if (!picoRTOS_assert(mclk < CLOCK_SAME5X_MCLK_COUNT)) return -EINVAL;
+    picoRTOS_assert(mclk < CLOCK_SAME5X_MCLK_COUNT, return -EINVAL);
 
     size_t index = (size_t)mclk >> 5;
     size_t shift = (size_t)0x1f & mclk;
@@ -584,7 +571,7 @@ int clock_same5x_mclk_enable(clock_same5x_mclk_t mclk)
  */
 int clock_same5x_mclk_disable(clock_same5x_mclk_t mclk)
 {
-    if (!picoRTOS_assert(mclk < CLOCK_SAME5X_MCLK_COUNT)) return -EINVAL;
+    picoRTOS_assert(mclk < CLOCK_SAME5X_MCLK_COUNT, return -EINVAL);
 
     size_t index = (size_t)mclk >> 5;
     size_t shift = (size_t)0x1f & mclk;
@@ -616,8 +603,8 @@ int clock_same5x_mclk_disable(clock_same5x_mclk_t mclk)
  */
 int clock_same5x_setup(clock_id_t clkid, size_t gclk_index)
 {
-    if (!picoRTOS_assert(clkid < (clock_id_t)CLOCK_SAME5X_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(gclk_index < (size_t)CLOCK_SAME5X_GCLK_COUNT)) return -EINVAL;
+    picoRTOS_assert(clkid < (clock_id_t)CLOCK_SAME5X_COUNT, return -EINVAL);
+    picoRTOS_assert(gclk_index < (size_t)CLOCK_SAME5X_GCLK_COUNT, return -EINVAL);
 
     GCLK->PCHCTRLn[clkid] &= ~PCHCTRLn_GEN(PCHCTRLn_GEN_M);
     GCLK->PCHCTRLn[clkid] |= PCHCTRLn_GEN(gclk_index);
@@ -637,7 +624,7 @@ int clock_same5x_setup(clock_id_t clkid, size_t gclk_index)
  */
 int clock_same5x_enable(clock_id_t clkid)
 {
-    if (!picoRTOS_assert(clkid < (clock_id_t)CLOCK_SAME5X_COUNT)) return -EINVAL;
+    picoRTOS_assert(clkid < (clock_id_t)CLOCK_SAME5X_COUNT, return -EINVAL);
 
     GCLK->PCHCTRLn[clkid] |= PCHCTRLn_CHEN;
     return 0;
@@ -654,7 +641,7 @@ int clock_same5x_enable(clock_id_t clkid)
  */
 int clock_same5x_disable(clock_id_t clkid)
 {
-    if (!picoRTOS_assert(clkid < (clock_id_t)CLOCK_SAME5X_COUNT)) return -EINVAL;
+    picoRTOS_assert(clkid < (clock_id_t)CLOCK_SAME5X_COUNT, return -EINVAL);
 
     GCLK->PCHCTRLn[clkid] &= ~PCHCTRLn_CHEN;
     return 0;
@@ -664,7 +651,8 @@ int clock_same5x_disable(clock_id_t clkid)
 
 clock_freq_t clock_get_freq(clock_id_t clkid)
 {
-    if (!picoRTOS_assert(clkid < (clock_id_t)CLOCK_SAME5X_COUNT)) return (clock_freq_t)-EINVAL;
+    picoRTOS_assert(clkid < (clock_id_t)CLOCK_SAME5X_COUNT,
+                    return (clock_freq_t)-EINVAL);
 
     return clocks.pch[clkid];
 }

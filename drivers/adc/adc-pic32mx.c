@@ -227,9 +227,7 @@ static int vref_ready_busywait(struct adc_pic32mx *ctx)
             (ctx->base->ADCCON2 & ADCCON2_REFFLT) == 0)
             break;
 
-    if (!picoRTOS_assert(loop != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(loop != -1, return -EBUSY);
     return 0;
 }
 
@@ -270,13 +268,13 @@ int adc_pic32mx_init(struct adc_pic32mx *ctx, int base)
  */
 int adc_pic32mx_setup(struct adc_pic32mx *ctx, struct adc_pic32mx_settings *settings)
 {
-    if (!picoRTOS_assert(settings->wkupclkcnt <= (unsigned long)ADCANCON_WKUPCLKCNT_M)) return -EINVAL;
-    if (!picoRTOS_assert(settings->adcsel < ADC_PIC32MX_ADCSEL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->conclkdiv != 0)) return -EINVAL;
-    if (!picoRTOS_assert(settings->conclkdiv <= (unsigned long)ADCCON3_CONCLKDIV_M + 1ul)) return -EINVAL;
-    if (!picoRTOS_assert(settings->vrefsel < ADC_PIC32MX_VREFSEL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->strgsrc < ADC_PIC32MX_STRGSRC_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->strgsrc != ADC_PIC32MX_STRGSRC_RESERVED)) return -EINVAL;
+    picoRTOS_assert(settings->wkupclkcnt <= (unsigned long)ADCANCON_WKUPCLKCNT_M, return -EINVAL);
+    picoRTOS_assert(settings->adcsel < ADC_PIC32MX_ADCSEL_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->conclkdiv != 0, return -EINVAL);
+    picoRTOS_assert(settings->conclkdiv <= (unsigned long)ADCCON3_CONCLKDIV_M + 1ul, return -EINVAL);
+    picoRTOS_assert(settings->vrefsel < ADC_PIC32MX_VREFSEL_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->strgsrc < ADC_PIC32MX_STRGSRC_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->strgsrc != ADC_PIC32MX_STRGSRC_RESERVED, return -EINVAL);
 
     /* turn off adc */
     ctx->base->ADCCON1 &= ~ADCCON1_ON;
@@ -310,15 +308,13 @@ static int wakeup_ready_busywait(struct adc *ctx)
         if ((parent->base->ADCANCON & ADCANCON_WKRDYx(ctx->sar)) != 0)
             break;
 
-    if (!picoRTOS_assert(loop != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(loop != -1, return -EBUSY);
     return 0;
 }
 
 static int sar_from_channel(size_t channel)
 {
-    if (!picoRTOS_assert(channel < (size_t)ADC_PIC32MX_CHANNEL_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)ADC_PIC32MX_CHANNEL_COUNT, return -EINVAL);
 
     if (channel < (size_t)DEVICE_ADC_DEDICATED_SAR_COUNT)
         return (int)channel;
@@ -339,7 +335,7 @@ static int sar_from_channel(size_t channel)
  */
 int adc_pic32mx_adc_init(struct adc *ctx, struct adc_pic32mx *parent, size_t channel)
 {
-    if (!picoRTOS_assert(channel < (size_t)ADC_PIC32MX_CHANNEL_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)ADC_PIC32MX_CHANNEL_COUNT, return -EINVAL);
 
     ctx->parent = parent;
     ctx->channel = channel;
@@ -357,7 +353,7 @@ int adc_pic32mx_adc_init(struct adc *ctx, struct adc_pic32mx *parent, size_t cha
 
 static int set_input_mode(struct adc *ctx, adc_pic32mx_adc_im_t im)
 {
-    if (!picoRTOS_assert(im < ADC_PIC32MX_ADC_IM_COUNT)) return -EINVAL;
+    picoRTOS_assert(im < ADC_PIC32MX_ADC_IM_COUNT, return -EINVAL);
 
     struct adc_pic32mx *parent = ctx->parent;
 
@@ -409,9 +405,9 @@ static int set_trgsrc_and_lvl(struct adc *ctx,
                               adc_pic32mx_adc_trgsrc_t trgsrc,
                               adc_pic32mx_adc_lvl_t lvl)
 {
-    if (!picoRTOS_assert(trgsrc < ADC_PIC32MX_ADC_TRGSRC_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(lvl < ADC_PIC32MX_ADC_LVL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(ctx->channel < (size_t)ADC_PIC32MX_TRGSRCABLE_COUNT)) return -EIO;
+    picoRTOS_assert(trgsrc < ADC_PIC32MX_ADC_TRGSRC_COUNT, return -EINVAL);
+    picoRTOS_assert(lvl < ADC_PIC32MX_ADC_LVL_COUNT, return -EINVAL);
+    picoRTOS_assert(ctx->channel < (size_t)ADC_PIC32MX_TRGSRCABLE_COUNT, return -EIO);
 
     struct adc_pic32mx *parent = ctx->parent;
     size_t shift = (size_t)((ctx->channel & 0x3) * 8);
@@ -437,10 +433,10 @@ static int set_trgsrc_and_lvl(struct adc *ctx,
 static int adc_pic32mx_shared_setup(struct adc *ctx,
                                     struct adc_pic32mx_adc_settings *settings)
 {
-    if (!picoRTOS_assert(settings->selres < ADC_PIC32MX_ADC_SELRES_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->samc >= 2ul)) return -EINVAL;
-    if (!picoRTOS_assert(settings->samc <= (unsigned long)ADCxTIME_SAMC_M + 2ul)) return -EINVAL;
-    if (!picoRTOS_assert(settings->lvl < ADC_PIC32MX_ADC_LVL_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->selres < ADC_PIC32MX_ADC_SELRES_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->samc >= 2ul, return -EINVAL);
+    picoRTOS_assert(settings->samc <= (unsigned long)ADCxTIME_SAMC_M + 2ul, return -EINVAL);
+    picoRTOS_assert(settings->lvl < ADC_PIC32MX_ADC_LVL_COUNT, return -EINVAL);
 
     struct adc_pic32mx *parent = ctx->parent;
 
@@ -481,11 +477,11 @@ static int adc_pic32mx_shared_setup(struct adc *ctx,
  */
 int adc_pic32mx_adc_setup(struct adc *ctx, struct adc_pic32mx_adc_settings *settings)
 {
-    if (!picoRTOS_assert(settings->adcdiv >= 2ul)) return -EINVAL;
-    if (!picoRTOS_assert(settings->adcdiv <= (unsigned long)ADCxTIME_ADCDIV_M + 1ul)) return -EINVAL;
-    if (!picoRTOS_assert(settings->selres < ADC_PIC32MX_ADC_SELRES_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->samc >= 2ul)) return -EINVAL;
-    if (!picoRTOS_assert(settings->samc <= (unsigned long)ADCxTIME_SAMC_M + 2ul)) return -EINVAL;
+    picoRTOS_assert(settings->adcdiv >= 2ul, return -EINVAL);
+    picoRTOS_assert(settings->adcdiv <= (unsigned long)ADCxTIME_ADCDIV_M + 1ul, return -EINVAL);
+    picoRTOS_assert(settings->selres < ADC_PIC32MX_ADC_SELRES_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->samc >= 2ul, return -EINVAL);
+    picoRTOS_assert(settings->samc <= (unsigned long)ADCxTIME_SAMC_M + 2ul, return -EINVAL);
 
     int res;
     struct adc_pic32mx *parent = ctx->parent;
@@ -568,7 +564,6 @@ int adc_read(struct adc *ctx, int *data)
 
 int adc_read_multiple(struct adc *ctx, int *data, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-
+    picoRTOS_assert(n > 0, return -EINVAL);
     return adc_read(ctx, data);
 }

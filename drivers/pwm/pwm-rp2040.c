@@ -48,9 +48,7 @@ int pwm_rp2040_init(struct pwm_rp2040 *ctx, int base, clock_id_t clkid)
     ctx->base = (struct PWM_RP2040*)base;
     ctx->freq = clock_get_freq(clkid);
 
-    if (!picoRTOS_assert(ctx->freq > 0))
-        return (int)ctx->freq;
-
+    picoRTOS_assert(ctx->freq > 0, return (int)ctx->freq);
     return 0;
 }
 
@@ -69,8 +67,8 @@ int pwm_rp2040_init(struct pwm_rp2040 *ctx, int base, clock_id_t clkid)
 int pwm_rp2040_pwm_init(struct pwm *ctx, struct pwm_rp2040 *parent,
                         size_t channel, pwm_rp2040_pwm_output_t output)
 {
-    if (!picoRTOS_assert(channel < (size_t)PWM_RP2040_PWM_CHANNEL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(output < PWM_RP2040_PWM_OUTPUT_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)PWM_RP2040_PWM_CHANNEL_COUNT, return -EINVAL);
+    picoRTOS_assert(output < PWM_RP2040_PWM_OUTPUT_COUNT, return -EINVAL);
 
     ctx->parent = parent;
     ctx->ch = &parent->base->CH[channel];
@@ -89,7 +87,7 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
 {
 #define PWM_RP2040_PWM_TOP_MAX 0xffff
 
-    if (!picoRTOS_assert(period > 0)) return -EINVAL;
+    picoRTOS_assert(period > 0, return -EINVAL);
 
     /* real RP2040 channel frequency */
     size_t hz = (size_t)ctx->parent->freq / ctx->div;
@@ -101,7 +99,7 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
         ctx->ncycles = ctx->ncycles / ctx->div;
     }
 
-    if (!picoRTOS_assert(ctx->ncycles > 0)) return -EINVAL;
+    picoRTOS_assert(ctx->ncycles > 0, return -EINVAL);
 
     ctx->ch->DIV = (uint32_t)CHn_DIV_INT(ctx->div);
     ctx->ch->TOP = (uint32_t)ctx->ncycles;
@@ -155,7 +153,7 @@ void pwm_stop(struct pwm *ctx)
  */
 int pwm_rp2040_ipwm_init(struct ipwm *ctx, struct pwm_rp2040 *parent, size_t channel)
 {
-    if (!picoRTOS_assert(channel < (size_t)PWM_RP2040_PWM_CHANNEL_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)PWM_RP2040_PWM_CHANNEL_COUNT, return -EINVAL);
 
     ctx->parent = parent;
     ctx->ch = &parent->base->CH[channel];
@@ -179,7 +177,7 @@ int pwm_rp2040_ipwm_init(struct ipwm *ctx, struct pwm_rp2040 *parent, size_t cha
  */
 int pwm_rp2040_ipwm_setup(struct ipwm *ctx, struct pwm_rp2040_ipwm_settings *settings)
 {
-    if (!picoRTOS_assert(settings->div > 0)) return -EINVAL;
+    picoRTOS_assert(settings->div > 0, return -EINVAL);
 
     ctx->div = settings->div;
     ctx->ch->DIV = (uint32_t)CHn_DIV_INT(ctx->div);

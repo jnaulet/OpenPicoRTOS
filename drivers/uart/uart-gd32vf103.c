@@ -99,14 +99,13 @@ int uart_gd32vf103_init(struct uart *ctx, int base, clock_id_t clkid)
 
 static int set_baudrate(struct uart *ctx, unsigned long baudrate)
 {
-    if (!picoRTOS_assert(baudrate > 0)) return -EINVAL;
+    picoRTOS_assert(baudrate > 0, return -EINVAL);
 
     unsigned long intdiv;
     unsigned long modulo;
     clock_freq_t freq = clock_get_freq(ctx->clkid);
 
-    if (!picoRTOS_assert(freq > 0))
-        return (int)freq;
+    picoRTOS_assert(freq > 0, return (int)freq);
 
     intdiv = (unsigned long)freq / (16ul * baudrate);
     modulo = (unsigned long)freq % (16ul * baudrate);
@@ -118,8 +117,8 @@ static int set_baudrate(struct uart *ctx, unsigned long baudrate)
 
 static int set_cs(struct uart *ctx, size_t cs)
 {
-    if (!picoRTOS_assert(cs >= (size_t)UART_GD32VF103_CS_MIN)) return -EINVAL;
-    if (!picoRTOS_assert(cs <= (size_t)UART_GD32VF103_CS_MAX)) return -EINVAL;
+    picoRTOS_assert(cs >= (size_t)UART_GD32VF103_CS_MIN, return -EINVAL);
+    picoRTOS_assert(cs <= (size_t)UART_GD32VF103_CS_MAX, return -EINVAL);
 
     if (cs == (size_t)UART_GD32VF103_CS_MAX) ctx->base->USART_CTL0 |= USART_CTL0_WL;
     else ctx->base->USART_CTL0 &= ~USART_CTL0_WL;
@@ -129,8 +128,8 @@ static int set_cs(struct uart *ctx, size_t cs)
 
 static int set_parity(struct uart *ctx, uart_par_t par)
 {
-    if (!picoRTOS_assert(par != UART_PAR_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(par < UART_PAR_COUNT)) return -EINVAL;
+    picoRTOS_assert(par != UART_PAR_IGNORE, return -EINVAL);
+    picoRTOS_assert(par < UART_PAR_COUNT, return -EINVAL);
 
     /* no parity */
     if (par == UART_PAR_NONE) {
@@ -147,8 +146,8 @@ static int set_parity(struct uart *ctx, uart_par_t par)
 
 static int set_cstopb(struct uart *ctx, uart_cstopb_t cstopb)
 {
-    if (!picoRTOS_assert(cstopb != UART_CSTOPB_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(cstopb < UART_CSTOPB_COUNT)) return -EINVAL;
+    picoRTOS_assert(cstopb != UART_CSTOPB_IGNORE, return -EINVAL);
+    picoRTOS_assert(cstopb < UART_CSTOPB_COUNT, return -EINVAL);
 
     ctx->base->USART_CTL1 &= ~USART_CTL1_STB(USART_CTL1_STB_M);
 
@@ -187,7 +186,7 @@ int uart_setup(struct uart *ctx, const struct uart_settings *settings)
 
 int uart_write(struct uart *ctx, const char *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     int sent = 0;
 
@@ -206,7 +205,7 @@ int uart_write(struct uart *ctx, const char *buf, size_t n)
 
 int uart_read(struct uart *ctx, char *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     int recv = 0;
 

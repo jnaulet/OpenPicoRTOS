@@ -86,8 +86,8 @@ int mux_rp2040_init(struct mux *ctx, int io_base, int pads_base)
  */
 int mux_rp2040_io(struct mux *ctx, size_t pin, mux_rp2040_t funcsel)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_RP2040_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(funcsel < MUX_RP2040_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_RP2040_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(funcsel < MUX_RP2040_COUNT, return -EINVAL);
 
     struct MUX_RP2040_GPIO *gpio = &ctx->io->GPIO[pin];
 
@@ -115,8 +115,8 @@ int mux_rp2040_io(struct mux *ctx, size_t pin, mux_rp2040_t funcsel)
  */
 int mux_rp2040_input(struct mux *ctx, size_t pin, mux_rp2040_t funcsel)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_RP2040_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(funcsel < MUX_RP2040_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_RP2040_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(funcsel < MUX_RP2040_COUNT, return -EINVAL);
 
     struct MUX_RP2040_GPIO *gpio = &ctx->io->GPIO[pin];
 
@@ -144,8 +144,8 @@ int mux_rp2040_input(struct mux *ctx, size_t pin, mux_rp2040_t funcsel)
  */
 int mux_rp2040_output(struct mux *ctx, size_t pin, mux_rp2040_t funcsel)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_RP2040_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(funcsel < MUX_RP2040_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_RP2040_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(funcsel < MUX_RP2040_COUNT, return -EINVAL);
 
     struct MUX_RP2040_GPIO *gpio = &ctx->io->GPIO[pin];
 
@@ -171,7 +171,7 @@ int mux_rp2040_output(struct mux *ctx, size_t pin, mux_rp2040_t funcsel)
  */
 int mux_rp2040_pull_up(struct mux *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_RP2040_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_RP2040_PIN_COUNT, return -EINVAL);
 
     /* PADS */
     ctx->pads->GPIOn[pin] |= GPIOn_PUE;
@@ -192,7 +192,7 @@ int mux_rp2040_pull_up(struct mux *ctx, size_t pin)
  */
 int mux_rp2040_pull_down(struct mux *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_RP2040_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_RP2040_PIN_COUNT, return -EINVAL);
 
     /* PADS */
     ctx->pads->GPIOn[pin] |= GPIOn_PDE;
@@ -214,8 +214,8 @@ int mux_rp2040_pull_down(struct mux *ctx, size_t pin)
  */
 int mux_rp2040_override(struct mux *ctx, size_t pin, mux_rp2040_over_t over)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_RP2040_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(over < MUX_RP2040_OVER_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_RP2040_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(over < MUX_RP2040_OVER_COUNT, return -EINVAL);
 
     struct MUX_RP2040_GPIO *gpio = &ctx->io->GPIO[pin];
 
@@ -238,8 +238,8 @@ int mux_rp2040_override(struct mux *ctx, size_t pin, mux_rp2040_over_t over)
  */
 int mux_rp2040_set_drive(struct mux *ctx, size_t pin, mux_rp2040_drive_t drive)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_RP2040_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(drive < MUX_RP2040_DRIVE_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_RP2040_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(drive < MUX_RP2040_DRIVE_COUNT, return -EINVAL);
 
     /* PADS */
     ctx->pads->GPIOn[pin] &= ~GPIOn_DRIVE(GPIOn_DRIVE_M);

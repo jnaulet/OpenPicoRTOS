@@ -91,13 +91,12 @@ int spi_gd32vf103_setup(struct spi *ctx, struct spi_gd32vf103_settings *settings
 
 static int set_bitrate(struct spi *ctx, unsigned long bitrate)
 {
-    if (!picoRTOS_assert(bitrate > 0)) return -EINVAL;
+    picoRTOS_assert(bitrate > 0, return -EINVAL);
 
     unsigned long psc;
     clock_freq_t freq = clock_get_freq(ctx->clkid);
 
-    if (!picoRTOS_assert(freq > 0))
-        return -EIO;
+    picoRTOS_assert(freq > 0, return -EIO);
 
     for (psc = 1ul; psc <= 8ul; psc++) {
         unsigned long f = (unsigned long)freq >> psc;
@@ -114,8 +113,8 @@ static int set_bitrate(struct spi *ctx, unsigned long bitrate)
 
 static int set_clkmode(struct spi *ctx, spi_clock_mode_t clkmode)
 {
-    if (!picoRTOS_assert(clkmode != SPI_CLOCK_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(clkmode < SPI_CLOCK_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(clkmode != SPI_CLOCK_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(clkmode < SPI_CLOCK_MODE_COUNT, return -EINVAL);
 
     switch (clkmode) {
     case SPI_CLOCK_MODE_0:
@@ -150,7 +149,7 @@ static int set_frame_size(struct spi *ctx, size_t frame_size)
 {
 #define div_ceil(x, y) (((x) + ((y) - 1)) / (y))
 
-    if (!picoRTOS_assert(frame_size > 0)) return -EINVAL;
+    picoRTOS_assert(frame_size > 0, return -EINVAL);
 
     switch (frame_size) {
     case 8: ctx->base->SPI_CTL0 &= ~SPI_CTL0_FF16; break;
@@ -168,8 +167,8 @@ static int set_frame_size(struct spi *ctx, size_t frame_size)
 
 static int set_mode(struct spi *ctx, spi_mode_t mode)
 {
-    if (!picoRTOS_assert(mode != SPI_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(mode < SPI_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(mode != SPI_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(mode < SPI_MODE_COUNT, return -EINVAL);
 
     if (mode == SPI_MODE_MASTER) {
         ctx->base->SPI_CTL0 |= SPI_CTL0_MSTMOD;
@@ -190,9 +189,7 @@ static int spi_enable(struct spi *ctx)
         ctx->base->SPI_CTL0 |= SPI_CTL0_SPIEN;
     }
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -263,10 +260,10 @@ static int transmit_data(struct spi *ctx, const uint8_t *data)
 
 static int spi_xfer_dma_start(struct spi *ctx, void *rx, const void *tx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
     /* null check */
-    if ( !picoRTOS_assert(ctx->fill != NULL)) return -EIO;
-    if ( !picoRTOS_assert(ctx->drain != NULL)) return -EIO;
+    picoRTOS_assert(ctx->fill != NULL, return -EIO);
+    picoRTOS_assert(ctx->drain != NULL, return -EIO);
 
     /* fill xfer */
     struct dma_xfer fill = {
@@ -301,10 +298,10 @@ static int spi_xfer_dma_start(struct spi *ctx, void *rx, const void *tx, size_t 
 
 static int spi_xfer_dma_wait(struct spi *ctx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
     /* null check */
-    if ( !picoRTOS_assert(ctx->fill != NULL)) return -EIO;
-    if ( !picoRTOS_assert(ctx->drain != NULL)) return -EIO;
+    picoRTOS_assert(ctx->fill != NULL, return -EIO);
+    picoRTOS_assert(ctx->drain != NULL, return -EIO);
 
     if (dma_xfer_done(ctx->fill) == 0 &&
         dma_xfer_done(ctx->drain) == 0) {
@@ -320,7 +317,7 @@ static int spi_xfer_dma_wait(struct spi *ctx, size_t n)
 
 static int spi_xfer_dma(struct spi *ctx, void *rx, const void *tx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
     case SPI_GD32VF103_STATE_DMA_START: return spi_xfer_dma_start(ctx, rx, tx, n);
@@ -334,8 +331,8 @@ static int spi_xfer_dma(struct spi *ctx, void *rx, const void *tx, size_t n)
 
 static int spi_xfer_nodma(struct spi *ctx, void *rx, const void *tx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert((n & (ctx->frame_width - 1)) == 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert((n & (ctx->frame_width - 1)) == 0, return -EINVAL);
 
     size_t recv = 0;
     uint8_t *rx8 = rx;
@@ -375,7 +372,7 @@ static int spi_xfer_nodma(struct spi *ctx, void *rx, const void *tx, size_t n)
 
 int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     /* DMA */
     if (ctx->fill != NULL && ctx->drain != NULL &&

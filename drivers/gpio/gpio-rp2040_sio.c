@@ -38,8 +38,8 @@ struct GPIO_RP2040_SIO {
 int gpio_rp2040_sio_init(struct gpio *ctx, int base,
                          size_t pin, gpio_rp2040_sio_dir_t dir)
 {
-    if (!picoRTOS_assert(pin < (size_t)GPIO_RP2040_SIO_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(dir < GPIO_RP2040_SIO_DIR_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)GPIO_RP2040_SIO_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(dir < GPIO_RP2040_SIO_DIR_COUNT, return -EINVAL);
 
     ctx->base = (struct GPIO_RP2040_SIO*)base;
     ctx->mask = (uint32_t)(1 << pin);
@@ -55,8 +55,8 @@ int gpio_rp2040_sio_init(struct gpio *ctx, int base,
 
 static int set_invert(struct gpio *ctx, gpio_invert_t invert)
 {
-    if (!picoRTOS_assert(invert != GPIO_INVERT_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(invert < GPIO_INVERT_COUNT)) return -EINVAL;
+    picoRTOS_assert(invert != GPIO_INVERT_IGNORE, return -EINVAL);
+    picoRTOS_assert(invert < GPIO_INVERT_COUNT, return -EINVAL);
 
     ctx->invert = (invert == GPIO_INVERT_ENABLE);
     return 0;

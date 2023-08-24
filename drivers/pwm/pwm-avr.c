@@ -51,8 +51,7 @@ int pwm_avr_init(struct pwm_avr *ctx, int base, clock_id_t clkid)
     ctx->cs = PWM_AVR_CS_NO_CLOCK;
     ctx->ncycles = 0;
 
-    if (!picoRTOS_assert(ctx->freq > 0))
-        return (int)ctx->freq;
+    picoRTOS_assert(ctx->freq > 0, return (int)ctx->freq);
 
     /* zero counter */
     ctx->base->TCNTn = (uint16_t)0;
@@ -67,7 +66,7 @@ int pwm_avr_init(struct pwm_avr *ctx, int base, clock_id_t clkid)
 
 static int set_clock_select(struct pwm_avr *ctx, pwm_avr_cs_t cs)
 {
-    if (!picoRTOS_assert(cs < PWM_AVR_CS_COUNT)) return -EINVAL;
+    picoRTOS_assert(cs < PWM_AVR_CS_COUNT, return -EINVAL);
 
     ctx->base->TCCRnB &= ~TCCRnB_CSn(TCCRnB_CSn_M); /* stop */
     ctx->cs = cs;
@@ -85,7 +84,7 @@ static int set_clock_select(struct pwm_avr *ctx, pwm_avr_cs_t cs)
 
 static int set_waveform(struct pwm_avr *ctx, pwm_avr_waveform_t wf)
 {
-    if (!picoRTOS_assert(wf < PWM_AVR_WAVEFORM_COUNT)) return -EINVAL;
+    picoRTOS_assert(wf < PWM_AVR_WAVEFORM_COUNT, return -EINVAL);
 
     /* zero-out WGM */
     ctx->base->TCCRnA &= ~TCCRnA_WGMnL(TCCRnA_WGMnL_M);
@@ -156,7 +155,7 @@ int pwm_avr_setup(struct pwm_avr *ctx, struct pwm_avr_settings *settings)
 
 static int set_OCnA_mode(struct pwm_avr *ctx, pwm_avr_mode_t mode)
 {
-    if (!picoRTOS_assert(mode < PWM_AVR_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(mode < PWM_AVR_MODE_COUNT, return -EINVAL);
 
     if (mode == PWM_AVR_MODE_TOGGLE &&
         ctx->waveform != PWM_AVR_WAVEFORM_PHASE_FREQ_CORRECT_OCRnA &&
@@ -177,8 +176,8 @@ static int set_OCnA_mode(struct pwm_avr *ctx, pwm_avr_mode_t mode)
 
 static int set_OCnB_mode(struct pwm_avr *ctx, pwm_avr_mode_t mode)
 {
-    if (!picoRTOS_assert(mode < PWM_AVR_MODE_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(mode != PWM_AVR_MODE_TOGGLE)) return -EINVAL;
+    picoRTOS_assert(mode < PWM_AVR_MODE_COUNT, return -EINVAL);
+    picoRTOS_assert(mode != PWM_AVR_MODE_TOGGLE, return -EINVAL);
 
     ctx->base->TCCRnA &= ~TCCRnA_COMnB(TCCRnA_COMn_M);
     ctx->base->TCCRnA |= TCCRnA_COMnB(mode);
@@ -188,8 +187,8 @@ static int set_OCnB_mode(struct pwm_avr *ctx, pwm_avr_mode_t mode)
 
 static int set_OCnC_mode(struct pwm_avr *ctx, pwm_avr_mode_t mode)
 {
-    if (!picoRTOS_assert(mode < PWM_AVR_MODE_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(mode != PWM_AVR_MODE_TOGGLE)) return -EINVAL;
+    picoRTOS_assert(mode < PWM_AVR_MODE_COUNT, return -EINVAL);
+    picoRTOS_assert(mode != PWM_AVR_MODE_TOGGLE, return -EINVAL);
 
     ctx->base->TCCRnA &= ~TCCRnA_COMnC(TCCRnA_COMn_M);
     ctx->base->TCCRnA |= TCCRnA_COMnC(mode);
@@ -201,8 +200,8 @@ static int set_output_compare_mode(struct pwm_avr *ctx,
                                    pwm_avr_oc_t oc,
                                    pwm_avr_mode_t mode)
 {
-    if (!picoRTOS_assert(oc < PWM_AVR_OC_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(mode < PWM_AVR_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(oc < PWM_AVR_OC_COUNT, return -EINVAL);
+    picoRTOS_assert(mode < PWM_AVR_MODE_COUNT, return -EINVAL);
 
     switch (oc) {
     case PWM_AVR_OCnA: return set_OCnA_mode(ctx, mode);
@@ -240,7 +239,7 @@ static void stop(struct pwm_avr *ctx)
  */
 int pwm_avr_pwm_init(struct pwm *ctx, struct pwm_avr *parent, pwm_avr_oc_t oc)
 {
-    if (!picoRTOS_assert(oc < PWM_AVR_OC_COUNT)) return -EINVAL;
+    picoRTOS_assert(oc < PWM_AVR_OC_COUNT, return -EINVAL);
 
     ctx->parent = parent;
     ctx->oc = oc;
@@ -273,14 +272,14 @@ int pwm_avr_pwm_setup(struct pwm *ctx, struct pwm_settings *settings)
 
 int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
 {
-    if (!picoRTOS_assert(period > (size_t)0)) return -EINVAL;
+    picoRTOS_assert(period > (size_t)0, return -EINVAL);
 
     struct pwm_avr *parent = ctx->parent;
     uint32_t hz = (uint32_t)parent->freq / parent->prescale;
 
     parent->ncycles = (uint16_t)((hz / (uint32_t)1000000ul) * (uint32_t)period);
 
-    if (!picoRTOS_assert(parent->ncycles > 0)) return -EINVAL;
+    picoRTOS_assert(parent->ncycles > 0, return -EINVAL);
 
     switch (parent->waveform) {
     case PWM_AVR_WAVEFORM_PHASE_FREQ_CORRECT_ICRn:  /*@fallthrough@*/

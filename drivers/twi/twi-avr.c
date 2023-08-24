@@ -96,14 +96,13 @@ int twi_avr_init(struct twi *ctx, int base, clock_id_t clkid)
 
 static int set_bitrate(struct twi *ctx, unsigned long bitrate)
 {
-    if (!picoRTOS_assert(bitrate > 0)) return -EINVAL;
+    picoRTOS_assert(bitrate > 0, return -EINVAL);
 
     unsigned long twbr;
     unsigned long shift;
     clock_freq_t freq = clock_get_freq(ctx->clkid);
 
-    if (!picoRTOS_assert(freq > 0))
-        return -EIO;
+    picoRTOS_assert(freq > 0, return -EIO);
 
     /* scl = freq / (16 + 2(TWBR) * 4 ^ TWPS) */
 
@@ -129,8 +128,8 @@ static int set_bitrate(struct twi *ctx, unsigned long bitrate)
 
 static int set_mode(struct twi *ctx, twi_mode_t mode)
 {
-    if (!picoRTOS_assert(mode != TWI_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(mode < TWI_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(mode != TWI_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(mode < TWI_MODE_COUNT, return -EINVAL);
 
     ctx->mode = mode;
     return 0;
@@ -180,7 +179,7 @@ static int twi_rw_as_master_idle(struct twi *ctx)
 
 static int twi_rw_as_master_start(struct twi *ctx, twi_avr_rw_t rw)
 {
-    if (!picoRTOS_assert(rw < TWI_AVR_RW_COUNT)) return -EINVAL;
+    picoRTOS_assert(rw < TWI_AVR_RW_COUNT, return -EINVAL);
 
     uint8_t twcr = ctx->base->TWCR;
     int tws = (int)TWSR_TWS_READ(ctx->base->TWSR);
@@ -209,7 +208,7 @@ static int twi_rw_as_master_start(struct twi *ctx, twi_avr_rw_t rw)
 
 static int twi_write_as_master_sla(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     uint8_t twcr = ctx->base->TWCR;
     int tws = (int)TWSR_TWS_READ(ctx->base->TWSR);
@@ -243,7 +242,7 @@ static int twi_write_as_master_sla(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_write_as_master_data(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     uint8_t twcr = ctx->base->TWCR;
     int tws = (int)TWSR_TWS_READ(ctx->base->TWSR);
@@ -292,7 +291,7 @@ static int twi_rw_as_master_stop(struct twi *ctx)
 
 static int twi_write_as_master(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
     case TWI_AVR_STATE_IDLE: return twi_rw_as_master_idle(ctx);
@@ -310,7 +309,7 @@ static int twi_write_as_master(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_read_as_master_sla(struct twi *ctx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     uint8_t twcr = ctx->base->TWCR;
     int tws = (int)TWSR_TWS_READ(ctx->base->TWSR);
@@ -337,7 +336,7 @@ static int twi_read_as_master_sla(struct twi *ctx, size_t n)
 
 static int twi_read_as_master_data(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     uint8_t twcr = ctx->base->TWCR;
     int tws = (int)TWSR_TWS_READ(ctx->base->TWSR);
@@ -370,8 +369,8 @@ static int twi_read_as_master_data(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_read_as_master(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(ctx->mode == TWI_MODE_MASTER)) return -EIO;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(ctx->mode == TWI_MODE_MASTER, return -EIO);
 
     switch (ctx->state) {
     case TWI_AVR_STATE_IDLE: return twi_rw_as_master_idle(ctx);
@@ -405,7 +404,7 @@ static int twi_rw_as_slave_idle(struct twi *ctx)
 
 static int twi_write_as_slave_sla(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     uint8_t twcr = ctx->base->TWCR;
     int tws = (int)TWSR_TWS_READ(ctx->base->TWSR);
@@ -431,7 +430,7 @@ static int twi_write_as_slave_sla(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_write_as_slave_data(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     uint8_t twcr = ctx->base->TWCR;
     int tws = (int)TWSR_TWS_READ(ctx->base->TWSR);
@@ -462,7 +461,7 @@ static int twi_write_as_slave_data(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_write_as_slave(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
     case TWI_AVR_STATE_IDLE: return twi_rw_as_slave_idle(ctx);
@@ -478,7 +477,7 @@ static int twi_write_as_slave(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_read_as_slave_sla(struct twi *ctx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     uint8_t twcr = ctx->base->TWCR;
     int tws = (int)TWSR_TWS_READ(ctx->base->TWSR);
@@ -508,7 +507,7 @@ static int twi_read_as_slave_sla(struct twi *ctx, size_t n)
 
 static int twi_read_as_slave_data(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     uint32_t twcr = ctx->base->TWCR;
     int tws = (int)TWSR_TWS_READ(ctx->base->TWSR);
@@ -549,7 +548,7 @@ static int twi_read_as_slave_data(struct twi *ctx, void *buf, size_t n)
 
 static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
     case TWI_AVR_STATE_IDLE: return twi_rw_as_slave_idle(ctx);
@@ -565,7 +564,7 @@ static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
 
 int twi_write(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     if (ctx->mode == TWI_MODE_MASTER)
         return twi_write_as_master(ctx, buf, n);
@@ -580,7 +579,7 @@ int twi_write(struct twi *ctx, const void *buf, size_t n)
 
 int twi_read(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     if (ctx->mode == TWI_MODE_MASTER)
         return twi_read_as_master(ctx, buf, n);

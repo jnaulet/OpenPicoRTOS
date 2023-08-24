@@ -29,7 +29,7 @@ struct GPIO_STM32H7XX {
  */
 int gpio_stm32h7xx_init(struct gpio *ctx, int base, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)GPIO_STM32H7XX_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)GPIO_STM32H7XX_PIN_COUNT, return -EINVAL);
 
     ctx->base = (struct GPIO_STM32H7XX*)base;
     ctx->mask = (uint32_t)(1 << pin);
@@ -40,8 +40,8 @@ int gpio_stm32h7xx_init(struct gpio *ctx, int base, size_t pin)
 
 static int set_invert(struct gpio *ctx, gpio_invert_t invert)
 {
-    if (!picoRTOS_assert(invert != GPIO_INVERT_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(invert < GPIO_INVERT_COUNT)) return -EINVAL;
+    picoRTOS_assert(invert != GPIO_INVERT_IGNORE, return -EINVAL);
+    picoRTOS_assert(invert < GPIO_INVERT_COUNT, return -EINVAL);
 
     ctx->invert = (invert == GPIO_INVERT_ENABLE);
     return 0;

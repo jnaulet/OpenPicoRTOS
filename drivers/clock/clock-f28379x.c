@@ -2,6 +2,8 @@
 #include "picoRTOS.h"
 #include "picoRTOS_device.h"
 
+#include <generated/autoconf.h>
+
 #include <errno.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -98,17 +100,15 @@ static int pll_lock_busywait(void)
         if ((CLK_CFG_REGS->SYSPLLSTS & SYSPLLSTS_LOCKS) != 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
 static int pll_setup(uint32_t imult, uint32_t fmult, uint32_t divsel)
 {
-    if (!picoRTOS_assert(imult <= (uint32_t)SYSPLLMULT_IMULT_M)) return -EINVAL;
-    if (!picoRTOS_assert(fmult <= (uint32_t)SYSPLLMULT_FMULT_M)) return -EINVAL;
-    if (!picoRTOS_assert(divsel <= (uint32_t)SYSCLKDIVSEL_PLLSYSCLKDIV_M)) return -EINVAL;
+    picoRTOS_assert(imult <= (uint32_t)SYSPLLMULT_IMULT_M, return -EINVAL);
+    picoRTOS_assert(fmult <= (uint32_t)SYSPLLMULT_FMULT_M, return -EINVAL);
+    picoRTOS_assert(divsel <= (uint32_t)SYSCLKDIVSEL_PLLSYSCLKDIV_M, return -EINVAL);
 
     int i;
 
@@ -180,7 +180,7 @@ static int configure_pll(unsigned long freq)
  */
 int clock_f28379x_init(struct clock_settings *settings)
 {
-    if (!picoRTOS_assert(settings->clksrc < CLOCK_F28379X_CLKSRC_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->clksrc < CLOCK_F28379X_CLKSRC_COUNT, return -EINVAL);
 
     /* default is INTOSC2 */
     clocks.clksrc = (clock_freq_t)INTOSCx_FREQ;
@@ -203,7 +203,7 @@ int clock_f28379x_init(struct clock_settings *settings)
  */
 int clock_f28379x_pclk_enable(clock_f28379x_pclk_t pclk)
 {
-    if (!picoRTOS_assert(pclk < CLOCK_F28379X_PCLK_COUNT)) return -EINVAL;
+    picoRTOS_assert(pclk < CLOCK_F28379X_PCLK_COUNT, return -EINVAL);
 
     size_t index = (size_t)pclk >> 5;
     uint32_t mask = (uint32_t)(1ul << (0x1fu & pclk));
@@ -226,7 +226,7 @@ int clock_f28379x_pclk_enable(clock_f28379x_pclk_t pclk)
  */
 int clock_f28379x_pclk_disable(clock_f28379x_pclk_t pclk)
 {
-    if (!picoRTOS_assert(pclk < CLOCK_F28379X_PCLK_COUNT)) return -EINVAL;
+    picoRTOS_assert(pclk < CLOCK_F28379X_PCLK_COUNT, return -EINVAL);
 
     size_t index = (size_t)pclk >> 5;
     uint32_t mask = (uint32_t)(1ul << (0x1fu & pclk));

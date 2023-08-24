@@ -106,9 +106,7 @@ static int sync_busywait(struct adc *ctx, uint32_t mask)
         if ((ctx->base->SYNCBUSY & mask) == 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -125,7 +123,7 @@ static int sync_busywait(struct adc *ctx, uint32_t mask)
  */
 int adc_same5x_init(struct adc *ctx, int base, adc_same5x_channel_t channel)
 {
-    if (!picoRTOS_assert(channel < ADC_SAME5X_CHANNEL_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < ADC_SAME5X_CHANNEL_COUNT, return -EINVAL);
 
     ctx->base = (struct ADC_SAME5X*)base;
     ctx->channel = channel;
@@ -198,7 +196,7 @@ int adc_read(struct adc *ctx, int *data)
 
 int adc_read_multiple(struct adc *ctx, int *data, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     return adc_read(ctx, data);
 }

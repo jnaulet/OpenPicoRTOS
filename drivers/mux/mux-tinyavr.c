@@ -59,7 +59,7 @@ int mux_tinyavr_init(struct mux *ctx, int base)
  */
 int mux_tinyavr_input(struct mux *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_TINYAVR_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_TINYAVR_PIN_COUNT, return -EINVAL);
 
     ctx->base->DIRCLR = (uint8_t)(1 << pin);
     return 0;
@@ -77,7 +77,7 @@ int mux_tinyavr_input(struct mux *ctx, size_t pin)
  */
 int mux_tinyavr_output(struct mux *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_TINYAVR_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_TINYAVR_PIN_COUNT, return -EINVAL);
 
     ctx->base->DIRSET = (uint8_t)(1 << pin);
     return 0;
@@ -95,7 +95,7 @@ int mux_tinyavr_output(struct mux *ctx, size_t pin)
  */
 int mux_tinyavr_pull_up(struct mux *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_TINYAVR_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_TINYAVR_PIN_COUNT, return -EINVAL);
 
     ctx->base->PINnCTRL[pin] = (uint8_t)PINnCTRL_PULLUPEN;
     return 0;
@@ -103,7 +103,7 @@ int mux_tinyavr_pull_up(struct mux *ctx, size_t pin)
 
 int mux_tinyavr_select_alt_pin(mux_tinyavr_alt_t alt)
 {
-    if (!picoRTOS_assert(alt < MUX_TINYAVR_ALT_COUNT)) return -EINVAL; /* ! */
+    picoRTOS_assert(alt < MUX_TINYAVR_ALT_COUNT, return -EINVAL); /* ! */
 
     size_t shift = (size_t)0xfu & alt;
 

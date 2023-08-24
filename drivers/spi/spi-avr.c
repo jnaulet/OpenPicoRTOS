@@ -35,7 +35,7 @@ struct SPI_AVR {
  */
 int spi_avr_init(struct spi *ctx, int base, spi_avr_speed_t speed)
 {
-    if (!picoRTOS_assert(speed < SPI_AVR_SPEED_COUNT)) return -EINVAL;
+    picoRTOS_assert(speed < SPI_AVR_SPEED_COUNT, return -EINVAL);
 
     /* internals */
     ctx->base = (struct SPI_AVR*)base;
@@ -54,8 +54,8 @@ int spi_avr_init(struct spi *ctx, int base, spi_avr_speed_t speed)
 
 static int set_mode(struct spi *ctx, spi_mode_t mode)
 {
-    if (!picoRTOS_assert(mode != SPI_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(mode < SPI_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(mode != SPI_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(mode < SPI_MODE_COUNT, return -EINVAL);
 
     /* master */
     if (mode == SPI_MODE_MASTER)
@@ -68,8 +68,8 @@ static int set_mode(struct spi *ctx, spi_mode_t mode)
 
 static int set_clkmode(struct spi *ctx, spi_clock_mode_t clkmode)
 {
-    if (!picoRTOS_assert(clkmode != SPI_CLOCK_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(clkmode < SPI_CLOCK_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(clkmode != SPI_CLOCK_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(clkmode < SPI_CLOCK_MODE_COUNT, return -EINVAL);
 
     switch (clkmode) {
     case SPI_CLOCK_MODE_0:
@@ -133,7 +133,7 @@ static int run_state_start(struct spi *ctx, const void *tx)
 static int run_state_xfer(struct spi *ctx, void *rx,
                           const void *tx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     if ((ctx->base->SPSR & SPSR_SPIF) == 0)
         return -EAGAIN;
@@ -151,7 +151,7 @@ static int run_state_xfer(struct spi *ctx, void *rx,
 
 int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
     case SPI_AVR_STATE_START: return run_state_start(ctx, tx);

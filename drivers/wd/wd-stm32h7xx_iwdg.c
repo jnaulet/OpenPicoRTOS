@@ -58,9 +58,7 @@ static int reg_update_busywait(struct wd *ctx)
         if (ctx->base->SR == 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -76,16 +74,16 @@ static int reg_update_busywait(struct wd *ctx)
  */
 int wd_stm32h7xx_iwdg_setup(struct wd *ctx, struct wd_stm32h7xx_iwdg_settings *settings)
 {
-    if (!picoRTOS_assert(settings->timeout_ms > 0)) return -EINVAL;
-    if (!picoRTOS_assert(settings->window_ms > 0)) return -EINVAL;
-    if (!picoRTOS_assert(settings->window_ms <= settings->timeout_ms)) return -EINVAL;
+    picoRTOS_assert(settings->timeout_ms > 0, return -EINVAL);
+    picoRTOS_assert(settings->window_ms > 0, return -EINVAL);
+    picoRTOS_assert(settings->window_ms <= settings->timeout_ms, return -EINVAL);
 
     size_t p;
     clock_freq_t freq;
     static const unsigned long pr[] = { 4ul, 8ul, 16ul, 32ul, 64ul, 128ul, 256ul };
 
-    if (!picoRTOS_assert((freq = clock_get_freq(ctx->clkid)) > 0))
-        return -EIO;
+    picoRTOS_assert((freq = clock_get_freq(ctx->clkid)) > 0,
+                    return -EIO);
 
     /* determine prescaler + reload + window */
     for (p = 0; p < (size_t)7; p++) {

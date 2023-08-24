@@ -54,7 +54,8 @@ struct DMA_GD32VF103 {
  */
 int dma_gd32vf103_init(struct dma *ctx, int base, size_t channel)
 {
-    if (!picoRTOS_assert(channel < (size_t)DMA_GD32VF103_MAX_CH_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)DMA_GD32VF103_MAX_CH_COUNT,
+                    return -EINVAL);
 
     ctx->base = (struct DMA_GD32VF103*)base;
     ctx->channel = channel;
@@ -65,9 +66,9 @@ int dma_gd32vf103_init(struct dma *ctx, int base, size_t channel)
 
 static int dma_prepare(struct dma *ctx, struct dma_xfer *xfer)
 {
-    if (!picoRTOS_assert(xfer->size > 0)) return -EAGAIN;
-    if (!picoRTOS_assert(xfer->size <= sizeof(uint32_t))) return -EAGAIN;
-    if (!picoRTOS_assert(xfer->byte_count > 0)) return -EAGAIN;
+    picoRTOS_assert(xfer->size > 0, return -EAGAIN);
+    picoRTOS_assert(xfer->size <= sizeof(uint32_t), return -EAGAIN);
+    picoRTOS_assert(xfer->byte_count > 0, return -EAGAIN);
 
     /* this one is tricky, as the DMA is designed to transfer data between
      * memory & peripherals */

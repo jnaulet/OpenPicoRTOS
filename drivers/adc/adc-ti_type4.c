@@ -103,14 +103,14 @@ static int calibrate_inl(unsigned long cal_inl_addr)
 
 static int request_samples(struct adc_ti_type4 *ctx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)ADC_TI_TYPE4_SAMPLES_MAX)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)ADC_TI_TYPE4_SAMPLES_MAX, return -EINVAL);
 
     int ret = 0;
 
     /* check if we have enough left */
-    if (!picoRTOS_assert((ctx->sample_count + n) <= (size_t)ADC_TI_TYPE4_SAMPLES_MAX))
-        return -EIO;
+    picoRTOS_assert((ctx->sample_count + n) <= (size_t)ADC_TI_TYPE4_SAMPLES_MAX,
+                    return -EIO; )
 
     ret = (int)ctx->sample_count;
     ctx->sample_count += n;
@@ -121,8 +121,8 @@ static int request_samples(struct adc_ti_type4 *ctx, size_t n)
 static int request_intflg(struct adc_ti_type4 *ctx, size_t soc,
                           adc_ti_type4_intflg_t intflg)
 {
-    if (!picoRTOS_assert(soc < (size_t)ADC_TI_TYPE4_CHANNEL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(intflg < ADC_TI_TYPE4_INTFLG_COUNT)) return -EINVAL;
+    picoRTOS_assert(soc < (size_t)ADC_TI_TYPE4_CHANNEL_COUNT, return -EINVAL);
+    picoRTOS_assert(intflg < ADC_TI_TYPE4_INTFLG_COUNT, return -EINVAL);
 
     int res = 0;
 
@@ -207,9 +207,9 @@ static int set_offset_trim_otp(struct adc_ti_type4 *ctx,
                                adc_ti_type4_resolution_t resolution,
                                adc_ti_type4_trim_off_index_t trim_off_index)
 {
-    if (!picoRTOS_assert(resolution < ADC_TI_TYPE4_RESOLUTION_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(sigmode < ADC_TI_TYPE4_SIGMODE_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(trim_off_index < ADC_TI_TYPE4_TRIM_OFF_INDEX_COUNT)) return -EINVAL;
+    picoRTOS_assert(resolution < ADC_TI_TYPE4_RESOLUTION_COUNT, return -EINVAL);
+    picoRTOS_assert(sigmode < ADC_TI_TYPE4_SIGMODE_COUNT, return -EINVAL);
+    picoRTOS_assert(trim_off_index < ADC_TI_TYPE4_TRIM_OFF_INDEX_COUNT, return -EINVAL);
 
     uint16_t index = (uint16_t)(trim_off_index << 2);
 
@@ -236,10 +236,10 @@ static int set_offset_trim_otp(struct adc_ti_type4 *ctx,
  */
 int adc_ti_type4_setup(struct adc_ti_type4 *ctx, struct adc_ti_type4_settings *settings)
 {
-    if (!picoRTOS_assert(settings->resolution < ADC_TI_TYPE4_RESOLUTION_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->sigmode < ADC_TI_TYPE4_SIGMODE_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->prescale < ADC_TI_TYPE4_PRESCALE_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->prescale != ADC_TI_TYPE4_PRESCALE_INVALID)) return -EINVAL;
+    picoRTOS_assert(settings->resolution < ADC_TI_TYPE4_RESOLUTION_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->sigmode < ADC_TI_TYPE4_SIGMODE_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->prescale < ADC_TI_TYPE4_PRESCALE_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->prescale != ADC_TI_TYPE4_PRESCALE_INVALID, return -EINVAL);
 
     int res;
 
@@ -293,9 +293,9 @@ int adc_ti_type4_adc_init(struct adc *ctx, struct adc_ti_type4 *parent,
                           size_t channel, size_t sample_count,
                           adc_ti_type4_intflg_t intflg)
 {
-    if (!picoRTOS_assert(channel < (size_t)ADC_TI_TYPE4_CHANNEL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(sample_count <= (size_t)ADC_TI_TYPE4_SAMPLES_MAX)) return -EINVAL;
-    if (!picoRTOS_assert(intflg < ADC_TI_TYPE4_INTFLG_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)ADC_TI_TYPE4_CHANNEL_COUNT, return -EINVAL);
+    picoRTOS_assert(sample_count <= (size_t)ADC_TI_TYPE4_SAMPLES_MAX, return -EINVAL);
+    picoRTOS_assert(intflg < ADC_TI_TYPE4_INTFLG_COUNT, return -EINVAL);
 
     int res;
     size_t index;
@@ -344,8 +344,8 @@ int adc_ti_type4_adc_init(struct adc *ctx, struct adc_ti_type4 *parent,
 int adc_ti_type4_adc_setup(struct adc *ctx,
                            struct adc_ti_type4_adc_settings *settings)
 {
-    if (!picoRTOS_assert(settings->trig < ADC_TI_TYPE4_TRIG_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert((size_t)settings->acqps >= ctx->parent->acqps_min)) return -EINVAL;
+    picoRTOS_assert(settings->trig < ADC_TI_TYPE4_TRIG_COUNT, return -EINVAL);
+    picoRTOS_assert((size_t)settings->acqps >= ctx->parent->acqps_min, return -EINVAL);
 
     size_t i;
     struct adc_ti_type4 *parent = ctx->parent;
@@ -391,8 +391,8 @@ int adc_read(struct adc *ctx, int *data)
 
 int adc_read_multiple(struct adc *ctx, int *data, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)ADC_TI_TYPE4_SAMPLES_MAX)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)ADC_TI_TYPE4_SAMPLES_MAX, return -EINVAL);
 
     size_t i;
     struct adc_ti_type4 *parent = ctx->parent;

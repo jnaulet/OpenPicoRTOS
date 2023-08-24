@@ -41,7 +41,8 @@ int wd_avr_init(struct wd *ctx, int base)
  */
 int wd_avr_setup(struct wd *ctx, struct wd_avr_settings *settings)
 {
-    if (!picoRTOS_assert(settings->cycles < WD_AVR_CYCLES_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->cycles < WD_AVR_CYCLES_COUNT,
+                    return -EINVAL);
 
     ctx->cycles = settings->cycles;
     return 0;

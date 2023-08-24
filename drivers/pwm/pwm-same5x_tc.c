@@ -101,9 +101,7 @@ static int sync_busywait(struct pwm_same5x_tc *ctx, uint32_t mask)
         if ((ctx->base->SYNCBUSY & mask) == 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -126,15 +124,13 @@ int pwm_same5x_tc_init(struct pwm_same5x_tc *ctx, int base, clock_id_t clkid)
     ctx->mode = PWM_SAME5X_TC_MODE_16;
     ctx->wavegen = PWM_SAME5X_TC_WAVEGEN_NFRQ;
 
-    if (!picoRTOS_assert(ctx->freq > 0))
-        return -EIO;
-
+    picoRTOS_assert(ctx->freq > 0, return -EIO);
     return 0;
 }
 
 static int set_prescaler(struct pwm_same5x_tc *ctx, pwm_same5x_tc_prescaler_t prescaler)
 {
-    if (!picoRTOS_assert(prescaler < PWM_SAME5X_TC_PRESCALER_COUNT)) return -EINVAL;
+    picoRTOS_assert(prescaler < PWM_SAME5X_TC_PRESCALER_COUNT, return -EINVAL);
 
     switch (prescaler) {
     case PWM_SAME5X_TC_PRESCALER_DIV1: ctx->prescaler = 1ul; break;
@@ -169,8 +165,8 @@ static int set_prescaler(struct pwm_same5x_tc *ctx, pwm_same5x_tc_prescaler_t pr
  */
 int pwm_same5x_tc_setup(struct pwm_same5x_tc *ctx, struct pwm_same5x_tc_settings *settings)
 {
-    if (!picoRTOS_assert(settings->mode < PWM_SAME5X_TC_MODE_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->wavegen < PWM_SAME5X_TC_WAVEGEN_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->mode < PWM_SAME5X_TC_MODE_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->wavegen < PWM_SAME5X_TC_WAVEGEN_COUNT, return -EINVAL);
 
     int res;
 
@@ -191,7 +187,7 @@ int pwm_same5x_tc_setup(struct pwm_same5x_tc *ctx, struct pwm_same5x_tc_settings
 
 static int set_invert(struct pwm_same5x_tc *ctx, size_t channel, bool invert)
 {
-    if (!picoRTOS_assert(channel < (size_t)PWM_SAME5X_TC_CHANNEL_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)PWM_SAME5X_TC_CHANNEL_COUNT, return -EINVAL);
 
     if (channel == 0) {
         if (invert) ctx->base->DRVCTRL |= DRVCTRL_INVEN0;
@@ -217,7 +213,7 @@ static int set_invert(struct pwm_same5x_tc *ctx, size_t channel, bool invert)
  */
 int pwm_same5x_tc_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_same5x_tc *parent, size_t channel)
 {
-    if (!picoRTOS_assert(channel < (size_t)PWM_SAME5X_TC_CHANNEL_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)PWM_SAME5X_TC_CHANNEL_COUNT, return -EINVAL);
 
     ctx->parent = parent;
     ctx->channel = channel;
@@ -242,7 +238,7 @@ int pwm_same5x_tc_pwm_setup(struct pwm *ctx, struct pwm_same5x_tc_pwm_settings *
 
 static int set_period8(struct pwm_same5x_tc *ctx, size_t ncycles)
 {
-    if (!picoRTOS_assert(ncycles < (size_t)0x100)) return -EINVAL;
+    picoRTOS_assert(ncycles < (size_t)0x100, return -EINVAL);
 
     ctx->base->TC8.PER = (uint8_t)ncycles;
     return 0;
@@ -250,10 +246,10 @@ static int set_period8(struct pwm_same5x_tc *ctx, size_t ncycles)
 
 static int set_period16(struct pwm_same5x_tc *ctx, size_t ncycles)
 {
-    if (!picoRTOS_assert(ncycles < (size_t)0x10000)) return -EINVAL;
-    if (!picoRTOS_assert(ctx->wavegen == PWM_SAME5X_TC_WAVEGEN_MFRQ ||
-                         ctx->wavegen == PWM_SAME5X_TC_WAVEGEN_MPWM))
-        return -EINVAL;
+    picoRTOS_assert(ncycles < (size_t)0x10000, return -EINVAL);
+    picoRTOS_assert(ctx->wavegen == PWM_SAME5X_TC_WAVEGEN_MFRQ ||
+                    ctx->wavegen == PWM_SAME5X_TC_WAVEGEN_MPWM,
+                    return -EINVAL);
 
     ctx->base->TC16.CC0 = (uint16_t)ncycles;
     return sync_busywait(ctx, (uint32_t)SYNCBUSY_CC0);
@@ -261,9 +257,9 @@ static int set_period16(struct pwm_same5x_tc *ctx, size_t ncycles)
 
 static int set_period32(struct pwm_same5x_tc *ctx, size_t ncycles)
 {
-    if (!picoRTOS_assert(ctx->wavegen == PWM_SAME5X_TC_WAVEGEN_MFRQ ||
-                         ctx->wavegen == PWM_SAME5X_TC_WAVEGEN_MPWM))
-        return -EINVAL;
+    picoRTOS_assert(ctx->wavegen == PWM_SAME5X_TC_WAVEGEN_MFRQ ||
+                    ctx->wavegen == PWM_SAME5X_TC_WAVEGEN_MPWM,
+                    return -EINVAL);
 
     ctx->base->TC32.CC0 = (uint32_t)ncycles;
     return sync_busywait(ctx, (uint32_t)SYNCBUSY_CC0);
@@ -290,7 +286,7 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
 
 static int set_duty_cycle8(struct pwm *ctx, size_t ccx)
 {
-    if (!picoRTOS_assert(ccx < (size_t)0x100)) return -EINVAL;
+    picoRTOS_assert(ccx < (size_t)0x100, return -EINVAL);
 
     struct pwm_same5x_tc *parent = ctx->parent;
 
@@ -305,7 +301,7 @@ static int set_duty_cycle8(struct pwm *ctx, size_t ccx)
 
 static int set_duty_cycle16(struct pwm *ctx, size_t ccx)
 {
-    if (!picoRTOS_assert(ccx < (size_t)0x10000)) return -EINVAL;
+    picoRTOS_assert(ccx < (size_t)0x10000, return -EINVAL);
 
     struct pwm_same5x_tc *parent = ctx->parent;
 
@@ -346,9 +342,7 @@ static int cmd_read_back_as_zero(struct pwm_same5x_tc *ctx)
         if ((ctx->base->CTRLBSET >> 5) == 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 

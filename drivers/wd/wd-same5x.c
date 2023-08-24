@@ -44,9 +44,7 @@ static int sync_busywait(struct wd *ctx, uint32_t mask)
         if ((ctx->base->SYNCBUSY & mask) == 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -81,13 +79,11 @@ int wd_same5x_init(struct wd *ctx, int base)
  */
 int wd_same5x_setup(struct wd *ctx, struct wd_same5x_settings *settings)
 {
-    if (!picoRTOS_assert(settings->period < WD_SAME5X_PERIOD_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->period < WD_SAME5X_PERIOD_COUNT, return -EINVAL);
 
     ctx->base->CONFIG = (uint8_t)CONFIG_PER(settings->period);
     if (settings->window_mode) {
-        if (!picoRTOS_assert(settings->window < WD_SAME5X_PERIOD_COUNT))
-            return -EINVAL;
-
+        picoRTOS_assert(settings->window < WD_SAME5X_PERIOD_COUNT, return -EINVAL);
         ctx->base->CONFIG |= CONFIG_WINDOW(settings->window);
         ctx->base->CTRLA = (uint8_t)CTRLA_WEN;
     }

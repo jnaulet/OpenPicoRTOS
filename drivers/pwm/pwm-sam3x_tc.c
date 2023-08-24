@@ -2,6 +2,7 @@
 #include "picoRTOS.h"
 
 #include <stdint.h>
+#include <generated/autoconf.h>
 
 struct PWM_SAM3X_TC {
     volatile uint32_t TC_CCR;
@@ -108,13 +109,12 @@ struct PWM_SAM3X_TC {
 static clock_freq_t pwm_sam3x_tc_get_freq(clock_id_t clkid,
                                           pwm_sam3x_tc_tcclks_t tcclks)
 {
-    if (!picoRTOS_assert(tcclks < PWM_SAM3X_TC_TCCLKS_COUNT))
-        return (clock_freq_t)-EINVAL;
+    picoRTOS_assert(tcclks < PWM_SAM3X_TC_TCCLKS_COUNT,
+                    return (clock_freq_t)-EINVAL);
 
     clock_freq_t freq = clock_get_freq(clkid);
 
-    if (!picoRTOS_assert(freq > 0))
-        return (clock_freq_t)-EIO;
+    picoRTOS_assert(freq > 0, return (clock_freq_t)-EIO);
 
     switch (tcclks) {
     case PWM_SAM3X_TC_TCCLKS_TIMER_CLOCK1: return freq / (clock_freq_t)2;
@@ -139,8 +139,7 @@ int pwm_sam3x_tc_init(struct pwm *ctx, int base, clock_id_t clkid)
 
     /* freq */
     ctx->freq = pwm_sam3x_tc_get_freq(ctx->clkid, PWM_SAM3X_TC_TCCLKS_TIMER_CLOCK1);
-    if (!picoRTOS_assert(ctx->freq > 0))
-        return -EIO;
+    picoRTOS_assert(ctx->freq > 0, return -EIO);
 
     /* waveform mode */
     ctx->base->TC_CMR |= TC_CMR_WAVE;
@@ -150,14 +149,13 @@ int pwm_sam3x_tc_init(struct pwm *ctx, int base, clock_id_t clkid)
 
 int pwm_sam3x_tc_setup(struct pwm *ctx, struct pwm_sam3x_tc_settings *settings)
 {
-    if (!picoRTOS_assert(settings->tio < PWM_SAM3X_TC_TIO_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->wavsel < PWM_SAM3X_TC_WAVSEL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->ncpn < PWM_SAM3X_TC_CP_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->ncpc < PWM_SAM3X_TC_CP_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->tio < PWM_SAM3X_TC_TIO_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->wavsel < PWM_SAM3X_TC_WAVSEL_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->ncpn < PWM_SAM3X_TC_CP_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->ncpc < PWM_SAM3X_TC_CP_COUNT, return -EINVAL);
 
     ctx->freq = pwm_sam3x_tc_get_freq(ctx->clkid, settings->tcclks);
-    if (!picoRTOS_assert(ctx->freq > 0))
-        return -EIO;
+    picoRTOS_assert(ctx->freq > 0, return -EIO);
 
     ctx->base->TC_CMR &= ~TC_CMR_TCCLKS(TC_CMR_TCCLKS_M);
     ctx->base->TC_CMR |= TC_CMR_TCCLKS(settings->tcclks);
@@ -222,8 +220,7 @@ int ipwm_sam3x_tc_init(struct ipwm *ctx, int base, clock_id_t clkid)
 
     /* freq */
     ctx->freq = pwm_sam3x_tc_get_freq(ctx->clkid, ctx->tcclks);
-    if (!picoRTOS_assert(ctx->freq > 0))
-        return -EIO;
+    picoRTOS_assert(ctx->freq > 0, return -EIO);
 
     /* capture mode */
     ctx->base->TC_CMR &= ~TC_CMR_WAVE;
@@ -233,12 +230,11 @@ int ipwm_sam3x_tc_init(struct ipwm *ctx, int base, clock_id_t clkid)
 
 int ipwm_sam3x_tc_setup(struct ipwm *ctx, struct ipwm_sam3x_tc_settings *settings)
 {
-    if (!picoRTOS_assert(settings->tcclks < PWM_SAM3X_TC_TCCLKS_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->ldr < IPWM_SAM3X_TC_LDR_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->tcclks < PWM_SAM3X_TC_TCCLKS_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->ldr < IPWM_SAM3X_TC_LDR_COUNT, return -EINVAL);
 
     ctx->freq = pwm_sam3x_tc_get_freq(ctx->clkid, settings->tcclks);
-    if (!picoRTOS_assert(ctx->freq > 0))
-        return -EIO;
+    picoRTOS_assert(ctx->freq > 0, return -EIO);
 
     ctx->base->TC_CMR &= ~TC_CMR_TCCLKS(TC_CMR_TCCLKS_M);
     ctx->base->TC_CMR |= TC_CMR_TCCLKS(settings->tcclks);

@@ -70,8 +70,8 @@ struct DMA_RP2040 {
 int dma_r2040_init(struct dma *ctx, int base, size_t channel,
                    dma_rp2040_treq_sel_t treq_sel)
 {
-    if (!picoRTOS_assert(channel < (size_t)DMA_RP2040_CHANNEL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(treq_sel < DMA_RP2040_TREQ_SEL_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)DMA_RP2040_CHANNEL_COUNT, return -EINVAL);
+    picoRTOS_assert(treq_sel < DMA_RP2040_TREQ_SEL_COUNT, return -EINVAL);
 
     ctx->base = (struct DMA_RP2040*)base;
     ctx->ch = &ctx->base->CH[channel];
@@ -96,9 +96,9 @@ int dma_r2040_init(struct dma *ctx, int base, size_t channel,
 
 int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
 {
-    if (!picoRTOS_assert(xfer->size > 0)) return -EINVAL;
-    if (!picoRTOS_assert(xfer->size != (size_t)3)) return -EINVAL;
-    if (!picoRTOS_assert(xfer->size < (size_t)5)) return -EINVAL;
+    picoRTOS_assert(xfer->size > 0, return -EINVAL);
+    picoRTOS_assert(xfer->size != (size_t)3, return -EINVAL);
+    picoRTOS_assert(xfer->size < (size_t)5, return -EINVAL);
 
     ctx->ch->READ_ADDR = (uint32_t)xfer->saddr;
     ctx->ch->WRITE_ADDR = (uint32_t)xfer->daddr;
@@ -121,9 +121,9 @@ int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
 
 int dma_xfer(struct dma *ctx, struct dma_xfer *xfer)
 {
-    if (!picoRTOS_assert(xfer->size > 0)) return -EINVAL;
-    if (!picoRTOS_assert(xfer->size != (size_t)3)) return -EINVAL;
-    if (!picoRTOS_assert(xfer->size < (size_t)5)) return -EINVAL;
+    picoRTOS_assert(xfer->size > 0, return -EINVAL);
+    picoRTOS_assert(xfer->size != (size_t)3, return -EINVAL);
+    picoRTOS_assert(xfer->size < (size_t)5, return -EINVAL);
 
     int res;
 

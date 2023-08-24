@@ -62,8 +62,8 @@ int adc_avr_init(struct adc_avr *ctx, int base)
  */
 int adc_avr_setup(struct adc_avr *ctx, struct adc_avr_settings *settings)
 {
-    if (!picoRTOS_assert(settings->prescaler < ADC_AVR_PRESCALER_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->refs < ADC_AVR_REFS_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->prescaler < ADC_AVR_PRESCALER_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->refs < ADC_AVR_REFS_COUNT, return -EINVAL);
 
     ctx->base->ADCSRA &= ~ADCSRA_ADPS_M;
     ctx->base->ADCSRA |= (uint8_t)ADCSRA_ADPS(settings->prescaler);
@@ -89,7 +89,8 @@ int adc_avr_setup(struct adc_avr *ctx, struct adc_avr_settings *settings)
 
 static int adc_avr_set_mux(struct adc_avr *ctx, size_t channel)
 {
-    if (!picoRTOS_assert(channel <= (size_t)ADC_AVR_CHANNEL_P13_N10)) return -EINVAL;
+    picoRTOS_assert(channel <= (size_t)ADC_AVR_CHANNEL_P13_N10,
+                    return -EINVAL);
 
     ctx->base->ADMUX &= ~ADMUX_MUX_M;
     ctx->base->ADMUX |= (uint8_t)ADMUX_MUX(channel);
@@ -114,7 +115,8 @@ static int adc_avr_set_mux(struct adc_avr *ctx, size_t channel)
  */
 int adc_avr_adc_init(struct adc *ctx, struct adc_avr *parent, size_t channel)
 {
-    if (!picoRTOS_assert(channel <= (size_t)ADC_AVR_CHANNEL_P13_N10)) return -EINVAL;
+    picoRTOS_assert(channel <= (size_t)ADC_AVR_CHANNEL_P13_N10,
+                    return -EINVAL);
 
     ctx->parent = parent;
     ctx->channel = channel;
@@ -186,7 +188,7 @@ int adc_read(struct adc *ctx, int *data)
 
 int adc_read_multiple(struct adc *ctx, int *data, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     return adc_read(ctx, data);
 }

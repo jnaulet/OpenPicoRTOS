@@ -20,9 +20,9 @@ struct GPIO_CTRL_REGS {
 
 static int set_mux(struct mux *ctx, size_t pin, mux_ti_f28x_t gmux, mux_ti_f28x_t mux)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_TI_F28X_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(gmux < MUX_TI_F28X_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(mux < MUX_TI_F28X_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_TI_F28X_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(gmux < MUX_TI_F28X_COUNT, return -EINVAL);
+    picoRTOS_assert(mux < MUX_TI_F28X_COUNT, return -EINVAL);
 
     if (pin < (size_t)(MUX_TI_F28X_PIN_COUNT / 2)) {
         size_t shift = (size_t)(pin * 2);
@@ -76,9 +76,9 @@ int mux_ti_f28x_init(struct mux *ctx, int base)
  */
 int mux_ti_f28x_output(struct mux *ctx, size_t pin, mux_ti_f28x_t gmux, mux_ti_f28x_t mux)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_TI_F28X_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(gmux < MUX_TI_F28X_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(mux < MUX_TI_F28X_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_TI_F28X_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(gmux < MUX_TI_F28X_COUNT, return -EINVAL);
+    picoRTOS_assert(mux < MUX_TI_F28X_COUNT, return -EINVAL);
 
     int ret;
 
@@ -104,9 +104,9 @@ int mux_ti_f28x_output(struct mux *ctx, size_t pin, mux_ti_f28x_t gmux, mux_ti_f
  */
 int mux_ti_f28x_input(struct mux *ctx, size_t pin, mux_ti_f28x_t gmux, mux_ti_f28x_t mux)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_TI_F28X_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(gmux < MUX_TI_F28X_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(mux < MUX_TI_F28X_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_TI_F28X_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(gmux < MUX_TI_F28X_COUNT, return -EINVAL);
+    picoRTOS_assert(mux < MUX_TI_F28X_COUNT, return -EINVAL);
 
     int ret;
 
@@ -130,7 +130,7 @@ int mux_ti_f28x_input(struct mux *ctx, size_t pin, mux_ti_f28x_t gmux, mux_ti_f2
  */
 int mux_ti_f28x_pull_up(struct mux *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_TI_F28X_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_TI_F28X_PIN_COUNT, return -EINVAL);
 
     ASM(" eallow");
     ctx->base->GPnPUD &= ~((uint32_t)1ul << pin);
@@ -152,8 +152,8 @@ int mux_ti_f28x_pull_up(struct mux *ctx, size_t pin)
  */
 int mux_ti_f28x_set_qsel(struct mux *ctx, size_t pin, mux_ti_f28x_qsel_t qsel)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_TI_F28X_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(qsel < MUX_TI_F28X_QSEL_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_TI_F28X_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(qsel < MUX_TI_F28X_QSEL_COUNT, return -EINVAL);
 
     ASM(" eallow");
 

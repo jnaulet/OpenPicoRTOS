@@ -145,7 +145,7 @@ int flash_get_nblocks(struct flash *ctx)
 
 int flash_get_erase_size(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
 
     /* TODO: AUX ? */
     return (int)ctx->block_size;
@@ -153,7 +153,7 @@ int flash_get_erase_size(struct flash *ctx, size_t block)
 
 int flash_get_write_size(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
 
     /* TODO: AUX ? */
     return (int)QWORD_SIZE;
@@ -161,7 +161,7 @@ int flash_get_write_size(struct flash *ctx, size_t block)
 
 int flash_get_block_addr(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
 
     return (int)(block * ctx->block_size);
 }
@@ -186,7 +186,7 @@ static int run_cmd_busy(struct flash *ctx, size_t n)
 
 static int run_cmd(struct flash *ctx, int cmd, size_t addr)
 {
-    if (!picoRTOS_assert(cmd <= CMD_USEER)) return -EINVAL;
+    picoRTOS_assert(cmd <= CMD_USEER, return -EINVAL);
 
     switch (ctx->state) {
     case FLASH_SAME5X_STATE_IDLE:
@@ -208,14 +208,14 @@ static int run_cmd(struct flash *ctx, int cmd, size_t addr)
 
 int flash_erase(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
 
     return run_cmd(ctx, CMD_EB, block * ctx->block_size);
 }
 
 int flash_blankcheck(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
 
     size_t n = ctx->block_size / sizeof(uint32_t);
     uint32_t *addr = (uint32_t*)(block * ctx->block_size);
@@ -247,7 +247,7 @@ static int flash_write_idle(struct flash *ctx, int cmd, size_t addr,
 static int write_data(struct flash *ctx, int cmd, size_t addr,
                       const void *data, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
     case FLASH_SAME5X_STATE_IDLE:
@@ -266,8 +266,8 @@ static int write_data(struct flash *ctx, int cmd, size_t addr,
 
 int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert((n % sizeof(uint32_t)) == 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert((n % sizeof(uint32_t)) == 0, return -EINVAL);
 
     int nwritten = 0;
     int res = -EAGAIN;
@@ -304,14 +304,14 @@ int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n)
 
 int flash_lock(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
 
     return run_cmd(ctx, CMD_LR, block * ctx->block_size);
 }
 
 int flash_unlock(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
 
     return run_cmd(ctx, CMD_UR, block * ctx->block_size);
 }

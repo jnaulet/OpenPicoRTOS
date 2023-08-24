@@ -43,7 +43,7 @@ int wd_pic32mx_init(struct wd *ctx, int base)
  */
 int wd_pic32mx_setup(struct wd *ctx, struct wd_pic32mx_settings *settings)
 {
-    if (!picoRTOS_assert(settings->timeout < WD_PIC32MX_PERIOD_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->timeout < WD_PIC32MX_PERIOD_COUNT, return -EINVAL);
 
     ctx->base->WDTCON.CLR = (uint32_t)WDTCON_RUNDIV(WDTCON_RUNDIV_M);
     ctx->base->WDTCON.SET = (uint32_t)WDTCON_RUNDIV(settings->timeout);

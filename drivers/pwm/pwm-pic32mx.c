@@ -95,7 +95,7 @@ int pwm_pic32mx_init(struct pwm *ctx, int oc_base, int tc_base, clock_id_t clkid
  */
 int pwm_pic32mx_setup(struct pwm *ctx, struct pwm_pic32mx_settings *settings)
 {
-    if (!picoRTOS_assert(settings->octsel < PWM_PIC32MX_OCTSEL_COUNT)) return -EAGAIN;
+    picoRTOS_assert(settings->octsel < PWM_PIC32MX_OCTSEL_COUNT, return -EAGAIN);
 
     if (settings->octsel == PWM_PIC32MX_OCTSEL_TIMERY)
         ctx->oc->OCxCON.SET = (uint32_t)OCxCON_OCTSEL;
@@ -113,13 +113,12 @@ static unsigned long prescaler[TxCON_TCKPS_M + 1] =
 
 int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
 {
-    if (!picoRTOS_assert(period > 0)) return -EINVAL;
+    picoRTOS_assert(period > 0, return -EINVAL);
 
     size_t p;
     clock_freq_t freq = clock_get_freq(ctx->clkid);
 
-    if (!picoRTOS_assert(freq > 0))
-        return (int)freq;
+    picoRTOS_assert(freq > 0, return (int)freq);
 
     for (p = 0; p <= (size_t)TxCON_TCKPS_M; p++) {
         unsigned long pfreq = (unsigned long)freq / prescaler[p];

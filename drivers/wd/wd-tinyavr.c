@@ -49,8 +49,8 @@ int wd_tinyavr_init(struct wd *ctx, int base)
  */
 int wd_tinyavr_setup(struct wd *ctx, struct wd_tinyavr_settings *settings)
 {
-    if (!picoRTOS_assert(settings->window < WD_TINYAVR_PERIOD_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->period < WD_TINYAVR_PERIOD_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->window < WD_TINYAVR_PERIOD_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->period < WD_TINYAVR_PERIOD_COUNT, return -EINVAL);
 
     ctx->ctrla = (uint8_t)(CTRLA_WINDOW(settings->window) | CTRLA_PERIOD(settings->period));
     return 0;

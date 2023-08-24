@@ -27,7 +27,7 @@ int rp2040_reset_init(struct rp2040_reset *ctx, int base)
 
 int rp2040_reset(struct rp2040_reset *ctx, rp2040_reset_t ss)
 {
-    if (!picoRTOS_assert(ss < RP2040_RESET_COUNT)) return -EINVAL;
+    picoRTOS_assert(ss < RP2040_RESET_COUNT, return -EINVAL);
 
     ctx->base->RESET |= (uint32_t)(1 << ss);
     return 0;
@@ -35,7 +35,7 @@ int rp2040_reset(struct rp2040_reset *ctx, rp2040_reset_t ss)
 
 int rp2040_unreset(struct rp2040_reset *ctx, rp2040_reset_t ss)
 {
-    if (!picoRTOS_assert(ss < RP2040_RESET_COUNT)) return -EINVAL;
+    picoRTOS_assert(ss < RP2040_RESET_COUNT, return -EINVAL);
 
     int deadlock = CONFIG_DEADLOCK_COUNT;
     uint32_t mask = (uint32_t)(1 << ss);
@@ -46,8 +46,6 @@ int rp2040_unreset(struct rp2040_reset *ctx, rp2040_reset_t ss)
         if ((ctx->base->RESET_DONE & mask) != 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }

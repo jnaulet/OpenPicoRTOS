@@ -174,7 +174,7 @@ int dma_same5x_init(struct dma_same5x *ctx, int base)
 int dma_same5x_dma_init(/*@out@*/ struct dma *ctx, struct dma_same5x *parent,
                         size_t channel, dma_same5x_trigsrc_t trigsrc)
 {
-    if (!picoRTOS_assert(channel < (size_t)DMA_SAME5X_CHANNEL_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)DMA_SAME5X_CHANNEL_COUNT, return -EINVAL);
 
     ctx->parent = parent;
     ctx->channel = channel;
@@ -191,8 +191,8 @@ int dma_same5x_dma_init(/*@out@*/ struct dma *ctx, struct dma_same5x *parent,
 
 int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
 {
-    if (!picoRTOS_assert(xfer->size > 0)) return -EINVAL;
-    if (!picoRTOS_assert(xfer->size <= sizeof(uint32_t))) return -EINVAL;
+    picoRTOS_assert(xfer->size > 0, return -EINVAL);
+    picoRTOS_assert(xfer->size <= sizeof(uint32_t), return -EINVAL);
 
     struct DMA_SAME5X_TD *TD = &ctx->parent->TD[ctx->channel];
 

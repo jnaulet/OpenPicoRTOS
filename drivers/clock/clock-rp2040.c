@@ -187,7 +187,7 @@ static int xosc_config(unsigned long hz)
 #define XOSC_ENABLE        0xfab
 #define XOSC_FREQ_RANGE    0xaa0
 
-    if (!picoRTOS_assert(hz <= 15000000ul)) return -EINVAL;
+    picoRTOS_assert(hz <= 15000000ul, return -EINVAL);
 
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
@@ -200,8 +200,7 @@ static int xosc_config(unsigned long hz)
            deadlock-- != 0) {
     }
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
 
     clocks.xosc = (clock_freq_t)hz;
     return 0;
@@ -228,8 +227,7 @@ static int pll_setup(struct PLL *pll, int refdiv, int fbdiv,
            deadlock-- != 0) {
     }
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
 
     /* post dividers */
     pll->PRIM = (uint32_t)(PLL_PRIM_POSTDIV1(postdiv1) |
@@ -248,7 +246,7 @@ static int pll_config(struct PLL *pll, unsigned long hz)
 #define FBDIV_COUNT    320
 #define POSTDIVn_COUNT 8
 
-    if (!picoRTOS_assert(hz > 0)) return -EINVAL;
+    picoRTOS_assert(hz > 0, return -EINVAL);
 
     /* PLL SYS: 12 / 1 = 12MHz * 125 = 1500MHZ / 6 / 2 = 125MHz */
     /* PLL USB: 12 / 1 = 12MHz * 40 = 480 MHz / 5 / 2 = 48MHz */
@@ -278,7 +276,7 @@ static int pll_config(struct PLL *pll, unsigned long hz)
 
 static int pll_sys_config(unsigned long hz)
 {
-    if (!picoRTOS_assert(hz > 0)) return -EINVAL;
+    picoRTOS_assert(hz > 0, return -EINVAL);
 
     int res;
 
@@ -292,7 +290,7 @@ static int pll_sys_config(unsigned long hz)
 
 static int pll_usb_config(unsigned long hz)
 {
-    if (!picoRTOS_assert(hz > 0)) return -EINVAL;
+    picoRTOS_assert(hz > 0, return -EINVAL);
 
     int res;
 
@@ -316,15 +314,13 @@ static int sys_config_ref(void)
            deadlock-- != 0) {
     }
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
 static int sys_config(unsigned long sys_div)
 {
-    if (!picoRTOS_assert(sys_div > 0)) return -EINVAL;
+    picoRTOS_assert(sys_div > 0, return -EINVAL);
 
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
@@ -337,8 +333,7 @@ static int sys_config(unsigned long sys_div)
            deadlock-- != 0) {
     }
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
 
     clocks.sys = clocks.pll_sys / (clock_freq_t)sys_div;
     return 0;
@@ -348,8 +343,8 @@ static int ref_config(unsigned long ref_div)
 {
 #define REF_SRC 0x2 /* xosc */
 
-    if (!picoRTOS_assert(ref_div > 0ul)) return -EINVAL;
-    if (!picoRTOS_assert(ref_div < 4ul)) return -EINVAL;
+    picoRTOS_assert(ref_div > 0ul, return -EINVAL);
+    picoRTOS_assert(ref_div < 4ul, return -EINVAL);
 
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
@@ -362,8 +357,7 @@ static int ref_config(unsigned long ref_div)
            deadlock-- != 0) {
     }
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
 
     clocks.ref = clocks.xosc / (clock_freq_t)ref_div;
     return 0;
@@ -371,7 +365,7 @@ static int ref_config(unsigned long ref_div)
 
 static int gpout_config(size_t index, unsigned long gpout_div)
 {
-    if (!picoRTOS_assert(gpout_div > 0)) return -EINVAL;
+    picoRTOS_assert(gpout_div > 0, return -EINVAL);
 
     /* force clk_sys as auxsrc */
     CLK->CLK_GPOUTn[index].CTRL = (uint32_t)CLK_GPOUTn_CTRL_AUXSRC(0x6);
@@ -434,7 +428,7 @@ static int rtc_config(void)
  */
 int clock_rp2040_init(struct clock_settings *settings)
 {
-    if (!picoRTOS_assert(settings->xosc > 0)) return -EINVAL;
+    picoRTOS_assert(settings->xosc > 0, return -EINVAL);
 
     int res;
 
@@ -480,7 +474,8 @@ int clock_rp2040_init(struct clock_settings *settings)
 
 clock_freq_t clock_get_freq(clock_id_t clkid)
 {
-    if (!picoRTOS_assert(clkid <= CLOCK_RP2040_GPOUT3)) return (clock_freq_t)-EINVAL;
+    picoRTOS_assert(clkid <= CLOCK_RP2040_GPOUT3,
+                    return (clock_freq_t)-EINVAL);
 
     switch (clkid) {
     case CLOCK_RP2040_SYS: return clocks.sys;

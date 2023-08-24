@@ -1,5 +1,6 @@
 #include "clock-stm32h7xx.h"
 #include "picoRTOS.h"
+#include "picoRTOS_device.h"
 
 #include <stdint.h>
 
@@ -461,8 +462,7 @@ static int hse_setup(unsigned long hz)
         if ((RCC->CR & CR_HSERDY) != 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
 
     clocks.hse = (clock_freq_t)hz;
     return 0;
@@ -470,7 +470,7 @@ static int hse_setup(unsigned long hz)
 
 static int hsi_setup(clock_stm32h7xx_hsi_t hsi)
 {
-    if (!picoRTOS_assert(hsi < CLOCK_STM32H7XX_HSI_COUNT)) return -EINVAL;
+    picoRTOS_assert(hsi < CLOCK_STM32H7XX_HSI_COUNT, return -EINVAL);
 
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
@@ -500,15 +500,13 @@ static int hsi_setup(clock_stm32h7xx_hsi_t hsi)
             (RCC->CR & CR_HSIDIVF) != 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
 static int csi_setup(clock_stm32h7xx_csi_t csi)
 {
-    if (!picoRTOS_assert(csi < CLOCK_STM32H7XX_CSI_COUNT)) return -EINVAL;
+    picoRTOS_assert(csi < CLOCK_STM32H7XX_CSI_COUNT, return -EINVAL);
 
     if (csi == CLOCK_STM32H7XX_CSI_ON) {
         int deadlock = CONFIG_DEADLOCK_COUNT;
@@ -518,8 +516,8 @@ static int csi_setup(clock_stm32h7xx_csi_t csi)
             if ((RCC->CR & CR_CSIRDY) != 0)
                 break;
 
-        if (!picoRTOS_assert(deadlock != -1))
-            return -EBUSY;
+        picoRTOS_assert(deadlock != -1, return -EBUSY);
+
     }else
         RCC->CR &= ~(CR_CSION | CR_CSIKERON);
 
@@ -528,7 +526,7 @@ static int csi_setup(clock_stm32h7xx_csi_t csi)
 
 static int hsi48_setup(clock_stm32h7xx_hsi48_t hsi48)
 {
-    if (!picoRTOS_assert(hsi48 < CLOCK_STM32H7XX_HSI48_COUNT)) return -EINVAL;
+    picoRTOS_assert(hsi48 < CLOCK_STM32H7XX_HSI48_COUNT, return -EINVAL);
 
     if (hsi48 == CLOCK_STM32H7XX_HSI48_ON) {
         int deadlock = CONFIG_DEADLOCK_COUNT;
@@ -538,8 +536,8 @@ static int hsi48_setup(clock_stm32h7xx_hsi48_t hsi48)
             if ((RCC->CR & CR_HSI48RDY) != 0)
                 break;
 
-        if (!picoRTOS_assert(deadlock != -1))
-            return -EBUSY;
+        picoRTOS_assert(deadlock != -1,  return -EBUSY);
+
     }else
         RCC->CR &= ~CR_HSI48ON;
 
@@ -548,7 +546,7 @@ static int hsi48_setup(clock_stm32h7xx_hsi48_t hsi48)
 
 static int pllsrc_setup(clock_stm32h7xx_pllsrc_t pllsrc)
 {
-    if (!picoRTOS_assert(pllsrc < CLOCK_STM32H7XX_PLLSRC_COUNT)) return -EINVAL;
+    picoRTOS_assert(pllsrc < CLOCK_STM32H7XX_PLLSRC_COUNT, return -EINVAL);
 
     switch (pllsrc) {
     case CLOCK_STM32H7XX_PLLSRC_HSI_CK: clocks.pllsrc = clocks.hsi; break;
@@ -571,7 +569,7 @@ static int pllsrc_setup(clock_stm32h7xx_pllsrc_t pllsrc)
 
 static int pll_enable(size_t index, bool on)
 {
-    if (!picoRTOS_assert(index < (size_t)CLOCK_STM32H7XX_PLL_COUNT)) return -EINVAL;
+    picoRTOS_assert(index < (size_t)CLOCK_STM32H7XX_PLL_COUNT, return -EINVAL);
 
     uint32_t pllxon;
     uint32_t pllxrdy;
@@ -607,8 +605,7 @@ static int pll_enable(size_t index, bool on)
             if ((RCC->CR & pllxrdy) != 0)
                 break;
 
-        if (!picoRTOS_assert(deadlock != -1))
-            return -EBUSY;
+        picoRTOS_assert(deadlock != -1, return -EBUSY);
 
     }else
         RCC->CR &= ~pllxon;
@@ -618,8 +615,8 @@ static int pll_enable(size_t index, bool on)
 
 static int set_divm(size_t index, unsigned long divm)
 {
-    if (!picoRTOS_assert(index < (size_t)CLOCK_STM32H7XX_PLL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(divm <= (unsigned long)PLLCKSELR_DIVM1_M)) return -EINVAL;
+    picoRTOS_assert(index < (size_t)CLOCK_STM32H7XX_PLL_COUNT, return -EINVAL);
+    picoRTOS_assert(divm <= (unsigned long)PLLCKSELR_DIVM1_M, return -EINVAL);
 
     switch (index) {
     case 0:
@@ -647,7 +644,7 @@ static int set_divm(size_t index, unsigned long divm)
 
 static int divx_enable(size_t index, bool p, bool q, bool r)
 {
-    if (!picoRTOS_assert(index < (size_t)CLOCK_STM32H7XX_PLL_COUNT)) return -EINVAL;
+    picoRTOS_assert(index < (size_t)CLOCK_STM32H7XX_PLL_COUNT, return -EINVAL);
 
     uint32_t pllcfgr_divpxen;
     uint32_t pllcfgr_divqxen;
@@ -692,13 +689,13 @@ static int divx_enable(size_t index, bool p, bool q, bool r)
 
 static int pll_range_setup(size_t index, unsigned long vco_hz)
 {
-    if (!picoRTOS_assert(index < (size_t)CLOCK_STM32H7XX_PLL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(vco_hz <= 960000000ul)) return -EINVAL;
+    picoRTOS_assert(index < (size_t)CLOCK_STM32H7XX_PLL_COUNT, return -EINVAL);
+    picoRTOS_assert(vco_hz <= 960000000ul, return -EINVAL);
 
     uint32_t refx_ck;
     bool pllxvcosel = (vco_hz <= 420000000ul);
 
-    if (!picoRTOS_assert(clocks.pllsrc >= (clock_freq_t)1000000)) return -EIO;
+    picoRTOS_assert(clocks.pllsrc >= (clock_freq_t)1000000, return -EIO);
 
     if (clocks.pll[index].ref_ck <= (clock_freq_t)2000000) refx_ck = (uint32_t)0x0;
     else if (clocks.pll[index].ref_ck <= (clock_freq_t)4000000) refx_ck = (uint32_t)0x1;
@@ -744,11 +741,11 @@ static int pll_range_setup(size_t index, unsigned long vco_hz)
 static int divr_setup(size_t index, unsigned long divp, unsigned long divq,
                       unsigned long divr, unsigned long divn)
 {
-    if (!picoRTOS_assert(index < (size_t)CLOCK_STM32H7XX_PLL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(divp <= (unsigned long)PLLnDIVR_DIVPn_M)) return -EINVAL;
-    if (!picoRTOS_assert(divq <= (unsigned long)PLLnDIVR_DIVQn_M)) return -EINVAL;
-    if (!picoRTOS_assert(divr <= (unsigned long)PLLnDIVR_DIVRn_M)) return -EINVAL;
-    if (!picoRTOS_assert(divn <= (unsigned long)PLLnDIVR_DIVNn_M)) return -EINVAL;
+    picoRTOS_assert(index < (size_t)CLOCK_STM32H7XX_PLL_COUNT, return -EINVAL);
+    picoRTOS_assert(divp <= (unsigned long)PLLnDIVR_DIVPn_M, return -EINVAL);
+    picoRTOS_assert(divq <= (unsigned long)PLLnDIVR_DIVQn_M, return -EINVAL);
+    picoRTOS_assert(divr <= (unsigned long)PLLnDIVR_DIVRn_M, return -EINVAL);
+    picoRTOS_assert(divn <= (unsigned long)PLLnDIVR_DIVNn_M, return -EINVAL);
 
     switch (index) {
     case 0:
@@ -778,7 +775,7 @@ static int pll_setup(size_t index, const struct pll_settings *settings)
 {
 #define div_ceil(x, y) (((x) + ((y) - 1)) / (y))
 
-    if (!picoRTOS_assert(index < (size_t)CLOCK_STM32H7XX_PLL_COUNT)) return -EINVAL;
+    picoRTOS_assert(index < (size_t)CLOCK_STM32H7XX_PLL_COUNT, return -EINVAL);
 
     int res;
     unsigned long divn;
@@ -831,8 +828,7 @@ static int set_voltage_scale1(void)
         if ((PWR->CSR1 & CSR1_ACTVOSRDY) != 0)
             break;
 
-    if (!picoRTOS_assert(timeout0 != -1))
-        return -EBUSY;
+    picoRTOS_assert(timeout0 != -1, return -EBUSY);
 
     /* disable overdrive */
     *SYSCFG_PWRCR &= ~SYSCFG_PWRCR_ODEN;
@@ -845,15 +841,13 @@ static int set_voltage_scale1(void)
         if ((PWR->D3CR & D3CR_VOSRDY) != 0)
             break;
 
-    if (!picoRTOS_assert(timeout1 != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(timeout1 != -1, return -EBUSY);
     return 0;
 }
 
 static int sw_setup(clock_stm32h7xx_sw_t sw)
 {
-    if (!picoRTOS_assert(sw < CLOCK_STM32H7XX_SW_COUNT)) return -EINVAL;
+    picoRTOS_assert(sw < CLOCK_STM32H7XX_SW_COUNT, return -EINVAL);
 
     int res;
     uint32_t cfgr = RCC->CFGR;
@@ -882,9 +876,7 @@ static int sw_setup(clock_stm32h7xx_sw_t sw)
         if ((RCC->CFGR & CFGR_SWS(CFGR_SWS_M)) == CFGR_SWS(sw))
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -933,7 +925,7 @@ int clock_stm32h7xx_init(struct clock_settings *settings)
  */
 int clock_stm32h7xx_enable(clock_stm32h7xx_axb_t clk)
 {
-    if (!picoRTOS_assert(clk < CLOCK_STM32H7XX_AXB_COUNT)) return -EINVAL;
+    picoRTOS_assert(clk < CLOCK_STM32H7XX_AXB_COUNT, return -EINVAL);
 
     size_t index = (size_t)clk >> 5;
     size_t bit = (size_t)(0x1fu & clk);
@@ -955,7 +947,7 @@ int clock_stm32h7xx_enable(clock_stm32h7xx_axb_t clk)
  */
 int clock_stm32h7xx_disable(clock_stm32h7xx_axb_t clk)
 {
-    if (!picoRTOS_assert(clk < CLOCK_STM32H7XX_AXB_COUNT)) return -EINVAL;
+    picoRTOS_assert(clk < CLOCK_STM32H7XX_AXB_COUNT, return -EINVAL);
 
     size_t index = (size_t)clk >> 5;
     size_t bit = (size_t)(0x1fu & clk);
@@ -982,8 +974,8 @@ int clock_stm32h7xx_ker_sel(clock_stm32h7xx_ker_t ker, unsigned int value)
     unsigned int mask = (0xffu & ker) >> 5;
     size_t shift = (size_t)(0x1f & ker);
 
-    if (!picoRTOS_assert(value <= mask)) return -EINVAL;
-    if (!picoRTOS_assert(index < (size_t)4)) return -EINVAL; /* FIXME */
+    picoRTOS_assert(value <= mask, return -EINVAL);
+    picoRTOS_assert(index < (size_t)4, return -EINVAL); /* FIXME */
 
     volatile uint32_t *DxCCIPxR = &RCC->D1CCIPR;
 
@@ -995,7 +987,7 @@ int clock_stm32h7xx_ker_sel(clock_stm32h7xx_ker_t ker, unsigned int value)
 
 clock_freq_t clock_get_freq(clock_id_t clkid)
 {
-    if (!picoRTOS_assert(clkid <= CLOCK_STM32H7XX_HSI48_CK)) return -EINVAL;
+    picoRTOS_assert(clkid <= CLOCK_STM32H7XX_HSI48_CK, return -EINVAL);
 
     switch (clkid) {
     case CLOCK_STM32H7XX_PLL1_P_CK: return clocks.pll[0].p;

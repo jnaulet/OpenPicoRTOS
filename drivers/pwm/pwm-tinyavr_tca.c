@@ -66,8 +66,7 @@ int pwm_tinyavr_tca_init(struct pwm_tinyavr_tca *ctx, int base, clock_id_t clkid
     ctx->freq = clock_get_freq(clkid);
     ctx->div = 1ul;
 
-    if (!picoRTOS_assert(ctx->freq > 0))
-        return (int)ctx->freq;
+    picoRTOS_assert(ctx->freq > 0, return (int)ctx->freq);
 
     ctx->base->CTRLA = (uint8_t)CTRLA_ENABLE;
     return 0;
@@ -75,7 +74,7 @@ int pwm_tinyavr_tca_init(struct pwm_tinyavr_tca *ctx, int base, clock_id_t clkid
 
 static int set_clksel(struct pwm_tinyavr_tca *ctx, pwm_tinyavr_tca_clksel_t clksel)
 {
-    if (!picoRTOS_assert(clksel < PWM_TINYAVR_TCA_CLKSEL_COUNT)) return -EINVAL;
+    picoRTOS_assert(clksel < PWM_TINYAVR_TCA_CLKSEL_COUNT, return -EINVAL);
 
     switch (clksel) {
     case PWM_TINYAVR_TCA_CLKSEL_DIV1: ctx->div = 1ul; break;
@@ -110,7 +109,7 @@ static int set_clksel(struct pwm_tinyavr_tca *ctx, pwm_tinyavr_tca_clksel_t clks
  */
 int pwm_tinyavr_tca_setup(struct pwm_tinyavr_tca *ctx, struct pwm_tinyavr_tca_settings *settings)
 {
-    if (!picoRTOS_assert(settings->wgmode < PWM_TINYAVR_TCA_WGMODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->wgmode < PWM_TINYAVR_TCA_WGMODE_COUNT, return -EINVAL);
 
     int res;
 
@@ -138,7 +137,7 @@ int pwm_tinyavr_tca_pwm_init(struct pwm *ctx,
                              struct pwm_tinyavr_tca *parent,
                              pwm_tinyavr_tca_cmp_t cmp)
 {
-    if (!picoRTOS_assert(cmp < PWM_TINYAVR_TCA_CMP_COUNT)) return -EINVAL;
+    picoRTOS_assert(cmp < PWM_TINYAVR_TCA_CMP_COUNT, return -EINVAL);
 
     ctx->parent = parent;
     ctx->cmp = cmp;
@@ -148,7 +147,7 @@ int pwm_tinyavr_tca_pwm_init(struct pwm *ctx,
 
 int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
 {
-    if (!picoRTOS_assert(period > 0)) return -EINVAL;
+    picoRTOS_assert(period > 0, return -EINVAL);
 
     struct pwm_tinyavr_tca *parent = ctx->parent;
 

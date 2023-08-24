@@ -37,8 +37,8 @@ int eeprom_avr_init(struct eeprom *ctx, int base, int SPMCSR_base)
 
 int eeprom_read(struct eeprom *ctx, size_t addr, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(addr < (size_t)C99_EEPROM_AVR_ADDR_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(addr < (size_t)C99_EEPROM_AVR_ADDR_COUNT, return -EINVAL);
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     if ((ctx->base->EECR & C99_EECR_EEPE) != 0)
         return -EAGAIN;
@@ -55,8 +55,8 @@ int eeprom_read(struct eeprom *ctx, size_t addr, void *buf, size_t n)
 
 int eeprom_erase(struct eeprom *ctx, size_t addr, size_t n)
 {
-    if (!picoRTOS_assert(addr < (size_t)C99_EEPROM_AVR_ADDR_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(addr < (size_t)C99_EEPROM_AVR_ADDR_COUNT, return -EINVAL);
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     volatile register uint8_t *C99_EECR = &ctx->base->EECR;
     register uint8_t step1 = (uint8_t)(C99_EECR_EEPM(1) | C99_EECR_EEMPE);
@@ -77,8 +77,8 @@ int eeprom_erase(struct eeprom *ctx, size_t addr, size_t n)
 
 int eeprom_write(struct eeprom *ctx, size_t addr, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(addr < (size_t)C99_EEPROM_AVR_ADDR_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(addr < (size_t)C99_EEPROM_AVR_ADDR_COUNT, return -EINVAL);
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     volatile register uint8_t *C99_EECR = &ctx->base->EECR;
     register uint8_t step2 = (uint8_t)(C99_EECR_EEMPE | C99_EECR_EEPE);

@@ -58,8 +58,8 @@ int spi_tinyavr_init(struct spi *ctx, int base, clock_id_t clkid)
 
 static int set_mode(struct spi *ctx, spi_mode_t mode)
 {
-    if (!picoRTOS_assert(mode != SPI_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(mode < SPI_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(mode != SPI_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(mode < SPI_MODE_COUNT, return -EINVAL);
 
     /* master */
     if (mode == SPI_MODE_MASTER)
@@ -72,8 +72,8 @@ static int set_mode(struct spi *ctx, spi_mode_t mode)
 
 static int set_clkmode(struct spi *ctx, spi_clock_mode_t clkmode)
 {
-    if (!picoRTOS_assert(clkmode != SPI_CLOCK_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(clkmode < SPI_CLOCK_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(clkmode != SPI_CLOCK_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(clkmode < SPI_CLOCK_MODE_COUNT, return -EINVAL);
 
     ctx->base->CTRLB &= ~CTRLB_MODE(CTRLB_MODE_M);
     ctx->base->CTRLB |= CTRLB_MODE(clkmode);
@@ -83,15 +83,14 @@ static int set_clkmode(struct spi *ctx, spi_clock_mode_t clkmode)
 
 static int set_bitrate(struct spi *ctx, unsigned long bitrate)
 {
-    if (!picoRTOS_assert(bitrate > 0)) return -EINVAL;
+    picoRTOS_assert(bitrate > 0, return -EINVAL);
 
     /* can only play with presc & clk2x,
     * this will be very approximative */
     clock_freq_t freq = clock_get_freq(ctx->clkid);
     unsigned long pdiv = (unsigned long)freq / bitrate;
 
-    if (!picoRTOS_assert(freq > 0))
-        return -EIO;
+    picoRTOS_assert(freq > 0, return -EIO);
 
     /* find closest power of 2... */
     ctx->base->CTRLA &= ~(CTRLA_CLK2X | CTRLA_PRESC(CTRLA_PRESC_M));
@@ -162,7 +161,7 @@ static int transmit_data(struct spi *ctx, const uint8_t *data)
 
 int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     size_t recv = 0;
     uint8_t *rx8 = rx;

@@ -221,16 +221,15 @@ struct PWM_STM32H7XX_TIM {
 int pwm_stm32h7xx_tim_init(struct pwm_stm32h7xx_tim *ctx, int base, clock_id_t clkid,
                            size_t channel_count)
 {
-    if (!picoRTOS_assert(channel_count < (size_t)PWM_STM32H7XX_TIM_CHANNEL_MAX)) return -EINVAL;
+    picoRTOS_assert(channel_count < (size_t)PWM_STM32H7XX_TIM_CHANNEL_MAX,
+                    return -EINVAL);
 
     ctx->base = (struct PWM_STM32H7XX_TIM*)base;
     ctx->clkid = clkid;
     ctx->channel_count = channel_count;
     ctx->freq = clock_get_freq(clkid);
 
-    if (!picoRTOS_assert(ctx->freq > 0))
-        return (int)ctx->freq;
-
+    picoRTOS_assert(ctx->freq > 0, return (int)ctx->freq);
     return 0;
 }
 
@@ -248,7 +247,8 @@ int pwm_stm32h7xx_tim_setup(struct pwm_stm32h7xx_tim *ctx,
                             struct pwm_stm32h7xx_tim_settings *settings)
 {
 
-    if (!picoRTOS_assert(settings->align < PWM_STM32H7XX_TIM_ALIGN_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->align < PWM_STM32H7XX_TIM_ALIGN_COUNT,
+                    return -EINVAL);
 
     /* zero field anyway */
     ctx->base->CR1 &= ~CR1_CMS(CR1_CMS_M);
@@ -282,7 +282,7 @@ int pwm_stm32h7xx_tim_pwm_init(struct pwm *ctx,
                                struct pwm_stm32h7xx_tim *parent,
                                size_t channel)
 {
-    if (!picoRTOS_assert(channel < (size_t)parent->channel_count)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)parent->channel_count, return -EINVAL);
 
     ctx->parent = parent;
     ctx->channel = channel;
@@ -293,7 +293,7 @@ int pwm_stm32h7xx_tim_pwm_init(struct pwm *ctx,
 
 static int set_oc(struct pwm *ctx, pwm_stm32h7xx_tim_oc_t oc)
 {
-    if (!picoRTOS_assert(oc < PWM_STM32H7XX_TIM_OC_COUNT)) return -EINVAL;
+    picoRTOS_assert(oc < PWM_STM32H7XX_TIM_OC_COUNT, return -EINVAL);
 
     volatile uint32_t *CCMRx;
     struct pwm_stm32h7xx_tim *parent = ctx->parent;
@@ -382,7 +382,7 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
 {
 #define PWM_STM32H7XX_PWM_ARR_MAX 0xffff
 
-    if (!picoRTOS_assert(period > 0)) return -EINVAL;
+    picoRTOS_assert(period > 0, return -EINVAL);
 
     size_t psc = 0;
     struct pwm_stm32h7xx_tim *parent = ctx->parent;
@@ -393,7 +393,7 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
         ctx->ncycles = (hz / (size_t)1000000) * (size_t)period;
     } while(ctx->ncycles > (size_t)PWM_STM32H7XX_PWM_ARR_MAX);
 
-    if (!picoRTOS_assert(ctx->ncycles > 0)) return -EINVAL;
+    picoRTOS_assert(ctx->ncycles > 0, return -EINVAL);
 
     parent->base->PSC = (uint32_t)psc - 1;
     parent->base->ARR = (uint32_t)ctx->ncycles;

@@ -51,7 +51,7 @@ struct DMAMUX_STM32H7XX {
  */
 int dmamux_stm32h7xx_init(struct dmamux *ctx, int base, size_t channel)
 {
-    if (!picoRTOS_assert(channel < (size_t)DMAMUX_STM32H7XX_CHANNEL_MAX)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)DMAMUX_STM32H7XX_CHANNEL_MAX, return -EINVAL);
 
     ctx->base = (struct DMAMUX_STM32H7XX*)base;
     ctx->channel = channel;
@@ -71,7 +71,7 @@ int dmamux_stm32h7xx_init(struct dmamux *ctx, int base, size_t channel)
  */
 int dmamux_stm32h7xx_set_dmareq_id(struct dmamux *ctx, unsigned long id)
 {
-    if (!picoRTOS_assert(id <= (unsigned long)CxCR_DMAREQ_ID_M)) return -EINVAL;
+    picoRTOS_assert(id <= (unsigned long)CxCR_DMAREQ_ID_M, return -EINVAL);
 
     ctx->base->CxCR[ctx->channel] = (uint32_t)CxCR_DMAREQ_ID(id);
     return 0;

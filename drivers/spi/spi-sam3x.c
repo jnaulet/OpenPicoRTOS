@@ -114,13 +114,12 @@ int spi_sam3x_set_loopback(struct spi *ctx, bool loopback)
 
 static int set_bitrate(struct spi *ctx, size_t cs, unsigned long bitrate)
 {
-    if (!picoRTOS_assert(cs < (size_t)SPI_SAM3X_CS_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(bitrate > 0)) return -EINVAL;
+    picoRTOS_assert(cs < (size_t)SPI_SAM3X_CS_COUNT, return -EINVAL);
+    picoRTOS_assert(bitrate > 0, return -EINVAL);
 
     clock_freq_t freq = clock_get_freq(ctx->clkid);
 
-    if (!picoRTOS_assert(freq > 0))
-        return -EIO;
+    picoRTOS_assert(freq > 0, return -EIO);
 
     ctx->base->SPI_CSR[cs] &= SPI_CSRn_SCBR(SPI_CSRn_SCBR_M);
     ctx->base->SPI_CSR[cs] |= SPI_CSRn_SCBR((unsigned long)freq / bitrate);
@@ -130,9 +129,9 @@ static int set_bitrate(struct spi *ctx, size_t cs, unsigned long bitrate)
 
 static int set_clkmode(struct spi *ctx, size_t cs, spi_clock_mode_t clkmode)
 {
-    if (!picoRTOS_assert(cs < (size_t)SPI_SAM3X_CS_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(clkmode != SPI_CLOCK_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(clkmode < SPI_CLOCK_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(cs < (size_t)SPI_SAM3X_CS_COUNT, return -EINVAL);
+    picoRTOS_assert(clkmode != SPI_CLOCK_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(clkmode < SPI_CLOCK_MODE_COUNT, return -EINVAL);
 
     switch (clkmode) {
     case SPI_CLOCK_MODE_0:
@@ -168,9 +167,9 @@ static int set_frame_size(struct spi *ctx, size_t cs, size_t frame_size)
 {
 #define div_ceil(x, y) (((x) + ((y) - 1)) / (y))
 
-    if (!picoRTOS_assert(cs < (size_t)SPI_SAM3X_CS_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(frame_size >= (size_t)SPI_SAM3X_FRAME_SIZE_MIN)) return -EINVAL;
-    if (!picoRTOS_assert(frame_size <= (size_t)SPI_SAM3X_FRAME_SIZE_MAX)) return -EINVAL;
+    picoRTOS_assert(cs < (size_t)SPI_SAM3X_CS_COUNT, return -EINVAL);
+    picoRTOS_assert(frame_size >= (size_t)SPI_SAM3X_FRAME_SIZE_MIN, return -EINVAL);
+    picoRTOS_assert(frame_size <= (size_t)SPI_SAM3X_FRAME_SIZE_MAX, return -EINVAL);
 
     size_t bits = frame_size - (size_t)SPI_SAM3X_FRAME_SIZE_MIN;
 
@@ -185,8 +184,8 @@ static int set_frame_size(struct spi *ctx, size_t cs, size_t frame_size)
 
 static int set_mode(struct spi *ctx, spi_mode_t mode)
 {
-    if (!picoRTOS_assert(mode != SPI_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(mode < SPI_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(mode != SPI_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(mode < SPI_MODE_COUNT, return -EINVAL);
 
     if (mode == SPI_MODE_MASTER) ctx->base->SPI_MR |= SPI_MR_MSTR;
     else ctx->base->SPI_MR &= ~SPI_MR_MSTR;
@@ -196,7 +195,8 @@ static int set_mode(struct spi *ctx, spi_mode_t mode)
 
 int spi_setup(struct spi *ctx, const struct spi_settings *settings)
 {
-    if (!picoRTOS_assert(settings->cs < (size_t)SPI_SAM3X_CS_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->cs < (size_t)SPI_SAM3X_CS_COUNT,
+                    return -EINVAL);
 
     int res;
 
@@ -269,8 +269,8 @@ static int transmit_data(struct spi *ctx, const uint8_t *data)
 
 int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert((n & (ctx->frame_width - 1)) == 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert((n & (ctx->frame_width - 1)) == 0, return -EINVAL);
 
     size_t recv = 0;
     uint8_t *rx8 = rx;

@@ -1,9 +1,10 @@
 #include "clock-sam3x_pmc.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_device.h"
 
 #include <stdint.h>
-
-#include "picoRTOS_device.h"
+#include <generated/autoconf.h>
 
 struct CLOCK_SAM3X_PMC {
     volatile uint32_t PMC_SCER;
@@ -87,9 +88,9 @@ static struct CLOCK_SAM3X_PMC *PMC = (struct CLOCK_SAM3X_PMC*)ADDR_PMC;
 static struct {
     /* internals */
     clock_freq_t moscx;
-    clock_freq_t mainck;
+    /* clock_freq_t mainck; */
     clock_freq_t pllack;
-    clock_freq_t upllck;
+    /* clock_freq_t upllck; */
     /* exported */
     clock_freq_t slck;
     clock_freq_t mck;
@@ -107,7 +108,7 @@ static int clock_sam3x_pmc_init_moscx(unsigned long hz)
 {
 #define CKGR_MOR_MOSCXTST_DEFAULT 8
 
-    if (!picoRTOS_assert(hz > 0)) return -EINVAL;
+    picoRTOS_assert(hz > 0, return -EINVAL);
 
     uint32_t mor = (uint32_t)CKGR_MOR_KEY(0x37);
     int deadlock = CONFIG_DEADLOCK_COUNT * CKGR_MOR_MOSCXTST_DEFAULT;
@@ -123,8 +124,7 @@ static int clock_sam3x_pmc_init_moscx(unsigned long hz)
            deadlock-- != 0) {
     }
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
 
     clocks.moscx = (clock_freq_t)hz;
     return 0;
@@ -143,7 +143,7 @@ static int plla_setup(unsigned long mula)
 #define CKGR_PLLAR_PLLACOUNT_DEFAULT 0x3f
 #define CKGR_PLLAR_MULA_COUNT        2048ul
 
-    if (!picoRTOS_assert(mula < CKGR_PLLAR_MULA_COUNT)) return -EINVAL;
+    picoRTOS_assert(mula < CKGR_PLLAR_MULA_COUNT, return -EINVAL);
 
     uint32_t pllar = (uint32_t)CKGR_PLLAR_ONE;
     int deadlock = CONFIG_DEADLOCK_COUNT * CKGR_PLLAR_PLLACOUNT_DEFAULT;
@@ -163,15 +163,14 @@ static int plla_setup(unsigned long mula)
            deadlock-- != 0) {
     }
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
 static int clock_sam3x_pmc_init_plla(unsigned long hz)
 {
-    if (!picoRTOS_assert((clock_freq_t)(hz / 2ul) >= clocks.moscx)) return -EINVAL;
+    picoRTOS_assert((clock_freq_t)(hz / 2ul) >= clocks.moscx,
+                    return -EINVAL);
 
     unsigned long mula = (hz / (unsigned long)clocks.moscx);
 
@@ -210,8 +209,7 @@ static int clock_sam3x_pmc_init_mck(unsigned long mck_div)
            deadlock-- != 0) {
     }
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
 
     /* switch to pll */
     PMC->PMC_MCKR = (uint32_t)(PMC_MCKR_PRES(pres) | PMC_MCKR_CSS(PLLA_CLK));
@@ -219,8 +217,7 @@ static int clock_sam3x_pmc_init_mck(unsigned long mck_div)
            deadlock-- != 0) {
     }
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
 
     clocks.mck = clocks.pllack / (clock_freq_t)mck_div;
     return 0;
@@ -237,7 +234,7 @@ static int clock_sam3x_pmc_init_mck(unsigned long mck_div)
  */
 int clock_sam3x_pmc_init(struct clock_settings *settings)
 {
-    if (!picoRTOS_assert(settings->moscx > 0)) return -EINVAL;
+    picoRTOS_assert(settings->moscx > 0, return -EINVAL);
 
     int res;
 
@@ -276,13 +273,13 @@ int clock_sam3x_pmc_init(struct clock_settings *settings)
  */
 int clock_sam3x_pmc_enable(clock_id_t clkid, clock_sam3x_pmc_periph_div_t periph_div)
 {
-    if (!picoRTOS_assert(periph_div < CLOCK_SAM3X_PMC_PERIPH_DIV_COUNT)) return -EINVAL;
+    picoRTOS_assert(periph_div < CLOCK_SAM3X_PMC_PERIPH_DIV_COUNT,
+                    return -EINVAL);
 
     if (clkid > (clock_id_t)CLOCK_SAM3X_PMC_PERIPH_BASE) {
         size_t pid = (size_t)clkid - (size_t)CLOCK_SAM3X_PMC_PERIPH_BASE;
 
-        if (!picoRTOS_assert(pid < (size_t)DEVICE_PID_COUNT))
-            return -EINVAL;
+        picoRTOS_assert(pid < (size_t)DEVICE_PID_COUNT, return -EINVAL);
 
         PMC->PMC_PCR = (uint32_t)(PMC_PCR_EN | PMC_PCR_CMD |
                                   PCM_PCR_DIV(periph_div) |
@@ -309,8 +306,7 @@ int clock_sam3x_pmc_disable(clock_id_t clkid)
     if (clkid > (clock_id_t)CLOCK_SAM3X_PMC_PERIPH_BASE) {
         size_t pid = (size_t)clkid - (size_t)CLOCK_SAM3X_PMC_PERIPH_BASE;
 
-        if (!picoRTOS_assert(pid < (size_t)DEVICE_PID_COUNT))
-            return -EINVAL;
+        picoRTOS_assert(pid < (size_t)DEVICE_PID_COUNT, return -EINVAL);
 
         PMC->PMC_PCR = (uint32_t)(PMC_PCR_CMD | PMC_PCR_PID(pid));
         return 0;
@@ -324,8 +320,8 @@ clock_freq_t clock_get_freq(clock_id_t clkid)
     if (clkid > (clock_id_t)CLOCK_SAM3X_PMC_PERIPH_BASE) {
         size_t pid = (size_t)clkid - (size_t)CLOCK_SAM3X_PMC_PERIPH_BASE;
 
-        if (!picoRTOS_assert(pid < (size_t)DEVICE_PID_COUNT))
-            return (clock_freq_t)-EINVAL;
+        picoRTOS_assert(pid < (size_t)DEVICE_PID_COUNT,
+                        return (clock_freq_t)-EINVAL);
 
         return clocks.periph[pid];
     }

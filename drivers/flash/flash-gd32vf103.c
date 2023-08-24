@@ -79,19 +79,19 @@ int flash_get_nblocks(struct flash *ctx)
 
 int flash_get_erase_size(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
     return FLASH_GD32VF103_BLOCK_SIZE;
 }
 
 int flash_get_write_size(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
     return (int)sizeof(uint32_t);
 }
 
 int flash_get_block_addr(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
     return FLASH_GD32VF103_ADDR_START + (int)block * FLASH_GD32VF103_BLOCK_SIZE;
 }
 
@@ -108,7 +108,7 @@ static void lock_fmc_ctl(struct flash *ctx)
 
 static int flash_erase_idle(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
 
     if ((ctx->base->FMC_STAT & FMC_STAT_BUSY) != 0)
         return -EAGAIN;
@@ -139,7 +139,7 @@ static int flash_erase_busy(struct flash *ctx)
 
 int flash_erase(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
 
     switch (ctx->state) {
     case FLASH_GD32VF103_STATE_IDLE: return flash_erase_idle(ctx, block);
@@ -153,7 +153,7 @@ int flash_erase(struct flash *ctx, size_t block)
 
 int flash_blankcheck(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
 
     uint32_t *addr = (uint32_t*)flash_get_block_addr(ctx, block);
     size_t n = (size_t)FLASH_GD32VF103_BLOCK_SIZE / sizeof(uint32_t);
@@ -170,8 +170,8 @@ int flash_blankcheck(struct flash *ctx, size_t block)
 
 int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert((n % sizeof(uint32_t)) == 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert((n % sizeof(uint32_t)) == 0, return -EINVAL);
 
     int nwritten = 0;
     uint8_t *dst8 = (uint8_t*)addr;
@@ -202,12 +202,12 @@ int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n)
 
 int flash_lock(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
     return -ENOSYS;
 }
 
 int flash_unlock(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < ctx->block_count)) return -EINVAL;
+    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
     return -ENOSYS;
 }

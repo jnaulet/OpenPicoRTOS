@@ -52,8 +52,8 @@ static int set_pmux(struct mux_same5x *ctx, size_t pin, mux_pmux_t pmux)
 {
 #define IS_ODD(x) (((x) & 0x1) != 0)
 
-    if (!picoRTOS_assert(pin < (size_t)MUX_SAME5X_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(pmux < MUX_PMUX_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_SAME5X_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(pmux < MUX_PMUX_COUNT, return -EINVAL);
 
     size_t pmux_index = pin >> 1;
 
@@ -81,8 +81,8 @@ static int set_pmux(struct mux_same5x *ctx, size_t pin, mux_pmux_t pmux)
  */
 int mux_same5x_input(struct mux_same5x *ctx, size_t pin, mux_pmux_t pmux)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_SAME5X_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(pmux < MUX_PMUX_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_SAME5X_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(pmux < MUX_PMUX_COUNT, return -EINVAL);
 
     if (pmux != MUX_PMUX_GPIO) {
         (void)set_pmux(ctx, pin, pmux);
@@ -106,8 +106,8 @@ int mux_same5x_input(struct mux_same5x *ctx, size_t pin, mux_pmux_t pmux)
  */
 int mux_same5x_output(struct mux_same5x *ctx, size_t pin, mux_pmux_t pmux)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_SAME5X_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(pmux < MUX_PMUX_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_SAME5X_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(pmux < MUX_PMUX_COUNT, return -EINVAL);
 
     if (pmux != MUX_PMUX_GPIO) {
         (void)set_pmux(ctx, pin, pmux);
@@ -130,7 +130,7 @@ int mux_same5x_output(struct mux_same5x *ctx, size_t pin, mux_pmux_t pmux)
  */
 int mux_same5x_pull_up(struct mux_same5x *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_SAME5X_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_SAME5X_PIN_COUNT, return -EINVAL);
 
     ctx->base->PINCFGn[pin] |= PINCFGn_PULLEN;
     return 0;
@@ -148,7 +148,7 @@ int mux_same5x_pull_up(struct mux_same5x *ctx, size_t pin)
  */
 int mux_same5x_pull_down(struct mux_same5x *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_SAME5X_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_SAME5X_PIN_COUNT, return -EINVAL);
 
     ctx->base->PINCFGn[pin] |= PINCFGn_PULLEN;
     return 0;

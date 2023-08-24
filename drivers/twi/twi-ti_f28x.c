@@ -131,13 +131,12 @@ static int set_bitrate(struct twi *ctx, unsigned long bitrate)
 {
 #define PERIOD_MAX 131072ul
 
-    if (!picoRTOS_assert(bitrate > 0)) return -EINVAL;
+    picoRTOS_assert(bitrate > 0, return -EINVAL);
 
     unsigned long ipsc;
     clock_freq_t freq = clock_get_freq(ctx->clkid);
 
-    if (!picoRTOS_assert(freq > 0))
-        return -EIO;
+    picoRTOS_assert(freq > 0, return -EIO);
 
     for (ipsc = 1ul; ipsc <= (unsigned long)(I2CPSC_IPSC_M + 1); ipsc++) {
 
@@ -163,8 +162,8 @@ static int set_bitrate(struct twi *ctx, unsigned long bitrate)
 
 static int set_mode(struct twi *ctx, twi_mode_t mode)
 {
-    if (!picoRTOS_assert(mode != TWI_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(mode < TWI_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(mode != TWI_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(mode < TWI_MODE_COUNT, return -EINVAL);
 
     ctx->mode = mode;
     return 0;
@@ -212,7 +211,7 @@ int twi_poll(struct twi *ctx)
 
 static int twi_write_as_slave_xfer(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     int sent = 0;
     uint16_t *buf16 = (uint16_t*)buf;
@@ -235,7 +234,7 @@ static int twi_write_as_slave_xfer(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_write_as_slave_idle(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     /* prepare xfer */
     ctx->base->I2CCNT = (uint16_t)n;
@@ -247,7 +246,7 @@ static int twi_write_as_slave_idle(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_write_as_slave(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
     case TWI_TI_F28X_STATE_IDLE: return twi_write_as_slave_idle(ctx, buf, n);
@@ -275,7 +274,7 @@ static int check_for_errors(struct twi *ctx)
 
 static int twi_write_as_master_xfer(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     int sent = 0;
     uint16_t *buf16 = (uint16_t*)buf;
@@ -306,7 +305,7 @@ static int twi_write_as_master_xfer(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_write_as_master_idle(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     /* check if bus is available */
     if ((ctx->base->I2CSTR & I2CSTR_BB) != 0)
@@ -334,7 +333,7 @@ static int twi_write_as_master(struct twi *ctx, const void *buf, size_t n)
 
 int twi_write(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->mode) {
     case TWI_MODE_SLAVE: return twi_write_as_slave(ctx, buf, n);
@@ -350,7 +349,7 @@ int twi_write(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_read_as_slave_xfer(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     int recv = 0;
     uint16_t *buf16 = (uint16_t*)buf;
@@ -373,7 +372,7 @@ static int twi_read_as_slave_xfer(struct twi *ctx, void *buf, size_t n)
 
 static int twi_read_as_slave_idle(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     /* prepare xfer */
     ctx->base->I2CCNT = (uint16_t)n;
@@ -385,7 +384,7 @@ static int twi_read_as_slave_idle(struct twi *ctx, void *buf, size_t n)
 
 static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
     case TWI_TI_F28X_STATE_IDLE: return twi_read_as_slave_idle(ctx, buf, n);
@@ -401,7 +400,7 @@ static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
 
 static int twi_read_as_master_xfer(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     int recv = 0;
     uint16_t *buf16 = (uint16_t*)buf;
@@ -424,7 +423,7 @@ static int twi_read_as_master_xfer(struct twi *ctx, void *buf, size_t n)
 
 static int twi_read_as_master_idle(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     /* check if bus is available */
     if ((ctx->base->I2CSTR & I2CSTR_BB) != 0)
@@ -452,7 +451,7 @@ static int twi_read_as_master(struct twi *ctx, void *buf, size_t n)
 
 int twi_read(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->mode) {
     case TWI_MODE_SLAVE: return twi_read_as_slave(ctx, buf, n);

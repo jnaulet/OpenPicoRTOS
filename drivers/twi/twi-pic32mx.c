@@ -82,15 +82,14 @@ static int set_bitrate(struct twi *ctx, unsigned long bitrate)
 {
 #define PGD_TYPICAL 104ul
 
-    if (!picoRTOS_assert(bitrate > 0)) return -EINVAL;
+    picoRTOS_assert(bitrate > 0, return -EINVAL);
 
     clock_freq_t freq = clock_get_freq(ctx->clkid);
     unsigned long t = 1000000000ul / (bitrate * 2ul) - PGD_TYPICAL;
     unsigned long corrected_bitrate = 1000000000ul / t;
     unsigned long brg = (unsigned long)freq / corrected_bitrate - 2ul;
 
-    if (!picoRTOS_assert(freq > 0))
-        return -EIO;
+    picoRTOS_assert(freq > 0, return -EIO);
 
     ctx->base->I2CxBRG.REG = (uint32_t)brg;
     return 0;
@@ -98,8 +97,8 @@ static int set_bitrate(struct twi *ctx, unsigned long bitrate)
 
 static int set_mode(struct twi *ctx, twi_mode_t mode)
 {
-    if (!picoRTOS_assert(mode != TWI_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(mode < TWI_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(mode != TWI_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(mode < TWI_MODE_COUNT, return -EINVAL);
 
     ctx->mode = mode;
 
@@ -113,8 +112,8 @@ static int set_mode(struct twi *ctx, twi_mode_t mode)
 
 int twi_setup(struct twi *ctx, struct twi_settings *settings)
 {
-    if (!picoRTOS_assert(settings->mode < TWI_MODE_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->slave_addr < (twi_addr_t)TWI_ADDR_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->mode < TWI_MODE_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->slave_addr < (twi_addr_t)TWI_ADDR_COUNT, return -EINVAL);
 
     int res;
 
@@ -174,7 +173,7 @@ static int twi_write_as_master_sla(struct twi *ctx)
 
 static int twi_write_as_master_data(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     /* check ack */
     if ((ctx->base->I2CxSTAT.REG & I2CxSTAT_ACKSTAT) != 0) {
@@ -220,7 +219,7 @@ static int twi_rw_as_master_stop(struct twi *ctx)
 
 static int twi_write_as_master(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
     case TWI_PIC32MX_STATE_IDLE: return twi_rw_as_master_idle(ctx);
@@ -249,7 +248,7 @@ static int twi_write_as_slave_idle(struct twi *ctx)
 
 static int twi_write_as_slave_data(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     /* check if tx buf is available */
     if ((ctx->base->I2CxSTAT.REG & I2CxSTAT_TRSTAT) != 0 ||
@@ -269,7 +268,7 @@ static int twi_write_as_slave_data(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_write_as_slave(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
     case TWI_PIC32MX_STATE_IDLE: return twi_write_as_slave_idle(ctx);
@@ -284,7 +283,7 @@ static int twi_write_as_slave(struct twi *ctx, const void *buf, size_t n)
 
 int twi_write(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     if (ctx->mode == TWI_MODE_MASTER)
         return twi_write_as_master(ctx, buf, n);
@@ -299,7 +298,7 @@ int twi_write(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_read_as_master_sla(struct twi *ctx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     if ((ctx->base->I2CxCON.REG & I2CxCON_SEN) != 0)
         return -EAGAIN;
@@ -318,7 +317,7 @@ static int twi_read_as_master_sla(struct twi *ctx, size_t n)
 
 static int twi_read_as_master_data(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     /* check if rx buf is available */
     if ((ctx->base->I2CxSTAT.REG & I2CxSTAT_RBF) == 0)
@@ -345,7 +344,7 @@ static int twi_read_as_master_data(struct twi *ctx, void *buf, size_t n)
 
 static int twi_read_as_master(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
     case TWI_PIC32MX_STATE_IDLE: return twi_rw_as_master_idle(ctx);
@@ -362,7 +361,7 @@ static int twi_read_as_master(struct twi *ctx, void *buf, size_t n)
 
 static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     if ((ctx->base->I2CxSTAT.REG & I2CxSTAT_RBF) == 0)
         return -EAGAIN;
@@ -382,7 +381,7 @@ static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
 
 int twi_read(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     if (ctx->mode == TWI_MODE_MASTER)
         return twi_read_as_master(ctx, buf, n);

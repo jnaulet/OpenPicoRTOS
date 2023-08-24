@@ -90,13 +90,12 @@ int spi_pic32mx_init(struct spi *ctx, int base, clock_id_t clkid)
 
 static int set_bitrate(struct spi *ctx, unsigned long bitrate)
 {
-    if (!picoRTOS_assert(bitrate > 0)) return -EINVAL;
+    picoRTOS_assert(bitrate > 0, return -EINVAL);
 
     unsigned long brg;
     clock_freq_t freq = clock_get_freq(ctx->clkid);
 
-    if (!picoRTOS_assert(freq > 0))
-        return (int)freq;
+    picoRTOS_assert(freq > 0, return (int)freq);
 
     brg = (unsigned long)freq / (bitrate * 2ul) - 1ul;
     ctx->base->SPIxBRG.REG = (uint32_t)brg;
@@ -106,8 +105,8 @@ static int set_bitrate(struct spi *ctx, unsigned long bitrate)
 
 static int set_mode(struct spi *ctx, spi_mode_t mode)
 {
-    if (!picoRTOS_assert(mode != SPI_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(mode < SPI_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(mode != SPI_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(mode < SPI_MODE_COUNT, return -EINVAL);
 
     if (mode == SPI_MODE_MASTER) ctx->base->SPIxCON.SET = (uint32_t)(SPIxCON_MSSEN | SPIxCON_MSTEN);
     else ctx->base->SPIxCON.CLR = (uint32_t)(SPIxCON_MSSEN | SPIxCON_MSTEN);
@@ -117,8 +116,8 @@ static int set_mode(struct spi *ctx, spi_mode_t mode)
 
 static int set_clkmode(struct spi *ctx, spi_clock_mode_t clkmode)
 {
-    if (!picoRTOS_assert(clkmode != SPI_CLOCK_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(clkmode < SPI_CLOCK_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(clkmode != SPI_CLOCK_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(clkmode < SPI_CLOCK_MODE_COUNT, return -EINVAL);
 
     switch (clkmode) {
     case SPI_CLOCK_MODE_0:
@@ -241,8 +240,8 @@ static int read_data(struct spi *ctx, uint8_t *data)
 
 int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert((n & (ctx->frame_width - 1)) == 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert((n & (ctx->frame_width - 1)) == 0, return -EINVAL);
 
     size_t recv = 0;
     uint8_t *rx8 = rx;

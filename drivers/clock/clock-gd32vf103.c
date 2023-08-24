@@ -102,9 +102,7 @@ static int switch_system_clock(clock_gd32vf103_ck_sys_t ck_sys)
             RCU_CFG0_SCSS(ck_sys))
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -119,8 +117,7 @@ static int setup_hxtal_busywait(unsigned long freq)
         if ((RCU->RCU_CTL & RCU_CTL_HXTALSTB) != 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
 
     clocks.hxtal = (clock_freq_t)freq;
     return 0;
@@ -129,9 +126,9 @@ static int setup_hxtal_busywait(unsigned long freq)
 static int setup_pll(clock_gd32vf103_pllsel_t pllsel,
                      unsigned long freq)
 {
-    if (!picoRTOS_assert(pllsel < CLOCK_GD32VF103_PLLSEL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(freq > 0)) return -EINVAL;
-    if (!picoRTOS_assert(freq <= (unsigned long)PLLMAX_FREQ)) return -EINVAL;
+    picoRTOS_assert(pllsel < CLOCK_GD32VF103_PLLSEL_COUNT, return -EINVAL);
+    picoRTOS_assert(freq > 0, return -EINVAL);
+    picoRTOS_assert(freq <= (unsigned long)PLLMAX_FREQ, return -EINVAL);
 
     unsigned long input;
     unsigned long pllmf;
@@ -184,21 +181,19 @@ static int enable_pll_busywait(void)
         if ((RCU->RCU_CTL & RCU_CTL_PLLSTB) != 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
 static int setup_ahb_div(unsigned long ahb_div)
 {
-    if (!picoRTOS_assert(ahb_div > 0)) return -EINVAL;
+    picoRTOS_assert(ahb_div > 0, return -EINVAL);
 
     uint32_t rcu_cfg0 = RCU->RCU_CFG0;
     clock_freq_t ck_ahb = clocks.ck_sys / (clock_freq_t)ahb_div;
 
-    if (!picoRTOS_assert(ck_ahb <= (clock_freq_t)AHB_MAX))
-        return -EIO;
+    picoRTOS_assert(ck_ahb <= (clock_freq_t)AHB_MAX,
+                    return -EIO);
 
     /* reset field */
     rcu_cfg0 &= ~RCU_CFG0_AHBPSC(RCU_CFG0_AHBPSC_M);
@@ -226,13 +221,13 @@ static int setup_ahb_div(unsigned long ahb_div)
 
 static int setup_apb1_div(unsigned long apb1_div)
 {
-    if (!picoRTOS_assert(apb1_div > 0)) return -EINVAL;
+    picoRTOS_assert(apb1_div > 0, return -EINVAL);
 
     uint32_t rcu_cfg0 = RCU->RCU_CFG0;
     clock_freq_t ck_apb1 = clocks.ahb / (clock_freq_t)apb1_div;
 
-    if (!picoRTOS_assert(ck_apb1 <= (clock_freq_t)APB1_MAX))
-        return -EIO;
+    picoRTOS_assert(ck_apb1 <= (clock_freq_t)APB1_MAX,
+                    return -EIO);
 
     /* reset field */
     rcu_cfg0 &= ~RCU_CFG0_APB1PSC(RCU_CFG0_APB1PSC_M);
@@ -256,13 +251,13 @@ static int setup_apb1_div(unsigned long apb1_div)
 
 static int setup_apb2_div(unsigned long apb2_div)
 {
-    if (!picoRTOS_assert(apb2_div > 0)) return -EINVAL;
+    picoRTOS_assert(apb2_div > 0, return -EINVAL);
 
     uint32_t rcu_cfg0 = RCU->RCU_CFG0;
     clock_freq_t ck_apb2 = clocks.ahb / (clock_freq_t)apb2_div;
 
-    if (!picoRTOS_assert(ck_apb2 <= (clock_freq_t)APB2_MAX))
-        return -EIO;
+    picoRTOS_assert(ck_apb2 <= (clock_freq_t)APB2_MAX,
+                    return -EIO);
 
     /* reset field */
     rcu_cfg0 &= ~RCU_CFG0_APB2PSC(RCU_CFG0_APB2PSC_M);
@@ -286,13 +281,13 @@ static int setup_apb2_div(unsigned long apb2_div)
 
 static int setup_adc_div(unsigned long adc_div)
 {
-    if (!picoRTOS_assert(adc_div > 0)) return -EINVAL;
+    picoRTOS_assert(adc_div > 0, return -EINVAL);
 
     uint32_t rcu_cfg0 = RCU->RCU_CFG0;
     clock_freq_t ck_adc = clocks.apb2 / (clock_freq_t)adc_div;
 
-    if (!picoRTOS_assert(ck_adc <= (clock_freq_t)ADC_MAX))
-        return -EIO;
+    picoRTOS_assert(ck_adc <= (clock_freq_t)ADC_MAX,
+                    return -EIO);
 
     /* reset field */
     rcu_cfg0 &= ~(RCU_CFG0_ADCPSC(RCU_CFG0_ADCPSC_M) | RCU_CFG0_ADCPSC2);
@@ -334,7 +329,8 @@ static int setup_adc_div(unsigned long adc_div)
  */
 int clock_gd32vf103_init(struct clock_settings *settings)
 {
-    if (!picoRTOS_assert(settings->ck_sys < CLOCK_GD32VF103_CK_SYS_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->ck_sys < CLOCK_GD32VF103_CK_SYS_COUNT,
+                    return -EINVAL);
 
     int res;
 
@@ -389,7 +385,7 @@ int clock_gd32vf103_init(struct clock_settings *settings)
  */
 int clock_gd32vf103_enable(clock_gd32vf103_clk_t clk)
 {
-    if (!picoRTOS_assert(clk < CLOCK_GD32VF103_CLK_COUNT)) return -EINVAL;
+    picoRTOS_assert(clk < CLOCK_GD32VF103_CLK_COUNT, return -EINVAL);
 
     size_t bus = (size_t)(clk >> 5);
     size_t bit = (size_t)(0x1f & clk);
@@ -421,7 +417,7 @@ int clock_gd32vf103_enable(clock_gd32vf103_clk_t clk)
  */
 int clock_gd32vf103_disable(clock_gd32vf103_clk_t clk)
 {
-    if (!picoRTOS_assert(clk < CLOCK_GD32VF103_CLK_COUNT)) return -EINVAL;
+    picoRTOS_assert(clk < CLOCK_GD32VF103_CLK_COUNT, return -EINVAL);
 
     size_t bus = (size_t)(clk >> 5);
     size_t bit = (size_t)(0x1f & clk);
@@ -446,8 +442,8 @@ int clock_gd32vf103_disable(clock_gd32vf103_clk_t clk)
 
 clock_freq_t clock_get_freq(clock_id_t clkid)
 {
-    if (!picoRTOS_assert(clkid < (clock_id_t)CLOCK_GD32VF103_COUNT))
-        return (clock_freq_t)-EINVAL;
+    picoRTOS_assert(clkid < (clock_id_t)CLOCK_GD32VF103_COUNT,
+                    return (clock_freq_t)-EINVAL);
 
     switch (clkid) {
     case CLOCK_GD32VF103_CK_SYS: return clocks.ck_sys;

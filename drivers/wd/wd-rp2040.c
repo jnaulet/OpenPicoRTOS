@@ -50,14 +50,13 @@ int wd_rp2040_init(struct wd *ctx, int base, clock_id_t clkid)
  */
 int wd_rp2040_setup(struct wd *ctx, struct wd_rp2040_settings *settings)
 {
-    if (!picoRTOS_assert(settings->timeout_us > 0)) return -EINVAL;
+    picoRTOS_assert(settings->timeout_us > 0, return -EINVAL);
 
     unsigned long load;
     unsigned long tick_cycles;
     clock_freq_t freq = clock_get_freq(ctx->clkid);
 
-    if (!picoRTOS_assert(freq > 0))
-        return -EIO;
+    picoRTOS_assert(freq > 0, return -EIO);
 
     for (tick_cycles = 1ul; tick_cycles < WD_RP2040_CYCLES_COUNT; tick_cycles++) {
         load = settings->timeout_us * ((unsigned long)freq / 1000000ul) / tick_cycles;
@@ -68,8 +67,8 @@ int wd_rp2040_setup(struct wd *ctx, struct wd_rp2040_settings *settings)
             break;
     }
 
-    if (!picoRTOS_assert(load < WD_RP2040_LOAD_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(tick_cycles < WD_RP2040_CYCLES_COUNT)) return -EINVAL;
+    picoRTOS_assert(load < WD_RP2040_LOAD_COUNT, return -EINVAL);
+    picoRTOS_assert(tick_cycles < WD_RP2040_CYCLES_COUNT, return -EINVAL);
 
     ctx->load = (uint32_t)load;
 

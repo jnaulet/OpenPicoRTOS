@@ -1,5 +1,6 @@
 #include "can-ti_dcan.h"
 #include "picoRTOS.h"
+#include <generated/autoconf.h>
 
 #include <stdint.h>
 
@@ -143,9 +144,7 @@ static int ifcmd_busywait(volatile const uint32_t *ifcmd, uint32_t mask)
         if ((*ifcmd & mask) == 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -159,15 +158,13 @@ static int clear_ram_busywait(struct can *ctx)
         if ((ctx->base->CAN_RAM_INIT & CAN_RAM_INIT_RAM_INIT_DONE) != 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
 static int set_tx_mailboxes(/*@partial@*/ struct can *ctx, size_t n)
 {
-    if (!picoRTOS_assert(n < (size_t)CAN_TI_DCAN_MB_COUNT)) return -EINVAL;
+    picoRTOS_assert(n < (size_t)CAN_TI_DCAN_MB_COUNT, return -EINVAL);
 
     ctx->tx_mailbox_count = n;
     ctx->rx_mailbox_count = (size_t)(CAN_TI_DCAN_MB_COUNT - n);
@@ -231,8 +228,8 @@ static int set_brp_and_tseg(struct can *ctx, size_t brp, size_t tq)
 {
 #define div_round_closest(a, b) (((a) + ((b) >> 1)) / (b))
 
-    if (!picoRTOS_assert(tq >= (size_t)TQ_MIN)) return -EINVAL;
-    if (!picoRTOS_assert(tq <= (size_t)TQ_MAX)) return -EINVAL;
+    picoRTOS_assert(tq >= (size_t)TQ_MIN, return -EINVAL);
+    picoRTOS_assert(tq <= (size_t)TQ_MAX, return -EINVAL);
 
     size_t tseg1;
     size_t tseg2;
@@ -265,7 +262,7 @@ static int set_brp_and_tseg(struct can *ctx, size_t brp, size_t tq)
 
 static int set_bitrate(struct can *ctx, unsigned long bitrate)
 {
-    if (!picoRTOS_assert(bitrate > 0)) return -EINVAL;
+    picoRTOS_assert(bitrate > 0, return -EINVAL);
 
 #define BRPE_MAX 1024
 
@@ -275,8 +272,8 @@ static int set_bitrate(struct can *ctx, unsigned long bitrate)
     if ((freq = clock_get_freq(ctx->clkid)) < 0)
         return (int)freq;
 
-    if (!picoRTOS_assert(((unsigned long)freq % bitrate) == 0))
-        return -EIO;
+    picoRTOS_assert(((unsigned long)freq % bitrate) == 0,
+                    return -EIO; )
 
     /* parameters computation (iterative) */
     for (brp = (size_t)1; brp <= (size_t)BRPE_MAX; brp++) {
@@ -320,9 +317,9 @@ int can_setup(struct can *ctx, struct can_settings *settings)
 
 int can_accept(struct can *ctx, can_id_t id, can_id_t accept_mask)
 {
-    if (!picoRTOS_assert(id < (can_id_t)CAN_ID_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(accept_mask < (can_id_t)CAN_ID_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(ctx->rx_mailbox_index < ctx->rx_mailbox_count)) return -ENOMEM;
+    picoRTOS_assert(id < (can_id_t)CAN_ID_COUNT, return -EINVAL);
+    picoRTOS_assert(accept_mask < (can_id_t)CAN_ID_COUNT, return -EINVAL);
+    picoRTOS_assert(ctx->rx_mailbox_index < ctx->rx_mailbox_count, return -ENOMEM);
 
     uint32_t if2cmd = (uint32_t)(CAN_IF1CMD_DIR | CAN_IF1CMD_ARB | CAN_IF1CMD_CONTROL);
 
@@ -339,8 +336,8 @@ int can_accept(struct can *ctx, can_id_t id, can_id_t accept_mask)
 
 static int copy_data_to_mb(struct can *ctx, const uint_least8_t *buf, size_t n, uint32_t *mask)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT, return -EINVAL);
 
     /* message packing */
     uint32_t DATA_A = 0;
@@ -374,9 +371,9 @@ static int copy_data_to_mb(struct can *ctx, const uint_least8_t *buf, size_t n, 
 
 static int copy_mb_to_data(struct can *ctx, size_t index, uint_least8_t *buf, size_t n)
 {
-    if (!picoRTOS_assert(index < ctx->rx_mailbox_count)) return -EINVAL;
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT)) return -EINVAL;
+    picoRTOS_assert(index < ctx->rx_mailbox_count, return -EINVAL);
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT, return -EINVAL);
 
     int res;
     uint32_t DATA_A;
@@ -415,10 +412,10 @@ static int copy_mb_to_data(struct can *ctx, size_t index, uint_least8_t *buf, si
 static int transfer_tx_mailbox(struct can *ctx, size_t index,
                                can_id_t id, const uint_least8_t *buf, size_t n)
 {
-    if (!picoRTOS_assert(index < (size_t)CAN_TI_DCAN_MB_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(id < (can_id_t)CAN_ID_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT)) return -EINVAL;
+    picoRTOS_assert(index < (size_t)CAN_TI_DCAN_MB_COUNT, return -EINVAL);
+    picoRTOS_assert(id < (can_id_t)CAN_ID_COUNT, return -EINVAL);
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT, return -EINVAL);
 
     int res;
     uint32_t if1cmd = 0;
@@ -457,9 +454,9 @@ static int transfer_tx_mailbox(struct can *ctx, size_t index,
 static int transfer_rx_mailbox(struct can *ctx, size_t index,
                                can_id_t *id, uint_least8_t *buf, size_t n)
 {
-    if (!picoRTOS_assert(index < (size_t)CAN_TI_DCAN_MB_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT)) return -EINVAL;
+    picoRTOS_assert(index < (size_t)CAN_TI_DCAN_MB_COUNT, return -EINVAL);
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT, return -EINVAL);
 
     int ret = -EAGAIN;
 
@@ -483,9 +480,9 @@ static int transfer_rx_mailbox(struct can *ctx, size_t index,
 
 int can_write(struct can *ctx, can_id_t id, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(id < (can_id_t)CAN_ID_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT)) return -EINVAL;
+    picoRTOS_assert(id < (can_id_t)CAN_ID_COUNT, return -EINVAL);
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT, return -EINVAL);
 
     /* get next index */
     size_t index = ctx->rx_mailbox_count + ctx->tx_mailbox_index;
@@ -503,8 +500,8 @@ int can_write(struct can *ctx, can_id_t id, const void *buf, size_t n)
 
 int can_read(struct can *ctx, can_id_t *id, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT, return -EINVAL);
 
     size_t index = ctx->rx_mailbox_index;
     uint32_t mask = (uint32_t)((1 << ctx->rx_mailbox_count) - 1);

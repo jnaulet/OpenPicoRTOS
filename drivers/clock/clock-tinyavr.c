@@ -83,7 +83,7 @@ static int setup_osculp32k(void)
 
 static int setup_prescaler(clock_tinyavr_pdiv_t pdiv)
 {
-    if (!picoRTOS_assert(pdiv < CLOCK_TINYAVR_PDIV_COUNT)) return -EINVAL;
+    picoRTOS_assert(pdiv < CLOCK_TINYAVR_PDIV_COUNT, return -EINVAL);
 
     switch (pdiv) {
     case CLOCK_TINYAVR_PDIV_2: clocks.per_div = (clock_freq_t)2; break;
@@ -166,8 +166,8 @@ int clock_tinyavr_init(struct clock_settings *settings)
 
 clock_freq_t clock_get_freq(clock_id_t clkid)
 {
-    if (!picoRTOS_assert(clkid < (clock_id_t)CLOCK_TINYAVR_COUNT))
-        return (clock_freq_t)-EINVAL;
+    picoRTOS_assert(clkid < (clock_id_t)CLOCK_TINYAVR_COUNT,
+                    return (clock_freq_t)-EINVAL);
 
     switch (clkid) {
     case CLOCK_TINYAVR_CLK_CPU: return clocks.clk_main / clocks.per_div;

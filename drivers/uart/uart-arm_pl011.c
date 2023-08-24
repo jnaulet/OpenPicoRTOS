@@ -128,14 +128,13 @@ int uart_arm_pl011_set_loopback(struct uart *ctx, bool loopback)
 
 static int set_baudrate(struct uart *ctx, unsigned long baudrate)
 {
-    if (!picoRTOS_assert(baudrate > 0)) return -EINVAL;
+    picoRTOS_assert(baudrate > 0, return -EINVAL);
 
     unsigned long modulo;
     unsigned long divider = 16ul * baudrate;
     clock_freq_t freq = clock_get_freq(ctx->clkid);
 
-    if (!picoRTOS_assert(freq > 0))
-        return (int)freq;
+    picoRTOS_assert(freq > 0, return (int)freq);
 
     modulo = (unsigned long)freq % divider;
     ctx->base->UARTIBRD = (uint32_t)UARTIBRD_BAUD_DIVINT((unsigned long)freq / divider);
@@ -146,8 +145,8 @@ static int set_baudrate(struct uart *ctx, unsigned long baudrate)
 
 static int set_cs(struct uart *ctx, size_t cs)
 {
-    if (!picoRTOS_assert(cs >= (size_t)UART_ARM_PL011_CS_MIN)) return -EINVAL;
-    if (!picoRTOS_assert(cs <= (size_t)UART_ARM_PL011_CS_MAX)) return -EINVAL;
+    picoRTOS_assert(cs >= (size_t)UART_ARM_PL011_CS_MIN, return -EINVAL);
+    picoRTOS_assert(cs <= (size_t)UART_ARM_PL011_CS_MAX, return -EINVAL);
 
     ctx->base->UARTLCR_H &= ~UARTLCR_H_WLEN(UARTLCR_H_WLEN_M);
     ctx->base->UARTLCR_H |= UARTLCR_H_WLEN(cs - (size_t)5);
@@ -157,8 +156,8 @@ static int set_cs(struct uart *ctx, size_t cs)
 
 static int set_parity(struct uart *ctx, uart_par_t par)
 {
-    if (!picoRTOS_assert(par != UART_PAR_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(par < UART_PAR_COUNT)) return -EINVAL;
+    picoRTOS_assert(par != UART_PAR_IGNORE, return -EINVAL);
+    picoRTOS_assert(par < UART_PAR_COUNT, return -EINVAL);
 
     /* no parity */
     if (par == UART_PAR_NONE) {
@@ -176,8 +175,8 @@ static int set_parity(struct uart *ctx, uart_par_t par)
 
 static int set_cstopb(struct uart *ctx, uart_cstopb_t cstopb)
 {
-    if (!picoRTOS_assert(cstopb != UART_CSTOPB_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(cstopb < UART_CSTOPB_COUNT)) return -EINVAL;
+    picoRTOS_assert(cstopb != UART_CSTOPB_IGNORE, return -EINVAL);
+    picoRTOS_assert(cstopb < UART_CSTOPB_COUNT, return -EINVAL);
 
     if (cstopb == UART_CSTOPB_2BIT) ctx->base->UARTLCR_H |= UARTLCR_H_STP2;
     else ctx->base->UARTLCR_H &= ~UARTLCR_H_STP2;
@@ -214,7 +213,7 @@ int uart_setup(struct uart *ctx, const struct uart_settings *settings)
 
 int uart_write(struct uart *ctx, const char *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     int sent = 0;
 
@@ -233,7 +232,7 @@ int uart_write(struct uart *ctx, const char *buf, size_t n)
 
 int uart_read(struct uart *ctx, char *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     int recv = 0;
 

@@ -84,9 +84,7 @@ static int sync_busywait(struct spi *ctx, uint32_t mask)
         if ((ctx->base->SYNCBUSY & mask) == 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -144,18 +142,16 @@ int spi_atmel_sercom_setup(struct spi *ctx, struct spi_atmel_sercom_settings *se
 
 static int set_bitrate(struct spi *ctx, unsigned long bitrate)
 {
-    if (!picoRTOS_assert(bitrate > 0)) return -EINVAL;
+    picoRTOS_assert(bitrate > 0, return -EINVAL);
 
     unsigned long baud;
     clock_freq_t freq = clock_get_freq(ctx->clkid);
 
-    if (!picoRTOS_assert(freq > 0))
-        return (int)freq;
+    picoRTOS_assert(freq > 0, return (int)freq);
 
     /* According to datasheet, BAUD = fref / (2 * fBAUD) - 1 */
     baud = (unsigned long)freq / (2ul * bitrate) - 1ul;
-    if (!picoRTOS_assert(baud < 0x100ul))
-        return -EINVAL;
+    picoRTOS_assert(baud < 0x100ul, return -EINVAL);
 
     ctx->base->BAUD = (uint32_t)BAUD_BAUD(baud);
     return 0;
@@ -163,8 +159,8 @@ static int set_bitrate(struct spi *ctx, unsigned long bitrate)
 
 static int set_mode(struct spi *ctx, spi_mode_t mode)
 {
-    if (!picoRTOS_assert(mode != SPI_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(mode < SPI_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(mode != SPI_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(mode < SPI_MODE_COUNT, return -EINVAL);
 
     ctx->base->CTRLA &= ~CTRLA_MODE(CTRLA_MODE_M);
 
@@ -176,8 +172,8 @@ static int set_mode(struct spi *ctx, spi_mode_t mode)
 
 static int set_clkmode(struct spi *ctx, spi_clock_mode_t clkmode)
 {
-    if (!picoRTOS_assert(clkmode != SPI_CLOCK_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(clkmode < SPI_CLOCK_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(clkmode != SPI_CLOCK_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(clkmode < SPI_CLOCK_MODE_COUNT, return -EINVAL);
 
     switch (clkmode) {
     case SPI_CLOCK_MODE_0:
@@ -213,8 +209,8 @@ static int set_frame_size(struct spi *ctx, size_t frame_size)
 {
 #define div_ceil(x, y) (((x) + ((y) - 1)) / (y))
 
-    if (!picoRTOS_assert(frame_size >= (size_t)SPI_ATMEL_SERCOM_FRAME_SIZE_MIN)) return -EINVAL;
-    if (!picoRTOS_assert(frame_size <= (size_t)SPI_ATMEL_SERCOM_FRAME_SIZE_MAX)) return -EINVAL;
+    picoRTOS_assert(frame_size >= (size_t)SPI_ATMEL_SERCOM_FRAME_SIZE_MIN, return -EINVAL);
+    picoRTOS_assert(frame_size <= (size_t)SPI_ATMEL_SERCOM_FRAME_SIZE_MAX, return -EINVAL);
 
     if (frame_size <= (size_t)8)
         ctx->base->CTRLC &= ~CTRLC_DATA32B;
@@ -306,10 +302,10 @@ static int read_data(struct spi *ctx, uint8_t *data)
 
 static int spi_xfer_dma_start(struct spi *ctx, void *rx, const void *tx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
     /* null check */
-    if (!picoRTOS_assert(ctx->fill != NULL)) return -EIO;
-    if (!picoRTOS_assert(ctx->drain != NULL)) return -EIO;
+    picoRTOS_assert(ctx->fill != NULL, return -EIO);
+    picoRTOS_assert(ctx->drain != NULL, return -EIO);
 
     int res;
 
@@ -344,10 +340,10 @@ static int spi_xfer_dma_start(struct spi *ctx, void *rx, const void *tx, size_t 
 
 static int spi_xfer_dma_wait(struct spi *ctx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
     /* null check */
-    if (!picoRTOS_assert(ctx->fill != NULL)) return -EIO;
-    if (!picoRTOS_assert(ctx->drain != NULL)) return -EIO;
+    picoRTOS_assert(ctx->fill != NULL, return -EIO);
+    picoRTOS_assert(ctx->drain != NULL, return -EIO);
 
     if (dma_xfer_done(ctx->fill) == 0 &&
         dma_xfer_done(ctx->drain) == 0) {
@@ -361,7 +357,7 @@ static int spi_xfer_dma_wait(struct spi *ctx, size_t n)
 
 static int spi_xfer_dma(struct spi *ctx, void *rx, const void *tx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
     case SPI_ATMEL_SERCOM_STATE_DMA_START: return spi_xfer_dma_start(ctx, rx, tx, n);
@@ -375,8 +371,8 @@ static int spi_xfer_dma(struct spi *ctx, void *rx, const void *tx, size_t n)
 
 static int spi_xfer_nodma(struct spi *ctx, void *rx, const void *tx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert((n & (ctx->frame_width - 1)) == 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert((n & (ctx->frame_width - 1)) == 0, return -EINVAL);
 
     size_t recv = 0;
     uint8_t *rx8 = rx;
@@ -415,7 +411,7 @@ static int spi_xfer_nodma(struct spi *ctx, void *rx, const void *tx, size_t n)
 
 int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     /* DMA */
     if (ctx->fill != NULL && ctx->drain != NULL &&

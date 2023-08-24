@@ -76,8 +76,7 @@ int adc_gd32vf103_init(struct adc_gd32vf103 *ctx, int base)
         if ((ctx->base->ADC_CTL1 & ADC_CTL1_CLB) == 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
 
     /* modes */
     ctx->mode = ADC_GD32VF103_MODE_SINGLE;
@@ -89,7 +88,7 @@ int adc_gd32vf103_init(struct adc_gd32vf103 *ctx, int base)
 
 static int setup_dma(struct adc_gd32vf103 *ctx, /*@null@*/ struct dma *dma)
 {
-    if (!picoRTOS_assert(dma != NULL)) return -EINVAL;
+    picoRTOS_assert(dma != NULL, return -EINVAL);
 
     ctx->base->ADC_CTL1 |= ADC_CTL1_DMA;
 
@@ -105,7 +104,7 @@ static int setup_dma(struct adc_gd32vf103 *ctx, /*@null@*/ struct dma *dma)
 
 int adc_gd32vf103_setup(struct adc_gd32vf103 *ctx, struct adc_gd32vf103_settings *settings)
 {
-    if (!picoRTOS_assert(settings->mode < ADC_GD32VF103_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->mode < ADC_GD32VF103_MODE_COUNT, return -EINVAL);
 
     int res = 0;
 
@@ -154,8 +153,8 @@ int adc_gd32vf103_start(struct adc_gd32vf103 *ctx)
 
 static int set_rsq(struct adc_gd32vf103 *ctx, size_t channel, size_t rsq)
 {
-    if (!picoRTOS_assert(channel < (size_t)ADC_GD32VF103_CHANNEL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(rsq < (size_t)ADC_GD32VF103_RSQ_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)ADC_GD32VF103_CHANNEL_COUNT, return -EINVAL);
+    picoRTOS_assert(rsq < (size_t)ADC_GD32VF103_RSQ_COUNT, return -EINVAL);
 
     size_t shift;
 
@@ -183,8 +182,8 @@ static int set_rsq(struct adc_gd32vf103 *ctx, size_t channel, size_t rsq)
 
 static int register_channel(struct adc_gd32vf103 *ctx, size_t channel)
 {
-    if (!picoRTOS_assert(channel < (size_t)ADC_GD32VF103_CHANNEL_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(ctx->rsq_count < (size_t)ADC_GD32VF103_RSQ_COUNT)) return -ENOMEM;
+    picoRTOS_assert(channel < (size_t)ADC_GD32VF103_CHANNEL_COUNT, return -EINVAL);
+    picoRTOS_assert(ctx->rsq_count < (size_t)ADC_GD32VF103_RSQ_COUNT, return -ENOMEM);
 
     int res;
 
@@ -205,7 +204,7 @@ static int register_channel(struct adc_gd32vf103 *ctx, size_t channel)
 
 int adc_gd32vf103_adc_init(struct adc *ctx, struct adc_gd32vf103 *parent, size_t channel)
 {
-    if (!picoRTOS_assert(channel < (size_t)ADC_GD32VF103_CHANNEL_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)ADC_GD32VF103_CHANNEL_COUNT, return -EINVAL);
 
     ctx->parent = parent;
     ctx->channel = channel;
@@ -292,7 +291,7 @@ int adc_read(struct adc *ctx, int *data)
 
 int adc_read_multiple(struct adc *ctx, int *data, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     /* FIXME */
     return adc_read(ctx, data);

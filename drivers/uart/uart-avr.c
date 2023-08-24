@@ -63,13 +63,12 @@ int uart_avr_init(struct uart *ctx, int base, clock_id_t clkid)
 
 static int set_baudrate(struct uart *ctx, unsigned long baud)
 {
-    if (!picoRTOS_assert(baud > 0)) return -EINVAL;
+    picoRTOS_assert(baud > 0, return -EINVAL);
 
     clock_freq_t freq = clock_get_freq(ctx->clkid);
     unsigned long ubrr = (unsigned long)freq / 8ul / baud - 1;
 
-    if (!picoRTOS_assert(freq > 0))
-        return -EIO;
+    picoRTOS_assert(freq > 0, return -EIO);
 
     ctx->base->UBRRn = (uint16_t)ubrr;
 
@@ -79,8 +78,8 @@ static int set_baudrate(struct uart *ctx, unsigned long baud)
 
 static int set_cs(struct uart *ctx, size_t cs)
 {
-    if (!picoRTOS_assert(cs >= (size_t)UART_AVR_CS_MIN)) return -EINVAL;
-    if (!picoRTOS_assert(cs <= (size_t)UART_AVR_CS_MAX)) return -EINVAL;
+    picoRTOS_assert(cs >= (size_t)UART_AVR_CS_MIN, return -EINVAL);
+    picoRTOS_assert(cs <= (size_t)UART_AVR_CS_MAX, return -EINVAL);
 
     /* no support for 9bit yet */
     ctx->base->UCSRnB &= ~UCSRnB_UCSZ2;
@@ -102,8 +101,8 @@ static int set_cs(struct uart *ctx, size_t cs)
 
 static int set_parity(struct uart *ctx, uart_par_t par)
 {
-    if (!picoRTOS_assert(par != UART_PAR_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(par < UART_PAR_COUNT)) return -EINVAL;
+    picoRTOS_assert(par != UART_PAR_IGNORE, return -EINVAL);
+    picoRTOS_assert(par < UART_PAR_COUNT, return -EINVAL);
 
     /* disable */
     ctx->base->UCSRnC &= ~UCSRnC_UPM(UCSRnC_UPM_M);
@@ -118,8 +117,8 @@ static int set_parity(struct uart *ctx, uart_par_t par)
 
 static int set_cstopb(struct uart *ctx, uart_cstopb_t cstopb)
 {
-    if (!picoRTOS_assert(cstopb != UART_CSTOPB_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(cstopb < UART_CSTOPB_COUNT)) return -EINVAL;
+    picoRTOS_assert(cstopb != UART_CSTOPB_IGNORE, return -EINVAL);
+    picoRTOS_assert(cstopb < UART_CSTOPB_COUNT, return -EINVAL);
 
     if (cstopb == UART_CSTOPB_2BIT) ctx->base->UCSRnC |= UCSRnC_USBS;
     else ctx->base->UCSRnC &= ~UCSRnC_USBS;
@@ -158,7 +157,7 @@ int uart_setup(struct uart *ctx, const struct uart_settings *settings)
 
 int uart_write(struct uart *ctx, const char *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     size_t nwritten = 0;
 
@@ -179,7 +178,7 @@ int uart_write(struct uart *ctx, const char *buf, size_t n)
 
 int uart_read(struct uart *ctx, char *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     size_t nread = 0;
 

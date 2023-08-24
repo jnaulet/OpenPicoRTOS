@@ -149,14 +149,13 @@ int twi_dw_apb_i2c_init(struct twi *ctx, int base, clock_id_t clkid)
 
 static int set_bitrate(struct twi *ctx, unsigned long bitrate)
 {
-    if (!picoRTOS_assert(bitrate > 0)) return -EINVAL;
+    picoRTOS_assert(bitrate > 0, return -EINVAL);
 
     uint32_t ic_con = ctx->base->IC_CON;
     uint32_t speed = (uint32_t)0x1; /* standard */
     clock_freq_t freq = clock_get_freq(ctx->clkid);
 
-    if (!picoRTOS_assert(freq > 0))
-        return -EIO;
+    picoRTOS_assert(freq > 0, return -EIO);
 
     /* SCL */
     unsigned long period = (unsigned long)freq / bitrate;
@@ -180,8 +179,8 @@ static int set_bitrate(struct twi *ctx, unsigned long bitrate)
 
 static int set_mode(struct twi *ctx, twi_mode_t mode)
 {
-    if (!picoRTOS_assert(mode != TWI_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(mode < TWI_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(mode != TWI_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(mode < TWI_MODE_COUNT, return -EINVAL);
 
     uint32_t ic_con = ctx->base->IC_CON;
 
@@ -278,7 +277,7 @@ static int twi_write_as_master_idle(struct twi *ctx)
 
 static int twi_write_as_master_xfer(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     size_t sent = 0;
     const uint8_t *buf8 = (uint8_t*)buf;
@@ -313,7 +312,7 @@ static int twi_write_as_master_xfer(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_write_as_master(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
     case TWI_DW_APB_I2C_STATE_IDLE: return twi_write_as_master_idle(ctx);
@@ -362,7 +361,7 @@ static int twi_write_as_slave_check_abort(struct twi *ctx)
 
 static int twi_write_as_slave_xfer(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     int sent = 0;
     const uint8_t *buf8 = (uint8_t*)buf;
@@ -410,7 +409,7 @@ static int twi_rw_as_slave_stop(struct twi *ctx)
 
 static int twi_write_as_slave(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
     case TWI_DW_APB_I2C_STATE_IDLE: return twi_write_as_slave_idle(ctx);
@@ -426,7 +425,7 @@ static int twi_write_as_slave(struct twi *ctx, const void *buf, size_t n)
 
 int twi_write(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     if (ctx->mode == TWI_MODE_MASTER)
         return twi_write_as_master(ctx, buf, n);
@@ -500,7 +499,7 @@ static int twi_read_as_master_xfer(struct twi *ctx, void *buf, size_t n)
 
 static int twi_read_as_master(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
     case TWI_DW_APB_I2C_STATE_IDLE: return twi_read_as_master_idle(ctx);
@@ -524,7 +523,7 @@ static int twi_read_as_slave_idle(struct twi *ctx)
 
 static int twi_read_as_slave_xfer(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     int recv = 0;
     uint8_t *buf8 = (uint8_t*)buf;
@@ -552,7 +551,7 @@ static int twi_read_as_slave_xfer(struct twi *ctx, void *buf, size_t n)
 
 static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
     case TWI_DW_APB_I2C_STATE_IDLE: return twi_read_as_slave_idle(ctx);
@@ -568,7 +567,7 @@ static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
 
 int twi_read(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     if (ctx->mode == TWI_MODE_MASTER)
         return twi_read_as_master(ctx, buf, n);

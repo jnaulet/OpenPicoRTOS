@@ -126,7 +126,7 @@ int twi_atmel_sercom_init(struct twi *ctx, int base, clock_id_t clkid)
 
 static int set_bitrate(struct twi *ctx, unsigned long bitrate)
 {
-    if (!picoRTOS_assert(bitrate > 0)) return -EINVAL;
+    picoRTOS_assert(bitrate > 0, return -EINVAL);
 
     clock_freq_t freq = clock_get_freq(ctx->clkid);
     /* compute normal speed tlow & thigh */
@@ -135,9 +135,8 @@ static int set_bitrate(struct twi *ctx, unsigned long bitrate)
     /* compute hi speed tlow & thigh */
     unsigned long hsbaud = ((unsigned long)freq / bitrate) / 2ul;
 
-    if (!picoRTOS_assert(freq > 0)) return -EIO;
-    if (!picoRTOS_assert(baud < 0x10000ul))
-        return -EINVAL;
+    picoRTOS_assert(freq > 0, return -EIO);
+    picoRTOS_assert(baud < 0x10000ul, return -EINVAL);
 
     ctx->base->BAUD = (uint32_t)(BAUD_HSBAUD(hsbaud - 1ul) |
                                  BAUD_BAUD(baud - 1ul));
@@ -152,8 +151,8 @@ static int set_bitrate(struct twi *ctx, unsigned long bitrate)
 
 static int set_mode(struct twi *ctx, twi_mode_t mode)
 {
-    if (!picoRTOS_assert(mode != TWI_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(mode < TWI_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(mode != TWI_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(mode < TWI_MODE_COUNT, return -EINVAL);
 
     ctx->mode = mode;
     ctx->base->CTRLA &= ~CTRLA_MODE(CTRLA_MODE_M);
@@ -172,16 +171,14 @@ static int sync_busywait(struct twi *ctx, uint32_t mask)
         if ((ctx->base->SYNCBUSY & mask) == 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
 int twi_setup(struct twi *ctx, struct twi_settings *settings)
 {
-    if (!picoRTOS_assert(settings->mode < TWI_MODE_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->slave_addr < (twi_addr_t)TWI_ADDR_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->mode < TWI_MODE_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->slave_addr < (twi_addr_t)TWI_ADDR_COUNT, return -EINVAL);
 
     int res;
 
@@ -293,7 +290,7 @@ static int twi_write_as_master_idle(struct twi *ctx)
 
 static int twi_write_as_master_data(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     const uint8_t *buf8 = (const uint8_t*)buf;
 
@@ -311,7 +308,7 @@ static int twi_write_as_master_data(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_write_as_master(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     /* NACK */
     if ((ctx->base->STATUS & STATUS_RXNACK) != 0)
@@ -338,7 +335,7 @@ static int twi_write_as_master(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_write_as_slave_data(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     const uint8_t *buf8 = (const uint8_t*)buf;
 
@@ -363,7 +360,7 @@ static int twi_write_as_slave_data(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_write_as_slave_idle(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     if ((ctx->base->INTFLAG & INTFLAG_AMATCH) == 0)
         return -EAGAIN;
@@ -395,7 +392,7 @@ static int twi_write_as_slave(struct twi *ctx, const void *buf, size_t n)
 
 int twi_write(struct twi *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     if (ctx->mode == TWI_MODE_MASTER)
         return twi_write_as_master(ctx, buf, n);
@@ -412,7 +409,7 @@ int twi_write(struct twi *ctx, const void *buf, size_t n)
 
 static int twi_read_as_master_idle(struct twi *ctx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     /* check if bus is idle */
     if ((ctx->base->STATUS & STATUS_BUSSTATE(STATUS_BUSSTATE_M)) !=
@@ -432,7 +429,7 @@ static int twi_read_as_master_idle(struct twi *ctx, size_t n)
 
 static int twi_read_as_master_data(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     uint8_t *buf8 = (uint8_t*)buf;
 
@@ -453,7 +450,7 @@ static int twi_read_as_master_data(struct twi *ctx, void *buf, size_t n)
 
 static int twi_read_as_master(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     /* NACK */
     if ((ctx->base->STATUS & STATUS_RXNACK) != 0)
@@ -481,7 +478,7 @@ static int twi_read_as_master(struct twi *ctx, void *buf, size_t n)
 
 static int twi_read_as_slave_data(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     uint8_t *buf8 = (uint8_t*)buf;
 
@@ -499,7 +496,7 @@ static int twi_read_as_slave_data(struct twi *ctx, void *buf, size_t n)
 
 static int twi_read_as_slave_idle(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     if ((ctx->base->INTFLAG & INTFLAG_AMATCH) == 0)
         return -EAGAIN;
@@ -531,7 +528,7 @@ static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
 
 int twi_read(struct twi *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     if (ctx->mode == TWI_MODE_MASTER)
         return twi_read_as_master(ctx, buf, n);

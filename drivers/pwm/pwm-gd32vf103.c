@@ -155,17 +155,16 @@ int pwm_gd32vf103_init(struct pwm_gd32vf103 *ctx, int base, clock_id_t clkid)
 
 static int set_frequency(struct pwm_gd32vf103 *ctx, unsigned long frequency)
 {
-    if (!picoRTOS_assert(frequency > 0)) return -EINVAL;
+    picoRTOS_assert(frequency > 0, return -EINVAL);
 
     unsigned long psc;
     clock_freq_t freq = clock_get_freq(ctx->clkid);
 
-    if (!picoRTOS_assert(freq > 0))
-        return -EIO;
+    picoRTOS_assert(freq > 0, return -EIO);
 
     psc = (unsigned long)freq / frequency;
-    if (!picoRTOS_assert(psc <= (unsigned long)TIMERx_PSC_PSC_M))
-        return -EINVAL;
+    picoRTOS_assert(psc <= (unsigned long)TIMERx_PSC_PSC_M,
+                    return -EINVAL);
 
     ctx->base->TIMERx_PSC = (uint32_t)TIMERx_PSC_PSC(psc);
     ctx->frequency = frequency;
@@ -185,7 +184,7 @@ static int set_frequency(struct pwm_gd32vf103 *ctx, unsigned long frequency)
  */
 int pwm_gd32vf103_setup(struct pwm_gd32vf103 *ctx, struct pwm_gd32vf103_settings *settings)
 {
-    if (!picoRTOS_assert(settings->waveform < PWM_GD32VF103_WAVEFORM_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->waveform < PWM_GD32VF103_WAVEFORM_COUNT, return -EINVAL);
 
     int res;
 
@@ -222,7 +221,7 @@ int pwm_gd32vf103_setup(struct pwm_gd32vf103 *ctx, struct pwm_gd32vf103_settings
  */
 int pwm_gd32vf103_pwm_init(struct pwm *ctx, struct pwm_gd32vf103 *parent, size_t channel)
 {
-    if (!picoRTOS_assert(channel < (size_t)PWM_GD32VF103_MAX_CH_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)PWM_GD32VF103_MAX_CH_COUNT, return -EINVAL);
 
     ctx->parent = parent;
     ctx->channel = channel;
@@ -272,7 +271,7 @@ int pwm_gd32vf103_pwm_init(struct pwm *ctx, struct pwm_gd32vf103 *parent, size_t
  */
 int pwm_gd32vf103_pwm_setup(struct pwm *ctx, struct pwm_gd32vf103_pwm_settings *settings)
 {
-    if (!picoRTOS_assert(settings->mode < PWM_GD32VF103_PWM_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->mode < PWM_GD32VF103_PWM_MODE_COUNT, return -EINVAL);
 
     int chxcomctl = PWM_MODE0;
     struct pwm_gd32vf103 *parent = ctx->parent;
@@ -311,14 +310,13 @@ int pwm_gd32vf103_pwm_setup(struct pwm *ctx, struct pwm_gd32vf103_pwm_settings *
 
 int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
 {
-    if (!picoRTOS_assert(period > 0)) return -EINVAL;
+    picoRTOS_assert(period > 0, return -EINVAL);
 
     /* gd32vf103 can only set the parent's period, beware */
     struct pwm_gd32vf103 *parent = ctx->parent;
 
     ctx->ncycles = (size_t)(parent->frequency / 1000000ul * (unsigned long)period);
-    if (!picoRTOS_assert(ctx->ncycles <= (size_t)TIMERx_CAR_CARL_M))
-        return -EINVAL;
+    picoRTOS_assert(ctx->ncycles <= (size_t)TIMERx_CAR_CARL_M, return -EINVAL);
 
     parent->base->TIMERx_CAR = (uint32_t)TIMERx_CAR_CARL(ctx->ncycles);
     return 0;

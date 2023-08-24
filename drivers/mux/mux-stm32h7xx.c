@@ -59,7 +59,7 @@ int mux_stm32h7xx_init(struct mux *ctx, int base)
  */
 int mux_stm32h7xx_analog(struct mux *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_STM32H7XX_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_STM32H7XX_PIN_COUNT, return -EINVAL);
 
     size_t lshift = pin * (size_t)2;
 
@@ -79,7 +79,7 @@ int mux_stm32h7xx_analog(struct mux *ctx, size_t pin)
  */
 int mux_stm32h7xx_output(struct mux *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_STM32H7XX_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_STM32H7XX_PIN_COUNT, return -EINVAL);
 
     size_t lshift = pin * (size_t)2;
 
@@ -100,7 +100,7 @@ int mux_stm32h7xx_output(struct mux *ctx, size_t pin)
  */
 int mux_stm32h7xx_input(struct mux *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_STM32H7XX_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_STM32H7XX_PIN_COUNT, return -EINVAL);
 
     size_t lshift = pin * (size_t)2;
 
@@ -121,8 +121,8 @@ int mux_stm32h7xx_input(struct mux *ctx, size_t pin)
  */
 int mux_stm32h7xx_alt(struct mux *ctx, size_t pin, size_t alt)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_STM32H7XX_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(alt < (size_t)MUX_STM32H7XX_ALT_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_STM32H7XX_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(alt < (size_t)MUX_STM32H7XX_ALT_COUNT, return -EINVAL);
 
     /* mode */
     size_t mode_lshift = pin * (size_t)2;
@@ -155,7 +155,7 @@ int mux_stm32h7xx_alt(struct mux *ctx, size_t pin, size_t alt)
  */
 int mux_stm32h7xx_pull_up(struct mux *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_STM32H7XX_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_STM32H7XX_PIN_COUNT, return -EINVAL);
 
     size_t lshift = pin * (size_t)2;
 
@@ -176,7 +176,7 @@ int mux_stm32h7xx_pull_up(struct mux *ctx, size_t pin)
  */
 int mux_stm32h7xx_pull_down(struct mux *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_STM32H7XX_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_STM32H7XX_PIN_COUNT, return -EINVAL);
 
     size_t lshift = pin * (size_t)2;
 
