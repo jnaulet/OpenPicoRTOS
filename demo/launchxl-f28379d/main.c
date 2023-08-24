@@ -1,6 +1,8 @@
 #include "picoRTOS.h"
 #include "launchxl-f28379d.h"
 
+#include <generated/autoconf.h>
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -12,7 +14,7 @@
  */
 static void tick_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct gpio *TICK = (struct gpio*)priv;
 
@@ -29,12 +31,12 @@ static void tick_main(void *priv)
 static struct picoRTOS_mutex mutex = PICORTOS_MUTEX_INITIALIZER;
 static struct picoRTOS_cond cond = PICORTOS_COND_INITIALIZER;
 
-#define BLINK_PERIOD PICORTOS_DELAY_SEC(1)
-#define BLINK_DELAY  PICORTOS_DELAY_MSEC(30)
+#define BLINK_PERIOD PICORTOS_DELAY_SEC(1l)
+#define BLINK_DELAY  PICORTOS_DELAY_MSEC(30l)
 
 static void blink_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct gpio *LED = (struct gpio*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -62,7 +64,7 @@ static void blink_main(void *priv)
 
 static void blink_again_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct gpio *LED = (struct gpio*)priv;
 
@@ -90,7 +92,7 @@ static void blink_again_main(void *priv)
  */
 static void spi_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     size_t xfered = 0;
     struct spi *SPI = (struct spi*)priv;
@@ -126,7 +128,7 @@ static void spi_main(void *priv)
  */
 static void pwm_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     pwm_duty_cycle_t dc = 0;
     struct pwm *PWM = (struct pwm*)priv;
@@ -145,13 +147,13 @@ static void pwm_main(void *priv)
  */
 static void adc_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     int deg_x10[3] = { 0, 0, 0 };
     struct adc *TS = (struct adc*)priv;
 
     for (;;) {
-        int timeout = (int)PICORTOS_DELAY_MSEC(50);
+        int timeout = (int)PICORTOS_DELAY_MSEC(50l);
 
         while (adc_read_multiple(TS, deg_x10, (size_t)3) == -EAGAIN && timeout-- != 0)
             picoRTOS_schedule();
@@ -171,7 +173,7 @@ static void can_main(void *priv)
 {
 #define CAN_TEST_ID 0x6
 
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct can *CAN = (struct can*)priv;
 
@@ -181,7 +183,7 @@ static void can_main(void *priv)
 
         int res;
         can_id_t id = 0;
-        int timeout = (int)PICORTOS_DELAY_MSEC(500);
+        int timeout = (int)PICORTOS_DELAY_MSEC(500l);
 
         static const char tx[] = { "PINGPONG" };
         char rx[CAN_DATA_COUNT] = { (char)0, (char)0, (char)0, (char)0,
@@ -210,7 +212,7 @@ static void can_main(void *priv)
  */
 static void twi_master_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct twi *TWI = (struct twi*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -218,7 +220,7 @@ static void twi_master_main(void *priv)
     for (;;) {
         int res;
         char c = (char)0xa5;
-        int timeout = (int)PICORTOS_DELAY_MSEC(500);
+        int timeout = (int)PICORTOS_DELAY_MSEC(500l);
 
         while ((res = twi_write(TWI, &c, sizeof(c))) == -EAGAIN && timeout-- != 0)
             picoRTOS_schedule();
@@ -232,7 +234,7 @@ static void twi_master_main(void *priv)
         picoRTOS_assert_void(timeout != -1);
         picoRTOS_assert_void(c == (char)0x5a);
 
-        picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
+        picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1l));
     }
 }
 
@@ -241,13 +243,13 @@ static void twi_master_main(void *priv)
  */
 static void twi_slave_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct twi *TWI = (struct twi*)priv;
 
     for (;;) {
         int res;
-        int timeout = (int)PICORTOS_DELAY_SEC(2);
+        int timeout = (int)PICORTOS_DELAY_SEC(2l);
 
         if ((res = twi_poll(TWI)) == -EAGAIN) {
             picoRTOS_schedule();
@@ -278,12 +280,12 @@ static void twi_slave_main(void *priv)
  */
 static void wd_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct wd *WDT = (struct wd*)priv;
 
     for (;;) {
-        picoRTOS_sleep(PICORTOS_DELAY_MSEC(7));
+        picoRTOS_sleep(PICORTOS_DELAY_MSEC(7l));
         wd_refresh(WDT);
     }
 }

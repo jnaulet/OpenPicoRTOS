@@ -1,0 +1,128 @@
+#
+# Automatically generated make config: don't edit
+# OpenPicoRTOS v1.9.x Configuration
+#
+# CONFIG_ARM is not set
+# CONFIG_AVR is not set
+CONFIG_C2000=y
+# CONFIG_MIPS is not set
+# CONFIG_PPC is not set
+# CONFIG_RISCV is not set
+
+#
+# TI C2000 architecture
+#
+CONFIG_C28X=y
+CONFIG_MACH_F28379X=y
+CONFIG_C28X_FPU=y
+CONFIG_C28X_EABI=y
+
+#
+# Scheduler options
+#
+CONFIG_SINGLE_CORE=y
+# CONFIG_SMP is not set
+
+#
+# General setup
+#
+CONFIG_SYSCLK_HZ=200000000
+CONFIG_TICK_HZ=1000
+CONFIG_TASK_COUNT=10
+CONFIG_DEFAULT_STACK_COUNT=256
+CONFIG_DEADLOCK_COUNT=20000
+
+#
+# Build configuration
+#
+CONFIG_CROSS_COMPILE=""
+CONFIG_CC_NO_OPTIMIZATION=y
+# CONFIG_CC_OPTIMIZE_FOR_SIZE is not set
+# CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE1 is not set
+# CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE2 is not set
+# CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE3 is not set
+CONFIG_DEBUG=y
+# CONFIG_NDEBUG is not set
+# CONFIG_MAP is not set
+CONFIG_EXTRA_CFLAGS=""
+CONFIG_LDSCRIPT="${srctree}/samples/ldscripts/f28379x_flash_xip.cmd"
+CONFIG_EXTRA_LDFLAGS=""
+
+#
+# Inter-Process communications
+#
+# CONFIG_FUTEX is not set
+CONFIG_MUTEX=y
+CONFIG_COND=y
+# CONFIG_QUEUE is not set
+
+#
+# Device drivers
+#
+
+#
+# ADC drivers
+#
+CONFIG_ADC_TI_TYPE4=y
+
+#
+# CAN drivers
+#
+CONFIG_CAN_TI_DCAN=y
+
+#
+# Clock drivers
+#
+CONFIG_CLOCK_F28379X=y
+
+#
+# DMA drivers
+#
+CONFIG_DMA_TI_F28X=y
+
+#
+# EEPROM drivers
+#
+
+#
+# Flash drivers
+#
+
+#
+# GPIO drivers
+#
+CONFIG_GPIO_TI_F28X=y
+
+#
+# Misc. drivers
+#
+
+#
+# MUX drivers
+#
+CONFIG_MUX_TI_F28X=y
+
+#
+# PWM drivers
+#
+CONFIG_PWM_TI_EPWM=y
+
+#
+# SPI drivers
+#
+CONFIG_SPI_TI_F28X=y
+
+#
+# TWI/I2C drivers
+#
+CONFIG_TWI_TI_F28X=y
+
+#
+# UART drivers
+#
+
+#
+# Watchdog drivers
+#
+CONFIG_WD_TI_F28X=y
+# CONFIG_STAGING is not set
