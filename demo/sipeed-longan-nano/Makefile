@@ -1,103 +1,30 @@
-# Longan Nano eval board
-# ELF_RAM := sipeed-longan-nano_ram.elf
-ELF_FLASH := sipeed-longan-nano_rom.elf
+# 1st: sources & targets
+target := $(TARGET)
 
-CC := gcc
-CROSS := riscv64-unknown-elf-
-BUILD := build
+c_src-y += main.c
+c_src-y += sipeed-longan-nano.c
 
-# picoRTOS
-PICORTOS_DIR := $(abspath ../..)
--include $(PICORTOS_DIR)/devices/gigadevice/gd32vf103/Makefile.in
+# avoid double-inclusion
+ifeq ($(skip-makefile),)
+PWD := $(shell pwd)
+KBUILD_SRC := ../..
 
-# static anaylzers
-SPLINTFLAGS := -checks +unixlib
-CPPCHECKFLAGS += --enable=all --inline-suppr -DNDEBUG
-CPPCHECKFLAGS += --suppress=missingIncludeSystem
-CPPCHECKFLAGS += --suppress=unusedFunction
-CPPCHECKFLAGS += --suppress=unusedStructMember
+TARGETS := sipeed-longan-nano_ram.elf
+TARGETS += sipeed-longan-nano_flash.elf
 
-INCLUDE += -I.
+defconfig = $(@:%.elf=%_defconfig)
 
-CFLAGS += -Wall -Wextra -std=c99 $(INCLUDE) -O0 -g3 $(DEFINE)
-CFLAGS += -ffreestanding -fmessage-length=0
-CFLAGS += -march=rv32imac -mabi=ilp32 -mcmodel=medlow
+all: $(TARGETS)
 
-SFLAGS += -x assembler-with-cpp -g3 $(DEFINE) $(INCLUDE)
-SFLAGS += -fmessage-length=0 -march=rv32imac -mabi=ilp32 -mcmodel=medlow
+%:
+	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) $@
 
-LDRAM := $(DEVICE_DIR)/gcc/gd32vf103cbt6_ram.ld
-LDFLASH := $(DEVICE_DIR)/gcc/gd32vf103cbt6_rom.ld
+%.elf: FORCE
+	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) $(defconfig)
+	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) TARGET=$@
 
-LDFLAGS += -Xlinker --gc-sections -nostdlib -nostartfiles
-LDFLAGS += -march=rv32imac -mabi=ilp32 -mcmodel=medlow
+PHONY += FORCE
+FORCE:
 
-# drivers
-INCLUDE += -I$(PICORTOS_DIR)/drivers/include
-INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/adc
-INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/can
-INCLUDE += -I$(PICORTOS_DIR)/drivers/clock
-INCLUDE += -I$(PICORTOS_DIR)/drivers/dma
-INCLUDE += -I$(PICORTOS_DIR)/drivers/flash
-INCLUDE += -I$(PICORTOS_DIR)/drivers/gpio
-INCLUDE += -I$(PICORTOS_DIR)/drivers/mux
-INCLUDE += -I$(PICORTOS_DIR)/drivers/pwm
-INCLUDE += -I$(PICORTOS_DIR)/drivers/spi
-INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/twi
-INCLUDE += -I$(PICORTOS_DIR)/drivers/uart
-INCLUDE += -I$(PICORTOS_DIR)/drivers/wd
-
-SRC_C += $(PICORTOS_DIR)/staging/drivers/adc/adc-gd32vf103.c
-SRC_C += $(PICORTOS_DIR)/staging/drivers/can/can-gd32vf103.c
-SRC_C += $(PICORTOS_DIR)/drivers/clock/clock-gd32vf103.c
-SRC_C += $(PICORTOS_DIR)/drivers/dma/dma-gd32vf103.c
-SRC_C += $(PICORTOS_DIR)/drivers/flash/flash-gd32vf103.c
-SRC_C += $(PICORTOS_DIR)/drivers/gpio/gpio-gd32vf103.c
-SRC_C += $(PICORTOS_DIR)/drivers/mux/mux-gd32vf103.c
-SRC_C += $(PICORTOS_DIR)/drivers/pwm/pwm-gd32vf103.c
-SRC_C += $(PICORTOS_DIR)/drivers/spi/spi-gd32vf103.c
-SRC_C += $(PICORTOS_DIR)/staging/drivers/twi/twi-gd32vf103.c
-SRC_C += $(PICORTOS_DIR)/drivers/uart/uart-gd32vf103.c
-SRC_C += $(PICORTOS_DIR)/drivers/wd/wd-gd32vf103_fwdgt.c
-
-# ipcs
-INCLUDE += -I$(PICORTOS_DIR)/ipc
-SRC_C += $(PICORTOS_DIR)/ipc/picoRTOS_mutex.c
-SRC_C += $(PICORTOS_DIR)/ipc/picoRTOS_cond.c
-
-# demo
-SRC_C += sipeed-longan-nano.c
-SRC_C += main.c
-
-OBJ := $(SRC_C:%.c=$(BUILD)/%.o)
-OBJ += $(SRC_S:%.S=$(BUILD)/%.o)
-
-all: $(ELF_RAM) $(ELF_FLASH)
-
-$(ELF_RAM): $(OBJ)
-	-mkdir -p $(@D)
-	$(CROSS)$(CC) $^ -T$(LDRAM) $(LDFLAGS) -o $@ -Wl,-Map=$@.map
-
-$(ELF_FLASH): $(OBJ)
-	-mkdir -p $(@D)
-	$(CROSS)$(CC) $^ -T$(LDFLASH) $(LDFLAGS) -o $@ -Wl,-Map=$@.map
-
-$(BUILD)/%.o: %.c
-	-mkdir -p $(@D)
-	$(CROSS)$(CC) $(CFLAGS) -c $< -o $@
-
-$(BUILD)/%.o: %.S
-	-mkdir -p $(@D)
-	$(CROSS)$(CC) $(SFLAGS) -c $< -o $@
-
-splint:
-	splint $(SPLINTFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
-
-cppcheck:
-	cppcheck $(CPPCHECKFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
-
-clean:
-	-rm -rf $(BUILD)
-	-rm -f $(ELF_RAM) $(ELF_FLASH)
-
-.PHONY: clean splint
+.PHONY: $(PHONY)
+endif
