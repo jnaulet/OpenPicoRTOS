@@ -644,3 +644,37 @@ void picoRTOS_disable_interrupt(picoRTOS_irq_t irq)
 {
     arch_disable_interrupt(irq);
 }
+
+/* Group: pîcoRTOS cache maintenance API */
+
+/* Function: picoRTOS_invalidate_dcache
+ * Invalidates the data cache by address(es)
+ *
+ * Parameters:
+ *  addr - The base address to invalidate
+ *  n    - The size of the data to invalidate (in bytes)
+ */
+void picoRTOS_invalidate_dcache(/*@unused@*/ void *addr, size_t n)
+{
+    picoRTOS_assert_void_fatal(n > 0);
+
+#ifdef CONFIG_CACHE_MAINTENANCE
+    arch_invalidate_dcache(addr, n);
+#endif
+}
+
+/* Function: picoRTOS_flush_dcache
+ * Flushes the data cache by address(es)
+ *
+ * Parameters:
+ *  addr - The base address to flush
+ *  n    - The size of the data to flush (in bytes)
+ */
+void picoRTOS_flush_dcache(/*@unused@*/ void *addr, size_t n)
+{
+    picoRTOS_assert_void_fatal(n > 0);
+
+#ifdef CONFIG_CACHE_MAINTENANCE
+    arch_flush_dcache(addr, n);
+#endif
+}

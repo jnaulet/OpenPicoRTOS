@@ -91,31 +91,8 @@ void picoRTOS_disable_interrupt(picoRTOS_irq_t irq);
 
 /* CACHE MANAGEMENT */
 
-#ifndef DEVICE_HAS_SOFTWARE_CACHE_COHERENCY
-
-/* Macro: picoRTOS_invalidate_dcache(addr, n)
- * If DEVICE_HAS_SOFTWARE_CACHE_COHERENCY, invalidates cache at addr up to addr+n,
- * otherwise, do nothing (hardware cache snooping)
- *
- * Parameters:
- *  addr - The memory base address to invalidate
- *  n - The size (in bytes) to invalidate
- */
-# define picoRTOS_invalidate_dcache(addr, n)
-
-/* Macro: picoRTOS_flush_dcache(addr, n)
- * If DEVICE_HAS_SOFTWARE_CACHE_COHERENCY, flushes cache at addr up to addr+n,
- * otherwise, do nothing (hardware cache snooping)
- *
- * Parameters:
- *  addr - The memory base address to flush to
- *  n - The size (in bytes) to flush
- */
-# define picoRTOS_flush_dcache(addr, n)
-#else
-# define picoRTOS_invalidate_dcache(addr, n) arch_invalidate_dcache((addr), (n))
-# define picoRTOS_flush_dcache(addr, n)      arch_flush_dcache((addr), (n))
-#endif
+void picoRTOS_invalidate_dcache(void *addr, size_t n);
+void picoRTOS_flush_dcache(void *addr, size_t n);
 
 /* Group: picoRTOS assert API */
 
