@@ -1,6 +1,7 @@
-#include "picoRTOS.h"
 #include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
+
+#include <generated/autoconf.h>
 
 /*
  * Based on IvanZuy's previous work on FreeRTOS, check it out at:
@@ -17,7 +18,7 @@ struct C28X_CPUTIMER {
 static struct C28X_CPUTIMER *CPUTIMER2 =
     (struct C28X_CPUTIMER*)ADDR_CPUTIMER2;
 
-#define CPUTIMER2_PRD_VALUE (PICORTOS_CYCLES_PER_TICK - 1)
+#define CPUTIMER2_PRD_VALUE ((CONFIG_SYSCLK_HZ / CONFIG_TICK_HZ) - 1)
 
 /* PIE */
 struct PIEIxRn {
@@ -31,8 +32,8 @@ struct PIEIxRn {
 /* ASM */
 /*@external@*/ extern /*@temp@*/
 picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
-                                          picoRTOS_task_fn_t fn,
-                                          void *priv);
+                                          arch_entry_point_fn fn,
+                                          /*@null@*/ void *priv);
 
 /*@external@*/ extern void arch_start_first_task(picoRTOS_stack_t *sp);
 /*@external@*/ extern void arch_syscall(picoRTOS_syscall_t syscall, void *priv);
@@ -68,16 +69,21 @@ void arch_resume(void)
     ASM(" clrc INTM");
 }
 
-picoRTOS_stack_t *arch_prepare_stack(struct picoRTOS_task *task)
+picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
+                                     size_t stack_count,
+                                     arch_entry_point_fn fn,
+                                     void *priv)
 {
+    arch_assert_void(stack_count >= (size_t)ARCH_MIN_STACK_COUNT);
+
     /* c28x has an incrementing stack */
-    return arch_save_first_context(task->stack, task->fn, task->priv);
+    return arch_save_first_context(stack, fn, priv);
 }
 
 /* cppcheck-suppress constParameter */
 void __attribute__((weak)) arch_idle(void *null)
 {
-    if (!picoRTOS_assert_fatal(null == NULL)) return;
+    arch_assert_void(null == NULL);
 
     for (;;)
         ASM(" idle");
@@ -108,16 +114,16 @@ picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *var,
 
 /*@external@*/
 extern struct {
-    picoRTOS_isr_fn fn;
+    arch_isr_fn fn;
     /*@temp@*/ /*@null@*/ void *priv;
 } ISR_TABLE[DEVICE_INTERRUPT_VECTOR_COUNT];
 
 void arch_register_interrupt(picoRTOS_irq_t irq,
-                             picoRTOS_isr_fn fn,
+                             arch_isr_fn fn,
                              void *priv)
 {
-    if (!picoRTOS_assert_fatal(irq >= (picoRTOS_irq_t)IRQ_INT1_1)) return;
-    if (picoRTOS_assert_fatal(irq <= (picoRTOS_irq_t)IRQ_INT12_16)) return;
+    arch_assert_void(irq >= (picoRTOS_irq_t)IRQ_INT1_1);
+    arch_assert_void(irq <= (picoRTOS_irq_t)IRQ_INT12_16);
 
     ISR_TABLE[irq - IRQ_INT1_1].fn = fn;
     ISR_TABLE[irq - IRQ_INT1_1].priv = priv;
@@ -125,8 +131,8 @@ void arch_register_interrupt(picoRTOS_irq_t irq,
 
 static void arch_set_irq_status(picoRTOS_irq_t irq, bool enable)
 {
-    if (!picoRTOS_assert_fatal(irq >= (picoRTOS_irq_t)IRQ_INT1_1)) return;
-    if (!picoRTOS_assert_fatal(irq <= (picoRTOS_irq_t)IRQ_INT12_16)) return;
+    arch_assert_void(irq >= (picoRTOS_irq_t)IRQ_INT1_1);
+    arch_assert_void(irq <= (picoRTOS_irq_t)IRQ_INT12_16);
 
     size_t bit;
     size_t index;
@@ -150,16 +156,16 @@ static void arch_set_irq_status(picoRTOS_irq_t irq, bool enable)
 
 void arch_enable_interrupt(picoRTOS_irq_t irq)
 {
-    if (!picoRTOS_assert_fatal(irq >= (picoRTOS_irq_t)IRQ_INT1_1)) return;
-    if (!picoRTOS_assert_fatal(irq <= (picoRTOS_irq_t)IRQ_INT12_16)) return;
+    arch_assert_void(irq >= (picoRTOS_irq_t)IRQ_INT1_1);
+    arch_assert_void(irq <= (picoRTOS_irq_t)IRQ_INT12_16);
 
     arch_set_irq_status(irq, true);
 }
 
 void arch_disable_interrupt(picoRTOS_irq_t irq)
 {
-    if (!picoRTOS_assert_fatal(irq >= (picoRTOS_irq_t)IRQ_INT1_1)) return;
-    if (!picoRTOS_assert_fatal(irq <= (picoRTOS_irq_t)IRQ_INT12_16)) return;
+    arch_assert_void(irq >= (picoRTOS_irq_t)IRQ_INT1_1);
+    arch_assert_void(irq <= (picoRTOS_irq_t)IRQ_INT12_16);
 
     arch_set_irq_status(irq, false);
 }

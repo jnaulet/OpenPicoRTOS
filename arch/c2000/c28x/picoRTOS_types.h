@@ -16,17 +16,18 @@ typedef unsigned long picoRTOS_cycles_t;
 # define ARCH_INTIAL_STACK_COUNT 36
 #endif
 
-#define ARCH_MIN_STACK_COUNT (ARCH_INTIAL_STACK_COUNT + 2)
+/* +4 to account for -O0 */
+#define ARCH_MIN_STACK_COUNT (ARCH_INTIAL_STACK_COUNT + 4)
 
 /* no cache */
-#define ARCH_L1_DCACHE_LINESIZE sizeof(unsigned long)
+#define ARCH_L1_DCACHE_LINESIZE sizeof(int)
 
 /* splint cannot check inline assembly */
 #ifdef S_SPLINT_S
 # define ASM(x) {}
 #else
-# define ASM(x) asm (x)
-# define arch_break() ({ ASM("  estop0"); })
+# define ASM(x) { asm (x); }
+# define arch_break() ASM("  estop0")
 #endif
 
 #endif
