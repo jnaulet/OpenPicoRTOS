@@ -5,10 +5,6 @@
 #include <stdbool.h>
 
 #include "picoRTOS_types.h"
-#include "picoRTOS_device.h"
-#include "picoRTOSConfig.h"
-
-#define PICORTOS_CYCLES_PER_TICK (CONFIG_SYSCLK_HZ / CONFIG_TICK_HZ)
 
 /* TASKS */
 typedef void (*picoRTOS_task_fn_t)(void*);

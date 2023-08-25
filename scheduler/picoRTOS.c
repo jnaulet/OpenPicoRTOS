@@ -1,12 +1,15 @@
 #include "picoRTOS.h"
 #include "picoRTOS_port.h"
 
+#include <generated/autoconf.h>
+
 /* CHECK FOR OBVIOUS ERRORS */
 
 #if CONFIG_DEFAULT_STACK_COUNT < ARCH_MIN_STACK_COUNT
 # error Default stack is too small
 #endif
 
+#define PICORTOS_CYCLES_PER_TICK (CONFIG_SYSCLK_HZ / CONFIG_TICK_HZ)
 #if PICORTOS_CYCLES_PER_TICK < 1
 # error Erroneous timing values
 #endif
@@ -144,18 +147,15 @@ static void task_core_stat_preempt(struct picoRTOS_task_core *task)
 static void task_idle_init(void)
 {
     /* IDLE */
-    struct picoRTOS_task idle;
-
-    picoRTOS_task_init(&idle, arch_idle, NULL, picoRTOS.idle_stack,
-                       (size_t)ARCH_MIN_STACK_COUNT);
-
     /* similar to picoRTOS_add_task, but without count limit */
-    TASK_BY_PID(TASK_IDLE_PID).sp = arch_prepare_stack(&idle);
     TASK_BY_PID(TASK_IDLE_PID).state = PICORTOS_TASK_STATE_READY;
+    TASK_BY_PID(TASK_IDLE_PID).sp = arch_prepare_stack(picoRTOS.idle_stack,
+                                                       (size_t)ARCH_MIN_STACK_COUNT,
+                                                       arch_idle, NULL);
     /* checks */
-    TASK_BY_PID(TASK_IDLE_PID).stack_bottom = idle.stack;
-    TASK_BY_PID(TASK_IDLE_PID).stack_top = idle.stack + idle.stack_count;
-    TASK_BY_PID(TASK_IDLE_PID).stack_count = idle.stack_count;
+    TASK_BY_PID(TASK_IDLE_PID).stack_bottom = picoRTOS.idle_stack;
+    TASK_BY_PID(TASK_IDLE_PID).stack_top = picoRTOS.idle_stack + ARCH_MIN_STACK_COUNT;
+    TASK_BY_PID(TASK_IDLE_PID).stack_count = (size_t)ARCH_MIN_STACK_COUNT;
     /* shared priorities, ignored by sort anyway */
     TASK_BY_PID(TASK_IDLE_PID).prio = (picoRTOS_priority_t)TASK_IDLE_PRIO;
 }
@@ -204,7 +204,7 @@ void picoRTOS_init(void)
  * picoRTOS will throw a debug exception and stall if stack_count < ARCH_MIN_STACK_COUNT (architecture-dependent)
  */
 void picoRTOS_task_init(struct picoRTOS_task *task,
-                        picoRTOS_task_fn_t fn, void *priv,
+                        picoRTOS_task_fn fn, void *priv,
                         picoRTOS_stack_t *stack,
                         size_t stack_count)
 {
@@ -242,8 +242,9 @@ void picoRTOS_add_task(struct picoRTOS_task *task, picoRTOS_priority_t prio)
     if (!picoRTOS_assert_fatal(TASK_BY_PID(pid).state == PICORTOS_TASK_STATE_EMPTY)) return;
 
     /* state machine */
-    TASK_BY_PID(pid).sp = arch_prepare_stack(task);
     TASK_BY_PID(pid).state = PICORTOS_TASK_STATE_READY;
+    TASK_BY_PID(pid).sp = arch_prepare_stack(task->stack, task->stack_count,
+                                             task->fn, task->priv);
     /* checks */
     TASK_BY_PID(pid).stack_bottom = task->stack;
     TASK_BY_PID(pid).stack_top = task->stack + task->stack_count;

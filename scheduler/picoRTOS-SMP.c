@@ -1,11 +1,20 @@
 #include "picoRTOS-SMP.h"
 #include "picoRTOS-SMP_port.h"
 
+#include <generated/autoconf.h>
+
 /* CHECK FOR OBVIOUS ERRORS */
+
+#ifndef CONFIG_SMP_CORES
+# error SMP cores not configured
+#endif
 
 #if CONFIG_DEFAULT_STACK_COUNT < ARCH_MIN_STACK_COUNT
 # error Default stack is too small
 #endif
+
+#define PICORTOS_SMP_CORE_ANY    ((1u << CONFIG_SMP_CORES) - 1u)
+#define PICORTOS_CYCLES_PER_TICK (CONFIG_SYSCLK_HZ / CONFIG_TICK_HZ)
 
 #if PICORTOS_CYCLES_PER_TICK < 1
 # error Erroneous timing values
@@ -135,6 +144,7 @@ static inline void task_core_stat_begin(struct picoRTOS_task_core *task)
 {
     task->stat.counter = arch_counter();
 }
+
 static void task_core_stat_watermark(struct picoRTOS_task_core *task)
 {
     if (task->stat.counter < task->stat.watermark_lo)
@@ -166,19 +176,22 @@ static void task_idle_init(void)
 
     for (i = 0; i < (size_t)CONFIG_SMP_CORES; i++) {
 
-        struct picoRTOS_task idle;
+        static struct picoRTOS_task idle;
         picoRTOS_pid_t pid = (picoRTOS_pid_t)(TASK_IDLE_PID + (int)i);
 
+        /* ensure proper stack alignment */
         picoRTOS_task_init(&idle, arch_idle, NULL, picoRTOS_SMP_stack[i].idle,
                            (size_t)ARCH_MIN_STACK_COUNT);
 
         /* similar to picoRTOS_add_task, but without count limit */
-        TASK_BY_PID(pid).sp = arch_prepare_stack(&idle);
+        TASK_BY_PID(pid).sp = arch_prepare_stack(idle.stack, idle.stack_count,
+                                                 idle.fn, idle.priv);
+        /* smp */
         TASK_BY_PID(pid).state = PICORTOS_TASK_STATE_READY;
         TASK_BY_PID(pid).core_mask = (picoRTOS_mask_t)(1u << i);
         /* checks */
-        TASK_BY_PID(pid).stack_bottom = picoRTOS_SMP_stack[i].idle;
-        TASK_BY_PID(pid).stack_top = picoRTOS_SMP_stack[i].idle + idle.stack_count;
+        TASK_BY_PID(pid).stack_bottom = idle.stack;
+        TASK_BY_PID(pid).stack_top = idle.stack + idle.stack_count;
         TASK_BY_PID(pid).stack_count = idle.stack_count;
         /* shared priorities, ignored by sort anyway */
         TASK_BY_PID(pid).prio = (picoRTOS_priority_t)TASK_IDLE_PRIO;
@@ -187,7 +200,7 @@ static void task_idle_init(void)
 
 /* to avoid static inline in picoRTOS.h, this is duplicated */
 void picoRTOS_task_init(struct picoRTOS_task *task,
-                        picoRTOS_task_fn_t fn, void *priv,
+                        picoRTOS_task_fn fn, void *priv,
                         picoRTOS_stack_t *stack,
                         size_t stack_count)
 {
@@ -308,7 +321,9 @@ void picoRTOS_SMP_add_task(struct picoRTOS_task *task,
     if (!picoRTOS_assert_fatal(TASK_BY_PID(pid).state == PICORTOS_TASK_STATE_EMPTY)) return;
 
     /* state machine */
-    TASK_BY_PID(pid).sp = arch_prepare_stack(task);
+    TASK_BY_PID(pid).sp = arch_prepare_stack(task->stack, task->stack_count,
+                                             task->fn, task->priv);
+    /* smp */
     TASK_BY_PID(pid).state = PICORTOS_TASK_STATE_READY;
     TASK_BY_PID(pid).core_mask = core_mask;
     /* checks */

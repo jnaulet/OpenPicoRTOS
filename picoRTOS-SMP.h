@@ -3,18 +3,9 @@
 
 /* SMP extensions for picoRTOS */
 
-#define PICORTOS_SMP
-
 #include "picoRTOS.h"
 
 /* CORES */
-
-#ifndef CONFIG_SMP_CORES
-# define CONFIG_SMP_CORES 1
-#endif
-
-#define PICORTOS_SMP_CORE_ANY                           \
-    (picoRTOS_mask_t)((1u << CONFIG_SMP_CORES) - 1u)
 
 /* TASKS (potentially unused) */
 
