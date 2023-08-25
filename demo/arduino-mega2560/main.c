@@ -1,6 +1,8 @@
 #include "picoRTOS.h"
 #include "arduino-mega2560.h"
 
+#include <generated/autoconf.h>
+
 #include "adc.h"
 #include "eeprom.h"
 #include "gpio.h"
@@ -63,7 +65,7 @@ static void blink_init(struct blink *ctx)
  */
 static void tick_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct gpio *TICK = (struct gpio*)priv;
 
@@ -79,7 +81,7 @@ static void tick_main(void *priv)
  */
 static void blink_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct pwm *PWM = (struct pwm*)priv;
 
@@ -110,7 +112,7 @@ static void blink_main(void *priv)
  */
 static void console_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct uart *UART = (struct uart*)priv;
 
@@ -135,7 +137,7 @@ static void console_main(void *priv)
  */
 static void spi_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     size_t xfered = 0;
     struct spi *SPI = (struct spi*)priv;
@@ -170,7 +172,7 @@ static void spi_main(void *priv)
  */
 static void adc_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct adc *ADC = (struct adc*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -197,7 +199,7 @@ static void adc_main(void *priv)
  */
 static void twi_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct twi *TWI = (struct twi*)priv;
 
@@ -235,7 +237,7 @@ static void twi_main(void *priv)
  */
 static void wd_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct wd *WDT = (struct wd*)priv;
 
@@ -264,7 +266,7 @@ int main( void )
     /* tick */
     picoRTOS_task_init(&task, tick_main, &blink.mega2560.DIGITAL23,
                        stack0, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-    picoRTOS_add_task(&task, (picoRTOS_priority_t)TASK_TICK_PRIO);
+    picoRTOS_add_task(&task, (picoRTOS_priority_t)0);
     /* led */
     picoRTOS_task_init(&task, blink_main, &blink.mega2560.PWM13,
                        stack1, (size_t)CONFIG_DEFAULT_STACK_COUNT);
@@ -288,7 +290,7 @@ int main( void )
     /* watchdog refresh */
     picoRTOS_task_init(&task, wd_main, &blink.mega2560.WDT,
                        stack6, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-    picoRTOS_add_task(&task, (picoRTOS_priority_t)TASK_WD_PRIO);
+    picoRTOS_add_task(&task, picoRTOS_get_last_available_priority());
 
     /* Start the scheduler. */
     picoRTOS_start();
