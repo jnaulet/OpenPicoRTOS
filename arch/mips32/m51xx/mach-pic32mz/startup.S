@@ -2,7 +2,7 @@
 	.set noreorder
 
 	#include "picoRTOS_device.h"
-	#include "../../lib/mips/macros.S"
+	#include "../../include/macros.S"
 
 	.equ __vectors_start__, ADDR_INTC + 0x540
 	.equ __vectors_end__, __vectors_start__ + (DEVICE_INTERRUPT_VECTOR_COUNT * 4)

@@ -29,7 +29,7 @@ extern struct {
 
 void arch_register_interrupt(picoRTOS_irq_t irq, arch_isr_fn fn, void *priv)
 {
-    if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT)) return;
+    arch_assert_void(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT);
 
     ISR_TABLE[irq].fn = fn;
     ISR_TABLE[irq].priv = priv;
@@ -37,7 +37,7 @@ void arch_register_interrupt(picoRTOS_irq_t irq, arch_isr_fn fn, void *priv)
 
 void arch_enable_interrupt(picoRTOS_irq_t irq)
 {
-    if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT)) return;
+    arch_assert_void(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT);
 
     /* find the correct IEC offset */
     size_t IEC_index = (size_t)(irq >> 5);
@@ -56,7 +56,7 @@ void arch_enable_interrupt(picoRTOS_irq_t irq)
 
 void arch_disable_interrupt(picoRTOS_irq_t irq)
 {
-    if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT)) return;
+    arch_assert_void(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT);
 
     /* find the correct IEC offset */
     size_t IEC_index = (size_t)(irq >> 5);
@@ -76,7 +76,7 @@ void arch_disable_interrupt(picoRTOS_irq_t irq)
 /* cppcheck-suppress [unusedFunction,unmatchedSuppression] */
 void arch_ack_interrupt(picoRTOS_irq_t irq)
 {
-    if (!picoRTOS_assert_fatal(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT)) return;
+    arch_assert_void(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT);
 
     /* find the correct IEC offset */
     size_t IFS_index = (size_t)(irq >> 5);

@@ -1,4 +1,3 @@
-#include "picoRTOS.h"
 #include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
@@ -8,8 +7,8 @@
 
 /*@external@*/ extern /*@temp@*/
 picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
-                                          picoRTOS_task_fn_t fn,
-                                          void *priv);
+                                          arch_entry_point_fn fn,
+                                          /*@null@*/ void *priv);
 
 /*@external@*/ extern void arch_hit_invalidate_d(uint32_t addr);
 /*@external@*/ extern void arch_hit_writeback_inv_d(uint32_t addr);
@@ -49,17 +48,19 @@ void arch_resume(void)
     ASM("ei");
 }
 
-picoRTOS_stack_t *arch_prepare_stack(struct picoRTOS_task *task)
+picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
+                                     size_t stack_count,
+                                     arch_entry_point_fn fn,
+                                     void *priv)
 {
     /* MPIS32s have a decrementing stack */
-    return arch_save_first_context(task->stack + task->stack_count,
-                                   task->fn, task->priv);
+    return arch_save_first_context(stack + stack_count, fn, priv);
 }
 
 /* cppcheck-suppress constParameter */
 void __attribute__((weak)) arch_idle(void *null)
 {
-    if (!picoRTOS_assert_fatal(null == NULL)) return;
+    arch_assert_void(null == NULL);
 
     for (;;)
         ASM("wait");
@@ -77,7 +78,7 @@ picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr)
 /* cppcheck-suppress [unusedFunction,unmatchedSuppression] */
 void arch_invalidate_dcache(void *addr, size_t n)
 {
-    if (!picoRTOS_assert_fatal(n > 0)) return;
+    arch_assert_void(n > 0);
 
     size_t npages = (n + (ARCH_L1_DCACHE_LINESIZE - 1)) / ARCH_L1_DCACHE_LINESIZE;
     uint32_t base = (uint32_t)addr & ~(ARCH_L1_DCACHE_LINESIZE - 1);
@@ -91,7 +92,7 @@ void arch_invalidate_dcache(void *addr, size_t n)
 /* cppcheck-suppress [unusedFunction,unmatchedSuppression] */
 void arch_flush_dcache(void *addr, size_t n)
 {
-    if (!picoRTOS_assert_fatal(n > 0)) return;
+    arch_assert_void(n > 0);
 
     size_t npages = (n + (ARCH_L1_DCACHE_LINESIZE - 1)) / ARCH_L1_DCACHE_LINESIZE;
     uint32_t base = (uint32_t)addr & ~(ARCH_L1_DCACHE_LINESIZE - 1);

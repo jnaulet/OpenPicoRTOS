@@ -1,8 +1,8 @@
 #ifndef PICORTOS_TYPES_H
 #define PICORTOS_TYPES_H
 
-/* FIXME: debatable */
 #include "picoRTOS_device.h"
+#include <generated/autoconf.h>
 
 typedef unsigned long picoRTOS_stack_t;
 typedef unsigned long picoRTOS_tick_t;
@@ -18,11 +18,11 @@ typedef unsigned long picoRTOS_cycles_t;
 #define ARCH_INITIAL_FPU_STACK_COUNT 0
 #define ARCH_INITIAL_DSP_STACK_COUNT 0
 
-#ifdef MIPS32_M51XX_HAS_FPU64
+#ifdef CONFIG_M51XX_FPU64
 # undef ARCH_INITIAL_FPU_STACK_COUNT
 # define ARCH_INITIAL_FPU_STACK_COUNT 66
 #endif
-#ifdef MIPS32_M51XX_HAS_DSP
+#ifdef CONFIG_M51XX_DSP
 # undef ARCH_INITIAL_DSP_STACK_COUNT
 # define ARCH_INITIAL_DSP_STACK_COUNT 6
 #endif
@@ -37,8 +37,8 @@ typedef unsigned long picoRTOS_cycles_t;
 #ifdef S_SPLINT_S
 # define ASM(x) {}
 #else
-# define ASM(x) __asm__ volatile (x)
-# define arch_break() ({ ASM("sdbbp"); })
+# define ASM(x) { __asm__ volatile (x); }
+# define arch_break() ASM("sdbbp")
 #endif
 
 #endif

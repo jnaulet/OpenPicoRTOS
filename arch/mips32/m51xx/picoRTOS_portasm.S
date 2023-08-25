@@ -9,10 +9,8 @@
 	.extern arch_ack_interrupt
 	.extern arch_get_interrupt
 
-	#include "picoRTOSConfig.h"
-	#include "picoRTOS_device.h"
-	/* MIPS specifics */
-	#include "../../lib/mips/regs.h"
+	#include "../include/regs.h"
+	#include <generated/autoconf.h>
 
 	/* counter increments every other clock */
 	.equ TIMER_CORE_PERIOD, (CONFIG_SYSCLK_HZ / CONFIG_TICK_HZ) / 2
@@ -89,10 +87,10 @@
 
 	.macro SAVE_CONTEXT
 	/* coprocessors */
-#ifdef MIPS32_M51XX_HAS_FPU64
+#ifdef CONFIG_M51XX_FPU64
 	SAVE_CONTEXT_FPU
 #endif
-#ifdef MIPS32_M51XX_HAS_DSP
+#ifdef CONFIG_M51XX_DSP
 	SAVE_CONTEXT_DSP
 #endif
 	/* cpu */
@@ -229,10 +227,10 @@
 	mtc0 at, CP0_EPC
 	addiu sp, sp, 116
 	/* coprocessors */
-#ifdef MIPS32_M51XX_HAS_DSP
+#ifdef CONFIG_M51XX_DSP
 	RESTORE_CONTEXT_DSP
 #endif
-#ifdef MIPS32_M51XX_HAS_FPU64
+#ifdef CONFIG_M51XX_FPU64
 	RESTORE_CONTEXT_FPU
 #endif
 	ehb
@@ -414,6 +412,8 @@ arch_counter:
 	sll v0, v0, 1
 
 	.bss
+
+	#include "picoRTOS_device.h"
 
 	.align 2
 	.type ISR_TABLE, %object
