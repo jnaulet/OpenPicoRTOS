@@ -1,0 +1,33 @@
+menu "Inter-Process communications"
+
+config FUTEX
+       bool "Support for futexes (fast mutexes)"
+       default n
+       help
+          Futexes are the most basic IPC you can think of. They
+	  are non re-entrant.
+	  
+config MUTEX
+       bool "Support for mutexes"
+       default n
+       help
+          On OpenPicoRTOS, mutexes are similar to futexes, but
+	  re-entrant.
+
+config COND
+       bool "Support for conditions"
+       default n
+       select MUTEX
+       help
+          Conditions are similar to POSIX conditions & require
+	  mutexes
+
+config QUEUE
+       bool "Support for queues"
+       default n
+       select FUTEX
+       help
+          Queues are used to make FIFOs. Warning: issues with
+	  caches are not solved yet
+
+endmenu

@@ -1,0 +1,15 @@
+menu "TI C2000 architecture"
+     depends on C2000
+
+choice
+        prompt "CPU series"
+        default C28X
+
+config C28X
+       bool "TI C2000/C28x series"
+
+endchoice
+
+source arch/c2000/c28x/Kconfig
+
+endmenu

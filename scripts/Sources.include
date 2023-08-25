@@ -1,0 +1,52 @@
+#
+# OpenPicoRTOS include files
+#
+
+# archs
+include arch/arm/Makefile
+include arch/avr/Makefile
+include arch/c2000/Makefile
+include arch/mips32/Makefile
+#include arch/powerpc/Makefile
+include arch/pthread/Makefile
+include arch/riscv/Makefile
+include arch/win32/Makefile
+
+# scheduler/ipcs
+include ipc/Makefile
+include scheduler/Makefile
+
+# drivers
+include drivers/adc/Makefile
+include drivers/can/Makefile
+include drivers/clock/Makefile
+include drivers/dma/Makefile
+# include drivers/dmasg/Makefile
+include drivers/eeprom/Makefile
+include drivers/flash/Makefile
+include drivers/gpio/Makefile
+include drivers/misc/Makefile
+include drivers/mux/Makefile
+include drivers/pwm/Makefile
+include drivers/spi/Makefile
+include drivers/twi/Makefile
+include drivers/uart/Makefile
+include drivers/wd/Makefile
+
+# staging tree
+# drivers
+include staging/drivers/adc/Makefile
+include staging/drivers/can/Makefile
+#include staging/drivers/clock/Makefile
+#include staging/drivers/dma/Makefile
+#include staging/drivers/dmasg/Makefile
+#include staging/drivers/flash/Makefile
+#include staging/drivers/gpio/Makefile
+#include staging/drivers/lin/Makefile
+#include staging/drivers/misc/Makefile
+#include staging/drivers/mux/Makefile
+#include staging/drivers/pwm/Makefile
+#include staging/drivers/spi/Makefile
+include staging/drivers/twi/Makefile
+#include staging/drivers/uart/Makefile
+#include staging/drivers/wd/Makefile

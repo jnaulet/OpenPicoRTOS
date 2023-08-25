@@ -1,0 +1,7 @@
+menu "LIN drivers"
+
+config LIN_NXP_LINFLEXD
+       depends on POWERPC
+       bool "NXP LinFlexD LIN"
+
+endmenu

@@ -1,0 +1,39 @@
+menu "GPIO drivers"
+
+config GPIO_AVR
+       depends on AVR
+       bool "AVR/ATMega series GPIOs"
+
+config GPIO_GD32VF103
+       depends on RISCV
+       bool "GD32VF103 series GPIOs"
+
+config GPIO_PIC32MX
+       depends on MIPS
+       bool "PIC32Mx series GPIOs"
+
+config GPIO_RP2040
+       depends on ARM
+       bool "Rapspberry RP2040 series GPIOs"
+
+config GPIO_ATSAM3X
+       depends on ARM
+       bool "ATSAM3x series GPIOs"
+
+config GPIO_ATSAME5X
+       depends on ARM
+       bool "ATSAME5x/D5x series GPIOs"
+
+config GPIO_STM32H7XX
+       depends on ARM
+       bool "STM32H7xx series GPIOs"
+
+config GPIO_TI_F28X
+       depends on C2000
+       bool "TI TMS320F28x series GPIOs"
+
+config GPIO_TINYAVR
+       depends on AVR
+       bool "TinyAVR/ATTiny series GPIOs"
+
+endmenu

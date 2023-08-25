@@ -1,0 +1,43 @@
+menu "SPI drivers"
+
+config SPI_ARM_PL022
+       depends on ARM
+       bool "ARM PL022 SPI"
+
+config SPI_ATMEL_SERCOM
+       depends on ARM
+       bool "Atmel SERCOM SPI"
+
+config SPI_AVR
+       depends on AVR
+       bool "AVR/ATMega series SPI"
+
+config SPI_AVR_USART
+       depends on AVR
+       bool "AVR/ATMega series SPIM on USART"
+
+config SPI_GD32VF103
+       depends on RISCV
+       bool "GD32VF103 series SPI"
+
+config SPI_PIC32MX
+       depends on MIPS
+       bool "PIC32Mx series SPI"
+
+config SPI_ATSAM3X
+       depends on ARM
+       bool "ATSAM3x series SPI"
+
+config SPI_STM32H7XX
+       depends on ARM
+       bool "STM32H7xx series SPI"
+
+config SPI_TI_F28X
+       depends on C2000
+       bool "TI TMS320F28x series SPI"
+
+config SPI_TINYAVR
+       depends on AVR
+       bool "TinyAVR/ATTiny series SPI"
+
+endmenu

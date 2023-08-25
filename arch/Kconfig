@@ -1,0 +1,37 @@
+choice
+	prompt "Architecture select"
+	default ARM
+
+config ARM
+       bool "ARM architecture"
+
+config AVR
+       bool "AVR8 architecture"
+
+config C2000
+       bool "C2000 architecture"
+
+config MIPS
+	bool "MIPS architecture"
+
+config PPC
+	bool "PowerPC architecture"
+
+config RISCV
+	bool "RISC-V architecture"
+
+config PTHREAD
+	bool "PTHREAD simulation"
+
+config WIN32
+        bool "WIN32 simulation"
+
+endchoice
+
+source "arch/arm/Kconfig"
+source "arch/avr/Kconfig"
+source "arch/c2000/Kconfig"
+source "arch/mips32/Kconfig"
+# source "arch/powerpc/Kconfig"
+source "arch/riscv/Kconfig"
+source "arch/pthread/Kconfig"

@@ -1,0 +1,7 @@
+menu "Misc. drivers"
+
+config MISC_NXP_IGF
+       depends on POWERPC
+       bool "NXP IGF filter"
+
+endmenu

@@ -1,0 +1,43 @@
+menu "Clock drivers"
+
+config CLOCK_ATMEGA2560
+       depends on AVR
+       bool "ATMega2560 clock"
+
+config CLOCK_ATMEGA328P
+       depends on AVR
+       bool "ATMega328P clock"
+
+config CLOCK_F28379X
+       depends on C2000
+       bool "TI TMS320F28379x clock"
+
+config CLOCK_GD32VF103
+       depends on RISCV
+       bool "GD32VF103 clock"
+
+config CLOCK_PIC32MX
+       depends on MIPS
+       bool "PIC32Mx clock"
+
+config CLOCK_RP2040
+       depends on ARM
+       bool "Raspberry RP2040 clock"
+
+config CLOCK_ATSAM3X
+       depends on ARM
+       bool "ATSAM3x series clock"
+
+config CLOCK_ATSAME5X
+       depends on ARM
+       bool "ATSAME5x/D5x series clock"
+
+config CLOCK_STM32H7XX
+        depends on ARM
+        bool "STM32H7xx series clock"
+
+config CLOCK_TINYAVR
+       depends on AVR
+       bool "TinyAVR/ATTiny series clock"
+
+endmenu

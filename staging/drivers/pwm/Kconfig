@@ -1,0 +1,7 @@
+menu "PWM drivers"
+
+config PWM_NXP_EMIOS
+       depends on POWERPC
+       bool "NXP eMIOS PWM"
+
+endmenu

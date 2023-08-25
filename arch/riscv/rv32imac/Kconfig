@@ -1,0 +1,8 @@
+choice
+	prompt "RV32IMAC device"
+	depends on RV32IMAC
+
+config MACH_GD32VF103
+       bool "GigaDevice GD32VF103"
+       
+endchoice

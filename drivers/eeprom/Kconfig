@@ -1,0 +1,7 @@
+menu "EEPROM drivers"
+
+config EEPROM_AVR
+       depends on AVR
+       bool "AVR EEPROM"
+
+endmenu

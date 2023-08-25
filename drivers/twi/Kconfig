@@ -1,0 +1,27 @@
+menu "TWI/I2C drivers"
+
+config TWI_ATMEL_SERCOM
+       depends on ARM
+       bool "Atmel SERCOM TWI"
+
+config TWI_AVR
+       depends on AVR
+       bool "AVR/ATMega series TWI"
+
+config TWI_DW_APB_I2C
+       depends on ARM
+       bool "Synopsis DW APB I2C"
+
+config TWI_PIC32MX
+       depends on MIPS
+       bool "PIC32Mx series TWI"
+
+config TWI_ATSAM3X
+       depends on ARM
+       bool "ATSAM3x series TWI"
+
+config TWI_TI_F28X
+       depends on C2000
+       bool "TI TMS320F28x series TWI"
+
+endmenu

@@ -1,0 +1,21 @@
+menu "Scheduler options"
+
+choice
+	prompt "Main scheduler"
+
+config SINGLE_CORE
+       bool "picoRTOS (single core)"
+
+config SMP
+       bool "picoRTOS-SMP (SMP)"
+
+endchoice
+
+config SMP_CORES
+       int "Number of SMP cores"
+       depends on SMP
+       default 2
+       help
+          The numbers of cores on which the system will run
+
+endmenu

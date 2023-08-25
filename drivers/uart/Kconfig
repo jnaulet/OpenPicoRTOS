@@ -1,0 +1,35 @@
+menu "UART drivers"
+
+config UART_ARM_PL011
+       depends on ARM
+       bool "ARM PL011 UART"
+
+config UART_ATMEL_SERCOM
+       depends on ARM
+       bool "Atmel SERCOM UART"
+
+config UART_AVR
+       depends on AVR
+       bool "AVR/ATMega series UART"
+
+config UART_GD32VF103
+       depends on RISCV
+       bool "GD32VF103 series UART"
+
+config UART_PIC32MX
+       depends on MIPS
+       bool "PIC32Mx series UART"
+
+config UART_ATSAM3X
+       depends on ARM
+       bool "ATSAM3x series UART"
+
+config UART_STM32H7XX
+       depends on ARM
+       bool "STM32H7xx series UART"
+
+config UART_TINYAVR_USART
+       depends on AVR
+       bool "TinyAVR/ATTiny series UART/USART"
+
+endmenu

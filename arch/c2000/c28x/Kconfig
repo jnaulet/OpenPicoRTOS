@@ -1,0 +1,19 @@
+choice
+	prompt "C28x device"
+	depends on C28X
+
+config MACH_F28379X
+       bool "TMS320F28379X"
+       
+endchoice
+
+config C28X_FPU
+       bool "Support for FPU"
+       depends on C28X
+       select C28X_EABI
+
+config C28X_EABI
+       bool "Support for EABI"
+       depends on C28X
+       default n
+

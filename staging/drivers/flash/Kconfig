@@ -1,0 +1,11 @@
+menu "FLash drivers"
+
+config FLASH_NXP_C55FMC
+       depends on POWERPC
+       bool "NXP C55FMC Flash"
+
+config FLASH_ATSAM3X
+       depends on ARM
+       bool "Atmel SAM3x Flash"
+
+endmenu

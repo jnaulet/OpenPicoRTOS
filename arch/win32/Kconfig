@@ -1,0 +1,13 @@
+menu "WIN32 simulation"
+     depends on WIN32
+
+choice
+        prompt "System"
+        default WINTHREADS
+
+config WINTHREADS
+       bool "Linux pthread"
+
+endchoice
+
+endmenu

@@ -1,0 +1,8 @@
+choice
+	prompt "ARMV7-M device"
+	depends on ARMV7M
+
+config MACH_ATSAM3X8E
+       bool "Atmel ATSAM3X8E"
+       
+endchoice

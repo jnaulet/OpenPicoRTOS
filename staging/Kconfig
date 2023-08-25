@@ -1,0 +1,23 @@
+config STAGING
+       bool "Support for staging tree"
+
+menu "Staging tree"
+     depends on STAGING
+
+source staging/drivers/adc/Kconfig
+source staging/drivers/can/Kconfig
+source staging/drivers/clock/Kconfig
+source staging/drivers/dma/Kconfig
+source staging/drivers/dmasg/Kconfig
+source staging/drivers/flash/Kconfig
+source staging/drivers/gpio/Kconfig
+source staging/drivers/lin/Kconfig
+source staging/drivers/misc/Kconfig
+source staging/drivers/mux/Kconfig
+source staging/drivers/pwm/Kconfig
+source staging/drivers/spi/Kconfig
+source staging/drivers/twi/Kconfig
+source staging/drivers/uart/Kconfig
+# source staging/drivers/wd/Kconfig
+
+endmenu

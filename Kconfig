@@ -1,0 +1,125 @@
+#
+# For a description of the syntax of this configuration file,
+# see docs/kbuild/kconfig-language.txt.
+#
+mainmenu "OpenPicoRTOS v1.9.x Configuration"
+
+# comment "Compiler: $(CC_VERSION_TEXT)"
+# source "scripts/Kconfig.include"
+
+source arch/Kconfig
+source scheduler/Kconfig
+
+menu "General setup"
+
+config SYSCLK_HZ
+       int "Core clock frequency"
+       default 100000000
+       help
+          Some help here
+
+config TICK_HZ
+       int "System tick frequency (in hertz)"
+       default 1000
+       help
+          Some more help here
+
+config TASK_COUNT
+       int "Max number of tasks"
+       default 5
+       help
+          OpenPicoRTOS is fully static and need to know how many tasks
+          will run in advance
+
+config DEFAULT_STACK_COUNT
+       int "Default size of a task stack"
+       default 128
+       help
+          This has no effect unless you use CONFIG_DEFAULT_STACK_COUNT
+          in your program. This represents the size of the default
+          stack in number of register-sized element (not bytes)
+
+config DEADLOCK_COUNT
+       int "Deadlock counter"
+       default 1000
+       help
+          Number of attempts the system will do before giving up and
+          declaring deadlock. This is used by IPCs, notably.
+
+endmenu
+
+menu "Build configuration"
+
+config CROSS_COMPILE
+        string "Cross-compiler tool prefix"
+        default arm-none-eabi- if ARM
+        default avr- if AVR && ATMEGA
+        default xc8- if AVR && ATTINY
+        default x32- if MIPS
+        default riscv64-unknown-elf- if RISCV
+        default '' if PTHREAD
+        default i686-w64-mingw32- if WIN32
+        help
+          Same as running 'make CROSS_COMPILE=prefix-' but stored for
+          default make runs in this kernel build directory.  You don't
+          need to set this unless you want the configured kernel build
+          directory to select the cross-compiler automatically.
+
+choice
+        prompt "Optimization level"
+        default CC_NO_OPTIMIZATION
+
+config CC_NO_OPTIMIZATION
+       bool "No optimization (-O0)"
+
+config CC_OPTIMIZE_FOR_SIZE
+       bool "Optimize for size (-Os)"
+
+config CC_OPTIMIZE_FOR_PERFORMANCE1
+       bool "Optimize for speed (-O1)"
+
+config CC_OPTIMIZE_FOR_PERFORMANCE2
+       bool "Optimize for speed (-O2)"
+
+config CC_OPTIMIZE_FOR_PERFORMANCE3
+       bool "Optimize for speed (-O3)"
+
+endchoice
+
+config DEBUG
+       bool "Build with debug information (-g3)"
+       default y
+
+config NDEBUG
+       bool "No breakpoints on failed asserts"
+       default n
+       help
+          By default, OpenPicoRTOS triggers a breakpoint everytime
+          an assert fails. This is Ok for debug, but rarely for
+          production. You might want to select this for your
+          final build
+
+config MAP
+       bool "Generate Map"
+       default n
+
+config EXTRA_CFLAGS
+       string "EXTRA_CFLAGS"
+       default ""
+
+config LDSCRIPT
+       string "Linker script path"
+       default "${srctree}/samples/ldscripts/rp2040_flash_xip.ld" if MACH_RP2040
+       default "${srctree}/samples/ldscripts/atsam3x8e_flash_xip.ld" if MACH_ATSAM3X8E
+       default "${srctree}/samples/ldscripts/atsamd51g19a_flash_xip.ld" if MACH_ATSAME5X
+       default "${srctree}/samples/ldscripts/stm32h743_flash_xip.ld" if MACH_STM32H7XX
+
+config EXTRA_LDFLAGS
+       string "EXTRA_LDFLAGS"
+       default ""
+
+endmenu
+
+source ipc/Kconfig # IPCs
+source drivers/Kconfig # Device drivers
+source staging/Kconfig # Staging tree

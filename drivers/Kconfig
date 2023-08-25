@@ -1,0 +1,19 @@
+menu "Device drivers"
+
+source drivers/adc/Kconfig
+source drivers/can/Kconfig
+source drivers/clock/Kconfig
+source drivers/dma/Kconfig
+# source drivers/dmasg/Kconfig
+source drivers/eeprom/Kconfig
+source drivers/flash/Kconfig
+source drivers/gpio/Kconfig
+source drivers/misc/Kconfig
+source drivers/mux/Kconfig
+source drivers/pwm/Kconfig
+source drivers/spi/Kconfig
+source drivers/twi/Kconfig
+source drivers/uart/Kconfig
+source drivers/wd/Kconfig
+
+endmenu

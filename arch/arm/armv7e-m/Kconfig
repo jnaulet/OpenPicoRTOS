@@ -1,0 +1,23 @@
+choice
+	prompt "ARMV7E-M device"
+	depends on ARMV7EM
+
+config MACH_ATSAME5X
+       bool "Atmel ATSAME5x/D5x Series"
+
+config MACH_STM32H7XX
+       bool "STMicro STM32H7XX Series"
+       
+endchoice
+
+choice
+	depends on ARMV7EM
+	prompt "FPU support"
+
+config FPV4_SP_D16
+       bool "fpv4-sp-d16"
+
+config FPV5_SP_D16
+       bool "fpv5-sp-d16"
+
+endchoice

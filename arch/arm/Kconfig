@@ -1,0 +1,35 @@
+menu "ARM architecture"
+	depends on ARM
+
+choice
+        prompt "CPU series"
+        default ARMV6M
+
+config ARMV6M
+       bool "ARMv6-M series"
+
+config ARMV7M
+       bool "ARMv7-M series"
+
+config ARMV7EM
+       bool "ARMv7E-M series"
+
+endchoice
+
+source arch/arm/armv6-m/Kconfig
+source arch/arm/armv7-m/Kconfig
+source arch/arm/armv7e-m/Kconfig
+
+config L1_CACHE_LINESIZE
+       int "Data cache line size"
+       depends on ARMV7EM
+       default 32 if MACH_STM32H7XX
+       default 16 if MACH_ATSAME5X
+
+config CACHE_MAINTENANCE
+       bool "Cache maintenance operations"
+       depends on ARMV7EM
+       default y if MACH_STM32H7XX
+       default n if MACH_ATSAME5X
+
+endmenu

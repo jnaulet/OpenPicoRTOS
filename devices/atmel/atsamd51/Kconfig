@@ -1,0 +1,17 @@
+choice
+	prompt "MCU variant"
+	default ATSAMD51G19A
+	depends on ATSAMD51
+
+config ATSAMD51G18A
+       bool "ATSAMD51G18A"
+
+config ATSAMD51G19A
+       bool "ATSAMD51G19A"
+
+endchoice
+
+config ATSAMD51G19A_ARDUINO
+       bool "Preserve Arduino bootloader"
+       default y
+       depends on ATSAMD51G19A

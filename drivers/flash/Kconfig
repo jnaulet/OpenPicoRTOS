@@ -1,0 +1,15 @@
+menu "Flash drivers"
+
+config FLASH_GD32VF103
+       depends on RISCV
+       bool "GD32VF103 series flash"
+
+config FLASH_PIC32MX
+       depends on MIPS
+       bool "PIC32Mx series flash"
+
+config FLASH_SAME5X
+       depends on ARM
+       bool "SAME5x/D5x series flash"
+
+endmenu

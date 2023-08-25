@@ -1,0 +1,15 @@
+menu "TWI drivers"
+
+config TWI_GD32VF103
+       depends on RISCV
+       bool  "GD32VF103 series TWI"
+
+config TWI_NXP_I2C
+       depends on POWERPC
+       bool "NXP I2C"
+
+config TWI_STM32H7XX
+       depends on ARM
+       bool "STM32H7xx series TWI"
+
+endmenu

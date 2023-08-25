@@ -1,0 +1,15 @@
+menu "Misc. drivers"
+
+config MISC_PIC32MX
+       depends on MIPS
+       bool "PIC32Mx system protected registers support"
+
+config MISC_RP2040_RESET
+       depends on ARM
+       bool "RP2040 reset system support"
+
+config MISC_STM32H7XX_DMAMUX
+       depends on ARM
+       bool "STM32H7XX DMAMUX support"
+
+endmenu

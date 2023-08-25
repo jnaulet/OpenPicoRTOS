@@ -1,0 +1,13 @@
+#
+# UART drivers makefile
+#
+drivers-uart := $(srctree)/drivers/uart
+
+c_src-$(CONFIG_UART_ARM_PL011) += $(drivers-uart)/uart-arm_pl011.c
+c_src-$(CONFIG_UART_ATMEL_SERCOM) += $(drivers-uart)/uart-atmel_sercom.c
+c_src-$(CONFIG_UART_AVR) += $(drivers-uart)/uart-avr.c
+c_src-$(CONFIG_UART_GD32VF103) += $(drivers-uart)/uart-gd32vf103.c
+c_src-$(CONFIG_UART_PIC32MX) += $(drivers-uart)/uart-pic32mx.c
+c_src-$(CONFIG_UART_ATSAM3X) += $(drivers-uart)/uart-sam3x.c
+c_src-$(CONFIG_UART_STM32H7XX) += $(drivers-uart)/uart-stm32h7xx.c
+c_src-$(CONFIG_UART_TINYAVR_USART) += $(drivers-uart)/uart-tinyavr_usart.c

@@ -1,0 +1,15 @@
+menu "MIPS architecture"
+     depends on MIPS
+
+choice
+        prompt "CPU series"
+        default M51XX
+
+config M51XX
+       bool "MIPS32 M51xx series"
+
+endchoice
+ 
+source arch/mips32/m51xx/Kconfig
+
+endmenu

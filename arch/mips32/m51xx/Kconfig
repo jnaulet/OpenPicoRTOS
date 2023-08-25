@@ -1,0 +1,18 @@
+choice
+	prompt "M51xx device"
+	depends on M51XX
+
+config MACH_PIC32MZ
+       bool "PIC32MZ Family"
+       
+endchoice
+
+config M51XX_DSP
+       depends on M51XX
+       default y
+       bool "Support for DSP"
+
+config M51XX_FPU64
+       depends on M51XX
+       default y
+       bool "Support for FPU64"

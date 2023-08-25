@@ -1,0 +1,15 @@
+menu "RISC-V architecture"
+     depends on RISCV
+
+choice
+        prompt "CPU series"
+        default RV32IMAC
+
+config RV32IMAC
+       bool "RISC-V RV32IMAC series"
+
+endchoice
+
+source arch/riscv/rv32imac/Kconfig
+
+endmenu

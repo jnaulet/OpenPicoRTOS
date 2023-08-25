@@ -1,0 +1,47 @@
+menu "AVR8 architecture"
+     depends on AVR
+
+choice
+        prompt "CPU series"
+        default ATMEGA
+
+config ATMEGA
+       bool "Atmel ATMega series"
+
+config ATTINY
+       bool "Atmel ATTiny series"
+
+endchoice
+
+# ATMega devices
+
+choice
+        prompt "ATMega device"
+        depends on ATMEGA
+
+config MACH_ATMEGA2560
+       bool "ATMega2560"
+
+config MACH_ATMEGA328P
+       bool "ATMega328p"
+
+config MACH_ATMEGA32U4
+       bool "ATMega32u4"
+
+endchoice
+
+# ATtiny devices
+
+choice
+        prompt "ATTiny device"
+        depends on ATTINY
+
+config MACH_ATTINY817
+       bool "ATTiny817"
+
+config MACH_ATTINY1607
+       bool "ATTiny1607"
+
+endchoice
+
+endmenu

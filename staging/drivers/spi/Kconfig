@@ -1,0 +1,7 @@
+menu "SPI drivers"
+
+config SPI_NXP_DSPI
+       depends on POWERPC
+       bool "NXP dSPI"
+
+endmenu

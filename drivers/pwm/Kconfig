@@ -1,0 +1,43 @@
+menu "PWM drivers"
+
+config PWM_AVR
+       depends on AVR
+       bool "AVR/ATMega series PWMs"
+
+config PWM_GD32VF103
+       depends on RISCV
+       bool "GD32VF103 series PWMs"
+
+config PWM_PIC32MX
+       depends on MIPS
+       bool "PIC32Mx series PWMs"
+
+config PWM_RP2040
+       depends on ARM
+       bool "Rapspberry RP2040 series PWMs"
+
+config PWM_ATSAM3X
+       depends on ARM
+       bool "ATSAM3x series PWMs"
+
+config PWM_ATSAM3X_TC
+       depends on ARM
+       bool "ATSAM3x series PWMs on TC"
+
+config PWM_ATSAME5X
+       depends on ARM
+       bool "ATSAME5x/D5x series PWMs"
+
+config PWM_STM32H7XX
+       depends on ARM
+       bool "STM32H7xx series PWMs"
+
+config PWM_TI_EPWM
+       depends on C2000
+       bool "TI C2000 ePWM"
+
+config PWM_TINYAVR
+       depends on AVR
+       bool "TinyAVR/ATTiny series PWMs"
+
+endmenu

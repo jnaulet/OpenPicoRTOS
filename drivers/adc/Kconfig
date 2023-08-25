@@ -1,0 +1,31 @@
+menu "ADC drivers"
+
+config ADC_AVR
+       depends on AVR
+       bool "AVR/ATMega series ADC"
+
+config ADC_PIC32MX
+       depends on MIPS
+       bool "PIC32Mx series ADC"
+
+config ADC_RP2040
+       depends on ARM
+       bool "RP2040 ADC"
+
+config ADC_SAM3X
+       depends on ARM
+       bool "ATSAM3x series ADC"
+
+config ADC_SAME5X
+       depends on ARM
+       bool "ATSAME5/D5x series ADC"
+
+config ADC_TINYAVR
+       depends on AVR
+       bool "TinyAVR/ATTiny series ADC"
+
+config ADC_TI_TYPE4
+       depends on C2000
+       bool "TI Type4 ADC"
+
+endmenu

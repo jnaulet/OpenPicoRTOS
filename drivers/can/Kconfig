@@ -1,0 +1,7 @@
+menu "CAN drivers"
+
+config CAN_TI_DCAN
+       depends on C2000 || ARM
+       bool "TI DCAN"
+
+endmenu

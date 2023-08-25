@@ -1,0 +1,7 @@
+menu "UART drivers"
+
+config UART_NXP_LINFLEXD
+       depends on POWERPC
+       bool "NXP LinFlexD UART"
+
+endmenu

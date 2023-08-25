@@ -1,0 +1,30 @@
+#
+# Automatic indentation
+#
+
+PHONY := __uncrustify
+
+skip-makefile := 1
+
+# Read auto.conf if it exists, otherwise ignore
+-include include/config/auto.conf
+
+include scripts/Sources.include
+
+ifneq ($(srctree),$(src))
+include scripts/Kbuild.include
+
+# The filename Kbuild has precedence over Makefile
+kbuild-dir := $(if $(filter /%,$(src)),$(src),$(srctree)/$(src))
+kbuild-file := $(if $(wildcard $(kbuild-dir)/Kbuild),$(kbuild-dir)/Kbuild,$(kbuild-dir)/Makefile)
+include $(kbuild-file)
+endif # srctree == src
+
+__uncrustify: $(c_src-y) $(c_src-)
+	$(Q)uncrustify -c $(srctree)/etc/uncrustify.cfg $(c_src-y) $(c_src-) \
+	--replace --no-backup
+
+# Declare the contents of the .PHONY variable as phony.	 We keep that
+# information in a variable se we can use it in if_changed and friends.
+
+.PHONY: $(PHONY)

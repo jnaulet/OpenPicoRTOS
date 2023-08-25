@@ -1,0 +1,39 @@
+menu "MUX drivers"
+
+config MUX_AVR
+       depends on AVR
+       bool "AVR/ATMega series MUX"
+
+config MUX_GD32VF103
+       depends on RISCV
+       bool "GD32VF103 series MUX"
+
+config MUX_PIC32MX
+       depends on MIPS
+       bool "PIC32Mx series MUX"
+
+config MUX_RP2040
+       depends on ARM
+       bool "Rapspberry RP2040 series MUX"
+
+config MUX_ATSAM3X
+       depends on ARM
+       bool "ATSAM3x series MUX"
+
+config MUX_ATSAME5X
+       depends on ARM
+       bool "ATSAME5x/D5x series MUX"
+
+config MUX_STM32H7XX
+       depends on ARM
+       bool "STM32H7xx series MUX"
+
+config MUX_TI_F28X
+       depends on C2000
+       bool "TI TMS320F28x series MUX"
+
+config MUX_TINYAVR
+       depends on AVR
+       bool "TinyAVR/ATTiny series MUX"
+
+endmenu

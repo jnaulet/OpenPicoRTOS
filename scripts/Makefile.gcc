@@ -1,0 +1,171 @@
+#
+# GCC compiler build
+#
+
+PHONY := __gcc
+__gcc:
+
+skip-makefile := 1
+
+# Read auto.conf if it exists, otherwise ignore
+-include include/config/auto.conf
+
+CROSS_COMPILE  := $(CONFIG_CROSS_COMPILE:"%"=%)
+
+LD := $(CROSS_COMPILE)ld
+CC := $(CROSS_COMPILE)gcc
+AR := $(CROSS_COMPILE)ar
+
+include scripts/Kbuild.include
+include scripts/Sources.include
+
+# optimization options
+opt-$(CONFIG_CC_NO_OPTIMIZATION) += -O0
+opt-$(CONFIG_CC_OPTIMIZE_FOR_SIZE) += -Os
+opt-$(CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE1) += -O1
+opt-$(CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE2) += -O2
+opt-$(CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE3) += -O3
+
+# debug options
+debug-$(CONFIG_DEBUG) += -g3
+ccflags-$(CONFIG_NDEBUG) += -DNDEBUG
+
+# map
+ifeq ($(CONFIG_MAP),y)
+map = -Wl,-Map=$@.map
+endif
+
+# linker script
+ldscript  := $(subst ",,$(CONFIG_LDSCRIPT))
+ifneq ($(ldscript),)
+ldflags-y += -L$(dir $(ldscript)) -T$(ldscript)
+endif # $(ldscript)
+
+# The filename Kbuild has precedence over Makefile
+kbuild-dir := $(if $(filter /%,$(src)),$(src),$(srctree)/$(src))
+kbuild-file := $(if $(wildcard $(kbuild-dir)/Kbuild),$(kbuild-dir)/Kbuild,$(kbuild-dir)/Makefile)
+include $(kbuild-file)
+
+# If the save-* variables changed error out
+ifeq ($(KBUILD_NOPEDANTIC),)
+        ifneq ("$(save-cflags)","$(CFLAGS)")
+                $(error CFLAGS was changed in "$(kbuild-file)". Fix it to use EXTRA_CFLAGS)
+        endif
+endif
+
+inctree        = $(patsubst %/,%,$(addprefix -I,$(dir $(1))))
+
+c_flags        = -Wp,-MD,$(depfile) $(opt-y) $(debug-y) $(RTOSINCLUDE) -Wpedantic \
+                 $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
+                 $(ccflags-y) $(subst ",,$(CONFIG_EXTRA_CFLAGS))
+
+a_flags        = -Wp,-MD,$(depfile) $(debug-y) $(RTOSINCLUDE) \
+                 $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
+                 $(asflags-y) $(subst ",,$(CONFIG_EXTRA_CFLAGS))
+
+ld_flags       = $(LDFLAGS) $(ldflags-y) $(subst ",,$(CONFIG_EXTRA_LDFLAGS))
+
+ifneq ($(KBUILD_SRC),)
+# Create output directory if not already present
+_dummy := $(shell [ -d $(src) ] || mkdir -p $(src))
+
+# Create directories for object files if directory does not exist
+# Needed when obj-y := dir/file.o syntax is used
+_dummy := $(foreach d,$(src-dirs), $(shell [ -d $(d) ] || mkdir -p $(d)))
+endif
+
+ifndef src
+$(warning kbuild: Makefile.gcc is included improperly)
+endif
+
+# ===========================================================================
+
+__gcc: $(target) $(always)
+          @:
+
+# Prepare object files (.o)
+# ---------------------------------------------------------------------------
+obj-y := $(c_src-y:%.c=%.o)
+obj-y += $(a_src-y:%.S=%.o)
+
+# Compile C sources (.c)
+# ---------------------------------------------------------------------------
+
+# C (.c) files
+# The C file is compiled and updated dependency information is generated.
+# (See cmd_cc_o_c + relevant part of rule_cc_o_c)
+
+quiet_cmd_cc_o_c = CC $(quiet_modtag)  $@
+cmd_cc_o_c = $(CC) $(c_flags) -c -o $@ $<
+
+define rule_cc_o_c
+	$(call echo-cmd,cc_o_c) $(cmd_cc_o_c);				  \
+	scripts/basic/fixdep $(depfile) $@ '$(call make-cmd,cc_o_c)' >    \
+	                                              $(dot-target).tmp;  \
+	rm -f $(depfile);						  \
+	mv -f $(dot-target).tmp $(dot-target).cmd
+endef
+
+# Built-in and composite module parts
+%.o: %.c FORCE
+	$(call if_changed_rule,cc_o_c)
+
+quiet_cmd_cc_lst_c = MKLST   $@
+      cmd_cc_lst_c = $(CC) $(c_flags) -g -c -o $*.o $< && \
+		     $(CONFIG_SHELL) $(srctree)/scripts/makelst $*.o \
+				     System.map $(OBJDUMP) > $@
+
+%.lst: %.c FORCE
+	$(call if_changed_dep,cc_lst_c)
+
+# Compile assembler sources (.S)
+# ---------------------------------------------------------------------------
+
+quiet_cmd_as_o_S = AS $(quiet_modtag)  $@
+cmd_as_o_S       = $(CC) $(a_flags) -c -o $@ $<
+
+%.o: %.S FORCE
+	$(call if_changed_dep,as_o_S)
+
+targets += $(real-objs-y) $(lib-y)
+targets += $(extra-y) $(MAKECMDGOALS) $(always)
+
+#
+# Rule to compile a set of .o files into one .o file
+#
+ifdef target
+quiet_cmd_link_o_target = LD      $@
+# If the list of objects to link is empty, just create an empty built-in.o
+cmd_link_o_target = $(if $(strip $(obj-y)),\
+		      $(CC) $(ld_flags) -o $@ $(filter $(obj-y), $^) $(map), \
+		      rm -f $@; $(AR) rcs$(KBUILD_ARFLAGS) $@)
+
+$(target): $(obj-y) FORCE
+	$(call if_changed,link_o_target)
+
+targets += $(target)
+endif # target
+
+# Add FORCE to the prequisites of a target to force it to be always rebuilt.
+# ---------------------------------------------------------------------------
+
+PHONY += FORCE
+
+FORCE:
+
+# Read all saved command lines and dependencies for the $(targets) we
+# may be building above, using $(if_changed{,_dep}). As an
+# optimization, we don't need to read them if the target does not
+# exist, we will rebuild anyway in that case.
+
+targets := $(wildcard $(sort $(targets)))
+cmd_files := $(wildcard $(foreach f,$(targets),$(dir $(f)).$(notdir $(f)).cmd))
+
+ifneq ($(cmd_files),)
+  include $(cmd_files)
+endif
+
+# Declare the contents of the .PHONY variable as phony.  We keep that
+# information in a variable se we can use it in if_changed and friends.
+
+.PHONY: $(PHONY)

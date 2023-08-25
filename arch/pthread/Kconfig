@@ -1,0 +1,13 @@
+menu "PTHREAD simulation"
+     depends on PTHREAD
+
+choice
+        prompt "System"
+        default PTHREAD_LINUX
+
+config PTHREAD_LINUX
+       bool "Linux pthreads"
+
+endchoice
+
+endmenu

@@ -1,0 +1,8 @@
+choice
+	prompt "ARMV6-M device"
+	depends on ARMV6M
+
+config MACH_RP2040
+       bool "Raspberry RP2040"
+       
+endchoice
