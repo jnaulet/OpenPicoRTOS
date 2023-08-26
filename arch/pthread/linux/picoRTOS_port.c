@@ -1,5 +1,5 @@
-#include "picoRTOS.h"
 #include "picoRTOS_port.h"
+#include <generated/autoconf.h>
 
 #include <time.h>
 #include <signal.h>
@@ -11,7 +11,7 @@
 /* local data structure */
 struct thread {
     pthread_t pthread;
-    picoRTOS_task_fn_t fn;
+    arch_entry_point_fn fn;
     /*@temp@*/ void *priv;
     /* signals */
     int sig;
@@ -43,7 +43,7 @@ static void arch_TICK(int sig)
 {
     struct thread *t = current_thread;
 
-    picoRTOS_assert_fatal(sig == SIGALRM);
+    arch_assert_void(sig == SIGALRM);
 
     current_thread = (struct thread*)picoRTOS_tick((picoRTOS_stack_t*)t);
     pthread_kill(current_thread->pthread, SIGUSR1);
@@ -64,11 +64,11 @@ static void itimer_init(void)
     (void)sigfillset(&sig_tick.sa_mask);
 
     res = sigaction(SIGALRM, &sig_tick, NULL);
-    picoRTOS_assert_fatal(res == 0);
+    arch_assert_void(res == 0);
 
     /* init itimer struct */
     res = getitimer(ITIMER_REAL, &itimer);
-    picoRTOS_assert_fatal(res == 0);
+    arch_assert_void(res == 0);
 
     /* set interval */
     itimer.it_interval.tv_sec = 0;
@@ -80,12 +80,12 @@ static void itimer_init(void)
 
     /* set tick */
     res = setitimer(ITIMER_REAL, &itimer, NULL);
-    picoRTOS_assert_fatal(res == 0);
+    arch_assert_void(res == 0);
 }
 
 static void arch_sigusr1(int sig)
 {
-    picoRTOS_assert_fatal(sig == SIGUSR1);
+    arch_assert_void(sig == SIGUSR1);
 }
 
 /* FUNCTIONS TO IMPLEMENT */
@@ -103,7 +103,7 @@ void arch_init(void)
     (void)sigemptyset(&set);
     (void)sigaddset(&set, SIGUSR1);
     res = pthread_sigmask(SIG_BLOCK, &set, NULL);
-    picoRTOS_assert_fatal(res == 0);
+    arch_assert_void(res == 0);
 
     /* pthread_sigmask should be enough to avoid
      * the main thread to receive the signal but for some
@@ -133,17 +133,20 @@ void arch_resume(void)
     (void)pthread_sigmask(SIG_UNBLOCK, &set, NULL);
 }
 
-picoRTOS_stack_t *arch_prepare_stack(struct picoRTOS_task *task)
+picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
+                                     size_t stack_count,
+                                     arch_entry_point_fn fn,
+                                     void *priv)
 {
     int res;
-    struct thread *t = (struct thread*)task->stack;
+    struct thread *t = (struct thread*)stack;
 
-    t->fn = task->fn;
-    t->priv = task->priv;
+    t->fn = fn;
+    t->priv = priv;
     (void)sigemptyset(&t->sigset);
 
     res = pthread_create(&t->pthread, NULL, pthread_start_routine, t);
-    picoRTOS_assert_fatal(res == 0);
+    arch_assert_void(res == 0);
 
     return (picoRTOS_stack_t*)t;
 }
@@ -169,9 +172,10 @@ void arch_syscall(picoRTOS_syscall_t syscall, void *priv)
     wait_for_sigusr1(t);
 }
 
+/* cppcheck-suppress constParameter */
 void __attribute__((weak)) arch_idle(void *null)
 {
-    picoRTOS_assert_fatal(null == NULL);
+    arch_assert_void(null == NULL);
 
     for (;;)
         (void)pause();
@@ -216,16 +220,16 @@ picoRTOS_cycles_t arch_counter(void)
 
 /* INTERRUPTS : unsupported */
 
-void arch_register_interrupt(picoRTOS_irq_t irq __attribute__((unused)),
-                             picoRTOS_isr_fn fn __attribute__((unused)),
-                             void *priv __attribute__((unused)))
+void arch_register_interrupt(/*@unused@*/ picoRTOS_irq_t irq __attribute__((unused)),
+                             /*@unused@*/ arch_isr_fn fn __attribute__((unused)),
+                             /*@unused@*/ void *priv __attribute__((unused)))
 {
 }
 
-void arch_enable_interrupt(picoRTOS_irq_t irq __attribute__((unused)))
+void arch_enable_interrupt(/*@unused@*/ picoRTOS_irq_t irq __attribute__((unused)))
 {
 }
 
-void arch_disable_interrupt(picoRTOS_irq_t irq __attribute__((unused)))
+void arch_disable_interrupt(/*@unused@*/ picoRTOS_irq_t irq __attribute__((unused)))
 {
 }
