@@ -1,6 +1,8 @@
 #include "picoRTOS.h"
 #include "attiny817-xplained.h"
 
+#define CONFIG_EXT_STACK_COUNT 52
+
 #ifdef DEMO_LED
 /*
  * led_main double-blinks the user LED

@@ -7,7 +7,7 @@
  */
 static void led_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct pwm *PWM = (struct pwm*)priv;
 
@@ -38,7 +38,7 @@ static void led_main(void *priv)
  */
 static void console_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct uart *UART = (struct uart*)priv;
 
@@ -62,7 +62,7 @@ static void console_main(void *priv)
  */
 static void spi_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     size_t xfered = 0;
     struct spi *SPI = (struct spi*)priv;
@@ -97,7 +97,7 @@ static void spi_main(void *priv)
  */
 static void adc_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct adc *ADC = (struct adc*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -125,7 +125,7 @@ static void adc_main(void *priv)
  */
 static void wd_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct wd *WDT = (struct wd*)priv;
 
