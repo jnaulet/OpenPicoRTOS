@@ -4,6 +4,8 @@
 #include "picoRTOS_mutex.h"
 #include "picoRTOS_cond.h"
 
+#include <generated/autoconf.h>
+
 #define BLINK_PERIOD PICORTOS_DELAY_SEC(1)
 #define BLINK_DELAY  PICORTOS_DELAY_MSEC(60)
 
@@ -37,7 +39,7 @@ static void blink_init(struct blink *ctx)
  */
 static void tick_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     /* TICK is a gpio passed as a parameter from main
      * You can change it over there */
@@ -58,7 +60,7 @@ static void tick_main(void *priv)
  */
 static void blink_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     picoRTOS_tick_t ref = picoRTOS_get_tick();
     struct blink *blink = (struct blink*)priv;
@@ -97,7 +99,7 @@ static void blink_main(void *priv)
  */
 static void blink_again_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct blink *blink = (struct blink*)priv;
 
@@ -126,7 +128,7 @@ static void blink_again_main(void *priv)
  */
 static void console_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct uart *UART = (struct uart*)priv;
 
@@ -151,7 +153,7 @@ static void console_main(void *priv)
  */
 static void spi_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     size_t xfered = 0;
     struct spi *SPI = (struct spi*)priv;
@@ -187,7 +189,7 @@ static void spi_main(void *priv)
  */
 static void wd_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct wd *WD = (struct wd*)priv;
 
@@ -203,7 +205,7 @@ static void wd_main(void *priv)
  */
 static void pwm_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     pwm_duty_cycle_t duty_cycle = 0;
     struct pwm *PWM = (struct pwm*)priv;
@@ -229,7 +231,7 @@ static void pwm_main(void *priv)
  */
 static void ipwm_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct ipwm *IPWM = (struct ipwm*)priv;
 
@@ -265,7 +267,7 @@ static void can_main(void *priv)
 #define CAN_ID_RX 0x6
 #define CAN_ID_TX 0x7
 
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct can *CAN = (struct can*)priv;
 
@@ -294,7 +296,7 @@ static void can_main(void *priv)
  */
 static void adc_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct adc *ADC = (struct adc*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -322,7 +324,7 @@ static void adc_main(void *priv)
  */
 static void twi_master_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct twi *TWI = (struct twi*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -351,7 +353,7 @@ static void twi_master_main(void *priv)
  */
 static void twi_slave_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct twi *TWI = (struct twi*)priv;
 
@@ -409,7 +411,7 @@ int main(void)
 
     /* Init fixed priorities first */
     picoRTOS_task_init(&task, tick_main, blink.due.DIGITAL23, stack0, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-    picoRTOS_add_task(&task, (picoRTOS_priority_t)TASK_TICK_PRIO);
+    picoRTOS_add_task(&task, (picoRTOS_priority_t)0);
 
     /* watchdog, last */
     picoRTOS_task_init(&task, wd_main, blink.due.WDT, stack1, (size_t)CONFIG_DEFAULT_STACK_COUNT);
