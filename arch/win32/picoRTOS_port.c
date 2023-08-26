@@ -1,5 +1,5 @@
-#include "picoRTOS.h"
 #include "picoRTOS_port.h"
+#include <generated/autoconf.h>
 
 #include <windows.h>
 #include <winbase.h>
@@ -42,11 +42,14 @@ void arch_resume(void)
     suspended = false;
 }
 
-picoRTOS_stack_t *arch_prepare_stack(struct picoRTOS_task *task)
+picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
+                                     size_t stack_count,
+                                     arch_entry_point_fn fn,
+                                     void *priv)
 {
-    struct thread *t = (struct thread*)task->stack;
+    struct thread *t = (struct thread*)stack;
 
-    t->wthread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)task->fn, task->priv,
+    t->wthread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)fn, priv,
                               CREATE_SUSPENDED | STACK_SIZE_PARAM_IS_A_RESERVATION, NULL);
 
     return (picoRTOS_stack_t*)t;
@@ -77,9 +80,10 @@ void arch_syscall(picoRTOS_syscall_t syscall, void *priv)
     SuspendThread(t->wthread);
 }
 
-void __attribute__((weak)) arch_idle(void *null)
+/* cppcheck-suppress constParameter */
+void arch_idle(void *null)
 {
-    picoRTOS_assert_fatal(null == NULL);
+    arch_assert_void(null == NULL);
 
     for (;;)
         Sleep(1000);
@@ -124,16 +128,16 @@ picoRTOS_cycles_t arch_counter(void)
 
 /* INTERRUPTS : unsupported */
 
-void arch_register_interrupt(picoRTOS_irq_t irq __attribute__((unused)),
-                             picoRTOS_isr_fn fn __attribute__((unused)),
-                             void *priv __attribute__((unused)))
+void arch_register_interrupt(/*@unused@*/ picoRTOS_irq_t irq __attribute__((unused)),
+                             /*@unused@*/ arch_isr_fn fn __attribute__((unused)),
+                             /*@unused@*/ void *priv __attribute__((unused)))
 {
 }
 
-void arch_enable_interrupt(picoRTOS_irq_t irq __attribute__((unused)))
+void arch_enable_interrupt(/*@unused@*/ picoRTOS_irq_t irq __attribute__((unused)))
 {
 }
 
-void arch_disable_interrupt(picoRTOS_irq_t irq __attribute__((unused)))
+void arch_disable_interrupt(/*@unused@*/ picoRTOS_irq_t irq __attribute__((unused)))
 {
 }
