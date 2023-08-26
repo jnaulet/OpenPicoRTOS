@@ -9,6 +9,8 @@ typedef unsigned int picoRTOS_atomic_t;
 typedef unsigned int picoRTOS_irq_t;
 typedef unsigned long picoRTOS_cycles_t;
 
+typedef long picoRTOS_intptr_t;
+
 #if (__TMS320C28XX_FPU32__ == 1) || \
     (__TMS320C28XX_FPU64__ == 1)
 # define ARCH_INTIAL_STACK_COUNT 72
@@ -26,7 +28,7 @@ typedef unsigned long picoRTOS_cycles_t;
 #ifdef S_SPLINT_S
 # define ASM(x) {}
 #else
-# define ASM(x) { asm (x); }
+# define ASM(x) { __asm(x); }
 # define arch_break() ASM("  estop0")
 #endif
 

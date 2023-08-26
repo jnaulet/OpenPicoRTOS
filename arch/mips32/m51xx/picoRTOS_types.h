@@ -12,7 +12,10 @@ typedef unsigned long picoRTOS_atomic_t;
 typedef unsigned long picoRTOS_irq_t;
 typedef unsigned long picoRTOS_cycles_t;
 
-#define ARCH_L1_DCACHE_LINESIZE 16
+typedef long picoRTOS_intptr_t;
+
+#define ARCH_L1_DCACHE_LINESIZE    16
+#define ARCH_L1_DCACHE_STACK_COUNT (CONFIG_L1_CACHE_LINESIZE / (int)sizeof(long))
 
 #define ARCH_INITIAL_CPU_STACK_COUNT 29
 #define ARCH_INITIAL_FPU_STACK_COUNT 0
@@ -31,7 +34,9 @@ typedef unsigned long picoRTOS_cycles_t;
                                   ARCH_INITIAL_FPU_STACK_COUNT +  \
                                   ARCH_INITIAL_DSP_STACK_COUNT)
 
-#define ARCH_MIN_STACK_COUNT     (ARCH_INITIAL_STACK_COUNT + 4)
+#define ARCH_MIN_STACK_COUNT     (ARCH_INITIAL_STACK_COUNT +    \
+                                  ARCH_L1_DCACHE_STACK_COUNT +  \
+                                  4)
 
 /* splint doesn't like inline assembly */
 #ifdef S_SPLINT_S
