@@ -1,4 +1,5 @@
 #include "picoRTOS.h"
+#include <generated/autoconf.h>
 
 #include <stdio.h>
 #include <stdbool.h>

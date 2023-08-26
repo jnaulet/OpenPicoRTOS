@@ -1,40 +1,24 @@
-ELF := pthread-linux.elf
+# 1st: sources & targets
+target := pthread-linux.elf
 
-CC := gcc
+c_src-y += main.c
 
-PICORTOS_DIR := $(abspath ../..)
-BUILD_DIR = build
+# avoid double-inclusion
+ifeq ($(skip-makefile),)
+PWD := $(shell pwd)
+KBUILD_SRC := ../..
 
-CFLAGS += -Wall -Wextra -I. -I$(PICORTOS_DIR) -g
-CFLAGS += -I$(PICORTOS_DIR)/arch/include
-CFLAGS += -I$(PICORTOS_DIR)/arch/pthread/linux
+all: $(target)
+	@
 
-LDFLAGS += -g -pthread
+%.elf: FORCE
+	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) TARGET=$@
 
-# picoRTOS
-SRC_C_FILES += $(PICORTOS_DIR)/picoRTOS.c
-SRC_C_FILES += $(PICORTOS_DIR)/arch/pthread/linux/picoRTOS_port.c
+%:
+	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) $@
 
-# demo
-SRC_C_FILES += blink.c
+PHONY += FORCE
+FORCE:
 
-OBJ_FILES := $(SRC_C_FILES:%.c=$(BUILD_DIR)/%.o)
-OBJ_FILES += $(SRC_S_FILES:%.S=$(BUILD_DIR)/%.o)
-
-all: $(ELF)
-
-$(ELF): $(OBJ_FILES)
-	-mkdir -p $(@D)
-	$(CROSS)$(CC) $^ $(LDFLAGS) -o $@
-
-$(BUILD_DIR)/%.o: %.c
-	-mkdir -p $(@D)
-	$(CROSS)$(CC) $(CFLAGS) -c $< -o $@
-
-splint:
-cppcheck:
-	@echo "dummy analysis"
-
-clean:
-	-rm -rf $(BUILD_DIR)
-	-rm -f $(ELF)
+.PHONY: $(PHONY)
+endif
