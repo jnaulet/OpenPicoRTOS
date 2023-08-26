@@ -1,4 +1,5 @@
 #include "picoRTOS.h"
+#include <generated/autoconf.h>
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -40,10 +41,10 @@ int main(void)
     picoRTOS_init();
 
     picoRTOS_task_init(&task, tick_main, NULL, stack0, CONFIG_DEFAULT_STACK_COUNT);
-    picoRTOS_add_task(&task, TASK_TICK_PRIO);
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
 
     picoRTOS_task_init(&task, blink_main, NULL, stack1, CONFIG_DEFAULT_STACK_COUNT);
-    picoRTOS_add_task(&task, TASK_BLINK_PRIO);
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
 
     picoRTOS_start();
 }
