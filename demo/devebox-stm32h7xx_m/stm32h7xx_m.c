@@ -1,5 +1,6 @@
 #include "stm32h7xx_m.h"
 #include "picoRTOS.h"
+#include "picoRTOS_device.h"
 
 #include "clock-stm32h7xx.h"
 #include "mux-stm32h7xx.h"

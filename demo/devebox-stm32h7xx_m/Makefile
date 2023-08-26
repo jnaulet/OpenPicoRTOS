@@ -1,88 +1,31 @@
-# Build file
-ELF_RAM := devebox-stm32h7xx_m_ram.elf
-ELF_FLASH := devebox-stm32h7xx_m_flash.elf
+# 1st: sources & targets
+target := $(TARGET)
 
-CC := gcc
-OBJCOPY := objcopy
-CROSS := arm-none-eabi-
-BUILD := build
+c_src-y += main.c
+c_src-y += stm32h7xx_m.c
 
-# Configure system
-PICORTOS_DIR := $(abspath ../..)
--include $(PICORTOS_DIR)/devices/stm/stm32h743/Makefile.in
+# avoid double-inclusion
+ifeq ($(skip-makefile),)
+PWD := $(shell pwd)
+KBUILD_SRC := ../..
 
-INCLUDE += -I.
-SPLINTFLAGS += -checks +unixlib
-CPPCHECKFLAGS += --enable=all --inline-suppr -DNDEBUG
-CPPCHECKFLAGS += --suppress=missingIncludeSystem
-CPPCHECKFLAGS += --suppress=unusedFunction
-CPPCHECKFLAGS += --suppress=unusedStructMember
+TARGETS := devebox-stm32h7xx_m_ram.elf
+TARGETS += devebox-stm32h7xx_m_flash.elf
 
-CFLAGS += -Wall -Wextra -std=c99 $(INCLUDE) -O0 -g3 $(DEFINE)
-CFLAGS += -mcpu=cortex-m7 -mthumb -mfpu=fpv5-sp-d16
-SFLAGS += -x assembler-with-cpp -g3 $(DEFINE) $(INCLUDE)
-SFLAGS += -mcpu=cortex-m7 -mthumb -mfpu=fpv5-sp-d16
+defconfig = $(@:%.elf=%_defconfig)
 
-INCLUDE += -I$(PICORTOS_DIR)/arch/include
-INCLUDE += -I$(PICORTOS_DIR)/drivers/include
-INCLUDE += -I$(PICORTOS_DIR)/drivers/clock
-INCLUDE += -I$(PICORTOS_DIR)/drivers/gpio
-INCLUDE += -I$(PICORTOS_DIR)/drivers/mux
-INCLUDE += -I$(PICORTOS_DIR)/drivers/pwm
-INCLUDE += -I$(PICORTOS_DIR)/drivers/spi
-INCLUDE += -I$(PICORTOS_DIR)/drivers/uart
+all: $(TARGETS)
+	@
 
-# drivers
-# staging
-SRC_C += $(PICORTOS_DIR)/drivers/clock/clock-stm32h7xx.c
-SRC_C += $(PICORTOS_DIR)/drivers/dma/dma-stm32h7xx.c
-SRC_C += $(PICORTOS_DIR)/drivers/gpio/gpio-stm32h7xx.c
-SRC_C += $(PICORTOS_DIR)/drivers/mux/mux-stm32h7xx.c
-SRC_C += $(PICORTOS_DIR)/drivers/pwm/pwm-stm32h7xx_tim.c
-SRC_C += $(PICORTOS_DIR)/drivers/spi/spi-stm32h7xx.c
-SRC_C += $(PICORTOS_DIR)/drivers/uart/uart-stm32h7xx.c
+%.elf: FORCE
+	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) $(defconfig)
+	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) TARGET=$@
 
-# IPCs
-INCLUDE += -I$(PICORTOS_DIR)/ipc
-SRC_C += $(PICORTOS_DIR)/ipc/picoRTOS_mutex.c
-SRC_C += $(PICORTOS_DIR)/ipc/picoRTOS_cond.c
+%:
+	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) $@
 
-# demo
-SRC_C += main.c
-SRC_C += stm32h7xx_m.c
+PHONY += FORCE
+FORCE:
 
-OBJ := $(SRC_C:%.c=$(BUILD)/%.o)
-OBJ += $(SRC_S:%.S=$(BUILD)/%.o)
-
-LDRAM := $(DEVICE_DIR)/gcc/stm32h743_ram.ld
-LDFLASH := $(DEVICE_DIR)/gcc/stm32h743_flash_xip.ld
-
-all: $(ELF_RAM) $(ELF_FLASH)
-
-$(ELF_RAM): $(OBJ)
-	-mkdir -p $(@D)
-	$(CROSS)$(CC) $^ -T$(LDRAM) $(LDFLAGS) -o $@ -Wl,-Map=$@.map
-
-$(ELF_FLASH): $(OBJ)
-	-mkdir -p $(@D)
-	$(CROSS)$(CC) $^ -T$(LDFLASH) $(LDFLAGS) -o $@ -Wl,-Map=$@.map
-
-$(BUILD)/%.o: %.c
-	-mkdir -p $(@D)
-	$(CROSS)$(CC) $(CFLAGS) -c $< -o $@
-
-$(BUILD)/%.o: %.S
-	-mkdir -p $(@D)
-	$(CROSS)$(CC) $(SFLAGS) -c $< -o $@
-
-splint:
-	splint $(SPLINTFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
-
-cppcheck:
-	cppcheck $(CPPCHECKFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
-
-clean:
-	-rm -rf $(BUILD)
-	-rm -f *.elf *.map
-
-.PHONY: clean splint
+.PHONY: $(PHONY)
+endif

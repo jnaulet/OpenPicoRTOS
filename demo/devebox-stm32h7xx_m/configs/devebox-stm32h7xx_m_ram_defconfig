@@ -1,0 +1,165 @@
+#
+# Automatically generated make config: don't edit
+# OpenPicoRTOS v1.9.x Configuration
+#
+CONFIG_ARM=y
+# CONFIG_AVR is not set
+# CONFIG_C2000 is not set
+# CONFIG_MIPS is not set
+# CONFIG_PPC is not set
+# CONFIG_RISCV is not set
+
+#
+# ARM architecture
+#
+# CONFIG_ARMV6M is not set
+# CONFIG_ARMV7M is not set
+CONFIG_ARMV7EM=y
+# CONFIG_MACH_ATSAME5X is not set
+CONFIG_MACH_STM32H7XX=y
+# CONFIG_FPV4_SP_D16 is not set
+CONFIG_FPV5_SP_D16=y
+CONFIG_L1_CACHE_LINESIZE=32
+CONFIG_CACHE_MAINTENANCE=y
+
+#
+# Scheduler options
+#
+CONFIG_SINGLE_CORE=y
+# CONFIG_SMP is not set
+
+#
+# General setup
+#
+CONFIG_SYSCLK_HZ=200000000
+CONFIG_TICK_HZ=1000
+CONFIG_TASK_COUNT=6
+CONFIG_DEFAULT_STACK_COUNT=128
+CONFIG_DEADLOCK_COUNT=1000
+
+#
+# Build configuration
+#
+CONFIG_CROSS_COMPILE="arm-none-eabi-"
+CONFIG_CC_NO_OPTIMIZATION=y
+# CONFIG_CC_OPTIMIZE_FOR_SIZE is not set
+# CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE1 is not set
+# CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE2 is not set
+# CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE3 is not set
+CONFIG_DEBUG=y
+# CONFIG_NDEBUG is not set
+# CONFIG_MAP is not set
+CONFIG_EXTRA_CFLAGS=""
+CONFIG_LDSCRIPT="${srctree}/samples/ldscripts/stm32h743_ram.ld"
+CONFIG_EXTRA_LDFLAGS=""
+
+#
+# Inter-Process communications
+#
+# CONFIG_FUTEX is not set
+CONFIG_MUTEX=y
+CONFIG_COND=y
+# CONFIG_QUEUE is not set
+
+#
+# Device drivers
+#
+
+#
+# ADC drivers
+#
+# CONFIG_ADC_RP2040 is not set
+# CONFIG_ADC_SAM3X is not set
+# CONFIG_ADC_SAME5X is not set
+
+#
+# CAN drivers
+#
+# CONFIG_CAN_TI_DCAN is not set
+
+#
+# Clock drivers
+#
+# CONFIG_CLOCK_RP2040 is not set
+# CONFIG_CLOCK_ATSAM3X is not set
+# CONFIG_CLOCK_ATSAME5X is not set
+CONFIG_CLOCK_STM32H7XX=y
+
+#
+# DMA drivers
+#
+# CONFIG_DMA_RP2040 is not set
+# CONFIG_DMA_ATSAME5X is not set
+CONFIG_DMA_STM32H7XX=y
+
+#
+# EEPROM drivers
+#
+
+#
+# Flash drivers
+#
+# CONFIG_FLASH_SAME5X is not set
+
+#
+# GPIO drivers
+#
+# CONFIG_GPIO_RP2040 is not set
+# CONFIG_GPIO_ATSAM3X is not set
+# CONFIG_GPIO_ATSAME5X is not set
+CONFIG_GPIO_STM32H7XX=y
+
+#
+# Misc. drivers
+#
+# CONFIG_MISC_RP2040_RESET is not set
+CONFIG_MISC_STM32H7XX_DMAMUX=y
+
+#
+# MUX drivers
+#
+# CONFIG_MUX_RP2040 is not set
+# CONFIG_MUX_ATSAM3X is not set
+# CONFIG_MUX_ATSAME5X is not set
+CONFIG_MUX_STM32H7XX=y
+
+#
+# PWM drivers
+#
+# CONFIG_PWM_RP2040 is not set
+# CONFIG_PWM_ATSAM3X is not set
+# CONFIG_PWM_ATSAM3X_TC is not set
+# CONFIG_PWM_ATSAME5X is not set
+CONFIG_PWM_STM32H7XX=y
+
+#
+# SPI drivers
+#
+# CONFIG_SPI_ARM_PL022 is not set
+# CONFIG_SPI_ATMEL_SERCOM is not set
+# CONFIG_SPI_ATSAM3X is not set
+CONFIG_SPI_STM32H7XX=y
+
+#
+# TWI/I2C drivers
+#
+# CONFIG_TWI_ATMEL_SERCOM is not set
+# CONFIG_TWI_DW_APB_I2C is not set
+# CONFIG_TWI_ATSAM3X is not set
+
+#
+# UART drivers
+#
+# CONFIG_UART_ARM_PL011 is not set
+# CONFIG_UART_ATMEL_SERCOM is not set
+# CONFIG_UART_ATSAM3X is not set
+CONFIG_UART_STM32H7XX=y
+
+#
+# Watchdog drivers
+#
+# CONFIG_WD_RP2040 is not set
+# CONFIG_WD_ATSAM3X is not set
+# CONFIG_WD_ATSAME5X is not set
+CONFIG_WD_STM32H7XX_IWDG=y
+# CONFIG_STAGING is not set
