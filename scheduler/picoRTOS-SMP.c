@@ -211,7 +211,7 @@ void picoRTOS_task_init(struct picoRTOS_task *task,
     task->fn = fn;
     task->priv = priv;
     /* ensure page cache alignment */
-    task->stack = (picoRTOS_stack_t*)L1_CACHE_ALIGN((long)stack, ARCH_L1_DCACHE_LINESIZE);
+    task->stack = (picoRTOS_stack_t*)L1_CACHE_ALIGN((picoRTOS_intptr_t)stack, ARCH_L1_DCACHE_LINESIZE);
     task->stack_count = (size_t)((stack + stack_count) - task->stack) & ~STACK_COUNT_MASK;
 }
 

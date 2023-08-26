@@ -51,6 +51,10 @@ struct picoRTOS_task_core {
 #define TASK_CURRENT() (picoRTOS.task[picoRTOS.index])
 #define TASK_BY_PID(x) (picoRTOS.task[(x)])
 
+/* cache alignment */
+#define L1_CACHE_ALIGN(x, a)         L1_CACHE_ALIGN_MASK((x), ((a) - 1))
+#define L1_CACHE_ALIGN_MASK(x, mask) (((x) + (mask)) & ~(mask))
+
 struct picoRTOS_core {
     bool is_running;
     picoRTOS_pid_t index;
@@ -58,7 +62,7 @@ struct picoRTOS_core {
     picoRTOS_pid_t pid_count;
     struct picoRTOS_task_core task[TASK_COUNT];
     picoRTOS_stack_t idle_stack[ARCH_MIN_STACK_COUNT];
-};
+} __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
 
 /* main core component */
 static struct picoRTOS_core picoRTOS;
@@ -114,7 +118,7 @@ static void task_core_quickswap(struct picoRTOS_task_core *t1,
     task_core_quickcpy(t2, &tmp);
 }
 
-static inline void task_core_stat_begin(struct picoRTOS_task_core *task)
+static void task_core_stat_begin(struct picoRTOS_task_core *task)
 {
     task->stat.counter = arch_counter();
 }
@@ -147,15 +151,20 @@ static void task_core_stat_preempt(struct picoRTOS_task_core *task)
 static void task_idle_init(void)
 {
     /* IDLE */
+    static struct picoRTOS_task idle;
+
+    /* ensure proper stack alignment */
+    picoRTOS_task_init(&idle, arch_idle, NULL, picoRTOS.idle_stack,
+                       (size_t)ARCH_MIN_STACK_COUNT);
+
     /* similar to picoRTOS_add_task, but without count limit */
     TASK_BY_PID(TASK_IDLE_PID).state = PICORTOS_TASK_STATE_READY;
-    TASK_BY_PID(TASK_IDLE_PID).sp = arch_prepare_stack(picoRTOS.idle_stack,
-                                                       (size_t)ARCH_MIN_STACK_COUNT,
-                                                       arch_idle, NULL);
+    TASK_BY_PID(TASK_IDLE_PID).sp = arch_prepare_stack(idle.stack, idle.stack_count,
+                                                       idle.fn, idle.priv);
     /* checks */
-    TASK_BY_PID(TASK_IDLE_PID).stack_bottom = picoRTOS.idle_stack;
-    TASK_BY_PID(TASK_IDLE_PID).stack_top = picoRTOS.idle_stack + ARCH_MIN_STACK_COUNT;
-    TASK_BY_PID(TASK_IDLE_PID).stack_count = (size_t)ARCH_MIN_STACK_COUNT;
+    TASK_BY_PID(TASK_IDLE_PID).stack_bottom = idle.stack;
+    TASK_BY_PID(TASK_IDLE_PID).stack_top = idle.stack + idle.stack_count;
+    TASK_BY_PID(TASK_IDLE_PID).stack_count = idle.stack_count;
     /* shared priorities, ignored by sort anyway */
     TASK_BY_PID(TASK_IDLE_PID).prio = (picoRTOS_priority_t)TASK_IDLE_PRIO;
 }
@@ -208,13 +217,16 @@ void picoRTOS_task_init(struct picoRTOS_task *task,
                         picoRTOS_stack_t *stack,
                         size_t stack_count)
 {
+#define STACK_COUNT_MASK ((ARCH_L1_DCACHE_LINESIZE / sizeof(picoRTOS_stack_t)) - 1)
+
     picoRTOS_assert_fatal(stack_count >= (size_t)ARCH_MIN_STACK_COUNT,
                           return );
 
     task->fn = fn;
-    task->stack = stack;
-    task->stack_count = stack_count;
     task->priv = priv;
+    /* ensure page cache alignment */
+    task->stack = (picoRTOS_stack_t*)L1_CACHE_ALIGN((picoRTOS_intptr_t)stack, ARCH_L1_DCACHE_LINESIZE);
+    task->stack_count = (size_t)((stack + stack_count) - task->stack) & ~STACK_COUNT_MASK;
 }
 
 /* Function: picoRTOS_add_task
@@ -645,7 +657,7 @@ void picoRTOS_disable_interrupt(picoRTOS_irq_t irq)
     arch_disable_interrupt(irq);
 }
 
-/* Group: pîcoRTOS cache maintenance API */
+/* Group: picoRTOS cache maintenance API */
 
 /* Function: picoRTOS_invalidate_dcache
  * Invalidates the data cache by address(es)
