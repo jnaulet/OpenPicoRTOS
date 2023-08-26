@@ -259,7 +259,7 @@ int main( void )
     /* tick */
     picoRTOS_task_init(&task, tick_main, &blink.uno.DIGITAL4,
                        stack0, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-    picoRTOS_add_task(&task, (picoRTOS_priority_t)TASK_TICK_PRIO);
+    picoRTOS_add_task(&task, (picoRTOS_priority_t)0);
     /* led */
     picoRTOS_task_init(&task, blink_main, &blink.uno.PWM9,
                        stack1, (size_t)CONFIG_DEFAULT_STACK_COUNT);
@@ -283,7 +283,7 @@ int main( void )
     /* watchdog refresh */
     picoRTOS_task_init(&task, wd_main, &blink.uno.WDT,
                        stack6, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-    picoRTOS_add_task(&task, (picoRTOS_priority_t)TASK_WDT_PRIO);
+    picoRTOS_add_task(&task, picoRTOS_get_last_available_priority());
 
     /* Start the scheduler. */
     picoRTOS_start();
