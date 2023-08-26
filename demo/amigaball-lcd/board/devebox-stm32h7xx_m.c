@@ -1,5 +1,6 @@
 #include "board.h"
 #include "picoRTOS.h"
+#include "picoRTOS_device.h"
 
 #include "clock-stm32h7xx.h"
 #include "dma-stm32h7xx.h"

@@ -1,6 +1,10 @@
 #include "board.h"
 #include "picoRTOS.h"
 
+#include <generated/autoconf.h>
+
+#define CONFIG_SHORT_STACK_COUNT   128
+
 static uint16_t bgcolxy(long x, long y)
 {
     long r;
@@ -37,8 +41,8 @@ static void amigaBall_render(uint16_t *pfb, long px, long py, long ph)
 
 static void lcd_main(void *priv)
 {
+    picoRTOS_tick_t ref;
     static struct lcd lcd;
-    picoRTOS_tick_t ref = picoRTOS_get_tick();
     struct lcd_phys *phys = (struct lcd_phys*)priv;
 
     /* Example with framebuffer upload after each frame completion (Amiga ball) */
@@ -49,6 +53,9 @@ static void lcd_main(void *priv)
     long ph = 0;
 
     (void)lcd_init(&lcd, phys);
+
+    /* init ref AFTER LCD */
+    ref = picoRTOS_get_tick();
 
     for (;;) {
 

@@ -1,6 +1,8 @@
 #include "lcd.h"
 #include "picoRTOS.h"
 
+#include <generated/autoconf.h>
+
 #define LCD_MODE_CMD(ctx)   gpio_write((ctx)->dc, false)
 #define LCD_MODE_DATA(ctx)  gpio_write((ctx)->dc, true)
 #define LCD_CS_ENABLE(ctx)  gpio_write((ctx)->cs, false)
@@ -48,9 +50,7 @@ static int lcd_xfer8(struct lcd *ctx, uint_least8_t x)
         if ((res = spi_xfer(ctx->spi, &dummy, &x, sizeof(x))) != -EAGAIN)
             break;
 
-    if (!picoRTOS_assert(timeout != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(timeout != -1, return -EBUSY);
     return res;
 }
 
@@ -68,9 +68,7 @@ static int lcd_xfer16(struct lcd *ctx, uint16_t x)
         if ((res = spi_xfer(ctx->spi, &dummy, &x, sizeof(x))) != -EAGAIN)
             break;
 
-    if (!picoRTOS_assert(timeout != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(timeout != -1, return -EBUSY);
     return res;
 }
 
@@ -205,8 +203,6 @@ int lcd_refresh(struct lcd *ctx)
         xfered += (size_t)res;
     }
 
-    if (!picoRTOS_assert(timeout != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(timeout != -1, return -EBUSY);
     return 0;
 }

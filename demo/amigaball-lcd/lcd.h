@@ -18,6 +18,8 @@
 #include "gpio.h"
 #include <stdint.h>
 
+#include "picoRTOS_types.h"
+
 struct lcd_phys {
     /*@temp@*/ struct spi *spi;
     /*@temp@*/ struct gpio *cs;
@@ -30,8 +32,9 @@ struct lcd {
     /*@temp@*/ struct gpio *cs;
     /*@temp@*/ struct gpio *dc;
     /*@temp@*/ struct gpio *rst;
-    /* frame buffer */
-    uint16_t fb[LCD_FRAMEBUFFER_PIXELS]; /* LCD Color: RGB565 (MSB rrrrrggggggbbbbb LSB) */
+    /* frame buffer, LCD Color: RGB565 (MSB rrrrrggggggbbbbb LSB) */
+    uint16_t fb[LCD_FRAMEBUFFER_PIXELS]
+    __attribute__ ((aligned(ARCH_L1_DCACHE_LINESIZE)));
 };
 
 int lcd_init(/*@out@*/ struct lcd *ctx, struct lcd_phys *phys);
