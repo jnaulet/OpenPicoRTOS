@@ -1,6 +1,8 @@
 #include "picoRTOS.h"
 #include "attiny1607-cnano.h"
 
+#define CONFIG_EXT_STACK_COUNT 52
+
 /*
  * led_main drives the PWM LED.
  * Warning: in order to work, PB5 must be wired to PB7 on th cnano board
