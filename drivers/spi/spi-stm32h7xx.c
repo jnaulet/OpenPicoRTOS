@@ -340,6 +340,8 @@ static int spi_xfer_dma_idle(struct spi *ctx, void *rx, const void *tx, size_t n
         (res = dma_setup(ctx->drain, &drain)) < 0)
         return res;
 
+    picoRTOS_flush_dcache((void*)tx, n);
+
     ctx->base->CFG1 |= (CFG1_TXDMAEN | CFG1_RXDMAEN);
     ctx->base->CFG1 &= ~CFG1_FTHLV(CFG1_FTHLV_M);
     ctx->base->CFG1 |= CFG1_FTHLV(ctx->frame_width);
