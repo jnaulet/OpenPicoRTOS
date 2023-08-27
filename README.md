@@ -1,4 +1,4 @@
-# OpenPicoRTOS [![Latest Release](https://img.shields.io/github/release-date/jnaulet/OpenPicoRTOS)](https://img.shields.io) [![Commits since](https://img.shields.io/github/commits-since/jnaulet/OpenPicoRTOS/latest/v1.8.x)](https://img.shields.io)
+# OpenPicoRTOS [![Latest Release](https://img.shields.io/github/release-date/jnaulet/OpenPicoRTOS)](https://img.shields.io) [![Commits since](https://img.shields.io/github/commits-since/jnaulet/OpenPicoRTOS/latest/v1.9.x)](https://img.shields.io)
 
 Very small, safe, lightning fast, yet portable preemptive RTOS with SMP support.
 
@@ -9,15 +9,16 @@ picoRTOS is a small hard RTOS with as little overhead as humanly possible.
 ## Table of contents
 
   1. [Book of requirements](#book-of-requirements)
-  2. [API Documentation](#api-documentation)
-  3. [Supported architectures](#supported-architectures)
-  4. [Featured devices](#featured-devices)
-  5. [Working principle](#working-principle)
-  6. [Inter-processus communication](#inter-processus-communication)
-  8. [Shared priorities](#shared-priorities)
-  7. [Interrupt management](#interrupt-management)
-  7. [Staging tree](#staging-tree)
-  9. [Featured demos](#featured-demos)
+  1. [How to use](#how-to-use)
+  1. [API Documentation](#api-documentation)
+  1. [Supported architectures](#supported-architectures)
+  1. [Featured devices](#featured-devices)
+  1. [Working principle](#working-principle)
+  1. [Inter-processus communication](#inter-processus-communication)
+  1. [Shared priorities](#shared-priorities)
+  1. [Interrupt management](#interrupt-management)
+  1. [Staging tree](#staging-tree)
+  1. [Featured demos](#featured-demos)
 
 ## Book of requirements
 
@@ -35,6 +36,79 @@ OpenPicoRTOS has been designed with these requirements in mind:
   - Less than 400 lines of code
 
 More information here: https://github.com/jnaulet/OpenPicoRTOS/blob/main/etc/Requirements.md
+
+## How to use
+
+### Step1: Preparation of your project
+
+To create a project compatible with OpenPicoRTOS you first need to add a specific kind of Makefile to your project.   
+You can find a very basic template here: https://github.com/jnaulet/OpenPicoRTOS/blob/v1.9.x/etc/Makefile.template
+
+This offers you access to a new set of targets for the OpenPicoRTOS build system directly in your project directory:
+
+```
+Cleaning targets:
+  clean           - Remove most generated files but keep the config and
+                    enough build support to build external modules
+  mrproper        - Remove all generated files + config + various backup files
+  distclean       - mrproper + remove editor backup and patch files
+
+Configuration targets:
+  config          - Update current config utilising a line-oriented program
+  nconfig         - Update current config utilising a ncurses menu based program
+  menuconfig      - Update current config utilising a menu based program
+  xconfig         - Update current config utilising a QT based front-end
+  gconfig         - Update current config utilising a GTK based front-end
+  oldconfig       - Update current config utilising a provided .config as base
+  localmodconfig  - Update current config disabling modules not loaded
+  localyesconfig  - Update current config converting local mods to core
+  silentoldconfig - Same as oldconfig, but quietly, additionally update deps
+  defconfig       - New config with default from ARCH supplied defconfig
+  savedefconfig   - Save current config as ./defconfig (minimal config)
+  allnoconfig     - New config where all options are answered with no
+  allyesconfig    - New config where all options are accepted with yes
+  allmodconfig    - New config selecting modules when possible
+  alldefconfig    - New config with all symbols set to default
+  randconfig      - New config with random answer to all options
+  listnewconfig   - List new options
+  oldnoconfig     - Same as silentoldconfig but set new symbols to n (unset)
+
+Other generic targets:
+  all             - Build target
+
+Test targets:
+  check           - Run static analysis on all basic platforms + unit tests
+
+Static analysis targets:
+  splint          - Run splint -checks on the source code
+  cppcheck        - Run cppcheck --enable=all on the source code
+  staticcheck     - Run both previous checks
+
+  make V=0|1 [targets] 0 => quiet build (default), 1 => verbose build
+
+```
+
+### Step2: configuration of your project
+
+Simply type:
+
+    # make menuconfig
+
+And configure your project according to your needs.
+You can find a lot of examples in the demo directory.
+
+### Step3: Compilation of your project
+
+    # make
+
+### Step4: Static analysis of your project
+
+    # make staticcheck
+
+or, alternatively:
+
+    # make splint
+    # make cppcheck
 
 ## API Documentation
 

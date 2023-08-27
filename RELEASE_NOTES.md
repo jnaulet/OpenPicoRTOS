@@ -1,5 +1,26 @@
 # Release notes
 
+## picoRTOS v1.9.0
+### What's new ?
+
+This is a major revision that brings up a brand new graphical configuration menu (GUI), heavily
+inspired by the Linux/U-boot/Buildroot "make menuconfig".
+
+OpenPicoRTOS is now more than an OS. It is an OS AND a build system AND a code checking system, too.
+
+Migrating to OpenPicoRTOS has been made easier than ever (hopefully).
+
+Some changes have been made to the port API & the main API, especially regarding asserts, that have been
+made ISO-C compliant to accomodate for the now default gcc -pedantic mode.
+
+Cross-dependencies between the ports and the schedulers have been totally removed.
+
+All drivers have benn migrated already & some have been improved, especially the SAM3x/Arduino Due I2C &
+CAN.
+
+Some work still needs to be done on the PowerPC chips, as we are still waiting for some replacements
+after the last ones have been stolen.
+
 ## picoRTOS v1.8.4
 ### What's new ?
 
