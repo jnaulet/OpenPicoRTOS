@@ -987,7 +987,8 @@ int clock_stm32h7xx_ker_sel(clock_stm32h7xx_ker_t ker, unsigned int value)
 
 clock_freq_t clock_get_freq(clock_id_t clkid)
 {
-    picoRTOS_assert(clkid <= CLOCK_STM32H7XX_HSI48_CK, return -EINVAL);
+    picoRTOS_assert(clkid <= CLOCK_STM32H7XX_HSI48_CK,
+                    return (clock_freq_t)-EINVAL);
 
     switch (clkid) {
     case CLOCK_STM32H7XX_PLL1_P_CK: return clocks.pll[0].p;
