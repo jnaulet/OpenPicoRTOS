@@ -11,6 +11,8 @@ typedef unsigned long picoRTOS_cycles_t;
 typedef unsigned long picoRTOS_mask_t;
 typedef unsigned long picoRTOS_core_t;
 
+typedef long picoRTOS_intptr_t;
+
 #define ARCH_L1_DCACHE_LINESIZE sizeof(unsigned long)
 
 #define ARCH_INITIAL_STACK_COUNT 10

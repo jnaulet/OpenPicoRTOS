@@ -1,4 +1,3 @@
-#include "picoRTOS.h"
 #include "picoRTOS_port.h"
 
 /* FUNCTIONS TO IMPLEMENT */
@@ -15,9 +14,12 @@ void arch_resume(void)
 {
 }
 
-picoRTOS_stack_t *arch_prepare_stack(struct picoRTOS_task *task)
+picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
+                                     size_t stack_count,
+                                     arch_entry_point_fn fn,
+                                     void *priv)
 {
-    return task->stack;
+    return stack;
 }
 
 void arch_start_first_task(picoRTOS_stack_t *sp)
@@ -72,7 +74,7 @@ picoRTOS_cycles_t arch_counter(void)
 /* INTERRUPTS : unsupported */
 
 void arch_register_interrupt(picoRTOS_irq_t irq __attribute__((unused)),
-                             picoRTOS_isr_fn fn __attribute__((unused)),
+                             arch_isr_fn fn __attribute__((unused)),
                              void *priv __attribute__((unused)))
 {
 }

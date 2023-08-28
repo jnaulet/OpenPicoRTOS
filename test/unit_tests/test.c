@@ -20,9 +20,9 @@ static inline picoRTOS_core_t arch_core(void)
  */
 
 #ifndef TEST_PICORTOS_SMP
-# include "../../picoRTOS.c"
+# include "../../scheduler/picoRTOS.c"
 #else
-# include "../../picoRTOS-SMP.c"
+# include "../../scheduler/picoRTOS-SMP.c"
 #endif
 
 /* Dummy functions */
