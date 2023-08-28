@@ -1,31 +1,27 @@
-PICORTOS_DIR := $(abspath ../../..)
+# 1st: sources & targets
+target := dummy
+c_src-y += test.c
 
-DEVICES := $(shell find $(PICORTOS_DIR)/devices -name "Makefile-SMP.in")
-DEVICES += $(shell find $(PICORTOS_DIR)/staging/devices -name "Makefile-SMP.in")
+# avoid double-inclusion
+ifneq ($(skip-makefile),1)
+PWD := $(shell pwd)
+KBUILD_SRC := ../../..
 
-# recursion...
--include $(DEVICE)
+TARGETS := $(notdir $(wildcard configs/*_defconfig))
 
-INCLUDE += -I.
+all: $(TARGETS)
+	@
 
-SPLINT := splint
-SPLINTFLAGS := -checks -unixlib
+%:
+	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) $@
 
-CPPCHECK := cppcheck
-CPPCHECKFLAGS := --enable=all --inline-suppr --error-exitcode=1
-CPPCHECKFLAGS += -DNDEBUG --suppress=missingIncludeSystem
+$(TARGETS): FORCE
+	@cat configs/$@ configs/base.config > .config
+	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) oldnoconfig
+	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) staticcheck
 
-SRC_C += $(PICORTOS_DIR)/ipc/picoRTOS_futex.c
-SRC_C += $(PICORTOS_DIR)/ipc/picoRTOS_mutex.c
-SRC_C += $(PICORTOS_DIR)/ipc/picoRTOS_cond.c
-SRC_C += $(PICORTOS_DIR)/ipc/picoRTOS_queue.c
-SRC_C += test.c
+PHONY += FORCE
+FORCE:
 
-all:
-	for d in $(DEVICES); do \
-	$(MAKE) check DEVICE=$$d || exit; \
-	done
-
-check:
-	$(SPLINT) $(SPLINTFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
-	$(CPPCHECK) $(CPPCHECKFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
+.PHONY: $(PHONY)
+endif
