@@ -22,12 +22,12 @@ Reset_Handler:
 	nop
 
 	/* copy .text to ram */
-	COPY_TO_RAM __etext, __text_start__, __text_end__
+	COPY_TO_RAM __edata, __text_start__, __text_end__
 
 .ignore_text_relocation:
 	/* copy .data & sdata section */
-	COPY_TO_RAM __sdata, __data_start__, __data_end__
-	COPY_TO_RAM __ssdata, __sdata_start__, __sdata_end__
+	COPY_TO_RAM __etext, __data_start__, __data_end__
+	COPY_TO_RAM __etext2, __sdata_start__, __sdata_end__
 
 	/* zero .bss & sbss section */
 	ZERO_RAM __bss_start__, __bss_end__

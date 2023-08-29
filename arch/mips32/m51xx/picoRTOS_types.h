@@ -15,7 +15,7 @@ typedef unsigned long picoRTOS_cycles_t;
 typedef long picoRTOS_intptr_t;
 
 #define ARCH_L1_DCACHE_LINESIZE    16
-#define ARCH_L1_DCACHE_STACK_COUNT (CONFIG_L1_CACHE_LINESIZE / (int)sizeof(long))
+#define ARCH_L1_DCACHE_STACK_COUNT (ARCH_L1_DCACHE_LINESIZE / 4)
 
 #define ARCH_INITIAL_CPU_STACK_COUNT 29
 #define ARCH_INITIAL_FPU_STACK_COUNT 0
