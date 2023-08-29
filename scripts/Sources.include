@@ -6,7 +6,7 @@
 include arch/arm/Makefile
 include arch/avr/Makefile
 include arch/c2000/Makefile
-include arch/mips32/Makefile
+include arch/mips/Makefile
 #include arch/powerpc/Makefile
 include arch/pthread/Makefile
 include arch/riscv/Makefile
