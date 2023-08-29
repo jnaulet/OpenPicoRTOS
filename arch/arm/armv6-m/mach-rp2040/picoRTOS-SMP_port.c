@@ -1,6 +1,8 @@
 #include "picoRTOS_device.h"
 #include "picoRTOS-SMP_port.h"
 
+#include <generated/autoconf.h>
+
 #ifndef CONFIG_DEADLOCK_COUNT
 # error Deadlock count is not defined
 #endif
