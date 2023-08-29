@@ -1,0 +1,148 @@
+#
+# Automatically generated make config: don't edit
+# OpenPicoRTOS v1.9.x Configuration
+#
+# CONFIG_ARM is not set
+# CONFIG_AVR is not set
+# CONFIG_C2000 is not set
+CONFIG_MIPS=y
+# CONFIG_PPC is not set
+# CONFIG_RISCV is not set
+# CONFIG_PTHREAD is not set
+# CONFIG_WIN32 is not set
+
+#
+# MIPS architecture
+#
+CONFIG_M51XX=y
+CONFIG_MACH_PIC32MZ=y
+CONFIG_M51XX_DSP=y
+CONFIG_M51XX_FPU64=y
+
+#
+# Scheduler options
+#
+CONFIG_SINGLE_CORE=y
+# CONFIG_SMP is not set
+
+#
+# General setup
+#
+CONFIG_SYSCLK_HZ=160000000
+CONFIG_TICK_HZ=1000
+CONFIG_TASK_COUNT=13
+CONFIG_DEFAULT_STACK_COUNT=256
+CONFIG_DEADLOCK_COUNT=1000
+
+#
+# Build configuration
+#
+CONFIG_CROSS_COMPILE="xc32-"
+CONFIG_CC_NO_OPTIMIZATION=y
+# CONFIG_CC_OPTIMIZE_FOR_SIZE is not set
+# CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE1 is not set
+# CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE2 is not set
+# CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE3 is not set
+CONFIG_DEBUG=y
+# CONFIG_NDEBUG is not set
+# CONFIG_MAP is not set
+CONFIG_EXTRA_CFLAGS="-mprocessor=32MZ2048EFM144 -fno-common"
+CONFIG_LDSCRIPT="${srctree}/samples/ldscripts/pic32mz-efm_2048_ram.ld"
+CONFIG_EXTRA_LDFLAGS=""
+
+#
+# Inter-Process communications
+#
+# CONFIG_FUTEX is not set
+CONFIG_MUTEX=y
+CONFIG_COND=y
+# CONFIG_QUEUE is not set
+
+#
+# Device drivers
+#
+
+#
+# ADC drivers
+#
+CONFIG_ADC_PIC32MX=y
+
+#
+# CAN drivers
+#
+
+#
+# Clock drivers
+#
+CONFIG_CLOCK_PIC32MX=y
+
+#
+# DMA drivers
+#
+
+#
+# EEPROM drivers
+#
+
+#
+# Flash drivers
+#
+CONFIG_FLASH_PIC32MX=y
+
+#
+# GPIO drivers
+#
+CONFIG_GPIO_PIC32MX=y
+
+#
+# Misc. drivers
+#
+CONFIG_MISC_PIC32MX=y
+
+#
+# MUX drivers
+#
+CONFIG_MUX_PIC32MX=y
+
+#
+# PWM drivers
+#
+CONFIG_PWM_PIC32MX=y
+
+#
+# SPI drivers
+#
+CONFIG_SPI_PIC32MX=y
+
+#
+# TWI/I2C drivers
+#
+CONFIG_TWI_PIC32MX=y
+
+#
+# UART drivers
+#
+CONFIG_UART_PIC32MX=y
+
+#
+# Watchdog drivers
+#
+CONFIG_WD_PIC32MX=y
+CONFIG_STAGING=y
+
+#
+# Staging tree
+#
+
+#
+# ADC drivers
+#
+
+#
+# CAN drivers
+#
+CONFIG_CAN_PIC32MX=y
+
+#
+# TWI drivers
+#

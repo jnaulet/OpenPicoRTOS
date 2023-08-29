@@ -1,105 +1,59 @@
-# Build file for PIC32Mx
-ELF_RAM := curiosity-2.0-pic32mz-ef_ram.elf
-ELF_FLASH := curiosity-2.0-pic32mz-ef_flash.elf
+# 1st: sources & targets
+target := $(TARGET)
 
-CC := gcc
-CROSS := xc32-
-BUILD := build
+c_src-y += main.c
+c_src-y += curiosity-2.0-pic32mz-ef.c
+a_src-y += config.S
 
-# picoRTOS
-PICORTOS_DIR := $(abspath ../..)
--include $(PICORTOS_DIR)/devices/microchip/pic32mz-ef/Makefile.in
+ifeq ($(skip-makefile),1)
 
-# static anaylyzer
-SPLINTFLAGS := -D__PIC32MZ_EF__ -checks +unixlib
-CPPCHECKFLAGS += --enable=all --platform=mips32 --inline-suppr -DNDEBUG
-CPPCHECKFLAGS += --suppress=missingIncludeSystem
-CPPCHECKFLAGS += --suppress=unusedFunction
-CPPCHECKFLAGS += --suppress=unusedStructMember
+ld_script := $(abspath $(CONFIG_LDSCRIPT:"%"=%))
+c_src := $(abspath $(c_src-y))
+a_src := $(abspath $(a_src-y))
 
-INCLUDE += -I.
+linkerscript := <itemPath>$(ld_script)</itemPath>
+sourcefiles := $(c_src:%=<itemPath>%</itemPath>)
+sourcefiles += $(a_src:%=<itemPath>%</itemPath>)
 
-CFLAGS += -Wall -Wextra -std=c99 $(INCLUDE) -O0 -g3 $(DEFINE)
-CFLAGS += -mprocessor=32MZ2048EFM144 -fno-common -DXPRJ_default=default
+inctree        = $(patsubst %/,%,$(addprefix -I,$(dir $(1))))
+c_flags        = -Wp,-MD,$(depfile) $(opt-y) $(debug-y) $(RTOSINCLUDE) -Wpedantic \
+                 $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
+                 $(ccflags-y) $(subst \",,$(CONFIG_EXTRA_CFLAGS))
 
-SFLAGS += -x assembler-with-cpp -g3 $(DEFINE) $(INCLUDE)
-SFLAGS += -mprocessor=32MZ2048EFM144  -DXPRJ_default=default
+includedirs := $(filter -I%,$(c_flags))
+includedirs := $(abspath $(includedirs:-I%=%;))
 
-LDFLAGS += -nostartfiles -nostdlib
+$(info === Useful info for MPLABX config file ===)
+$(info Linker script:)
+$(info $(linkerscript))
+$(info Source files:)
+$(info $(sourcefiles))
+$(info include directories:)
+$(info $(includedirs))
+$(info === Normal continuation ===)
 
-# IPCs
-INCLUDE += -I$(PICORTOS_DIR)/ipc
-SRC_C += $(PICORTOS_DIR)/ipc/picoRTOS_mutex.c
-SRC_C += $(PICORTOS_DIR)/ipc/picoRTOS_cond.c
+# avoid double-inclusion
+else # $(skip-makefile)
+PWD := $(shell pwd)
+KBUILD_SRC := ../..
 
-# Drivers
-INCLUDE += -I$(PICORTOS_DIR)/drivers/include
-INCLUDE += -I$(PICORTOS_DIR)/drivers/adc
-INCLUDE += -I$(PICORTOS_DIR)/drivers/clock
-INCLUDE += -I$(PICORTOS_DIR)/drivers/flash
-INCLUDE += -I$(PICORTOS_DIR)/drivers/gpio
-INCLUDE += -I$(PICORTOS_DIR)/drivers/misc
-INCLUDE += -I$(PICORTOS_DIR)/drivers/mux
-INCLUDE += -I$(PICORTOS_DIR)/drivers/pwm
-INCLUDE += -I$(PICORTOS_DIR)/drivers/spi
-INCLUDE += -I$(PICORTOS_DIR)/drivers/twi
-INCLUDE += -I$(PICORTOS_DIR)/drivers/uart
-INCLUDE += -I$(PICORTOS_DIR)/drivers/wd
+TARGETS := curiosity-2.0-pic32mz-ef_ram.elf
+TARGETS += curiosity-2.0-pic32mz-ef_flash.elf
 
-# Drivers
-SRC_C += $(PICORTOS_DIR)/drivers/adc/adc-pic32mx.c
-SRC_C += $(PICORTOS_DIR)/drivers/clock/clock-pic32mx.c
-SRC_C += $(PICORTOS_DIR)/drivers/flash/flash-pic32mx.c
-SRC_C += $(PICORTOS_DIR)/drivers/gpio/gpio-pic32mx.c
-SRC_C += $(PICORTOS_DIR)/drivers/misc/misc-pic32mx.c
-SRC_C += $(PICORTOS_DIR)/drivers/mux/mux-pic32mx.c
-SRC_C += $(PICORTOS_DIR)/drivers/pwm/pwm-pic32mx.c
-SRC_C += $(PICORTOS_DIR)/drivers/spi/spi-pic32mx.c
-SRC_C += $(PICORTOS_DIR)/drivers/twi/twi-pic32mx.c
-SRC_C += $(PICORTOS_DIR)/drivers/uart/uart-pic32mx.c
-SRC_C += $(PICORTOS_DIR)/drivers/wd/wd-pic32mx.c
+defconfig = $(@:%.elf=%_defconfig)
 
-# staging tree
-INCLUDE += -I$(PICORTOS_DIR)/staging/drivers/can
-SRC_C += $(PICORTOS_DIR)/staging/drivers/can/can-pic32mx.c
+all: $(TARGETS)
+	@
 
-# demo
-SRC_S += config.S
-SRC_C += curiosity-2.0-pic32mz-ef.c
-SRC_C += main.c
+%.elf: FORCE
+	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) $(defconfig)
+	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) TARGET=$@
 
-OBJ := $(SRC_C:%.c=$(BUILD)/%.o)
-OBJ += $(SRC_S:%.S=$(BUILD)/%.o)
+%:
+	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) $@
 
-LDRAM := $(DEVICE_DIR)/gcc/pic32mz-efm_2048_ram.ld
-LDFLASH := $(DEVICE_DIR)/gcc/pic32mz-efm_2048_rom.ld
+PHONY += FORCE
+FORCE:
 
-all: $(ELF_RAM) $(ELF_FLASH)
-
-$(ELF_RAM): $(OBJ)
-	-mkdir -p $(@D)
-	$(CROSS)$(CC) $^ -T$(LDRAM) $(LDFLAGS) -o $@
-
-$(ELF_FLASH): $(OBJ)
-	-mkdir -p $(@D)
-	$(CROSS)$(CC) $^ -T$(LDFLASH) $(LDFLAGS) -o $@
-
-$(BUILD)/%.o: %.c
-	-mkdir -p $(@D)
-	$(CROSS)$(CC) $(CFLAGS) -c $< -o $@
-
-$(BUILD)/%.o: %.S
-	-mkdir -p $(@D)
-	$(CROSS)$(CC) $(SFLAGS) -c $< -o $@
-
-splint:
-	splint $(SPLINTFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
-
-cppcheck:
-	cppcheck $(CPPCHECKFLAGS) $(DEFINE) $(INCLUDE) $(SRC_C)
-
-clean:
-	-rm -rf $(BUILD)
-	-rm -f *.elf
-
-.PHONY: clean splint
+.PHONY: $(PHONY)
+endif # $(skip-makefile)

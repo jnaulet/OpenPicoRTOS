@@ -9,7 +9,7 @@ static struct picoRTOS_cond cond = PICORTOS_COND_INITIALIZER;
 
 static void led1_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct gpio *LED = (struct gpio*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -36,7 +36,7 @@ static void led1_main(void *priv)
 
 static void led2_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct gpio *LED = (struct gpio*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -50,7 +50,7 @@ static void led2_main(void *priv)
 
 static void led3_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct gpio *LED = (struct gpio*)priv;
 
@@ -81,7 +81,7 @@ static void led4_main(void *priv)
 {
 #define LED4_PWM_COUNT 3
 
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     picoRTOS_tick_t ref = picoRTOS_get_tick();
     struct rgb_led *LED4 = (struct rgb_led*)priv;
@@ -114,7 +114,7 @@ static void led4_main(void *priv)
  */
 static void console_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct uart *UART = (struct uart*)priv;
 
@@ -139,7 +139,7 @@ static void console_main(void *priv)
  */
 static void spi_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     size_t xfered = 0;
     struct spi *SPI = (struct spi*)priv;
@@ -173,7 +173,7 @@ static void spi_main(void *priv)
  */
 static void wd_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct wd *WDT = (struct wd*)priv;
 
@@ -188,7 +188,7 @@ static void wd_main(void *priv)
  */
 static void pwm_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     pwm_duty_cycle_t duty_cycle = 0;
     struct pwm *PWM = (struct pwm*)priv;
@@ -210,7 +210,7 @@ static void pwm_main(void *priv)
  */
 static void twi_master_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct twi *TWI = (struct twi*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -239,7 +239,7 @@ static void twi_master_main(void *priv)
  */
 static void twi_slave_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct twi *TWI = (struct twi*)priv;
 
@@ -274,7 +274,7 @@ static void twi_slave_main(void *priv)
 /* ADC test. Not much for the moment */
 static void adc_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct adc *IVtemp = (struct adc*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -304,7 +304,7 @@ static void __attribute__((unused)) can_main(void *priv)
 {
 #define CAN_TEST_ID (can_id_t)0x7
 
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     static const char data[] = { "PINGPONG" };
 
@@ -345,7 +345,7 @@ static void flash_main(void *priv)
 {
 #define BUF_COUNT   516 /* 1x 2048b page + 1 qword */
 
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     int res;
     size_t n;
