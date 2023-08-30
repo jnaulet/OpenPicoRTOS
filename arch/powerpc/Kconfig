@@ -1,0 +1,33 @@
+menu "PowerPC architecture"
+	depends on POWERPC
+
+choice
+        prompt "PowerPC series"
+
+config E200Z4
+       bool "PowerPC e200z4 series"
+
+config E200Z7
+       bool "PowerPC e200z7 series"
+
+endchoice
+
+choice
+	prompt "Device"
+
+config MACH_MPC574X
+       bool "NXP MPC574x series"
+       depends on E200Z4
+
+config MACH_MPC577X
+       bool "NXP MPC577x series"
+       depends on E200Z7
+
+endchoice
+
+config CACHE_MAINTENANCE
+       bool "Cache maintenance operations"
+       default y if E200Z4
+       default n if E200Z7
+
+endmenu

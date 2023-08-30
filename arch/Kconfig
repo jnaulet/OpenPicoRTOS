@@ -14,7 +14,7 @@ config C2000
 config MIPS
 	bool "MIPS architecture"
 
-config PPC
+config POWERPC
 	bool "PowerPC architecture"
 
 config RISCV
@@ -32,6 +32,6 @@ source "arch/arm/Kconfig"
 source "arch/avr/Kconfig"
 source "arch/c2000/Kconfig"
 source "arch/mips/Kconfig"
-# source "arch/powerpc/Kconfig"
+source "arch/powerpc/Kconfig"
 source "arch/riscv/Kconfig"
 source "arch/pthread/Kconfig"
