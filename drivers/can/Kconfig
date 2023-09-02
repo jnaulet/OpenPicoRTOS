@@ -4,4 +4,8 @@ config CAN_TI_DCAN
        depends on C2000 || ARM
        bool "TI DCAN"
 
+config CAN_ATSAM3X
+       depends on ARM
+       bool "ATSAM3x series CAN"
+
 endmenu

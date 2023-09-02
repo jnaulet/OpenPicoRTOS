@@ -12,10 +12,6 @@ config CAN_PIC32MX
        depends on MIPS
        bool "PIC32Mx series CAN"
 
-config CAN_ATSAM3X
-       depends on ARM
-       bool "ATSAM3x series CAN"
-
 config CAN_ATSAME5X
        depends on ARM
        bool "ATSAME5X series CAN"

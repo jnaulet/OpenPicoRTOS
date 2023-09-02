@@ -68,14 +68,15 @@ struct CAN_SAM3X {
 #define CAN_MIDn_MIDvB_M  0x3fffu
 #define CAN_MIDn_MIDvB(x) ((x) & CAN_MIDn_MIDvB_M)
 
-#define CAN_MSRn_MRDY (1 << 23)
+#define CAN_MSRn_MRDY        (1 << 23)
+#define CAN_MSRn_MDLC_M      0xfu
+#define CAN_MSRn_MDLC_GET(x) (((x) >> 16) & CAN_MSRn_MDLC_M)
 
 #define CAN_MCRn_MTRC        (1 << 23)
 #define CAN_MCRn_MACR        (1 << 22)
 #define CAN_MCRn_MRTR        (1 << 20)
 #define CAN_MCRn_MDLC_M      0xfu
 #define CAN_MCRn_MDLC(x)     (((x) & CAN_MCRn_MDLC_M) << 16)
-#define CAN_MCRn_MDLC_GET(x) (((x) >> 16) & CAN_MCRn_MDLC_M)
 
 static int set_tx_mailboxes(/*@partial@*/ struct can *ctx, size_t n)
 {
@@ -91,6 +92,17 @@ static int set_tx_mailboxes(/*@partial@*/ struct can *ctx, size_t n)
     return 0;
 }
 
+/* Function: can_sam3x_init
+ * Init a CAN interface
+ *
+ * Parameters:
+ *  ctx - The CAN interface to init
+ *  base - The CAN interface base address
+ *  clkid - The CAN interface clock id
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int can_sam3x_init(struct can *ctx, int base, clock_id_t clkid)
 {
     ctx->base = (struct CAN_SAM3X*)base;
@@ -389,7 +401,7 @@ static int transfer_rx_mailbox(struct can *ctx, size_t index,
 
     /* get id */
     *id = mailbox_read_mid(mb);
-    n = (size_t)CAN_MCRn_MDLC_GET(mb->CAN_MCR);
+    n = (size_t)CAN_MSRn_MDLC_GET(mb->CAN_MSR);
 
     /* reset xfer */
     mb->CAN_MCR = (uint32_t)CAN_MCRn_MTRC;
