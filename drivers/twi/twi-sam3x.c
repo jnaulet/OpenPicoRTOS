@@ -167,8 +167,12 @@ int twi_setup(struct twi *ctx, struct twi_settings *settings)
 
 int twi_poll(struct twi *ctx)
 {
-    if ((ctx->base->TWI_SR & TWI_SR_SVACC) != 0) {
-        if ((ctx->base->TWI_SR & TWI_SR_SVREAD) == 0) return TWI_WRITE;
+    /* clear on read */
+    uint32_t twi_sr = ctx->base->TWI_SR;
+
+    if ((twi_sr & TWI_SR_SVACC) != 0 ||
+        (twi_sr & TWI_SR_EOSACC) != 0) {
+        if ((twi_sr & TWI_SR_SVREAD) == 0) return TWI_WRITE;
         else return TWI_READ;
     }
 
@@ -277,7 +281,7 @@ static int twi_read_as_master_idle(struct twi *ctx, size_t n)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
 
-    if ((ctx->base->TWI_SR & TWI_SR_TXRDY) == 0)
+    if ((ctx->base->TWI_SR & TWI_SR_TXCOMP) == 0)
         return -EAGAIN;
 
     ctx->base->TWI_MMR |= TWI_MMR_MREAD;
