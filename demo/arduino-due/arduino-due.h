@@ -46,7 +46,8 @@ struct arduino_due {
     /*@shared@*/ /* struct dac *DAC1 */
     /*@shared@*/ /* struct dac *DAC2 */
     /* CAN */
-    /*@shared@*/ struct can *CAN;
+    /*@shared@*/ struct can *CAN0;
+    /*@shared@*/ struct can *CAN1;
     /* DIGITAL */
     /*@shared@*/ struct gpio *DIGITAL22;
     /*@shared@*/ struct gpio *DIGITAL23;

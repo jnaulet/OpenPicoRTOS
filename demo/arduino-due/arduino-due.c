@@ -47,6 +47,8 @@ static void arduino_due_init_mux(void)
     /* CAN */
     (void)mux_sam3x_pio_output(&MUXA, (size_t)0, MUX_SAM3X_PIO_A);  /* CANTX */
     (void)mux_sam3x_pio_input(&MUXA, (size_t)1, MUX_SAM3X_PIO_A);   /* CANRX */
+    (void)mux_sam3x_pio_output(&MUXB, (size_t)14, MUX_SAM3X_PIO_A); /* CANTX1 */
+    (void)mux_sam3x_pio_input(&MUXB, (size_t)15, MUX_SAM3X_PIO_A);  /* CANRX1 */
 
     /* DIGITAL */
     (void)mux_sam3x_pio_output(&MUXB, (size_t)26, MUX_SAM3X_PIO_GPIO);  /* PIN22 */
@@ -80,7 +82,6 @@ static void arduino_due_init_mux(void)
     (void)mux_sam3x_pio_output(&MUXC, (size_t)13, MUX_SAM3X_PIO_GPIO);  /* PIN50 */
     (void)mux_sam3x_pio_input(&MUXC, (size_t)12, MUX_SAM3X_PIO_GPIO);   /* PIN51 */
     (void)mux_sam3x_pio_output(&MUXB, (size_t)21, MUX_SAM3X_PIO_GPIO);  /* AD14(RXD3) */
-    (void)mux_sam3x_pio_input(&MUXB, (size_t)14, MUX_SAM3X_PIO_GPIO);   /* CANTX1/IO */
 
     /* COMMUNICATON */
     (void)mux_sam3x_pio_input(&MUXA, (size_t)8, MUX_SAM3X_PIO_A);   /* RX */
@@ -191,9 +192,11 @@ static void arduino_due_init_can(/*@partial@*/ struct arduino_due *ctx)
 {
     /* clocks */
     (void)clock_sam3x_pmc_enable(CLOCK_SAM3X_PMC_PERIPH(PID_CAN0), CLOCK_SAM3X_PMC_PERIPH_DIV_1);
+    (void)clock_sam3x_pmc_enable(CLOCK_SAM3X_PMC_PERIPH(PID_CAN1), CLOCK_SAM3X_PMC_PERIPH_DIV_1);
 
     /* CAN */
-    static struct can CAN;
+    static struct can CAN0;
+    static struct can CAN1;
 
     struct can_settings CAN_settings = {
         125000ul,   /* bitrate */
@@ -203,11 +206,15 @@ static void arduino_due_init_can(/*@partial@*/ struct arduino_due *ctx)
         false       /* loopback */
     };
 
-    (void)can_sam3x_init(&CAN, ADDR_CAN0, CLOCK_SAM3X_PMC_PERIPH(PID_CAN0));
-    (void)can_setup(&CAN, &CAN_settings);
+    (void)can_sam3x_init(&CAN0, ADDR_CAN0, CLOCK_SAM3X_PMC_PERIPH(PID_CAN0));
+    (void)can_setup(&CAN0, &CAN_settings);
+
+    (void)can_sam3x_init(&CAN1, ADDR_CAN1, CLOCK_SAM3X_PMC_PERIPH(PID_CAN1));
+    (void)can_setup(&CAN1, &CAN_settings);
 
     /* HAL */
-    ctx->CAN = &CAN;
+    ctx->CAN0 = &CAN0;
+    ctx->CAN1 = &CAN1;
 }
 
 static void arduino_due_init_digital(/*@partial@*/ struct arduino_due *ctx)

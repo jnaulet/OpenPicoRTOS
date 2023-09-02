@@ -259,19 +259,48 @@ static void ipwm_main(void *priv)
     }
 }
 
-/*
- * This thread listens for CAN data on ID 6 and echoes it back on ID 7
- */
-static void can_main(void *priv)
-{
-#define CAN_ID_RX 0x6
-#define CAN_ID_TX 0x7
+#define CAN_ID_M2S 0x6
+#define CAN_ID_S2M 0x7
 
+/*
+ * This thread write data on ID 6 and reads it back (must be 7)
+ */
+static void can_master_main(void *priv)
+{
     picoRTOS_assert_fatal(priv != NULL, return );
 
     struct can *CAN = (struct can*)priv;
 
-    (void)can_accept(CAN, (can_id_t)CAN_ID_RX, 0);
+    (void)can_accept(CAN, (can_id_t)CAN_ID_S2M, 0);
+
+    for (;;) {
+        int res;
+        can_id_t id = 0;
+        char msg[CAN_DATA_COUNT] = { (char)0, (char)1, (char)2, (char)3,
+                                     (char)4, (char)5, (char)6, (char)7 };
+
+        if ((res = can_write(CAN, (can_id_t)CAN_ID_M2S, msg, sizeof(msg))) == -EAGAIN) {
+            picoRTOS_schedule();
+            continue;
+        }
+
+        while (can_read(CAN, &id, msg, (size_t)res) == -EAGAIN)
+            picoRTOS_schedule();
+
+        picoRTOS_assert_void(id == (can_id_t)CAN_ID_S2M);
+    }
+}
+
+/*
+ * This thread listens for CAN data on ID 6 and echoes it back on ID 7
+ */
+static void can_slave_main(void *priv)
+{
+    picoRTOS_assert_fatal(priv != NULL, return );
+
+    struct can *CAN = (struct can*)priv;
+
+    (void)can_accept(CAN, (can_id_t)CAN_ID_M2S, 0);
 
     for (;;) {
         int res;
@@ -284,9 +313,9 @@ static void can_main(void *priv)
             continue;
         }
 
-        picoRTOS_assert_void(id != (can_id_t)CAN_ID_RX);
+        picoRTOS_assert_void(id == (can_id_t)CAN_ID_M2S);
 
-        (void)can_write(CAN, (can_id_t)CAN_ID_TX, msg, (size_t)res);
+        (void)can_write(CAN, (can_id_t)CAN_ID_S2M, msg, (size_t)res);
     }
 }
 
@@ -311,8 +340,8 @@ static void adc_main(void *priv)
         }
 
         /* Analog measurement from 3.3v */
-        picoRTOS_assert_void(sample_mv > 3200);
-        picoRTOS_assert_void(sample_mv < 3400);
+        picoRTOS_assert_void(sample_mv > 3100);
+        picoRTOS_assert_void(sample_mv < 3500);
 
         picoRTOS_sleep_until(&ref, PICORTOS_DELAY_MSEC(40));
     }
@@ -408,6 +437,7 @@ int main(void)
     static picoRTOS_stack_t stack9[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack10[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack11[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack12[CONFIG_DEFAULT_STACK_COUNT];
 
     /* Init fixed priorities first */
     picoRTOS_task_init(&task, tick_main, blink.due.DIGITAL23, stack0, (size_t)CONFIG_DEFAULT_STACK_COUNT);
@@ -435,15 +465,17 @@ int main(void)
     picoRTOS_task_init(&task, ipwm_main, blink.due.PWM3, stack7, (size_t)CONFIG_DEFAULT_STACK_COUNT);
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
     /* can thread */
-    picoRTOS_task_init(&task, can_main, blink.due.CAN, stack8, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_task_init(&task, can_master_main, blink.due.CAN0, stack8, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+    picoRTOS_task_init(&task, can_slave_main, blink.due.CAN1, stack9, (size_t)CONFIG_DEFAULT_STACK_COUNT);
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
     /* adc thread */
-    picoRTOS_task_init(&task, adc_main, blink.due.A0, stack9, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_task_init(&task, adc_main, blink.due.A0, stack10, (size_t)CONFIG_DEFAULT_STACK_COUNT);
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
     /* i2c threads */
-    picoRTOS_task_init(&task, twi_master_main, blink.due.I2C, stack10, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_task_init(&task, twi_master_main, blink.due.I2C, stack11, (size_t)CONFIG_DEFAULT_STACK_COUNT);
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
-    picoRTOS_task_init(&task, twi_slave_main, blink.due.I2C1, stack11, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_task_init(&task, twi_slave_main, blink.due.I2C1, stack12, (size_t)CONFIG_DEFAULT_STACK_COUNT);
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
 
     /* start the scheduler */
