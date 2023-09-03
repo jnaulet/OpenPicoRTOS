@@ -43,11 +43,6 @@ Footer: distributed under MIT license
 # --------------------------------------------------------------------------
 
 
-Group: Configuration  {
-
-   File: picoRTOSConfig.h  (no auto-title, etc/picoRTOSConfig.h)
-   }  # Group: Configuration
-
 Group: hw-specific  {
 
    Group: ATMega / AVR  {
@@ -55,9 +50,7 @@ Group: hw-specific  {
       File: ADC  (no auto-title, drivers/adc/adc-avr.c)
       File: EEPROM  (no auto-title, drivers/eeprom/eeprom-avr.c)
       File: GPIO  (no auto-title, drivers/gpio/gpio-avr.c)
-      File: gpio_stm32h7xx_init  (drivers/gpio/gpio-stm32h7xx.c)
       File: MUX  (no auto-title, drivers/mux/mux-avr.c)
-      File: mux/mux-stm32h7xx.c  (drivers/mux/mux-stm32h7xx.c)
       File: PWM  (no auto-title, drivers/pwm/pwm-avr.c)
 
       Group: Spi  {
@@ -117,7 +110,9 @@ Group: hw-specific  {
 
       File: Clocks  (no auto-title, drivers/clock/clock-stm32h7xx.c)
       File: DMA  (no auto-title, drivers/dma/dma-stm32h7xx.c)
+      File: GPIO  (no auto-title, drivers/gpio/gpio-stm32h7xx.c)
       File: Misc.  (no auto-title, drivers/misc/misc-stm32h7xx_dmamux.c)
+      File: MUX  (no auto-title, drivers/mux/mux-stm32h7xx.c)
       File: PWM  (no auto-title, drivers/pwm/pwm-stm32h7xx_tim.c)
       File: SPI  (no auto-title, drivers/spi/spi-stm32h7xx.c)
       File: UART  (no auto-title, drivers/uart/uart-stm32h7xx.c)
@@ -153,6 +148,7 @@ Group: hw-specific  {
    Group: SAM3a/3x  {
 
       File: ADC  (no auto-title, drivers/adc/adc-sam3x.c)
+      File: CAN  (no auto-title, drivers/can/can-sam3x.c)
       File: Clocks  (no auto-title, drivers/clock/clock-sam3x_pmc.c)
       File: GPIO  (no auto-title, drivers/gpio/gpio-sam3x_pio.c)
       File: MUX  (no auto-title, drivers/mux/mux-sam3x_pio.c)
@@ -182,14 +178,10 @@ Group: hw-specific  {
 
 Group: picoRTOS-scheduler-API  {
 
-   File: Functions  (no auto-title, picoRTOS.c)
    File: Macros  (no auto-title, picoRTOS.h)
+   File: scheduler/picoRTOS-SMP.c  (scheduler/picoRTOS-SMP.c)
+   File: scheduler/picoRTOS.c  (scheduler/picoRTOS.c)
    }  # Group: picoRTOS-scheduler-API
-
-Group: picoRTOS-SMP-extensions  {
-
-   File: Functions  (no auto-title, picoRTOS-SMP.c)
-   }  # Group: picoRTOS-SMP-extensions
 
 Group: picoRTOS-IPC-API  {
 
