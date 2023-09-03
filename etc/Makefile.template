@@ -8,7 +8,7 @@ c_src-y += some_other_sources.c
 
 # This makefile will be included by OpenPicoRTOS during build, it is safer to use
 # the 'skip-makefile' keyword to avoid local targets inclusion
-ifeq ($(skip-makefile),)
+ifneq ($(skip-makefile),1)
 PWD := $(shell pwd)
 # 'KBUILD_SRC' is the directory containing the OpenPicoRTOS original sources
 KBUILD_SRC := path/to/OpenPicoRTOS
