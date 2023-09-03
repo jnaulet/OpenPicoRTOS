@@ -7,7 +7,10 @@ config MACH_ATSAME5X
 
 config MACH_STM32H7XX
        bool "STMicro STM32H7XX Series"
-       
+
+config MACH_RENESAS_RA4
+       bool "Renesas RA4 Series"
+
 endchoice
 
 choice

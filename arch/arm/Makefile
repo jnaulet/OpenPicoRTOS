@@ -30,6 +30,7 @@ a_src-$(CONFIG_MACH_RP2040) += $(arch-arm)/armv6-m/mach-rp2040/startup.S
 a_src-$(CONFIG_MACH_ATSAM3X8E) += $(arch-arm)/armv7-m/mach-atsam3x8e/startup.S
 a_src-$(CONFIG_MACH_ATSAME5X) += $(arch-arm)/armv7e-m/mach-atsame5x/startup.S
 a_src-$(CONFIG_MACH_STM32H7XX) += $(arch-arm)/armv7e-m/mach-stm32h7xx/startup.S
+a_src-$(CONFIG_MACH_RENESAS_RA4) += $(arch-arm)/armv7e-m/mach-renesas_ra4/startup.S
 
 ccflags-$(CONFIG_ARM) += -mthumb $(arch-y) $(fpu-y)
 asflags-$(CONFIG_ARM) += -mthumb $(arch-y) $(fpu-y)
