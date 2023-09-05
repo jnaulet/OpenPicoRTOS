@@ -5,7 +5,7 @@ c_src-y += main.c
 c_src-y += arduino-uno.c
 
 # avoid double-inclusion
-ifeq ($(skip-makefile),)
+ifneq ($(skip-makefile),1)
 PWD := $(shell pwd)
 KBUILD_SRC := ../..
 TTY ?= /dev/ttyACM0
@@ -16,7 +16,7 @@ all: $(hex)
 	@
 
 $(target): FORCE
-	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) TARGET=$@
+	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD)
 
 $(hex): $(target)
 	avr-objcopy -O ihex -R .eeprom $< $@

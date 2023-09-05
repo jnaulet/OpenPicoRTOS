@@ -1,6 +1,8 @@
 #include "picoRTOS.h"
 #include "arduino-uno.h"
 
+#include <generated/autoconf.h>
+
 #include "adc.h"
 #include "eeprom.h"
 #include "gpio.h"
