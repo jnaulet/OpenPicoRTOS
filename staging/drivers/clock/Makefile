@@ -5,3 +5,4 @@ staging-drivers-clock := $(srctree)/staging/drivers/clock
 
 c_src-$(CONFIG_CLOCK_MPC574XX) += $(staging-drivers-clock)/clock-mpc574xx.c
 c_src-$(CONFIG_CLOCK_NXP_SIU) += $(staging-drivers-clock)/clock-nxp_siu.c
+c_src-$(CONFIG_CLOCK_RENESAS_R4) += $(staging-drivers-clock)/clock-renesas_ra4.c
