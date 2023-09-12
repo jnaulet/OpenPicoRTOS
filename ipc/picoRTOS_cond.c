@@ -1,6 +1,5 @@
 #include "picoRTOS_cond.h"
 #include "picoRTOS_port.h"
-#include <generated/autoconf.h>
 
 /* Function: picoRTOS_cond_init
  * Initialises a condition

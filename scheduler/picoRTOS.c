@@ -1,7 +1,6 @@
 #include "picoRTOS.h"
 #include "picoRTOS_port.h"
 
-#include <generated/autoconf.h>
 
 /* CHECK FOR OBVIOUS ERRORS */
 

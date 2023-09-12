@@ -321,9 +321,9 @@ check:
 	cd test && ./run_tests.sh
 
 distcheck: FORCE
-	@for demo in $(DEMO); do \
+	@for demo in $(shell ls demo | xargs); do \
 	  echo $$demo " : "; \
-	  $(MAKE) -C $$demo staticcheck || exit 1; \
+	  $(MAKE) -C demo/$$demo || exit 1; \
 	done
 	@echo ""
 	@echo "Demo Test Complete"

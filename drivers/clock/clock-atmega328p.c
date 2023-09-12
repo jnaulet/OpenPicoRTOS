@@ -1,7 +1,6 @@
 #include "clock-atmega328p.h"
 #include "picoRTOS.h"
 
-#include <generated/autoconf.h>
 
 clock_freq_t clock_get_freq(clock_id_t clkid)
 {

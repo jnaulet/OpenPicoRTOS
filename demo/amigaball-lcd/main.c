@@ -1,7 +1,6 @@
 #include "board.h"
 #include "picoRTOS.h"
 
-#include <generated/autoconf.h>
 
 #define CONFIG_SHORT_STACK_COUNT   128
 

@@ -1,6 +1,5 @@
 #include "picoRTOS_futex.h"
 #include "picoRTOS_port.h"
-#include <generated/autoconf.h>
 
 /* check */
 #ifndef CONFIG_DEADLOCK_COUNT

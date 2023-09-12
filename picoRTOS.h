@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include "picoRTOS_types.h"
+#include <generated/autoconf.h>
 
 /* TASKS */
 typedef void (*picoRTOS_task_fn)(void*);

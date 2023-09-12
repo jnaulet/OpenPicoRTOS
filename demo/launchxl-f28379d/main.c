@@ -1,7 +1,6 @@
 #include "picoRTOS.h"
 #include "launchxl-f28379d.h"
 
-#include <generated/autoconf.h>
 
 #include <stdbool.h>
 #include <stdint.h>

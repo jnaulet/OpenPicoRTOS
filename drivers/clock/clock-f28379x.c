@@ -2,7 +2,6 @@
 #include "picoRTOS.h"
 #include "picoRTOS_device.h"
 
-#include <generated/autoconf.h>
 
 #include <errno.h>
 #include <stdint.h>

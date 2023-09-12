@@ -1,7 +1,6 @@
 #include "picoRTOS-SMP.h"
 #include "picoRTOS-SMP_port.h"
 
-#include <generated/autoconf.h>
 
 /* CHECK FOR OBVIOUS ERRORS */
 

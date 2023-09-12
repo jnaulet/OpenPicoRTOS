@@ -1,7 +1,6 @@
 #include "picoRTOS.h"
 #include "arduino-mega2560.h"
 
-#include <generated/autoconf.h>
 
 #include "adc.h"
 #include "eeprom.h"

@@ -1,5 +1,4 @@
 #include "picoRTOS_mutex.h"
-#include <generated/autoconf.h>
 
 /* check */
 #ifndef CONFIG_DEADLOCK_COUNT

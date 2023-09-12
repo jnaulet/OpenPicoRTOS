@@ -1,7 +1,6 @@
 #include "lcd.h"
 #include "picoRTOS.h"
 
-#include <generated/autoconf.h>
 
 #define LCD_MODE_CMD(ctx)   gpio_write((ctx)->dc, false)
 #define LCD_MODE_DATA(ctx)  gpio_write((ctx)->dc, true)

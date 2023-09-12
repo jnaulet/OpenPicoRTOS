@@ -1,6 +1,5 @@
 #include "can-ti_dcan.h"
 #include "picoRTOS.h"
-#include <generated/autoconf.h>
 
 #include <stdint.h>
 

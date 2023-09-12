@@ -4,7 +4,6 @@
 #include "picoRTOS_mutex.h"
 #include "picoRTOS_cond.h"
 
-#include <generated/autoconf.h>
 
 #define BLINK_PERIOD PICORTOS_DELAY_SEC(1)
 #define BLINK_DELAY  PICORTOS_DELAY_MSEC(60)

@@ -4,7 +4,6 @@
 #include "picoRTOS_device.h"
 
 #include <stdint.h>
-#include <generated/autoconf.h>
 
 struct CLOCK_SAM3X_PMC {
     volatile uint32_t PMC_SCER;

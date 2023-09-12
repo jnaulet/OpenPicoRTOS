@@ -15,6 +15,7 @@ typedef long picoRTOS_intptr_t;
 
 #define ARCH_INITIAL_STACK_COUNT 10
 #define ARCH_MIN_STACK_COUNT ARCH_INITIAL_STACK_COUNT
+#define ARCH_L1_DCACHE_LINESIZE sizeof(long)
 
 #define arch_break() __debugbreak()
 

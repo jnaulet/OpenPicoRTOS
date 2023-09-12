@@ -2,7 +2,6 @@
 #include "picoRTOS.h"
 
 #include <stdint.h>
-#include <generated/autoconf.h>
 
 struct PWM_SAM3X_TC {
     volatile uint32_t TC_CCR;

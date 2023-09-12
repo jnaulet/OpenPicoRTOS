@@ -13,6 +13,7 @@ typedef long picoRTOS_intptr_t;
 
 #define ARCH_INITIAL_STACK_COUNT 10
 #define ARCH_MIN_STACK_COUNT ARCH_INITIAL_STACK_COUNT
+#define ARCH_L1_DCACHE_LINESIZE sizeof(long)
 
 /* splint doesn't like inline assembly */
 #ifdef S_SPLINT_S
