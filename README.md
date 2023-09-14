@@ -126,6 +126,7 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - Atmel ATMega (AVR5+)
  - Atmel TinyAVR (0+) Series
  - MIPS M51xx / PIC32Mx
+ - Renesas RA4M1 (staging)
  - RISC-V RV32IMAC
  - PowerPC e200z4 (staging)
  - PowerPC e200z7 (staging)
@@ -230,6 +231,7 @@ Basic demo code is provided for the following boards:
   - Arduino Due
   - Arduino Mega2560
   - Arduino Uno
+  - Arduino Uno R4 Minima
   - ATtiny817-Xplained Mini
   - ATtiny1607 Curiosity Nano
   - Curiosity 2.0 PIC32 MZ EF
