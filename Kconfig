@@ -12,12 +12,6 @@ source scheduler/Kconfig
 
 menu "General setup"
 
-config SYSCLK_HZ
-       int "Core clock frequency"
-       default 100000000
-       help
-          Some help here
-
 config TICK_HZ
        int "System tick frequency (in hertz)"
        default 1000

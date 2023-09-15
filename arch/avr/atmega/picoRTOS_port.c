@@ -159,8 +159,40 @@ void arch_disable_interrupt(picoRTOS_irq_t irq)
 
 /* STATS */
 
-picoRTOS_cycles_t arch_counter(void)
+picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
 {
-    return (picoRTOS_cycles_t)*AVR_TCNTn *
-           (picoRTOS_cycles_t)PRESCALER;
+    arch_assert_void(counter < ARCH_COUNTER_COUNT);
+
+    if (counter == ARCH_COUNTER_CURRENT)
+        return (picoRTOS_cycles_t)*AVR_TCNTn;
+
+    if (counter == ARCH_COUNTER_SINCE) {
+        picoRTOS_cycles_t ocr = (picoRTOS_cycles_t)*AVR_OCRnA;
+        picoRTOS_cycles_t tcnt = (picoRTOS_cycles_t)*AVR_TCNTn;
+
+        if (t >= ocr) return ocr;           /* only used on first tick */
+        if (tcnt < t) return ocr - t;       /* rollover */
+        /* normal */
+        return tcnt - t;
+    }
+
+    arch_assert_void(false);
+    return 0;
+}
+
+/* CLOCK */
+
+void arch_set_clock_frequency(unsigned long freq)
+{
+    arch_assert_void(freq != 0);
+}
+
+void arch_delay_us(unsigned long n)
+{
+    arch_assert_void(n != 0);
+
+    unsigned long ncycles = n * ((unsigned long)CONFIG_SYSCLK_HZ / 1000000ul);
+
+    while (ncycles-- != 0)
+        ASM("nop");
 }

@@ -44,4 +44,9 @@ config MACH_ATTINY1607
 
 endchoice
 
+config SYSCLK_HZ
+       int "Main clock frequency"
+       depends on AVR
+       default 16000000
+
 endmenu
