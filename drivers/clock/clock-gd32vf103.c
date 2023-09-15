@@ -1,5 +1,7 @@
 #include "clock-gd32vf103.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
 #include <stdint.h>
@@ -97,12 +99,13 @@ static int switch_system_clock(clock_gd32vf103_ck_sys_t ck_sys)
     rcu_cfg0 |= RCU_CFG0_SCS(ck_sys);
     RCU->RCU_CFG0 = rcu_cfg0;
 
-    while (deadlock-- != 0)
-        if ((RCU->RCU_CFG0 & RCU_CFG0_SCSS(RCU_CFG0_SCSS_M)) ==
-            RCU_CFG0_SCSS(ck_sys))
-            break;
+    while ((RCU->RCU_CFG0 & RCU_CFG0_SCSS(RCU_CFG0_SCSS_M)) != RCU_CFG0_SCSS(ck_sys) &&
+           deadlock-- != 0) arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
+
+    /* Beware: there's a fixed /4 here */
+    arch_set_clock_frequency((unsigned long)clocks.ck_sys / 4ul);
     return 0;
 }
 
@@ -113,9 +116,8 @@ static int setup_hxtal_busywait(unsigned long freq)
     /* start xtal */
     RCU->RCU_CTL |= RCU_CTL_HXTALEN;
 
-    while (deadlock-- != 0)
-        if ((RCU->RCU_CTL & RCU_CTL_HXTALSTB) != 0)
-            break;
+    while ((RCU->RCU_CTL & RCU_CTL_HXTALSTB) == 0 &&
+           deadlock-- != 0) arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
 
@@ -177,9 +179,9 @@ static int enable_pll_busywait(void)
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
     RCU->RCU_CTL |= RCU_CTL_PLLEN;
-    while (deadlock-- != 0)
-        if ((RCU->RCU_CTL & RCU_CTL_PLLSTB) != 0)
-            break;
+
+    while ((RCU->RCU_CTL & RCU_CTL_PLLSTB) == 0 &&
+           deadlock-- != 0) arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;

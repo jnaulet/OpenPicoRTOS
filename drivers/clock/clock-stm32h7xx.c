@@ -1,5 +1,7 @@
 #include "clock-stm32h7xx.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
 #include <stdint.h>
@@ -458,9 +460,8 @@ static int hse_setup(unsigned long hz)
     /* otherwise */
     RCC->CR |= CR_HSEON;
 
-    while (deadlock-- != 0)
-        if ((RCC->CR & CR_HSERDY) != 0)
-            break;
+    while ((RCC->CR & CR_HSERDY) == 0 & deadlock-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
 
@@ -495,10 +496,9 @@ static int hsi_setup(clock_stm32h7xx_hsi_t hsi)
     RCC->CR |= (CR_HSIDIV(hsi) | CR_HSION | CR_HSIKERON);
 
     /* wait */
-    while (deadlock-- != 0)
-        if ((RCC->CR & CR_HSIRDY) != 0 &&
-            (RCC->CR & CR_HSIDIVF) != 0)
-            break;
+    while (((RCC->CR & CR_HSIRDY) == 0 ||
+            (RCC->CR & CR_HSIDIVF) == 0) &&
+           deadlock-- != 0) arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
@@ -512,9 +512,8 @@ static int csi_setup(clock_stm32h7xx_csi_t csi)
         int deadlock = CONFIG_DEADLOCK_COUNT;
 
         RCC->CR |= (CR_CSION | CR_CSIKERON);
-        while (deadlock-- != 0)
-            if ((RCC->CR & CR_CSIRDY) != 0)
-                break;
+        while ((RCC->CR & CR_CSIRDY) == 0 && deadlock-- != 0)
+            arch_delay_us(1ul);
 
         picoRTOS_assert(deadlock != -1, return -EBUSY);
 
@@ -532,9 +531,8 @@ static int hsi48_setup(clock_stm32h7xx_hsi48_t hsi48)
         int deadlock = CONFIG_DEADLOCK_COUNT;
 
         RCC->CR |= CR_HSI48ON;
-        while (deadlock-- != 0)
-            if ((RCC->CR & CR_HSI48RDY) != 0)
-                break;
+        while ((RCC->CR & CR_HSI48RDY) == 0 && deadlock-- != 0)
+            arch_delay_us(1ul);
 
         picoRTOS_assert(deadlock != -1,  return -EBUSY);
 
@@ -601,9 +599,8 @@ static int pll_enable(size_t index, bool on)
 
         RCC->CR |= pllxon;
 
-        while (deadlock-- != 0)
-            if ((RCC->CR & pllxrdy) != 0)
-                break;
+        while ((RCC->CR & pllxrdy) == 0 && deadlock-- != 0)
+            arch_delay_us(1ul);
 
         picoRTOS_assert(deadlock != -1, return -EBUSY);
 
@@ -824,9 +821,8 @@ static int set_voltage_scale1(void)
     /* supply if LDO */
     PWR->CR3 |= CR3_LDOEN;
 
-    while (timeout0-- != 0)
-        if ((PWR->CSR1 & CSR1_ACTVOSRDY) != 0)
-            break;
+    while ((PWR->CSR1 & CSR1_ACTVOSRDY) == 0 && timeout0-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(timeout0 != -1, return -EBUSY);
 
@@ -837,9 +833,8 @@ static int set_voltage_scale1(void)
     /* voltage scaling */
     PWR->D3CR = (uint32_t)D3CR_VOS(0x3);
 
-    while (timeout1-- != 0)
-        if ((PWR->D3CR & D3CR_VOSRDY) != 0)
-            break;
+    while ((PWR->D3CR & D3CR_VOSRDY) == 0 && timeout1-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(timeout1 != -1, return -EBUSY);
     return 0;
@@ -872,11 +867,12 @@ static int sw_setup(clock_stm32h7xx_sw_t sw)
     cfgr &= ~CFGR_SW(CFGR_SW_M);
     RCC->CFGR = cfgr | (uint32_t)CFGR_SW(sw);
 
-    while (deadlock-- != 0)
-        if ((RCC->CFGR & CFGR_SWS(CFGR_SWS_M)) == CFGR_SWS(sw))
-            break;
+    while ((RCC->CFGR & CFGR_SWS(CFGR_SWS_M)) != CFGR_SWS(sw) &&
+           deadlock-- != 0) arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
+
+    arch_set_clock_frequency((unsigned long)clocks.sys);
     return 0;
 }
 

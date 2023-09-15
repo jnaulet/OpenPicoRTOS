@@ -1,5 +1,7 @@
 #include "can-ti_dcan.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 #include <stdint.h>
 
@@ -139,9 +141,8 @@ static int ifcmd_busywait(volatile const uint32_t *ifcmd, uint32_t mask)
 {
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    while (deadlock-- != 0)
-        if ((*ifcmd & mask) == 0)
-            break;
+    while ((*ifcmd & mask) != 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
@@ -153,9 +154,8 @@ static int clear_ram_busywait(struct can *ctx)
 
     ctx->base->CAN_RAM_INIT = (uint32_t)CAN_RAM_INIT_CAN_RAM_INIT | 0xa;
 
-    while (deadlock-- != 0)
-        if ((ctx->base->CAN_RAM_INIT & CAN_RAM_INIT_RAM_INIT_DONE) != 0)
-            break;
+    while ((ctx->base->CAN_RAM_INIT & CAN_RAM_INIT_RAM_INIT_DONE) == 0 &&
+           deadlock-- != 0) arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;

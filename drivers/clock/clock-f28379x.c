@@ -1,7 +1,8 @@
 #include "clock-f28379x.h"
-#include "picoRTOS.h"
-#include "picoRTOS_device.h"
 
+#include "picoRTOS.h"
+#include "picoRTOS_port.h"
+#include "picoRTOS_device.h"
 
 #include <errno.h>
 #include <stdint.h>
@@ -95,9 +96,8 @@ static int pll_lock_busywait(void)
 {
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    while (deadlock-- != 0)
-        if ((CLK_CFG_REGS->SYSPLLSTS & SYSPLLSTS_LOCKS) != 0)
-            break;
+    while ((CLK_CFG_REGS->SYSPLLSTS & SYSPLLSTS_LOCKS) == 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
@@ -159,6 +159,7 @@ static int configure_pll(unsigned long freq)
     for (divsel = 2ul; divsel <= (unsigned long)SYSCLKDIVSEL_PLLSYSCLKDIV_M; divsel++)
         for (imult = 1ul; imult <= (unsigned long)SYSPLLMULT_IMULT_M; imult++) {
             if (freq == ((unsigned long)clocks.clksrc * imult) / divsel) {
+                arch_set_clock_frequency(freq);
                 clocks.cpuclk = (clock_freq_t)freq;
                 return pll_setup((uint32_t)imult, (uint32_t)0, (uint32_t)(divsel - 1ul));
             }

@@ -1,5 +1,7 @@
 #include "spi-atmel_sercom.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 #include <stdint.h>
 
@@ -80,9 +82,8 @@ static int sync_busywait(struct spi *ctx, uint32_t mask)
 {
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    while (deadlock-- != 0)
-        if ((ctx->base->SYNCBUSY & mask) == 0)
-            break;
+    while ((ctx->base->SYNCBUSY & mask) != 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;

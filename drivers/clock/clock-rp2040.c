@@ -1,5 +1,7 @@
 #include "clock-rp2040.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 #ifndef CONFIG_DEADLOCK_COUNT
 # error CONFIG_DEADLOCK_COUNT must be configured for this driver
@@ -196,9 +198,8 @@ static int xosc_config(unsigned long hz)
                             XOSC_CTRL_FREQ_RANGE(XOSC_FREQ_RANGE));
 
     /* wait */
-    while ((XOSC->STATUS & XOSC_STATUS_STABLE) == 0 &&
-           deadlock-- != 0) {
-    }
+    while ((XOSC->STATUS & XOSC_STATUS_STABLE) == 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
 
@@ -223,9 +224,8 @@ static int pll_setup(struct PLL *pll, int refdiv, int fbdiv,
     pll->PWR &= ~(PLL_PWR_VCOPD | PLL_PWR_PD);
 
     /* wait pll lock */
-    while ((pll->CS & PLL_CS_LOCK) == 0 &&
-           deadlock-- != 0) {
-    }
+    while ((pll->CS & PLL_CS_LOCK) == 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
 
@@ -310,9 +310,8 @@ static int sys_config_ref(void)
     CLK->CLK_SYS_DIV = (uint32_t)CLK_SYS_DIV_INT(1);
     CLK->CLK_SYS_CTRL = (uint32_t)0;
 
-    while ((CLK->CLK_SYS_SELECTED & (1 << 0)) == 0 &&
-           deadlock-- != 0) {
-    }
+    while ((CLK->CLK_SYS_SELECTED & (1 << 0)) == 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
@@ -329,13 +328,14 @@ static int sys_config(unsigned long sys_div)
     CLK->CLK_SYS_CTRL = (uint32_t)CLK_SYS_CTRL_AUXSRC(0);
     CLK->CLK_SYS_CTRL |= CLK_SYS_CTRL_SRC;
 
-    while ((CLK->CLK_SYS_SELECTED & (1 << 1)) == 0 &&
-           deadlock-- != 0) {
-    }
+    while ((CLK->CLK_SYS_SELECTED & (1 << 1)) == 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
 
     clocks.sys = clocks.pll_sys / (clock_freq_t)sys_div;
+    arch_set_clock_frequency((unsigned long)clocks.sys);
+
     return 0;
 }
 
@@ -353,9 +353,8 @@ static int ref_config(unsigned long ref_div)
     CLK->CLK_REF_CTRL = (uint32_t)CLK_REF_CTRL_SRC(REF_SRC);
 
     /* poll */
-    while ((CLK->CLK_REF_SELECTED & (1 << REF_SRC)) == 0 &&
-           deadlock-- != 0) {
-    }
+    while ((CLK->CLK_REF_SELECTED & (1 << REF_SRC)) == 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
 

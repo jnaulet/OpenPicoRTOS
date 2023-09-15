@@ -1,6 +1,7 @@
 #include "clock-sam3x_pmc.h"
 
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
 #include <stdint.h>
@@ -109,8 +110,8 @@ static int clock_sam3x_pmc_init_moscx(unsigned long hz)
 
     picoRTOS_assert(hz > 0, return -EINVAL);
 
+    int deadlock = CONFIG_DEADLOCK_COUNT;
     uint32_t mor = (uint32_t)CKGR_MOR_KEY(0x37);
-    int deadlock = CONFIG_DEADLOCK_COUNT * CKGR_MOR_MOSCXTST_DEFAULT;
 
     mor |= CKGR_MOR_MOSCTXEN;                               /* enable main crystal */
     mor |= CKGR_MOR_MOSCSEL;                                /* select */
@@ -120,8 +121,7 @@ static int clock_sam3x_pmc_init_moscx(unsigned long hz)
     PMC->CKGR_MOR = mor;
     while ((PMC->PMC_SR & PMC_SR_MOSCXTS) != 0 &&
            (PMC->PMC_SR & PMC_SR_MOSCSELS) == 0 &&
-           deadlock-- != 0) {
-    }
+           deadlock-- != 0) arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
 
@@ -144,8 +144,8 @@ static int plla_setup(unsigned long mula)
 
     picoRTOS_assert(mula < CKGR_PLLAR_MULA_COUNT, return -EINVAL);
 
+    int deadlock = CONFIG_DEADLOCK_COUNT;
     uint32_t pllar = (uint32_t)CKGR_PLLAR_ONE;
-    int deadlock = CONFIG_DEADLOCK_COUNT * CKGR_PLLAR_PLLACOUNT_DEFAULT;
 
     /* reset plla */
     PMC->CKGR_PLLAR = (uint32_t)CKGR_PLLAR_ONE;
@@ -158,9 +158,8 @@ static int plla_setup(unsigned long mula)
     PMC->CKGR_PLLAR = pllar;
 
     /* wait for lock bit */
-    while ((PMC->PMC_SR & PMC_SR_LOCKA) == 0 &&
-           deadlock-- != 0) {
-    }
+    while ((PMC->PMC_SR & PMC_SR_LOCKA) == 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
@@ -204,21 +203,21 @@ static int clock_sam3x_pmc_init_mck(unsigned long mck_div)
     PMC->PMC_MCKR = (uint32_t)((PMC->PMC_MCKR & ~PMC_MCKR_PRES(PMC_MCKR_PRES_M)) |
                                PMC_MCKR_PRES(pres));
 
-    while ((PMC->PMC_SR & PMC_SR_MCKRDY) == 0 &&
-           deadlock-- != 0) {
-    }
+    while ((PMC->PMC_SR & PMC_SR_MCKRDY) == 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
 
     /* switch to pll */
     PMC->PMC_MCKR = (uint32_t)(PMC_MCKR_PRES(pres) | PMC_MCKR_CSS(PLLA_CLK));
-    while ((PMC->PMC_SR & PMC_SR_MCKRDY) == 0 &&
-           deadlock-- != 0) {
-    }
+    while ((PMC->PMC_SR & PMC_SR_MCKRDY) == 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
 
     clocks.mck = clocks.pllack / (clock_freq_t)mck_div;
+    arch_set_clock_frequency((unsigned long)clocks.mck);
+
     return 0;
 }
 

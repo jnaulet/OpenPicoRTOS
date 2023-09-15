@@ -1,5 +1,7 @@
 #include "wd-stm32h7xx_iwdg.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 #include <stdint.h>
 
@@ -52,11 +54,10 @@ int wd_stm32h7xx_iwdg_init(/*@out@*/ struct wd *ctx, int base, clock_id_t clkid)
 
 static int reg_update_busywait(struct wd *ctx)
 {
-    int deadlock = CONFIG_DEADLOCK_COUNT * 1000;
+    int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    while (deadlock-- != 0)
-        if (ctx->base->SR == 0)
-            break;
+    while (ctx->base->SR != 0 && deadlock-- != 0)
+        arch_delay_us(100ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;

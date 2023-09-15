@@ -1,5 +1,7 @@
 #include "misc-rp2040_reset.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 #include <stdint.h>
 
@@ -42,9 +44,8 @@ int rp2040_unreset(struct rp2040_reset *ctx, rp2040_reset_t ss)
 
     ctx->base->RESET &= ~(uint32_t)(1 << ss);
 
-    while (deadlock-- != 0)
-        if ((ctx->base->RESET_DONE & mask) != 0)
-            break;
+    while ((ctx->base->RESET_DONE & mask) == 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;

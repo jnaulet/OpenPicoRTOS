@@ -1,5 +1,7 @@
 #include "clock-renesas_ra4.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
 #include <stdint.h>
@@ -237,9 +239,8 @@ static int setup_hoco(void)
 {
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    while (deadlock-- != 0)
-        if ((SYSTEM->OSCSF & OSCSF_HOCOSF) != 0)
-            break;
+    while ((SYSTEM->OSCSF & OSCSF_HOCOSF) == 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
 
@@ -269,6 +270,8 @@ static int setup_clock_source(struct clock_settings *settings)
     }
 
     SYSTEM->SCKSCR = (uint8_t)SCKSCR_CKSEL(settings->cksel);
+    arch_set_clock_frequency((unsigned long)clocks.main);
+
     return res;
 }
 

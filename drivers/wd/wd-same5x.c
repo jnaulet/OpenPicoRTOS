@@ -1,5 +1,7 @@
 #include "wd-same5x.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 #include <stdint.h>
 
@@ -33,16 +35,12 @@ struct WD_SAME5X {
 #define SYNCBUSY_WEN      (1 << 2)
 #define SYNCBUSY_ENABLE   (1 << 1)
 
-/* WD sync is very slow */
-#define WD_SAME5X_DEADLOCK_COUNT 100000
-
 static int sync_busywait(struct wd *ctx, uint32_t mask)
 {
-    int deadlock = WD_SAME5X_DEADLOCK_COUNT;
+    int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    while (deadlock-- != 0)
-        if ((ctx->base->SYNCBUSY & mask) == 0)
-            break;
+    while ((ctx->base->SYNCBUSY & mask) != 0 && deadlock-- != 0)
+        arch_delay_us(10ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;

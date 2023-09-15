@@ -1,6 +1,7 @@
 #include "clock-pic32mx.h"
 
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
 #include <stdint.h>
@@ -110,9 +111,8 @@ static int osccon_busywait(uint32_t mask)
 {
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    while (deadlock-- != 0)
-        if ((OSCILLATOR->OSCCON.REG & mask) != 0)
-            break;
+    while ((OSCILLATOR->OSCCON.REG & mask) == 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
@@ -219,6 +219,7 @@ static int switch_osc(clock_pic32mx_osc_t osc)
         /*@notreached@*/ return -EIO;
     }
 
+    arch_set_clock_frequency((unsigned long)clocks.sysclk);
     return osccon_busywait((uint32_t)OSCCON_OSWEN);
 }
 

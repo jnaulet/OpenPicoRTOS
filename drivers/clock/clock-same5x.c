@@ -1,9 +1,12 @@
 #include "clock-same5x.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
+#include "picoRTOS_device.h"
 
 #include <stdint.h>
 
-#include "picoRTOS_device.h"
+#define GCLK_MAIN 0
 
 struct GCLK_SAME5X {
     volatile uint32_t CTRLA;
@@ -209,8 +212,6 @@ static struct OSCCTRL_SAME5X *OSCCTRL = (struct OSCCTRL_SAME5X*)ADDR_OSCCTRL;
 #define OSC32K_FREQ    32768
 #define OSC32K_1K_FREQ 1024
 
-#define CLOCK_SAME5X_DEADLOCK_COUNT 1000000
-
 static struct {
     clock_freq_t gclk[CLOCK_SAME5X_GCLK_COUNT];
     clock_freq_t pch[CLOCK_SAME5X_PCH_COUNT];
@@ -225,13 +226,12 @@ static struct {
  */
 int clock_same5x_gclk_reset(void)
 {
-    int deadlock = CLOCK_SAME5X_DEADLOCK_COUNT;
+    int deadlock = CONFIG_DEADLOCK_COUNT;
 
     GCLK->CTRLA = (uint32_t)SYNCBUSY_SWRST;
 
-    while (deadlock-- != 0)
-        if ((GCLK->SYNCBUSY & SYNCBUSY_SWRST) == 0)
-            break;
+    while ((GCLK->SYNCBUSY & SYNCBUSY_SWRST) != 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
@@ -275,16 +275,18 @@ int clock_same5x_gclk_generator_setup(size_t index, struct clock_same5x_gclk_set
     GCLK->GENCTRLn[index] |= GENCTRLn_DIV(settings->div) | GENCTRLn_SRC(settings->src);
     clocks.gclk[index] = freq / (clock_freq_t)settings->div;
 
+    if (index == (size_t)GCLK_MAIN)
+        arch_set_clock_frequency((unsigned long)clocks.gclk[index]);
+
     return 0;
 }
 
 static int gclk_generator_sync_busywait(size_t index)
 {
-    int deadlock = CLOCK_SAME5X_DEADLOCK_COUNT;
+    int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    while (deadlock-- != 0)
-        if ((GCLK->SYNCBUSY & SYNCBUSY_GENCTRL(index)) == 0)
-            break;
+    while ((GCLK->SYNCBUSY & SYNCBUSY_GENCTRL(index)) != 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
@@ -326,11 +328,10 @@ int clock_same5x_gclk_generator_disable(size_t index)
 
 static int dfll_sync_busywait(uint32_t mask)
 {
-    int deadlock = CLOCK_SAME5X_DEADLOCK_COUNT;
+    int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    while (deadlock-- != 0)
-        if ((OSCCTRL->DFLLSYNC & mask) == 0)
-            break;
+    while ((OSCCTRL->DFLLSYNC & mask) != 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
@@ -368,11 +369,10 @@ int clock_same5x_dfll_setup(struct clock_same5x_dfll_settings *settings)
 
 static int dfll_ready_busywait(void)
 {
-    int deadlock = CLOCK_SAME5X_DEADLOCK_COUNT;
+    int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    while (deadlock-- != 0)
-        if ((OSCCTRL->STATUS & STATUS_DFLLRDY) != 0)
-            break;
+    while ((OSCCTRL->STATUS & STATUS_DFLLRDY) == 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
@@ -426,11 +426,10 @@ static int dpll_sync_busywait(size_t index)
 {
     picoRTOS_assert(index < (size_t)CLOCK_SAME5X_DPLL_COUNT, return -EINVAL);
 
-    int deadlock = CLOCK_SAME5X_DEADLOCK_COUNT;
+    int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    while (deadlock-- != 0)
-        if ((OSCCTRL->DPLLn[index].SYNCBUSY & DPLLn_SYNCBUSY_DPLLRATIO) == 0)
-            break;
+    while ((OSCCTRL->DPLLn[index].SYNCBUSY & DPLLn_SYNCBUSY_DPLLRATIO) != 0 &&
+           deadlock-- != 0) arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
@@ -440,12 +439,11 @@ static int dpll_lock_busywait(size_t index)
 {
     picoRTOS_assert(index < (size_t)CLOCK_SAME5X_DPLL_COUNT, return -EINVAL);
 
-    int deadlock = CLOCK_SAME5X_DEADLOCK_COUNT;
+    int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    while (deadlock-- != 0)
-        if ((OSCCTRL->DPLLn[index].STATUS & DPLLn_STATUS_CLKRDY) != 0 &&
-            (OSCCTRL->DPLLn[index].STATUS & DPLLn_STATUS_LOCK) != 0)
-            break;
+    while (((OSCCTRL->DPLLn[index].STATUS & DPLLn_STATUS_CLKRDY) == 0 ||
+            (OSCCTRL->DPLLn[index].STATUS & DPLLn_STATUS_LOCK) == 0) &&
+           deadlock-- != 0) arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
