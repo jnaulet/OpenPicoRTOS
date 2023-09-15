@@ -282,5 +282,6 @@
 /* DEVICE opts */
 
 #define DEVICE_INTERRUPT_VECTOR_COUNT 192
+#define DEVICE_DEFAULT_SYSCLK_HZ      10000000ul /* INTOSC2 */
 
 #endif

@@ -18,8 +18,6 @@ struct C28X_CPUTIMER {
 static struct C28X_CPUTIMER *CPUTIMER2 =
     (struct C28X_CPUTIMER*)ADDR_CPUTIMER2;
 
-#define CPUTIMER2_PRD_VALUE ((CONFIG_SYSCLK_HZ / CONFIG_TICK_HZ) - 1)
-
 /* PIE */
 struct PIEIxRn {
     volatile unsigned int IER;
@@ -39,6 +37,9 @@ picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
 /*@external@*/ extern void arch_syscall(picoRTOS_syscall_t syscall, void *priv);
 /*@external@*/ extern picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr);
 
+/* CLOCK */
+static unsigned long sysclk_hz = DEVICE_DEFAULT_SYSCLK_HZ;
+
 /* FUNCTIONS TO IMPLEMENT */
 
 void arch_init(void)
@@ -47,7 +48,7 @@ void arch_init(void)
     ASM(" setc INTM");
 
     /* periodic timer */
-    CPUTIMER2->PRD = (unsigned long)CPUTIMER2_PRD_VALUE;
+    CPUTIMER2->PRD = (unsigned long)((sysclk_hz / CONFIG_TICK_HZ) - 1);
     CPUTIMER2->TPR = 0;                 /* no prescaler */
     CPUTIMER2->TCR |= 0x30;             /* reload */
     CPUTIMER2->TCR &= ~0xc000;          /* stop */
@@ -170,8 +171,44 @@ void arch_disable_interrupt(picoRTOS_irq_t irq)
     arch_set_irq_status(irq, false);
 }
 
-picoRTOS_cycles_t arch_counter(void)
+/* STATS */
+
+picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
 {
-    return (picoRTOS_cycles_t)CPUTIMER2_PRD_VALUE -
-           (picoRTOS_cycles_t)CPUTIMER2->TIM;
+    arch_assert_void(counter < ARCH_COUNTER_COUNT);
+
+    if (counter == ARCH_COUNTER_CURRENT)
+        return (picoRTOS_cycles_t)CPUTIMER2->TIM;
+
+    if (counter == ARCH_COUNTER_SINCE) {
+        picoRTOS_cycles_t prd = (picoRTOS_cycles_t)CPUTIMER2->PRD;
+        picoRTOS_cycles_t tim = (picoRTOS_cycles_t)CPUTIMER2->TIM;
+
+
+        if (t > prd) return prd + 1;            /* 1st tick */
+        if (tim > t) return (prd - tim) + t;    /* rollover */
+        /* normal */
+        return t - tim;
+    }
+
+    arch_assert_void(false);
+    return 0;
+}
+
+/* CLOCKS */
+
+void arch_set_clock_frequency(unsigned long freq)
+{
+    arch_assert_void(freq != 0);
+    sysclk_hz = freq;
+}
+
+void arch_delay_us(unsigned long n)
+{
+    arch_assert_void(n != 0);
+
+    unsigned long ncycles = n * (sysclk_hz / 1000000ul);
+
+    while (ncycles-- != 0)
+        ASM(" nop");
 }
