@@ -4,4 +4,8 @@ config PWM_NXP_EMIOS
        depends on POWERPC
        bool "NXP eMIOS PWM"
 
+config PWM_RENESAS_RA4_GPT
+       depends on ARM
+       bool "Renesas RA4 GPT PWM"
+
 endmenu
