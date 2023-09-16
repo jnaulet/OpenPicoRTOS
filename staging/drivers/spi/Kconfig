@@ -4,4 +4,8 @@ config SPI_NXP_DSPI
        depends on POWERPC
        bool "NXP dSPI"
 
+config SPI_RENESAS_RA4
+       depends on ARM
+       bool "Renesas RA4 SPI"
+
 endmenu
