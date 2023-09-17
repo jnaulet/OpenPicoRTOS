@@ -12,4 +12,8 @@ config ADC_NXP_SAR
        depends on POWERPC
        bool "NXP MPC56/57xx series SAR ADC"
 
+config ADC_RENESAS_RA4
+       depends on ARM
+       bool "Renesas RA4 Series ADC"
+
 endmenu
