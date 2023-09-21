@@ -1,0 +1,7 @@
+menu "Watchdog drivers"
+
+config WD_RENESAS_RA4_WDT
+       depends on ARM
+       bool "Renesas RA4 WDT Watchdog"
+
+endmenu
