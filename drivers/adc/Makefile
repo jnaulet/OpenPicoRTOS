@@ -10,3 +10,4 @@ c_src-$(CONFIG_ADC_SAM3X) += $(drivers-adc)/adc-sam3x.c
 c_src-$(CONFIG_ADC_SAME5X) += $(drivers-adc)/adc-same5x.c
 c_src-$(CONFIG_ADC_TINYAVR) += $(drivers-adc)/adc-tinyavr.c
 c_src-$(CONFIG_ADC_TI_TYPE4) += $(drivers-adc)/adc-ti_type4.c
+c_src-$(CONFIG_ADC_RENESAS_RA4) += $(drivers-adc)/adc-renesas_ra4.c

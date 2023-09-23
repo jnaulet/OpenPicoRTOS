@@ -135,6 +135,16 @@ struct ADC_RENESAS_RA4 {
 #define ADHVREFCNT_HVSEL_M  0x3u
 #define ADHVREFCNT_HVSEL(x) ((x) & ADHVREFCNT_HVSEL_M)
 
+/* Function: adc_renesas_ra4_init
+ * Initializes an ADC block
+ *
+ * Parameters:
+ *  ctx - The adc_renesas_ra4 instance to initialize
+ *  base - The ADC base address
+ *
+ * Returns:
+ * always 0
+ */
 int adc_renesas_ra4_init(struct adc_renesas_ra4 *ctx, int base)
 {
     int n = ADC_RENESAS_RA4_CHANNEL_COUNT;
@@ -148,6 +158,16 @@ int adc_renesas_ra4_init(struct adc_renesas_ra4 *ctx, int base)
     return 0;
 }
 
+/* Function: adc_renesas_ra4_setup
+ * Configures an ADC block
+ *
+ * Parameters:
+ *  ctx - The ADC block instance to configure
+ *  settings - The settings to apply
+ *
+ * Returns:
+ * 0 in case of success, -errno otherwise
+ */
 int adc_renesas_ra4_setup(struct adc_renesas_ra4 *ctx,
                           struct adc_renesas_ra4_settings *settings)
 {
@@ -169,6 +189,17 @@ int adc_renesas_ra4_setup(struct adc_renesas_ra4 *ctx,
     return 0;
 }
 
+/* Function: adc_renesas_ra4_adc_init
+ * Initializes an ADC channel
+ *
+ * Parameters:
+ *  ctx - The ADC channel to init
+ *  parent - The parent ADC block
+ *  channel - The ADC channel number
+ *
+ * Returns:
+ * 0 in case of success, -errno otherwise
+ */
 int adc_renesas_ra4_adc_init(struct adc *ctx,
                              struct adc_renesas_ra4 *parent,
                              size_t channel)

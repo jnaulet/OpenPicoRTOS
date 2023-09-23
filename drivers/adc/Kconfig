@@ -28,4 +28,8 @@ config ADC_TI_TYPE4
        depends on C2000
        bool "TI Type4 ADC"
 
+config ADC_RENESAS_RA4
+       depends on ARM
+       bool "Renesas RA4 Series ADC"
+
 endmenu
