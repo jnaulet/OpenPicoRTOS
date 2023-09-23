@@ -90,7 +90,18 @@ struct UART_RENESAS_RA4_SCI {
 #define SPTR_SPB2DT (1 << 1)
 #define SPTR_RXDMON (1 << 0)
 
-int uart_renesas_ra4_sci_init(/*@out@*/ struct uart *ctx, int base, clock_id_t clkid)
+/* Function: uart_renesas_ra4_sci_init
+ * Initializes an UART
+ *
+ * Parameters:
+ *  ctx - The UART to init
+ *  base - The UART base address
+ *  clkid - The UART clock ID
+ *
+ * Returns:
+ * Always 0
+ */
+int uart_renesas_ra4_sci_init(struct uart *ctx, int base, clock_id_t clkid)
 {
     ctx->base = (struct UART_RENESAS_RA4_SCI*)base;
     ctx->clkid = clkid;

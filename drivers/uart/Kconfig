@@ -32,4 +32,8 @@ config UART_TINYAVR_USART
        depends on AVR
        bool "TinyAVR/ATTiny series UART/USART"
 
+config UART_RENESAS_RA4_SCI
+       depends on ARM
+       bool "Renesas RA4 UART SCI"
+
 endmenu
