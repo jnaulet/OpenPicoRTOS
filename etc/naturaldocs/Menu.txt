@@ -131,6 +131,17 @@ Group: hw-specific  {
       File: Watchdog  (no auto-title, drivers/wd/wd-tinyavr.c)
       }  # Group: TinyAVR
 
+   Group: Renesas RA4  {
+
+      File: ADC  (no auto-title, drivers/adc/adc-renesas_ra4.c)
+      File: Clock  (no auto-title, drivers/clock/clock-renesas_ra4.c)
+      File: GPIO  (no auto-title, drivers/gpio/gpio-renesas_ra4.c)
+      File: MUX  (no auto-title, drivers/mux/mux-renesas_ra4.c)
+      File: PWM  (no auto-title, drivers/pwm/pwm-renesas_ra4_gpt.c)
+      File: SPI  (no auto-title, drivers/spi/spi-renesas_ra4.c)
+      File: UART  (no auto-title, drivers/uart/uart-renesas_ra4_sci.c)
+      }  # Group: Renesas RA4
+
    Group: RP2040  {
 
       File: ADC  (no auto-title, drivers/adc/adc-rp2040.c)

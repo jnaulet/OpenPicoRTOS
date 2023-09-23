@@ -1,5 +1,16 @@
 # Release notes
 
+## picoRTOS v1.9.1
+### What's new ?
+
+This version adds support for Renesas RA4 series in general & Arduino Uno R4 Minima in particular.   
+ADC, Clocks, GPIOs, Multiplexing, PWMs, SPIs & UARTs are supported in quite a minimalistic way.
+
+TWI/I2C needs further testing (code is available in the staging tree).
+Other peripherals are not supported yet.
+
+On the minor side, the auto-generated config can now be included simply by including picoRTOS.h
+
 ## picoRTOS v1.9.0
 ### What's new ?
 
