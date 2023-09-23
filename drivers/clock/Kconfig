@@ -40,4 +40,8 @@ config CLOCK_TINYAVR
        depends on AVR
        bool "TinyAVR/ATTiny series clock"
 
+config CLOCK_RENESAS_RA4
+       depends on ARM
+       bool "Renesas RA4 clock"
+
 endmenu

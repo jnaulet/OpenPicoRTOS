@@ -272,6 +272,15 @@ static int setup_clock_source(struct clock_settings *settings)
     return res;
 }
 
+/* Function: clock_renesas_ra4_init
+ * Intializes the Renesas RA4 clock system
+ *
+ * Parameters:
+ *  settings - The clocks settings
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int clock_renesas_ra4_init(struct clock_settings *settings)
 {
     picoRTOS_assert(settings->fck < CLOCK_RENESAS_RA4_SCKDIV_COUNT, return -EINVAL);
@@ -313,6 +322,15 @@ int clock_renesas_ra4_init(struct clock_settings *settings)
     return 0;
 }
 
+/* Function: clock_renesas_ra4_module_start
+ * Sends power/clock to the selected module
+ *
+ * Parameters:
+ *  module - The module identifier (ex: MODULE_A(17), see doc)
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int clock_renesas_ra4_module_start(size_t module)
 {
     picoRTOS_assert(module <= (size_t)MODULE_D(31), return -EINVAL);
@@ -332,6 +350,15 @@ int clock_renesas_ra4_module_start(size_t module)
     return 0;
 }
 
+/* Function: clock_renesas_ra4_module_stop
+ * Stops power/clock to the selected module
+ *
+ * Parameters:
+ *  module - The module identifier (ex: MODULE_B(2), see doc)
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int clock_renesas_ra4_module_stop(size_t module)
 {
     picoRTOS_assert(module <= (size_t)MODULE_D(31), return -EINVAL);

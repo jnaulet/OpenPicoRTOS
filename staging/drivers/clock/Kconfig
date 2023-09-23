@@ -8,8 +8,4 @@ config CLOCK_NXP_SIU
        depends on POWERPC
        bool "NXP SIU clock"
 
-config CLOCK_RENESAS_R4
-       depends on ARM
-       bool "Renesas R4 clock"
-
 endmenu

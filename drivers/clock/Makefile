@@ -13,3 +13,4 @@ c_src-$(CONFIG_CLOCK_ATSAM3X) += $(drivers-clock)/clock-sam3x_pmc.c
 c_src-$(CONFIG_CLOCK_ATSAME5X) += $(drivers-clock)/clock-same5x.c
 c_src-$(CONFIG_CLOCK_STM32H7XX) += $(drivers-clock)/clock-stm32h7xx.c
 c_src-$(CONFIG_CLOCK_TINYAVR) += $(drivers-clock)/clock-tinyavr.c
+c_src-$(CONFIG_CLOCK_RENESAS_RA4) += $(drivers-clock)/clock-renesas_ra4.c
