@@ -114,6 +114,17 @@ static void lock(struct pwm_renesas_ra4_gpt *ctx)
     ctx->base->GTWP = (uint32_t)GTWP_PRKEY(0xa5) | GTWP_WP;
 }
 
+/* Function: pwm_renesas_ra4_gpt_init
+ * Inits an Reneas RA4 GPT PWM timer
+ *
+ * Parameters:
+ *  ctx - The GPT timer to init
+ *  base - The GPT timer base address
+ *  clkid - The GPT timer input clock id
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int pwm_renesas_ra4_gpt_init(struct pwm_renesas_ra4_gpt *ctx, int base, clock_id_t clkid)
 {
     ctx->base = (struct PWM_RENESAS_RA4_GPT*)base;
@@ -128,6 +139,17 @@ int pwm_renesas_ra4_gpt_init(struct pwm_renesas_ra4_gpt *ctx, int base, clock_id
 
 /* OUTPUTs */
 
+/* Function: pwm_renesas_ra4_gpt_pwm_init
+ * Creates a PWM output from a GPT timer
+ *
+ * Parameters:
+ *  ctx - The ti_epwm block to configure
+ *  parent - The parent GPT timer
+ *  output - The output pin selection
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int pwm_renesas_ra4_gpt_pwm_init(struct pwm *ctx,
                                  struct pwm_renesas_ra4_gpt *parent,
                                  pwm_renesas_ra4_gpt_output_t output)
@@ -141,6 +163,16 @@ int pwm_renesas_ra4_gpt_pwm_init(struct pwm *ctx,
     return 0;
 }
 
+/* Function: pwm_renesas_ra4_gpt_pwm_setup
+ * Configures a PWM output
+ *
+ * Parameters:
+ *  ctx - The pwm to init
+ *  settings - The pwm output settings
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int pwm_renesas_ra4_gpt_pwm_setup(struct pwm *ctx,
                                   struct pwm_renesas_ra4_gpt_pwm_settings *settings)
 {

@@ -40,4 +40,8 @@ config PWM_TINYAVR
        depends on AVR
        bool "TinyAVR/ATTiny series PWMs"
 
+config PWM_RENESAS_RA4_GPT
+       depends on ARM
+       bool "Renesas RA4 GPT PWM"
+
 endmenu
