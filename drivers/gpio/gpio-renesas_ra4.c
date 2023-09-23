@@ -22,6 +22,17 @@ struct GPIO_RENESAS_RA4 {
 #define PCNTR4_EORR00 (1 << 16)
 #define PCNTR4_EOSR00 (1 << 0)
 
+/* Function: gpio_renesas_ra4_init
+ * Initializes a GPIO
+ *
+ * Parameters:
+ *  ctx - The GPIO to init
+ *  base - The GPIO block base address
+ *  pin - The GPIO pin number on that block
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int gpio_renesas_ra4_init(struct gpio *ctx, int base, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)GPIO_RENESAS_RA4_PIN_COUNT, return -EINVAL);

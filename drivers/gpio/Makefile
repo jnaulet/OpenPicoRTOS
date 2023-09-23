@@ -12,3 +12,4 @@ c_src-$(CONFIG_GPIO_ATSAME5X) += $(drivers-gpio)/gpio-same5x.c
 c_src-$(CONFIG_GPIO_STM32H7XX) += $(drivers-gpio)/gpio-stm32h7xx.c
 c_src-$(CONFIG_GPIO_TI_F28X) += $(drivers-gpio)/gpio-ti_f28x.c
 c_src-$(CONFIG_GPIO_TINYAVR) += $(drivers-gpio)/gpio-tinyavr.c
+c_src-$(CONFIG_GPIO_RENESAS_RA4) += $(drivers-gpio)/gpio-renesas_ra4.c

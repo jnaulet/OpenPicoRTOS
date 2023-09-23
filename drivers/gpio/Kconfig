@@ -36,4 +36,8 @@ config GPIO_TINYAVR
        depends on AVR
        bool "TinyAVR/ATTiny series GPIOs"
 
+config GPIO_RENESAS_RA4
+       depends on ARM
+       bool "Renesas RA4 GPIOs"
+
 endmenu
