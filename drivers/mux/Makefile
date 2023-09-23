@@ -12,3 +12,4 @@ c_src-$(CONFIG_MUX_ATSAME5X) += $(drivers-mux)/mux-same5x.c
 c_src-$(CONFIG_MUX_STM32H7XX) += $(drivers-mux)/mux-stm32h7xx.c
 c_src-$(CONFIG_MUX_TI_F28X) += $(drivers-mux)/mux-ti_f28x.c
 c_src-$(CONFIG_MUX_TINYAVR) += $(drivers-mux)/mux-tinyavr.c
+c_src-$(CONFIG_MUX_RENESAS_RA4) += $(drivers-mux)/mux-renesas_ra4.c

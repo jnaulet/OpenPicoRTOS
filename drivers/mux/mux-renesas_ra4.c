@@ -44,6 +44,17 @@ static void disable_write(struct mux *ctx)
     ctx->base->PWPR = (uint8_t)PWPR_B0WI;
 }
 
+/* Function: mux_renesas_ra4_init
+ * Initializes multiplexing on a port
+ *
+ * Parameters:
+ *  ctx - The mux to init
+ *  base - The base address of the port
+ *  port - The port number
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_renesas_ra4_init(struct mux *ctx, int base, size_t port)
 {
     picoRTOS_assert(port < (size_t)MUX_RENESAS_RA4_PORT_COUNT, return -EINVAL);
@@ -54,6 +65,16 @@ int mux_renesas_ra4_init(struct mux *ctx, int base, size_t port)
     return 0;
 }
 
+/* Function: mux_renesas_ra4_output
+ * Set port pin as GPIO output
+ *
+ * Parameters:
+ *  ctx - The previously initialized mux
+ *  pin - The port pin number
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_renesas_ra4_output(struct mux *ctx, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)MUX_RENESAS_RA4_PIN_COUNT, return -EINVAL);
@@ -67,6 +88,16 @@ int mux_renesas_ra4_output(struct mux *ctx, size_t pin)
     return 0;
 }
 
+/* Function: mux_renesas_ra4_input
+ * Set port pin as GPIO input
+ *
+ * Parameters:
+ *  ctx - The previously initialized mux
+ *  pin - The port pin number
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_renesas_ra4_input(struct mux *ctx, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)MUX_RENESAS_RA4_PIN_COUNT, return -EINVAL);
@@ -80,6 +111,16 @@ int mux_renesas_ra4_input(struct mux *ctx, size_t pin)
     return 0;
 }
 
+/* Function: mux_renesas_ra4_analog
+ * Set port pin as analog input
+ *
+ * Parameters:
+ *  ctx - The previously initialized mux
+ *  pin - The port pin number
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_renesas_ra4_analog(struct mux *ctx, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)MUX_RENESAS_RA4_PIN_COUNT, return -EINVAL);
@@ -93,6 +134,17 @@ int mux_renesas_ra4_analog(struct mux *ctx, size_t pin)
     return 0;
 }
 
+/* Function: mux_renesas_ra4_periph
+ * Set port pin as special peripheral
+ *
+ * Parameters:
+ *  ctx - The previously initialized mux
+ *  pin - The port pin number
+ *  psel - The pin function selection (see doc)
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_renesas_ra4_periph(struct mux *ctx, size_t pin, size_t psel)
 {
     picoRTOS_assert(pin < (size_t)MUX_RENESAS_RA4_PIN_COUNT, return -EINVAL);
@@ -107,6 +159,16 @@ int mux_renesas_ra4_periph(struct mux *ctx, size_t pin, size_t psel)
     return 0;
 }
 
+/* Function: mux_renesas_ra4_pull_up
+ * Pulls up input pin
+ *
+ * Parameters:
+ *  ctx - The previously initialized mux
+ *  pin - The port pin number
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_renesas_ra4_pull_up(struct mux *ctx, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)MUX_RENESAS_RA4_PIN_COUNT, return -EINVAL);
