@@ -40,4 +40,8 @@ config SPI_TINYAVR
        depends on AVR
        bool "TinyAVR/ATTiny series SPI"
 
+config SPI_RENESAS_RA4
+       depends on ARM
+       bool "Renesas RA4 SPI"
+
 endmenu

@@ -80,6 +80,17 @@ struct SPI_RENESAS_RA4 {
 #define SPCMD0_CPOL    (1 << 1)
 #define SPCMD0_CPHA    (1 << 0)
 
+/* Function: spi_renesas_ra4_init
+ * Initializes a SPI
+ *
+ * Parameters:
+ *  ctx - The SPI to init
+ *  base - The SPI base address
+ *  clkid - The SPI peripheral clock ID
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int spi_renesas_ra4_init(struct spi *ctx, int base, clock_id_t clkid)
 {
     ctx->base = (struct SPI_RENESAS_RA4*)base;
