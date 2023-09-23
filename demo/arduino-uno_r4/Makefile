@@ -11,7 +11,7 @@ c_src-y += arduino-uno_r4.c
 ifneq ($(skip-makefile),1)
 PWD := $(shell pwd)
 # 'KBUILD_SRC' is the directory containing the OpenPicoRTOS original sources
-KBUILD_SRC := ../../..
+KBUILD_SRC := ../..
 
 all: $(target)
 	@
