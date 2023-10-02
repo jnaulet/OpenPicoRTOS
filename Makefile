@@ -314,8 +314,8 @@ naturaldocs:
 	  -o HTML docs
 
 cloc:
-	cloc picoRTOS.c
-	cloc picoRTOS-SMP.c
+	cloc scheduler/picoRTOS.c
+	cloc scheduler/picoRTOS-SMP.c
 
 check:
 	cd test && ./run_tests.sh

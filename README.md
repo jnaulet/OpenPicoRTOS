@@ -126,7 +126,6 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - Atmel ATMega (AVR5+)
  - Atmel TinyAVR (0+) Series
  - MIPS M51xx / PIC32Mx
- - Renesas RA4 Series
  - RISC-V RV32IMAC
  - PowerPC e200z4 (staging)
  - PowerPC e200z7 (staging)

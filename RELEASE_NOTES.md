@@ -1,5 +1,18 @@
 # Release notes
 
+## picoRTOS v1.9.2
+### What's new ?
+
+The main new feature in this release is the management of the CPU clock frequency inside the
+ports, which allow new API functions like arch_delay_us with decent accuracy.
+
+Clock drivers are responsible for setting this correctly & have been updated.
+From the user's perspective it's one less parameter to worry about
+(except for the AVR architecture).
+
+Tasks statistics have been improved without adding too much overhead and in was a real PITA !
+I hope it's the final version.
+
 ## picoRTOS v1.9.1
 ### What's new ?
 
