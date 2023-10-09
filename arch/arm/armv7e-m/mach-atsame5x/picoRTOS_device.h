@@ -80,4 +80,11 @@
 
 #define DEVICE_INTERRUPT_VECTOR_COUNT 137
 
+/* Clocks after reset
+ * - DFLL48M is enabled and configured to run at 48MHz
+ * - Generic Generator 0 uses DFLL48M as source and generates GCLK_MAIN
+ * - CPU and BUS clocks are undivided
+ */
+#define DEVICE_DEFAULT_SYSCLK_HZ 48000000
+
 #endif

@@ -82,4 +82,7 @@
 
 #define DEVICE_INTERRUPT_VECTOR_COUNT 26
 
+/* The startup frequency is typically 6MHz but varies with PVT */
+#define DEVICE_DEFAULT_SYSCLK_HZ 6000000
+
 #endif

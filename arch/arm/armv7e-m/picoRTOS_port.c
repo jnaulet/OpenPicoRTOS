@@ -8,8 +8,6 @@
 #define SYSTICK_RVR ((volatile unsigned long*)0xe000e014)
 #define SYSTICK_CVR ((volatile unsigned long*)0xe000e018)
 
-#define SYSTICK_RVR_VALUE ((CONFIG_SYSCLK_HZ / CONFIG_TICK_HZ) - 1)
-
 /* NVIC */
 #define NVIC_ISER         ((volatile unsigned long*)0xe000e100)
 #define NVIC_SHPR3        ((volatile unsigned long*)0xe000ed20)
@@ -33,6 +31,9 @@ picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
                                                               picoRTOS_atomic_t old,
                                                               picoRTOS_atomic_t val);
 
+/* CLOCK */
+static int sysclk_hz = DEVICE_DEFAULT_SYSCLK_HZ;
+
 /* FUNCTIONS TO IMPLEMENT */
 
 void arch_init(void)
@@ -44,9 +45,9 @@ void arch_init(void)
     *NVIC_SHPR3 |= 0xffff0000ul;
 
     /* SYSTICK */
-    *SYSTICK_CSR = 0x6ul;                                   /* stop systick */
-    *SYSTICK_CVR = 0;                                       /* reset */
-    *SYSTICK_RVR = (unsigned long)SYSTICK_RVR_VALUE;        /* set period */
+    *SYSTICK_CSR = 0x6ul;                                               /* stop systick */
+    *SYSTICK_CVR = 0;                                                   /* reset */
+    *SYSTICK_RVR = (unsigned long)((sysclk_hz / CONFIG_TICK_HZ) - 1);   /* period */
 }
 
 void arch_suspend(void)
@@ -115,10 +116,44 @@ void arch_disable_interrupt(picoRTOS_irq_t irq)
 
 /* STATS */
 
-picoRTOS_cycles_t arch_counter(void)
+picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
 {
-    return (picoRTOS_cycles_t)SYSTICK_RVR_VALUE -
-           (picoRTOS_cycles_t)*SYSTICK_CVR;
+    arch_assert_void(counter < ARCH_COUNTER_COUNT);
+
+    if (counter == ARCH_COUNTER_CURRENT)
+        return (picoRTOS_cycles_t)*SYSTICK_CVR;
+
+    if (counter == ARCH_COUNTER_SINCE) {
+        picoRTOS_cycles_t rvr = (picoRTOS_cycles_t)*SYSTICK_RVR;
+        picoRTOS_cycles_t cvr = (picoRTOS_cycles_t)*SYSTICK_CVR;
+
+        /* several cases here */
+        if (t > rvr) return rvr + 1;            /* only used on first tick */
+        if (cvr > t) return (rvr - cvr) + t;    /* rollover */
+        /* normal */
+        return t - cvr;
+    }
+
+    arch_assert_void(false);
+    return 0;
+}
+
+/* CLOCKS */
+
+void arch_set_clock_frequency(unsigned long freq)
+{
+    arch_assert_void(freq != 0);
+    sysclk_hz = (int)freq;
+}
+
+void arch_delay_us(unsigned long n)
+{
+    arch_assert_void(n != 0);
+
+    unsigned long ncycles = n * ((unsigned long)sysclk_hz / 1000000ul);
+
+    while (ncycles-- != 0)
+        ASM("nop");
 }
 
 /* CACHE OPS */

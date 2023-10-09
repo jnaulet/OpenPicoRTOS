@@ -115,6 +115,9 @@
 
 #define DEVICE_INTERRUPT_VECTOR_COUNT 150
 
+/* The HSI block provides the default clock to the product */
+#define DEVICE_DEFAULT_SYSCLK_HZ 64000000
+
 /* DMA */
 #define DMA_PADDR_BASE ADDR_TIM2
 

@@ -12,8 +12,6 @@
 #define SYSTICK_RVR ((volatile unsigned long*)0xe000e014)
 #define SYSTICK_CVR ((volatile unsigned long*)0xe000e018)
 
-#define SYSTICK_RVR_VALUE ((CONFIG_SYSCLK_HZ / CONFIG_TICK_HZ) - 1)
-
 /* NVIC */
 #define NVIC_ISER         ((volatile unsigned long*)0xe000e100)
 #define NVIC_ICPR         ((volatile unsigned long*)0xe000e280)
@@ -36,11 +34,16 @@
 
 /*@external@*/ extern picoRTOS_stack_t __Stack1Top[];
 
+/* CLOCK */
+static unsigned long systick_rvr;
+
 void arch_smp_init(void)
 {
     /* basic cm0+ init */
     arch_init();
 
+    /* remember core#0 SysTick's period */
+    systick_rvr = *SYSTICK_RVR;
     /* register FIFO interrupt beforehand, only used by core#1 */
     arch_register_interrupt((picoRTOS_irq_t)IRQ_SIO_PROC1, arch_SIO_PROC1, NULL);
 }
@@ -52,7 +55,7 @@ static void __attribute__((naked)) core1_start_first_task(void)
     /* SYSTICK */
     *SYSTICK_CSR = 0x4ul;                                   /* stop systick */
     *SYSTICK_CVR = 0;                                       /* reset */
-    *SYSTICK_RVR = (unsigned long)SYSTICK_RVR_VALUE;        /* set period */
+    *SYSTICK_RVR = systick_rvr;                             /* set period */
 
     /* clear FIFO flags */
     *SIO_FIFO_ST = 0xfful;

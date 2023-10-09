@@ -30,7 +30,7 @@
 	.endm
 
 	.text
-	
+
 	.thumb_func
 	.type arch_save_first_context, %function
 	.global arch_save_first_context
@@ -146,7 +146,7 @@ isr_fn_is_null:
 	.bss
 
 	#include "picoRTOS_device.h"
-	
+
 	.align 2
 	.type ISR_TABLE, %object
 	.global ISR_TABLE
@@ -157,7 +157,7 @@ ISR_TABLE:
 	.endr
 
 	.section .vectors, "ax"
-	
+
 	.word __StackTop
 	.word Reset_Handler
 	.word NMI_Handler

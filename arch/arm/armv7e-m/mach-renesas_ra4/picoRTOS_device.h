@@ -77,4 +77,7 @@
 
 #define DEVICE_INTERRUPT_VECTOR_COUNT 174
 
+/* Defaults to MOCO (8Mhz) */
+#define DEVICE_DEFAULT_SYSCLK_HZ 8000000
+
 #endif
