@@ -12,12 +12,7 @@
 # error Default stack is too small
 #endif
 
-#define PICORTOS_SMP_CORE_ANY    ((1u << CONFIG_SMP_CORES) - 1u)
-#define PICORTOS_CYCLES_PER_TICK (CONFIG_SYSCLK_HZ / CONFIG_TICK_HZ)
-
-#if PICORTOS_CYCLES_PER_TICK < 1
-# error Erroneous timing values
-#endif
+#define PICORTOS_SMP_CORE_ANY ((1u << CONFIG_SMP_CORES) - 1u)
 
 /* SMP SCHEDULER main structures */
 
@@ -96,8 +91,8 @@ static void task_core_init(/*@out@*/ struct picoRTOS_task_core *task)
     task->stack_top = NULL;
     task->stack_count = 0;
     /* stats */
-    task->stat.counter = (picoRTOS_cycles_t)0;
-    task->stat.watermark_lo = (picoRTOS_cycles_t)PICORTOS_CYCLES_PER_TICK;
+    task->stat.counter = (picoRTOS_cycles_t)-1;
+    task->stat.watermark_lo = (picoRTOS_cycles_t)-1;
     task->stat.watermark_hi = (picoRTOS_cycles_t)0;
     /* shared priority support */
     task->prio = (picoRTOS_priority_t)TASK_COUNT;
@@ -139,32 +134,21 @@ static void task_core_quickswap(struct picoRTOS_task_core *t1,
     task_core_quickcpy(t2, &tmp);
 }
 
-static inline void task_core_stat_begin(struct picoRTOS_task_core *task)
+static inline void task_core_stat_start(struct picoRTOS_task_core *task)
 {
-    task->stat.counter = arch_counter();
+    task->stat.counter = arch_counter(ARCH_COUNTER_CURRENT, 0);
 }
 
-static void task_core_stat_watermark(struct picoRTOS_task_core *task)
+static void task_core_stat_finish(struct picoRTOS_task_core *task)
 {
+    task->stat.counter = arch_counter(ARCH_COUNTER_SINCE, task->stat.counter);
+
+    /* watermak lo */
     if (task->stat.counter < task->stat.watermark_lo)
         task->stat.watermark_lo = task->stat.counter;
-
+    /* watermark hi */
     if (task->stat.counter > task->stat.watermark_hi)
         task->stat.watermark_hi = task->stat.counter;
-}
-
-static void task_core_stat_switch(struct picoRTOS_task_core *task)
-{
-    task->stat.counter = arch_counter() - task->stat.counter;
-    task_core_stat_watermark(task);
-}
-
-static void task_core_stat_preempt(struct picoRTOS_task_core *task)
-{
-    task->stat.counter = (picoRTOS_cycles_t)PICORTOS_CYCLES_PER_TICK -
-                         task->stat.counter;
-
-    task_core_stat_watermark(task);
 }
 
 /* SCHEDULER functions */
@@ -498,7 +482,7 @@ syscall_switch_context(struct picoRTOS_task_core *task)
     picoRTOS_mask_t mask = (picoRTOS_mask_t)(1u << core);
 
     /* stats */
-    task_core_stat_switch(task);
+    task_core_stat_finish(task);
 
     /* mark non-sleeping task as done */
     if (task->state == PICORTOS_TASK_STATE_BUSY)
@@ -514,7 +498,7 @@ syscall_switch_context(struct picoRTOS_task_core *task)
     task->state = PICORTOS_TASK_STATE_BUSY;
 
     /* stats */
-    task_core_stat_begin(task);
+    task_core_stat_start(task);
 
     return task;
 }
@@ -623,7 +607,7 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
 
     /* mask task as immediately ready */
     task->state = PICORTOS_TASK_STATE_READY;
-    task_core_stat_preempt(task);
+    task_core_stat_finish(task);
 
     /* advance tick & propagate to auxiliary cores */
     if (core == picoRTOS.main_core) {
@@ -638,7 +622,7 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
     /* refresh current task pointer */
     task = &TASK_BY_PID(pid);
     task->state = PICORTOS_TASK_STATE_BUSY;
-    task_core_stat_begin(task);
+    task_core_stat_start(task);
 
     picoRTOS_flush_dcache(&picoRTOS, sizeof(picoRTOS));
     picoRTOS_invalidate_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);

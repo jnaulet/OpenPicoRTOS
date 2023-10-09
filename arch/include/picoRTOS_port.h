@@ -223,17 +223,26 @@ extern /*@unused@*/ void arch_disable_interrupt(picoRTOS_irq_t irq);
 
 /* STATS */
 
+typedef enum {
+  ARCH_COUNTER_CURRENT,
+  ARCH_COUNTER_SINCE,
+  ARCH_COUNTER_COUNT
+} arch_counter_t;
+
 /* Function: arch_counter
- * Provides the current value of the CPU timer for internal statistics
- * and monitoring
+ * Provides the current cpu counter value
  *
  * This value should be between (0-PICORTOS_CYCLES_PER_TICK) and will
  * be used to populate the watermarks in picoRTOS_core::task[n]::stat
  *
+ * Parameters:
+ *  counter - The type of counter we want
+ *  t - The counter value to operate on (only valid if ARCH_COUNTER_SINCE)
+ *
  * Returns:
  *  The value of the counter in picoRTOS_cycles_t
  */
-extern picoRTOS_cycles_t arch_counter(void);
+extern picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t);
 
 /* CACHES */
 
@@ -254,5 +263,23 @@ extern /*@external@*/ void arch_invalidate_dcache(void *addr, size_t n);
  *  n - The number of bytes to flush
  */
 extern /*@external@*/ void arch_flush_dcache(void *addr, size_t n);
+
+/* CLOCKS */
+
+/* Function: arch_set_clock_frequency
+ * Sets the currect CPU input frequency
+ *
+ * Parameters:
+ *  freq - The CPU input frequency (in hertz)
+ */
+extern /*@external@*/ void arch_set_clock_frequency(unsigned long freq);
+
+/* Function: arch_delay_us
+ * Busy waits for at least n microseconds
+ *
+ * Parameters:
+ *  n - The number of microseconds to wait
+ */
+extern /*@external@*/ void arch_delay_us(unsigned long n);
 
 #endif
