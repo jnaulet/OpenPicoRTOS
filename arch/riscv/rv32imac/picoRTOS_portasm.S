@@ -6,8 +6,6 @@
 	#include "../include/regs.h"
 	#include <generated/autoconf.h>
 
-	.equ TIMER_CORE_PERIOD, (CONFIG_SYSCLK_HZ / CONFIG_TICK_HZ)
-
 	.macro SAVE_CONTEXT
 	/* cpu */
 	addi sp, sp, -116
@@ -85,7 +83,8 @@
 	.endm
 
 	.macro INCREASE_MTIMECMP src
-	la t0, TIMER_CORE_PERIOD
+	la t0, timer_core_period
+	lw t0, 0 (t0)
 	la t1, \src
 	lw t2, 0 (t1) /* srcl */
 	lw t3, 4 (t1) /* srch */
@@ -230,27 +229,23 @@ isr_fn_is_null:
 	j isr_fn_is_null
 
 	.align 4
-	.type arch_counter, %function
-	.global arch_counter
-arch_counter:
+	.type arch_mtimel, %function
+	.global arch_mtimel
+arch_mtimel:
 	/* mtimel */
 	la t0, mtime
 	lw a0, 0 (t0)
-	/* mtimecmpl */
-	la t0, mtimecmp
-	lw a1, 0 (t0)
-	/* compute difference only */
-	bltu a0, a1, .arch_counter_over
-.arch_counter_under:
-	sub a0, a0, a1
-	ret
-.arch_counter_over:
-	sub a0, a1, a0
 	ret
 
 	.bss
 
 	#include "../../include/macros.S"
+
+	.align 4
+	.type timer_core_period, %object
+	.global timer_core_period
+timer_core_period:
+	.long 0
 
 	.align 4
 	.type ISR_TABLE, %object

@@ -13,12 +13,17 @@ picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
                                                               picoRTOS_atomic_t val);
 
 /* stats */
-/*@external@*/ extern picoRTOS_cycles_t arch_counter(void);
+/*@external@*/ extern unsigned long arch_mtimel(void);
+
+/* CLOCK */
+/*@external@*/ extern unsigned long timer_core_period;
+static unsigned long timer_core_hz = DEVICE_DEFAULT_SYSCLK_HZ;
 
 /* FUNCTIONS TO IMPLEMENT */
 
 void arch_init(void)
 {
+    timer_core_period = timer_core_hz / (unsigned long)CONFIG_TICK_HZ;
     arch_enable_interrupt((picoRTOS_irq_t)IRQ_TMR);
 }
 
@@ -57,4 +62,40 @@ void __attribute__((weak)) arch_idle(void *null)
 picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr)
 {
     return arch_compare_and_swap(ptr, 0, (picoRTOS_atomic_t)1);
+}
+
+/* STATS */
+
+picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
+{
+    arch_assert_void(counter < ARCH_COUNTER_COUNT);
+
+    if (counter == ARCH_COUNTER_CURRENT)
+        return (picoRTOS_cycles_t)arch_mtimel();
+
+    if (counter == ARCH_COUNTER_SINCE)
+        return (picoRTOS_cycles_t)arch_mtimel() - t;
+
+    arch_assert_void(false);
+    return 0;
+}
+
+/* CLOCK */
+
+void arch_set_clock_frequency(unsigned long freq)
+{
+    arch_assert_void(freq != 0);
+
+    timer_core_hz = freq;
+    timer_core_period = freq / (unsigned long)CONFIG_TICK_HZ;
+}
+
+void arch_delay_us(unsigned long n)
+{
+    arch_assert_void(n != 0);
+
+    unsigned long ncycles = n * (timer_core_hz / 1000000ul);
+
+    while (ncycles-- != 0)
+        ASM("nop");
 }
