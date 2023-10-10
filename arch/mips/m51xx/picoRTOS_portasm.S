@@ -12,8 +12,6 @@
 	#include "../include/regs.h"
 	#include <generated/autoconf.h>
 
-	/* counter increments every other clock */
-	.equ TIMER_CORE_PERIOD, (CONFIG_SYSCLK_HZ / CONFIG_TICK_HZ) / 2
 	/* syscall cause */
 	.equ CP0_CAUSE_EXCCODE_SYS, 8
 
@@ -238,7 +236,8 @@
 
 	.macro INCREMENT_CP0_COMPARE cp0r, cp0s
 	mfc0 t0, \cp0r, \cp0s
-	la t1, TIMER_CORE_PERIOD
+	la t1, timer_core_period
+	lw t1, 0 (t1)
 	addu t0, t0, t1
 	mtc0 t0, CP0_COMPARE
 	.endm
@@ -401,15 +400,19 @@ isr_fn_is_null:
 	nop
 
 	.align 2
-	.type arch_counter, %function
-	.global arch_counter
-arch_counter:
-	/* FIXME: not very accurate */
-	mfc0 v0, CP0_COUNT
-	mfc0 v1, CP0_COMPARE
-	subu v0, v0, v1
+	.type arch_cp0_count, %function
+	.global arch_cp0_count
+arch_cp0_count:
 	jr ra
-	sll v0, v0, 1
+	mfc0 v0, CP0_COUNT
+
+	.sbss
+
+	.align 2
+	.type timer_core_period, %object
+	.global timer_core_period
+timer_core_period:
+	.long 0
 
 	.bss
 
