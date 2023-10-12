@@ -213,8 +213,29 @@ picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *var,
     return val;
 }
 
-picoRTOS_cycles_t arch_counter(void)
+picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
 {
+#define NS_PER_S 1000000000
+
+    arch_assert_void(counter < ARCH_COUNTER_COUNT);
+
+    struct timespec ts;
+    (void)clock_gettime(CLOCK_REALTIME, &ts);
+
+    if (counter == ARCH_COUNTER_CURRENT)
+        return (picoRTOS_cycles_t)ts.tv_nsec;
+
+    if (counter == ARCH_COUNTER_SINCE) {
+        /* fist tick */
+        if (t >= (picoRTOS_cycles_t)NS_PER_S) return (picoRTOS_cycles_t)NS_PER_S;
+        /* rollover */
+        if ((picoRTOS_cycles_t)ts.tv_nsec < t)
+            return ((picoRTOS_cycles_t)NS_PER_S - t) + (picoRTOS_cycles_t)ts.tv_nsec;
+        /* normal */
+        return (picoRTOS_cycles_t)ts.tv_nsec - t;
+    }
+
+    arch_assert_void(false);
     return 0;
 }
 
