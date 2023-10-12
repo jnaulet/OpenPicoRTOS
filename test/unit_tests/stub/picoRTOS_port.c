@@ -66,7 +66,12 @@ picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *var,
     return val;
 }
 
-picoRTOS_cycles_t arch_counter(void)
+picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
+{
+    return 0;
+}
+
+picoRTOS_cycles_t arch_count_since(picoRTOS_cycles_t y)
 {
     return 0;
 }

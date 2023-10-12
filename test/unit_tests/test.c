@@ -51,8 +51,8 @@ UNIT_TEST(task_core_init){
     u_assert_var_equals(task.stack_bottom, NULL);
     u_assert_var_equals(task.stack_top, NULL);
     u_assert_var_equals(task.stack_count, 0);
-    u_assert_var_equals(task.stat.counter, 0);
-    u_assert_var_equals(task.stat.watermark_lo, PICORTOS_CYCLES_PER_TICK);
+    u_assert_var_equals(task.stat.counter, -1);
+    u_assert_var_equals(task.stat.watermark_lo, -1);
     u_assert_var_equals(task.stat.watermark_hi, 0);
     u_assert_var_equals(task.prio, TASK_COUNT);
     u_assert_var_equals(task.sub, 0);
