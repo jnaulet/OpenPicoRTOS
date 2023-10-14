@@ -1,11 +1,11 @@
 # AVR platforms makefile
 arch-avr := $(srctree)/arch/avr
 
-c_src-$(CONFIG_ATMEGA) := $(arch-avr)/atmega/picoRTOS_port.c
-a_src-$(CONFIG_ATMEGA) := $(arch-avr)/atmega/picoRTOS_portasm.S
+c_src-$(CONFIG_ATMEGA) += $(arch-avr)/atmega/picoRTOS_port.c
+a_src-$(CONFIG_ATMEGA) += $(arch-avr)/atmega/picoRTOS_portasm.S
 
-c_src-$(CONFIG_ATTINY) := $(arch-avr)/attiny/picoRTOS_port.c
-a_src-$(CONFIG_ATTINY) := $(arch-avr)/attiny/picoRTOS_portasm.S
+c_src-$(CONFIG_ATTINY) += $(arch-avr)/attiny/picoRTOS_port.c
+a_src-$(CONFIG_ATTINY) += $(arch-avr)/attiny/picoRTOS_portasm.S
 
 # mcu
 mcu-$(CONFIG_MACH_ATMEGA2560) := -mmcu=atmega2560 -D__ATmega2560__
