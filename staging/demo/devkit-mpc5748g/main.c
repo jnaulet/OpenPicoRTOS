@@ -1,14 +1,16 @@
-#ifndef SUPPORT_FOR_SMP
+#include <generated/autoconf.h>
+
+#ifndef CONFIG_SMP
 # include "picoRTOS.h"
 #else
 # include "picoRTOS-SMP.h"
 #endif
 
-#include "ipc/picoRTOS_mutex.h"
-#include "ipc/picoRTOS_cond.h"
-
 #include <stdbool.h>
 #include "devkit-mpc5748g.h"
+
+#include "ipc/picoRTOS_mutex.h"
+#include "ipc/picoRTOS_cond.h"
 
 #define LED_DELAY_SHORT PICORTOS_DELAY_MSEC(30)
 #define LED_DELAY_LONG  PICORTOS_DELAY_MSEC(60)
@@ -17,13 +19,10 @@ static void tick_main(void *priv)
 {
     picoRTOS_assert_void(priv != NULL);
 
-    bool x = false;
     struct gpio *TICK = (struct gpio*)priv;
 
     for (;;) {
-        gpio_write(TICK, x);
-
-        x = !x; /* no toggle on this arch yet */
+        gpio_toggle(TICK);
         picoRTOS_schedule();
     }
 }
@@ -58,6 +57,9 @@ static void led0_main(void *priv)
         /* signal to task led1 */
         picoRTOS_cond_signal(&cond);
         picoRTOS_mutex_unlock(&mutex);
+
+        /* force to next task */
+        picoRTOS_schedule();
 
         /* wait for led1 to finish */
         picoRTOS_mutex_lock(&mutex);
@@ -98,6 +100,115 @@ static void led1_main(void *priv)
         /* signal to task led0 */
         picoRTOS_cond_signal(&cond);
         picoRTOS_mutex_unlock(&mutex);
+
+        /* force scheduling */
+        picoRTOS_schedule();
+    }
+}
+
+static void adc_main(void *priv)
+{
+    picoRTOS_assert_void(priv != NULL);
+
+    struct adc *ADC = (struct adc*)priv;
+
+    for (;;) {
+        int val = 0;
+        /* get adc value */
+        if (adc_read(ADC, &val) == -EAGAIN)
+            picoRTOS_schedule();
+
+        /* TBD */
+        picoRTOS_assert_void(val <= 100);
+        picoRTOS_assert_void(val >= 0);
+    }
+}
+
+static void pwm_main(void *priv)
+{
+    picoRTOS_assert_void(priv != NULL);
+
+    struct pwm *PWM = (struct pwm*)priv;
+
+    for (;;)
+        picoRTOS_schedule();
+}
+
+/*
+ * This thread uses the loopback mode of the spi to send data and control it has been
+ * received correctly
+ */
+static void spi_main(void *priv)
+{
+    picoRTOS_assert_fatal(priv != NULL, return );
+
+    size_t xfered = 0;
+    struct spi *SPI = (struct spi*)priv;
+
+    for (;;) {
+
+        int res;
+
+        char rx[5] = { (char)0, (char)0, (char)0, (char)0, (char)0 };
+        char tx[5] = { (char)0xa5, (char)0x55, (char)0x5a, (char)0x55, (char)0x4d };
+
+        if ((res = spi_xfer(SPI, &rx[xfered], &tx[xfered], sizeof(tx) - xfered)) == -EAGAIN) {
+            picoRTOS_schedule();
+            continue;
+        }
+
+        picoRTOS_assert_void(res > 0);
+
+        /* ack xfer */
+        xfered += (size_t)res;
+
+        if (xfered == sizeof(tx)) {
+            picoRTOS_assert_void(rx[0] == (char)0xa5);
+            picoRTOS_assert_void(rx[4] == (char)0x4d);
+            /* start again */
+            xfered = 0;
+        }
+    }
+}
+
+/*
+ * This thread uses the CAN loopback mode to send PINGPONG and check the data has been
+ * received correctly
+ */
+static void can_main(void *priv)
+{
+#define CAN_TEST_ID 0x6
+
+    picoRTOS_assert_fatal(priv != NULL, return );
+
+    struct can *CAN = (struct can*)priv;
+
+    (void)can_accept(CAN, (can_id_t)CAN_TEST_ID, 0);
+
+    for (;;) {
+
+        int res;
+        can_id_t id = 0;
+        int timeout = (int)PICORTOS_DELAY_MSEC(500l);
+
+        static const char tx[] = { "PINGPONG" };
+        char rx[CAN_DATA_COUNT] = { (char)0, (char)0, (char)0, (char)0,
+                                    (char)0, (char)0, (char)0, (char)0 };
+
+        /* ping */
+        if ((res = can_write(CAN, (can_id_t)CAN_TEST_ID, tx, (size_t)CAN_DATA_COUNT)) == -EAGAIN) {
+            picoRTOS_schedule();
+            continue;
+        }
+
+        /* pong */
+        while (((res = can_read(CAN, &id, rx, sizeof(rx)))) == -EAGAIN && timeout-- != 0)
+            picoRTOS_schedule();
+
+        picoRTOS_assert_void(res == (int)sizeof(rx));
+        picoRTOS_assert_void(timeout != -1);
+        picoRTOS_assert_void(id == (can_id_t)CAN_TEST_ID);
+        picoRTOS_assert_void(rx[7] == 'G');
     }
 }
 
@@ -116,6 +227,8 @@ int main(void)
     static picoRTOS_stack_t stack0[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack1[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack2[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack3[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack4[CONFIG_DEFAULT_STACK_COUNT];
 
     /* shared task */
     picoRTOS_task_init(&task, tick_main, &board.TICK, stack0, PICORTOS_STACK_COUNT(stack0));
@@ -133,6 +246,13 @@ int main(void)
     picoRTOS_task_init(&task, led1_main, board.LED, stack2, PICORTOS_STACK_COUNT(stack2));
     picoRTOS_SMP_add_task(&task, picoRTOS_get_next_available_priority(), (picoRTOS_mask_t)0x2);
 #endif
+
+    /* adc */
+    picoRTOS_task_init(&task, adc_main, &board.ADC1_P0, stack3, PICORTOS_STACK_COUNT(stack3));
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+    /* pwm */
+    picoRTOS_task_init(&task, pwm_main, &board.PWM, stack4, PICORTOS_STACK_COUNT(stack4));
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
 
     picoRTOS_start();
 

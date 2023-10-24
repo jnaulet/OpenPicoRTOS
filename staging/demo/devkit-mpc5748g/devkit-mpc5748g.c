@@ -8,7 +8,7 @@
 static void clock_init(void)
 {
     struct clock_settings CLOCK_settings = {
-        CLOCK_MPC574XX_SYSCLK_FXOSC,
+        CLOCK_MPC574XX_SYSCLK_PHI0,
         CLOCK_MPC574XX_FMPLL_CLKIN_FXOSC,
         40000000ul,     /* fxosc */
         160000000ul,    /* phi0 */
@@ -18,6 +18,8 @@ static void clock_init(void)
         4ul             /* s40_div */
     };
 
+    /* turn everything on for tests */
+    (void)clock_mpc574xx_set_run_pc((size_t)0, R_DRUN);
     (void)clock_mpc574xx_init(&CLOCK_settings);
 }
 
@@ -71,11 +73,22 @@ static int adc_init(/*@partial@*/ struct devkit_mpc5748g *ctx)
         false,  /* auto_clock_off_en */
     };
 
+    /* ~0-100% */
+    struct adc_settings ADC_settings = {
+        1,      /* multiplier */
+        650,    /* divider */
+        0,      /* offset */
+    };
+
+    /* turn clock on */
+    // (void)clock_mpc574xx_set_pctl_run_cfg(CLOCK_MPC574XX_PCTL_ADC1, (size_t)0);
+
     (void)adc_nxp_sar_init(&ADC1, ADDR_ADC1);
     (void)adc_nxp_sar_setup(&ADC1, &ADC1_settings);
 
     /* channel */
     (void)adc_nxp_sar_adc_init(&ctx->ADC1_P0, &ADC1, (size_t)0);
+    (void)adc_setup(&ctx->ADC1_P0, &ADC_settings);
 
     return 0;
 }
@@ -83,7 +96,7 @@ static int adc_init(/*@partial@*/ struct devkit_mpc5748g *ctx)
 static int can_init(/*@partial@*/ struct devkit_mpc5748g *ctx)
 {
     struct can_settings CAN_settings = {
-        1000000ul,  /* bitrate */
+        500000ul,   /* bitrate */
         (size_t)2,  /* tx_mailbox_count */
         true,       /* tx_auto_abort */
         false,      /* rx_overwrite */
@@ -188,9 +201,8 @@ static int uart_init(/*@partial@*/ struct devkit_mpc5748g *ctx)
     struct uart_settings UART_settings = {
         115200ul,   /* baudrate */
         (size_t)8,  /* cs */
-        false,      /* parenb */
-        false,      /* parodd */
-        true        /* cstopb */
+        UART_PAR_NONE,
+        UART_CSTOPB_1BIT,
     };
 
     (void)uart_nxp_linflexd_init(&ctx->UART, ADDR_LINFLEXD2, CLOCK_MPC574XX_F80);
@@ -211,7 +223,7 @@ int devkit_mpc5748g_init(struct devkit_mpc5748g *ctx)
     (void)lin_init(ctx);
     (void)pwm_init(ctx);
     (void)spi_init(ctx);
-    (void)twi_init(ctx);
+    // (void)twi_init(ctx);
     (void)uart_init(ctx);
 
     return 0;
