@@ -1,6 +1,7 @@
 #include "clock-mpc574xx.h"
 
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
 struct MC_CGM {
@@ -75,7 +76,7 @@ struct PLLDIG {
     volatile uint32_t PLLCAL1;
 };
 
-#define PLLCAL3_MFDEN_M  0x7fu
+#define PLLCAL3_MFDEN_M  0x7fffu
 #define PLLCAL3_MFDEN(x) (((x) & PLLCAL3_MFDEN_M) << 14)
 
 #define PLLDV_RFDPHI1_M  0x3fu
@@ -116,9 +117,9 @@ struct MC_ME {
     volatile uint32_t PS2;
     volatile uint32_t PS3;
     uint32_t RESERVED5[4];
-    volatile uint32_t RUN_PC[8];
-    volatile uint32_t LP_PC[8];
-    volatile uint8_t PCTLn[106];
+    volatile uint32_t RUN_PC[CLOCK_MPC574XX_RUN_PC_COUNT];
+    volatile uint32_t LP_PC[CLOCK_MPC574XX_LP_PC_COUNT];
+    volatile uint8_t PCTL[CLOCK_MPC574XX_PCTL_COUNT];
     uint8_t RESERVED6[150];
     volatile uint32_t CS;
     uint8_t RESERVED7[2];
@@ -133,6 +134,7 @@ struct MC_ME {
 
 #define GS_S_CURRENT_MODE_M  0xfu
 #define GS_S_CURRENT_MODE(x) (((x) & GS_S_CURRENT_MODE_M) << 28)
+#define GS_S_MTRANS          (1 << 27)
 #define GS_S_PLLON           (1 << 6)
 
 #define MCTL_TARGET_MODE_M  0xfu
@@ -149,10 +151,22 @@ struct MC_ME {
 #define DRUN_MC_SYSCLK_M  0xfu
 #define DRUN_MC_SYSCLK(x) ((x) & DRUN_MC_SYSCLK_M)
 
-#define RUN_PC_DRUN (1 << 3)
+#define RUN_PC_RUN3  (1 << 7)
+#define RUN_PC_RUN2  (1 << 6)
+#define RUN_PC_RUN1  (1 << 5)
+#define RUN_PC_RUN0  (1 << 4)
+#define RUN_PC_DRUN  (1 << 3)
+#define RUN_PC_SAFE  (1 << 2)
+#define RUN_PC_RESET (1 << 0)
 
-#define PCTLn_RUN_CFG_M  0x7u
-#define PCTLn_RUN_CFG(x) ((x) & PCTLn_RUN_CFG_M)
+#define LP_PC_STANDBY0 (1 << 13)
+#define LP_PC_STOP0    (1 << 10)
+
+#define PCTL_DBG_F      (1 << 6)
+#define PCTL_LP_CFG_M   0x7u
+#define PCTL_LP_CFG(x)  (((x) & PCTL_LP_CFG_M) << 3)
+#define PCTL_RUN_CFG_M  0x7u
+#define PCTL_RUN_CFG(x) ((x) & PCTL_RUN_CFG_M)
 
 /* no need to instanciate these in the main program */
 static struct MC_CGM *MC_CGM = (struct MC_CGM*)ADDR_MC_CGM;
@@ -175,9 +189,8 @@ static int stable_pll_busywait(void)
 {
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    while (deadlock-- != 0)
-        if ((MC_ME->GS & GS_S_PLLON) != 0)
-            break;
+    while ((MC_ME->GS & GS_S_PLLON) == 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
     if (!picoRTOS_assert(deadlock != -1))
         return -EBUSY;
@@ -190,13 +203,23 @@ static int drun_mode_busywait(void)
     int deadlock = CONFIG_DEADLOCK_COUNT;
     uint32_t mode = (uint32_t)GS_S_CURRENT_MODE(3);
 
-    while (deadlock-- != 0)
-        if ((uint32_t)(MC_ME->GS & GS_S_CURRENT_MODE_M) == mode)
-            break;
+    while ((uint32_t)(MC_ME->GS & GS_S_CURRENT_MODE(GS_S_CURRENT_MODE_M)) != mode &&
+           deadlock-- != 0) arch_delay_us(1ul);
 
     if (!picoRTOS_assert(deadlock != -1))
         return -EBUSY;
 
+    return 0;
+}
+
+static int mode_transition_not_active_busywait(void)
+{
+    int deadlock = CONFIG_DEADLOCK_COUNT;
+
+    while ((MC_ME->GS & GS_S_MTRANS) != 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
+
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -229,26 +252,26 @@ static int setup_fmpll_phi0(unsigned long freq)
 #define MFD_MAX       150ul
 #define PREDIV_MIN    1ul
 #define PREDIV_MAX    6ul
-#define RFDPHI_P2_MIN 0ul   /* powers of 2 */
-#define RFDPHI_P2_MAX 4ul   /* powers of 2 */
+#define RFDPHI_MIN    0ul   /* powers of 2 */
+#define RFDPHI_MAX    4ul   /* powers of 2 */
 
     if (!picoRTOS_assert(freq > 0)) return -EINVAL;
 
     unsigned long mfd;
     unsigned long prediv;
-    unsigned long rfdphi_p2;
+    unsigned long rfdphi;
 
     /* brute-force computation */
     for (prediv = PREDIV_MIN; prediv <= PREDIV_MAX; prediv++)
         for (mfd = MFD_MIN; mfd <= MFD_MAX; mfd++)
-            for (rfdphi_p2 = RFDPHI_P2_MIN; rfdphi_p2 <= RFDPHI_P2_MAX; rfdphi_p2++) {
-                unsigned long rfdphi = 2ul << rfdphi_p2;
-                unsigned long f = (((unsigned long)clocks.fmpll_clkin / prediv) * mfd) / rfdphi;
+            for (rfdphi = RFDPHI_MIN; rfdphi <= RFDPHI_MAX; rfdphi++) {
+                unsigned long f = (unsigned long)clocks.fmpll_clkin * mfd /* +cal */ /
+                                  (prediv * 2ul * (1ul << rfdphi));
                 if (freq == f) {
                     PLLDIG->PLLDV = (uint32_t)PLLDV_PREDIV(prediv);
                     PLLDIG->PLLDV |= (uint32_t)PLLDV_MFD(mfd);
-                    PLLDIG->PLLDV |= (uint32_t)PLLDV_RFDPHI(rfdphi_p2);
-                    PLLDIG->PLLCAL3 = (uint32_t)PLLCAL3_MFDEN(0x270f);  /* FIXME */
+                    PLLDIG->PLLDV |= (uint32_t)PLLDV_RFDPHI(rfdphi);
+                    PLLDIG->PLLCAL3 = (uint32_t)PLLCAL3_MFDEN(1);       /* not used */
                     PLLDIG->PLLFD = (uint32_t)PLLFD_SMDEN;              /* sigma-delta enabled */
                     return 0;
                 }
@@ -268,9 +291,6 @@ static int switch_to_fmpll_phi0(struct clock_settings *settings)
         (res = setup_fmpll_phi0(settings->phi0)) < 0)
         return res;
 
-    /* drun mode only (no low power) */
-    MC_ME->RUN_PC[0] = (uint32_t)RUN_PC_DRUN;
-
     /* switch to phi0 */
     MC_ME->DRUN_MC = (uint32_t)(DRUN_MC_MVRON |         /* main Voltage regulator on */
                                 DRUN_MC_FLAON(3) |      /* flash in run mode */
@@ -283,11 +303,11 @@ static int switch_to_fmpll_phi0(struct clock_settings *settings)
     MC_ME->MCTL = (uint32_t)(MCTL_TARGET_MODE(3) | MCTL_KEY(0x5af0));
     MC_ME->MCTL = (uint32_t)(MCTL_TARGET_MODE(3) | MCTL_KEY(0xa50f));
 
-    /* wait for pll stabilization */
-    if ((res = stable_pll_busywait()) < 0)
+    if ((res = stable_pll_busywait()) < 0 ||
+        (res = mode_transition_not_active_busywait()) < 0)
         return res;
 
-    /* check for drun mode */
+    clocks.sysclk = (clock_freq_t)settings->phi0;
     return drun_mode_busywait();
 }
 
@@ -296,8 +316,7 @@ static int switch_to_fxosc(unsigned long fxosc)
     if (!picoRTOS_assert(fxosc >= 8000000ul)) return -EINVAL;
     if (!picoRTOS_assert(fxosc <= 40000000ul)) return -EINVAL;
 
-    /* drun mode only (no low power) */
-    MC_ME->RUN_PC[0] = (uint32_t)RUN_PC_DRUN;
+    int res;
 
     /* switch to fxosc */
     MC_ME->DRUN_MC = (uint32_t)(DRUN_MC_MVRON |         /* main Voltage regulator on */
@@ -308,6 +327,9 @@ static int switch_to_fxosc(unsigned long fxosc)
     /* activate drun */
     MC_ME->MCTL = (uint32_t)(MCTL_TARGET_MODE(3) | MCTL_KEY(0x5af0));
     MC_ME->MCTL = (uint32_t)(MCTL_TARGET_MODE(3) | MCTL_KEY(0xa50f));
+
+    if ((res = mode_transition_not_active_busywait()) < 0)
+        return res;
 
     clocks.sysclk = (clock_freq_t)fxosc;
     return drun_mode_busywait();
@@ -364,6 +386,8 @@ int clock_mpc574xx_init(struct clock_settings *settings)
     if (res < 0)
         return res;
 
+    /* set system clock */
+    arch_set_clock_frequency((unsigned long)clocks.sysclk);
     /* set clock values */
     clocks.s160 = clocks.sysclk / (clock_freq_t)settings->s160_div;
     clocks.s80 = clocks.sysclk / (clock_freq_t)settings->s80_div;
@@ -378,6 +402,48 @@ int clock_mpc574xx_init(struct clock_settings *settings)
 
     return 0;
 }
+
+int clock_mpc574xx_set_run_pc(size_t index, int flags)
+{
+    picoRTOS_assert(index < (size_t)CLOCK_MPC574XX_RUN_PC_COUNT, return -EINVAL);
+    picoRTOS_assert(flags < 0x100, return -EINVAL); /* FIXME */
+
+    MC_ME->RUN_PC[index] = (uint32_t)flags;
+    return 0;
+}
+
+int clock_mpc574xx_set_lp_pc(size_t index, int flags)
+{
+    picoRTOS_assert(index < (size_t)CLOCK_MPC574XX_LP_PC_COUNT, return -EINVAL);
+
+    MC_ME->LP_PC[index] = (uint32_t)flags;
+    return 0;
+}
+
+int clock_mpc574xx_set_pctl_lp_cfg(clock_mpc574xx_pctl_t pctl, size_t lp_pc)
+{
+    picoRTOS_assert(pctl < CLOCK_MPC574XX_PCTL_COUNT, return -EINVAL);
+    picoRTOS_assert(lp_pc < (size_t)CLOCK_MPC574XX_LP_PC_COUNT, return -EINVAL);
+
+    size_t index = (size_t)pctl;
+
+    MC_ME->PCTL[index] &= ~PCTL_LP_CFG(PCTL_LP_CFG_M);
+    MC_ME->PCTL[index] |= PCTL_LP_CFG(lp_pc);
+    return 0;
+}
+
+int clock_mpc574xx_set_pctl_run_cfg(clock_mpc574xx_pctl_t pctl, size_t run_pc)
+{
+    picoRTOS_assert(pctl < CLOCK_MPC574XX_PCTL_COUNT, return -EINVAL);
+    picoRTOS_assert(run_pc < (size_t)CLOCK_MPC574XX_RUN_PC_COUNT, return -EINVAL);
+
+    size_t index = (size_t)pctl;
+
+    MC_ME->PCTL[index] &= ~PCTL_RUN_CFG(PCTL_RUN_CFG_M);
+    MC_ME->PCTL[index] |= PCTL_RUN_CFG(run_pc);
+    return 0;
+}
+
 
 /* hooks */
 
