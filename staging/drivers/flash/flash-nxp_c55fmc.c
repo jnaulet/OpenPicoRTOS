@@ -65,7 +65,7 @@ int flash_get_nblocks(/*@unused@*/ struct flash *ctx __attribute__ ((unused)))
 int flash_get_erase_size(/*@unused@*/ struct flash *ctx __attribute__ ((unused)),
                          size_t block)
 {
-    if (!picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT)) return -EINVAL;
+    picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT, return -EINVAL);
 
     return (int)(map[block].end_addr - map[block].start_addr) + 1;
 }
@@ -73,7 +73,7 @@ int flash_get_erase_size(/*@unused@*/ struct flash *ctx __attribute__ ((unused))
 int flash_get_write_size(/*@unused@*/ struct flash *ctx __attribute__ ((unused)),
                          size_t block)
 {
-    if (!picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT)) return -EINVAL;
+    picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT, return -EINVAL);
 
     return (int)sizeof(uint64_t);
 }
@@ -81,14 +81,14 @@ int flash_get_write_size(/*@unused@*/ struct flash *ctx __attribute__ ((unused))
 int flash_get_block_addr(/*@unused@*/ struct flash *ctx __attribute__ ((unused)),
                          size_t block)
 {
-    if (!picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT)) return -EINVAL;
+    picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT, return -EINVAL);
 
     return (int)map[block].start_addr;
 }
 
 static int flash_nxp_c55fmc_SELn(struct flash *ctx, size_t block, uint32_t **raddr)
 {
-    if (!picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT)) return -EINVAL;
+    picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT, return -EINVAL);
 
     *raddr = ((uint32_t*)&ctx->base->SEL0) + map[block].locksel;
     return 0;
@@ -96,7 +96,7 @@ static int flash_nxp_c55fmc_SELn(struct flash *ctx, size_t block, uint32_t **rad
 
 static int flash_nxp_c55fmc_LOCKn(struct flash *ctx, size_t block, uint32_t **raddr)
 {
-    if (!picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT)) return -EINVAL;
+    picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT, return -EINVAL);
 
     *raddr = ((uint32_t*)&ctx->base->LOCK0) + map[block].locksel;
     return 0;
@@ -113,7 +113,7 @@ static int abort_erase(struct flash *ctx, uint32_t *NXP_C55FMC_SELn)
 
 static int flash_erase_idle(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT)) return -EINVAL;
+    picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT, return -EINVAL);
 
     int res;
     uint32_t *NXP_C55FMC_SELn = NULL;
@@ -139,7 +139,7 @@ static int flash_erase_idle(struct flash *ctx, size_t block)
 
 static int flash_erase_busy(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT)) return -EINVAL;
+    picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT, return -EINVAL);
 
     int res;
     uint32_t *NXP_C55FMC_SELn = NULL;
@@ -171,7 +171,7 @@ static int flash_erase_busy(struct flash *ctx, size_t block)
 
 int flash_erase(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT)) return -EINVAL;
+    picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT, return -EINVAL);
 
     switch (ctx->state) {
     case FLASH_NXP_C55FMC_STATE_IDLE: return flash_erase_idle(ctx, block);
@@ -187,7 +187,7 @@ int flash_erase(struct flash *ctx, size_t block)
 int flash_blankcheck(/*@unused@*/ struct flash *ctx __attribute__ ((unused)),
                      size_t block)
 {
-    if (!picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT)) return -EINVAL;
+    picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT, return -EINVAL);
 
     const struct nxp_c55fmc_bit_mapping *m = &map[block];
 
@@ -214,9 +214,9 @@ static int flash_write_idle(struct flash *ctx, size_t addr, const void *data, si
 {
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
-    if (!picoRTOS_assert((addr % sizeof(uint64_t)) == 0)) return -EINVAL;
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert((n % sizeof(uint64_t)) == 0)) return -EINVAL;
+    picoRTOS_assert((addr % sizeof(uint64_t)) == 0, return -EINVAL);
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert((n % sizeof(uint64_t)) == 0, return -EINVAL);
 
     int nwritten = 0;
     uint32_t *dst32 = (uint32_t*)addr;
@@ -267,9 +267,9 @@ static int flash_write_busy(struct flash *ctx)
 
 int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n)
 {
-    if (!picoRTOS_assert((addr % sizeof(uint64_t)) == 0)) return -EINVAL;
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert((n % sizeof(uint64_t)) == 0)) return -EINVAL;
+    picoRTOS_assert((addr % sizeof(uint64_t)) == 0, return -EINVAL);
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert((n % sizeof(uint64_t)) == 0, return -EINVAL);
 
     switch (ctx->state) {
     case FLASH_NXP_C55FMC_STATE_IDLE: return flash_write_idle(ctx, addr, data, n);
@@ -284,7 +284,7 @@ int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n)
 
 int flash_lock(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT)) return -EINVAL;
+    picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT, return -EINVAL);
 
     int res;
     uint32_t *C55FMC_LOCKn = NULL;
@@ -300,7 +300,7 @@ int flash_lock(struct flash *ctx, size_t block)
 
 int flash_unlock(struct flash *ctx, size_t block)
 {
-    if (!picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT)) return -EINVAL;
+    picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT, return -EINVAL);
 
     int res;
     uint32_t *C55FMC_LOCKn = NULL;

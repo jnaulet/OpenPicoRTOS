@@ -80,9 +80,7 @@ static int request_init_mode_busywait(struct lin *ctx)
         if ((ctx->base->LINSR & LINSR_LINS(LINSR_LINS_M)) == LINSR_LINS(1))
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -116,7 +114,7 @@ static int set_bitrate(struct lin *ctx, unsigned long bitrate)
 {
 #define div_round_closest(a, b) (((a) + ((b) >> 1)) / (b))
 
-    if (!picoRTOS_assert(bitrate > 0)) return -EINVAL;
+    picoRTOS_assert(bitrate > 0, return -EINVAL);
 
     clock_freq_t freq;
 
@@ -138,8 +136,8 @@ static int set_bitrate(struct lin *ctx, unsigned long bitrate)
 
 static int set_mode(struct lin *ctx, lin_mode_t mode)
 {
-    if (!picoRTOS_assert(mode != LIN_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(mode < LIN_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(mode != LIN_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(mode < LIN_MODE_COUNT, return -EINVAL);
 
     if (mode == LIN_MODE_MASTER) ctx->base->LINCR1 |= LINCR1_MME;
     else ctx->base->LINCR1 &= ~LINCR1_MME;
@@ -172,8 +170,8 @@ int lin_setup(struct lin *ctx, struct lin_settings *settings)
 
 static int copy_to_bdr(struct lin *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT, return -EINVAL);
 
     const uint8_t *buf8 = (uint8_t*)buf;
 
@@ -200,8 +198,8 @@ static int copy_to_bdr(struct lin *ctx, const void *buf, size_t n)
 
 static int lin_write_as_master_idle(struct lin *ctx, uint8_t id, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT, return -EINVAL);
 
     int res;
 
@@ -225,8 +223,8 @@ static int lin_write_as_master_idle(struct lin *ctx, uint8_t id, const void *buf
 
 static int lin_write_as_master_xfer(struct lin *ctx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT, return -EINVAL);
 
     if ((ctx->base->LINSR & LINSR_DTF) == 0)
         return -EAGAIN;
@@ -240,8 +238,8 @@ static int lin_write_as_master_xfer(struct lin *ctx, size_t n)
 
 static int lin_write_as_master(struct lin *ctx, uint8_t id, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT, return -EINVAL);
 
     switch (ctx->state) {
     case LIN_NXP_LINFLEXD_STATE_IDLE: return lin_write_as_master_idle(ctx, id, buf, n);
@@ -256,8 +254,8 @@ static int lin_write_as_master(struct lin *ctx, uint8_t id, const void *buf, siz
 
 static int lin_write_as_slave(struct lin *ctx, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT, return -EINVAL);
 
     int res;
 
@@ -286,8 +284,8 @@ static int lin_write_as_slave(struct lin *ctx, const void *buf, size_t n)
 
 int lin_write(struct lin *ctx, uint8_t id, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(id < (uint8_t)LIN_ID_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(id < (uint8_t)LIN_ID_COUNT, return -EINVAL);
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->mode) {
     case LIN_MODE_MASTER: return lin_write_as_master(ctx, id, buf, n);
@@ -301,8 +299,8 @@ int lin_write(struct lin *ctx, uint8_t id, const void *buf, size_t n)
 
 static int copy_from_bdr(struct lin *ctx, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT, return -EINVAL);
 
     uint8_t *buf8 = (uint8_t*)buf;
 
@@ -325,8 +323,8 @@ static int copy_from_bdr(struct lin *ctx, void *buf, size_t n)
 
 static int lin_read_as_master_idle(struct lin *ctx, uint8_t id, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT, return -EINVAL);
 
     /* request */
     ctx->base->BIDR = 0;
@@ -348,8 +346,8 @@ static int lin_read_as_master_xfer(struct lin *ctx, void *buf, size_t n)
 {
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT, return -EINVAL);
 
     int res;
     int nread;
@@ -381,8 +379,8 @@ static int lin_read_as_master_xfer(struct lin *ctx, void *buf, size_t n)
 
 static int lin_read_as_master(struct lin *ctx, uint8_t id, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT, return -EINVAL);
 
     switch (ctx->state) {
     case LIN_NXP_LINFLEXD_STATE_IDLE: return lin_read_as_master_idle(ctx, id, n);
@@ -397,8 +395,8 @@ static int lin_read_as_master(struct lin *ctx, uint8_t id, void *buf, size_t n)
 
 static int lin_read_as_slave(struct lin *ctx, uint8_t *id, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT, return -EINVAL);
 
     int nread = 0;
 
@@ -432,8 +430,8 @@ static int lin_read_as_slave(struct lin *ctx, uint8_t *id, void *buf, size_t n)
 
 int lin_read(struct lin *ctx, uint8_t *id, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)LIN_FRAME_COUNT, return -EINVAL);
 
     switch (ctx->mode) {
     case LIN_MODE_MASTER: return lin_read_as_master(ctx, *id, buf, n);

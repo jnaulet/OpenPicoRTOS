@@ -57,8 +57,8 @@ int mux_nxp_siul2_init(struct mux *ctx, int base)
 
 int mux_nxp_siul2_output(struct mux *ctx, size_t pin, mux_nxp_siul2_t mux)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_NXP_SIUL2_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(mux < MUX_NXP_SIUL2_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_NXP_SIUL2_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(mux < MUX_NXP_SIUL2_COUNT, return -EINVAL);
 
     /* sss */
     ctx->base->MSCR[pin] &= ~MSCR_SSS_M;
@@ -73,9 +73,9 @@ int mux_nxp_siul2_output(struct mux *ctx, size_t pin, mux_nxp_siul2_t mux)
 
 int mux_nxp_siul2_input(struct mux *ctx, size_t pin, mux_nxp_siul2_t mux, size_t imcr)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_NXP_SIUL2_PIN_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(mux < MUX_NXP_SIUL2_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(imcr < (size_t)MUX_NXP_SIUL2_IMCR_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_NXP_SIUL2_PIN_COUNT, return -EINVAL);
+    picoRTOS_assert(mux < MUX_NXP_SIUL2_COUNT, return -EINVAL);
+    picoRTOS_assert(imcr < (size_t)MUX_NXP_SIUL2_IMCR_COUNT, return -EINVAL);
 
     /* ibe */
     ctx->base->MSCR[pin] |= MSCR_IBE;
@@ -89,7 +89,7 @@ int mux_nxp_siul2_input(struct mux *ctx, size_t pin, mux_nxp_siul2_t mux, size_t
 
 int mux_nxp_siul2_analog(struct mux *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_NXP_SIUL2_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_NXP_SIUL2_PIN_COUNT, return -EINVAL);
 
     ctx->base->MSCR[pin] = (uint32_t)(MSCR_APC | MSCR_IBE);
     return 0;
@@ -97,7 +97,7 @@ int mux_nxp_siul2_analog(struct mux *ctx, size_t pin)
 
 int mux_nxp_siul2_pull_up(struct mux *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_NXP_SIUL2_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_NXP_SIUL2_PIN_COUNT, return -EINVAL);
 
     /* pull enable & up */
     ctx->base->MSCR[pin] |= (MSCR_PUE | MSCR_PUS);
@@ -106,7 +106,7 @@ int mux_nxp_siul2_pull_up(struct mux *ctx, size_t pin)
 
 int mux_nxp_siul2_pull_down(struct mux *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_NXP_SIUL2_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_NXP_SIUL2_PIN_COUNT, return -EINVAL);
 
     /* pull enable & down */
     ctx->base->MSCR[pin] |= MSCR_PUE;

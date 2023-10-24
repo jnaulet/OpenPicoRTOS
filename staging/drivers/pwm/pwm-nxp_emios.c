@@ -44,8 +44,7 @@ int pwm_nxp_emios_init(struct pwm_nxp_emios *ctx, int base, clock_id_t clkid)
     ctx->gpre = (size_t)1;
     ctx->freq = clock_get_freq(clkid);
 
-    if (!picoRTOS_assert(ctx->freq > 0))
-        return (int)ctx->freq;
+    picoRTOS_assert(ctx->freq > 0, return (int)ctx->freq);
 
     /* turn general clock on */
     ctx->base->MCR = (uint32_t)MCR_GTBE;
@@ -55,8 +54,8 @@ int pwm_nxp_emios_init(struct pwm_nxp_emios *ctx, int base, clock_id_t clkid)
 
 int pwm_nxp_emios_setup(struct pwm_nxp_emios *ctx, struct pwm_nxp_emios_settings *settings)
 {
-    if (!picoRTOS_assert(settings->gpre >= (size_t)PWM_NXP_EMIOS_GPRE_MIN)) return -EINVAL;
-    if (!picoRTOS_assert(settings->gpre <= (size_t)PWM_NXP_EMIOS_GPRE_MAX)) return -EINVAL;
+    picoRTOS_assert(settings->gpre >= (size_t)PWM_NXP_EMIOS_GPRE_MIN, return -EINVAL);
+    picoRTOS_assert(settings->gpre <= (size_t)PWM_NXP_EMIOS_GPRE_MAX, return -EINVAL);
 
     /* set prescaler */
     ctx->base->MCR |= MCR_GPREN;
@@ -69,18 +68,19 @@ int pwm_nxp_emios_setup(struct pwm_nxp_emios *ctx, struct pwm_nxp_emios_settings
 static int nxp_emios_get_UC(struct pwm_nxp_emios *ctx, size_t channel,
                             /*@out@*/ struct PWM_NXP_EMIOS_UC **uc)
 {
-    if (!picoRTOS_assert(channel < (size_t)PWM_NXP_EMIOS_CHANNEL_COUNT)) {
-        *uc = NULL;
-        return -EINVAL;
+    if (channel < (size_t)PWM_NXP_EMIOS_CHANNEL_COUNT) {
+        *uc = &ctx->base->UC[channel];
+        return 0;
     }
 
-    *uc = &ctx->base->UC[channel];
-    return 0;
+    *uc = NULL;
+    picoRTOS_break();
+    /*@notreached@*/ return -EINVAL;
 }
 
 int pwm_nxp_emios_pwm_init(struct pwm *ctx, struct pwm_nxp_emios *nxp_emios, size_t channel)
 {
-    if (!picoRTOS_assert(channel < (size_t)PWM_NXP_EMIOS_CHANNEL_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)PWM_NXP_EMIOS_CHANNEL_COUNT, return -EINVAL);
 
     int res;
 
@@ -102,7 +102,7 @@ int pwm_nxp_emios_pwm_init(struct pwm *ctx, struct pwm_nxp_emios *nxp_emios, siz
 
 int pwm_nxp_emios_pwm_setup(struct pwm *ctx, struct pwm_nxp_emios_pwm_settings *settings)
 {
-    if (!picoRTOS_assert(settings->ucpre < PWM_NXP_EMIOS_UCPRE_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->ucpre < PWM_NXP_EMIOS_UCPRE_COUNT, return -EINVAL);
 
     ctx->uc->C &= ~C_UCPRE(C_UCPRE_M);
     ctx->uc->C |= C_UCPRE(settings->ucpre);
@@ -119,15 +119,15 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
 {
 #define PWM_NXP_EMIOS_PWM_PERIOD_COUNT 0x100000
 
-    if (!picoRTOS_assert(period > 0)) return -EINVAL;
+    picoRTOS_assert(period > 0, return -EINVAL);
 
     /* real nxp_emios channel frequency */
     size_t hz = (size_t)ctx->nxp_emios->freq / (ctx->nxp_emios->gpre * ctx->ucpre);
 
     ctx->ncycles = (hz / (size_t)1000000) * (size_t)period;
 
-    if (!picoRTOS_assert(ctx->ncycles > 0)) return -EINVAL;
-    if (!picoRTOS_assert(ctx->ncycles < (size_t)PWM_NXP_EMIOS_PWM_PERIOD_COUNT)) return -EINVAL;
+    picoRTOS_assert(ctx->ncycles > 0, return -EINVAL);
+    picoRTOS_assert(ctx->ncycles < (size_t)PWM_NXP_EMIOS_PWM_PERIOD_COUNT, return -EINVAL);
 
     ctx->uc->B = (uint32_t)ctx->ncycles;
 
@@ -165,7 +165,7 @@ void pwm_stop(struct pwm *ctx)
 
 int pwm_nxp_emios_ipwm_init(/*@out@*/ struct ipwm *ctx, struct pwm_nxp_emios *nxp_emios, size_t channel)
 {
-    if (!picoRTOS_assert(channel < (size_t)PWM_NXP_EMIOS_CHANNEL_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)PWM_NXP_EMIOS_CHANNEL_COUNT, return -EINVAL);
 
     int res;
 
@@ -188,8 +188,8 @@ int pwm_nxp_emios_ipwm_init(/*@out@*/ struct ipwm *ctx, struct pwm_nxp_emios *nx
 
 int pwm_nxp_emios_ipwm_setup(struct ipwm *ctx, struct pwm_nxp_emios_ipwm_settings *settings)
 {
-    if (!picoRTOS_assert(settings->ucpre < PWM_NXP_EMIOS_UCPRE_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(settings->filter < IPWM_NXP_EMIOS_IF_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->ucpre < PWM_NXP_EMIOS_UCPRE_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->filter < IPWM_NXP_EMIOS_IF_COUNT, return -EINVAL);
 
     ctx->uc->C &= ~C_UCPRE(C_UCPRE_M);
     ctx->uc->C |= C_UCPRE(settings->ucpre);

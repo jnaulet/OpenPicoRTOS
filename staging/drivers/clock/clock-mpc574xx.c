@@ -192,9 +192,7 @@ static int stable_pll_busywait(void)
     while ((MC_ME->GS & GS_S_PLLON) == 0 && deadlock-- != 0)
         arch_delay_us(1ul);
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -206,9 +204,7 @@ static int drun_mode_busywait(void)
     while ((uint32_t)(MC_ME->GS & GS_S_CURRENT_MODE(GS_S_CURRENT_MODE_M)) != mode &&
            deadlock-- != 0) arch_delay_us(1ul);
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -225,7 +221,7 @@ static int mode_transition_not_active_busywait(void)
 
 static int setup_fmpll_clkin(clock_mpc574xx_fmpll_clkin_t clkin, unsigned long fxosc)
 {
-    if (!picoRTOS_assert(clkin < CLOCK_MPC574XX_FMPLL_CLKIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(clkin < CLOCK_MPC574XX_FMPLL_CLKIN_COUNT, return -EINVAL);
 
     switch (clkin) {
     case CLOCK_MPC574XX_FMPLL_CLKIN_FIRC:
@@ -255,7 +251,7 @@ static int setup_fmpll_phi0(unsigned long freq)
 #define RFDPHI_MIN    0ul   /* powers of 2 */
 #define RFDPHI_MAX    4ul   /* powers of 2 */
 
-    if (!picoRTOS_assert(freq > 0)) return -EINVAL;
+    picoRTOS_assert(freq > 0, return -EINVAL);
 
     unsigned long mfd;
     unsigned long prediv;
@@ -313,8 +309,8 @@ static int switch_to_fmpll_phi0(struct clock_settings *settings)
 
 static int switch_to_fxosc(unsigned long fxosc)
 {
-    if (!picoRTOS_assert(fxosc >= 8000000ul)) return -EINVAL;
-    if (!picoRTOS_assert(fxosc <= 40000000ul)) return -EINVAL;
+    picoRTOS_assert(fxosc >= 8000000ul, return -EINVAL);
+    picoRTOS_assert(fxosc <= 40000000ul, return -EINVAL);
 
     int res;
 
@@ -337,10 +333,10 @@ static int switch_to_fxosc(unsigned long fxosc)
 
 static int set_scalable_dividers(struct clock_settings *settings)
 {
-    if (!picoRTOS_assert(settings->s160_div <= 8ul)) return -EINVAL;
-    if (!picoRTOS_assert(settings->s80_div <= 8ul)) return -EINVAL;
-    if (!picoRTOS_assert(settings->fs80_div <= 8ul)) return -EINVAL;
-    if (!picoRTOS_assert(settings->s40_div <= 16ul)) return -EINVAL;
+    picoRTOS_assert(settings->s160_div <= 8ul, return -EINVAL);
+    picoRTOS_assert(settings->s80_div <= 8ul, return -EINVAL);
+    picoRTOS_assert(settings->fs80_div <= 8ul, return -EINVAL);
+    picoRTOS_assert(settings->s40_div <= 16ul, return -EINVAL);
 
     if (settings->s160_div != 0)
         MC_CGM->SC_DC0 = (uint32_t)(SC_DCn_DIV(settings->s160_div - 1ul) | SC_DCn_DE);
@@ -449,8 +445,8 @@ int clock_mpc574xx_set_pctl_run_cfg(clock_mpc574xx_pctl_t pctl, size_t run_pc)
 
 clock_freq_t clock_get_freq(clock_id_t clkid)
 {
-    if (!picoRTOS_assert(clkid < (clock_id_t)CLOCK_MPC574XX_COUNT))
-        return (clock_freq_t)-EINVAL;
+    picoRTOS_assert(clkid < (clock_id_t)CLOCK_MPC574XX_COUNT,
+                    return (clock_freq_t)-EINVAL);
 
     switch (clkid) {
     case CLOCK_MPC574XX_F160: return clocks.sysclk;

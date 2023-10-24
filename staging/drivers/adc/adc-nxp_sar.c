@@ -78,7 +78,7 @@ int adc_nxp_sar_setup(struct adc_nxp_sar *ctx, struct adc_nxp_sar_settings *sett
 
 int adc_nxp_sar_adc_init(struct adc *ctx, struct adc_nxp_sar *parent, size_t channel)
 {
-    if (!picoRTOS_assert(channel < (size_t)ADC_NXP_SAR_CHANNEL_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)ADC_NXP_SAR_CHANNEL_COUNT, return -EINVAL);
 
     ctx->parent = parent;
     ctx->channel = channel;
@@ -125,7 +125,7 @@ int adc_read(struct adc *ctx, int *data)
 
 int adc_read_multiple(struct adc *ctx, int *data, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     return adc_read(ctx, data);
 }

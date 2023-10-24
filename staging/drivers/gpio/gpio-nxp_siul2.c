@@ -13,7 +13,7 @@ struct GPIO_NXP_SIUL2 {
 
 int gpio_nxp_siul2_init(struct gpio *ctx, int base, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)GPIO_NXP_SIUL2_PIN_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)GPIO_NXP_SIUL2_PIN_COUNT, return -EINVAL);
 
     ctx->base = (struct GPIO_NXP_SIUL2*)base;
     ctx->mask = (uint16_t)(0x8000u >> pin);

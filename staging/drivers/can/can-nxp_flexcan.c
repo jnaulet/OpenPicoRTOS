@@ -196,10 +196,10 @@ static int nxp_flexcan_set_ctrl1(struct can *ctx, size_t brp, size_t tq)
 {
 #define div_round_closest(a, b) (((a) + ((b) >> 1)) / (b))
 
-    if (!picoRTOS_assert(brp > 0)) return -EINVAL;
-    if (!picoRTOS_assert(brp <= (size_t)(CTRL1_PRESDIV_M + 1u))) return -EINVAL;
-    if (!picoRTOS_assert(tq >= (size_t)TQ_MIN)) return -EINVAL;
-    if (!picoRTOS_assert(tq <= (size_t)TQ_MAX)) return -EINVAL;
+    picoRTOS_assert(brp > 0, return -EINVAL);
+    picoRTOS_assert(brp <= (size_t)(CTRL1_PRESDIV_M + 1u), return -EINVAL);
+    picoRTOS_assert(tq >= (size_t)TQ_MIN, return -EINVAL);
+    picoRTOS_assert(tq <= (size_t)TQ_MAX, return -EINVAL);
 
     size_t pseg1;
     size_t pseg2;
@@ -243,7 +243,7 @@ static int nxp_flexcan_set_ctrl1(struct can *ctx, size_t brp, size_t tq)
 
 static int nxp_flexcan_set_bitrate(struct can *ctx, unsigned long bitrate)
 {
-    if (!picoRTOS_assert(bitrate > 0)) return -EINVAL;
+    picoRTOS_assert(bitrate > 0, return -EINVAL);
 
     size_t brp;
     clock_freq_t freq;
@@ -252,8 +252,8 @@ static int nxp_flexcan_set_bitrate(struct can *ctx, unsigned long bitrate)
         return (int)freq;
 
     /* check if freq is a multiple of bitrate */
-    if (!picoRTOS_assert(((unsigned long)freq % bitrate) == 0))
-        return -EIO;
+    picoRTOS_assert(((unsigned long)freq % bitrate) == 0,
+                    return -EIO);
 
     /* start iterative detection of params */
     for (brp = (size_t)1; brp <= (size_t)(CTRL1_PRESDIV_M + 1u); brp++) {
@@ -279,7 +279,7 @@ static int nxp_flexcan_set_bitrate(struct can *ctx, unsigned long bitrate)
 
 static int nxp_flexcan_set_tx_mailboxes(/*@partial@*/ struct can *ctx, size_t n)
 {
-    if (!picoRTOS_assert(n < (size_t)ctx->mailbox_count)) return -EINVAL;
+    picoRTOS_assert(n < (size_t)ctx->mailbox_count, return -EINVAL);
 
     ctx->tx_mailbox_count = n;
     ctx->rx_mailbox_count = (size_t)(ctx->mailbox_count - n);
@@ -319,9 +319,7 @@ static int nxp_flexcan_soft_reset(struct can *ctx)
         if ((ctx->base->MCR & MCR_SOFTRST) == 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -337,9 +335,7 @@ static int nxp_flexcan_freeze(struct can *ctx)
             (ctx->base->MCR & MCR_NOTRDY) != 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -355,9 +351,7 @@ static int nxp_flexcan_unfreeze(struct can *ctx)
             (ctx->base->MCR & MCR_NOTRDY) == 0)
             break;
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -377,8 +371,8 @@ static void nxp_flexcan_clear_ram(/*@partial@*/ struct can *ctx)
 int can_nxp_flexcan_init(struct can *ctx, int base, clock_id_t clkid,
                          size_t mailbox_count)
 {
-    if (!picoRTOS_assert(mailbox_count > 0)) return -EINVAL;
-    if (!picoRTOS_assert(mailbox_count < (size_t)CAN_NXP_FLEXCAN_MB_COUNT)) return -EINVAL;
+    picoRTOS_assert(mailbox_count > 0, return -EINVAL);
+    picoRTOS_assert(mailbox_count <= (size_t)CAN_NXP_FLEXCAN_MB_COUNT, return -EINVAL);
 
     int res;
 
@@ -483,10 +477,9 @@ int can_setup(struct can *ctx, struct can_settings *settings)
 
 int can_accept(struct can *ctx, can_id_t id, can_id_t accept_mask)
 {
-    if (!picoRTOS_assert(id < (can_id_t)CAN_EXTID_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(accept_mask < (can_id_t)CAN_EXTID_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(ctx->rx_mailbox_index < ctx->rx_mailbox_count))
-        return -ENOMEM;
+    picoRTOS_assert(id < (can_id_t)CAN_EXTID_COUNT, return -EINVAL);
+    picoRTOS_assert(accept_mask < (can_id_t)CAN_EXTID_COUNT, return -EINVAL);
+    picoRTOS_assert(ctx->rx_mailbox_index < ctx->rx_mailbox_count, return -ENOMEM);
 
     struct CAN_NXP_FLEXCAN_MB *mb = &ctx->base->MB[ctx->rx_mailbox_index];
 
@@ -517,9 +510,9 @@ int can_accept(struct can *ctx, can_id_t id, can_id_t accept_mask)
 static int nxp_flexcan_prepare_tx(struct can *ctx, struct CAN_NXP_FLEXCAN_MB *mb,
                                   can_id_t id, size_t n, uint32_t *CS)
 {
-    if (!picoRTOS_assert(id < (can_id_t)CAN_EXTID_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT)) return -EINVAL;
+    picoRTOS_assert(id < (can_id_t)CAN_EXTID_COUNT, return -EINVAL);
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT, return -EINVAL);
 
     uint32_t CS_flags = 0;
 
@@ -571,9 +564,9 @@ static int mailbox_write(struct CAN_NXP_FLEXCAN_MB *mb, const void *buf, size_t 
 static int nxp_flexcan_write_mailbox(struct can *ctx, size_t index,
                                      can_id_t id, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(index < ctx->mailbox_count)) return -EINVAL;
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT)) return -EINVAL;
+    picoRTOS_assert(index < ctx->mailbox_count, return -EINVAL);
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT, return -EINVAL);
 
     int res;
     uint32_t CS = 0;
@@ -596,8 +589,8 @@ static int nxp_flexcan_write_mailbox(struct can *ctx, size_t index,
 
 int can_write(struct can *ctx, can_id_t id, const void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT, return -EINVAL);
 
     /* get next index */
     size_t index = ctx->rx_mailbox_count + ctx->tx_mailbox_index;
@@ -609,8 +602,8 @@ int can_write(struct can *ctx, can_id_t id, const void *buf, size_t n)
 
 static int mailbox_read(struct CAN_NXP_FLEXCAN_MB *mb, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT, return -EINVAL);
 
     uint8_t *buf8 = (uint8_t*)buf;
 
@@ -643,9 +636,9 @@ static can_id_t mailbox_read_id(struct CAN_NXP_FLEXCAN_MB *mb, uint32_t CS)
 static int nxp_flexcan_read_mailbox(struct can *ctx, size_t index,
                                     can_id_t *id, void *buf, size_t n)
 {
-    if (!picoRTOS_assert(index < ctx->rx_mailbox_count)) return -EINVAL;
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT)) return -EINVAL;
+    picoRTOS_assert(index < ctx->rx_mailbox_count, return -EINVAL);
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT, return -EINVAL);
 
     struct CAN_NXP_FLEXCAN_MB *mb = &ctx->base->MB[index];
 
@@ -677,8 +670,8 @@ static int nxp_flexcan_read_mailbox(struct can *ctx, size_t index,
 int can_read(struct can *ctx, can_id_t *id, void *buf, size_t n)
 {
     /* classic can only */
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-    if (!picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT, return -EINVAL);
 
     size_t index = ctx->rx_mailbox_index;
 

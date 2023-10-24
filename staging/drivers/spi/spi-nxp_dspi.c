@@ -116,7 +116,7 @@ static int set_bitrate(struct spi *ctx, unsigned long bitrate)
                                         256ul,  512ul,  1024ul,  2048ul,
                                         4096ul, 8192ul, 16384ul, 32768ul };
 
-    if (!picoRTOS_assert(bitrate > 0)) return -EINVAL;
+    picoRTOS_assert(bitrate > 0, return -EINVAL);
 
     /* SCK baud rate = (fP / PBR) x [(1 + DBR) / BR] */
 
@@ -153,8 +153,8 @@ static int set_bitrate(struct spi *ctx, unsigned long bitrate)
 
 static int set_clock_mode(struct spi *ctx, spi_clock_mode_t mode)
 {
-    if (!picoRTOS_assert(mode > SPI_CLOCK_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(mode < SPI_CLOCK_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(mode > SPI_CLOCK_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(mode < SPI_CLOCK_MODE_COUNT, return -EINVAL);
 
     int cpol = 0;
     int cpha = 0;
@@ -181,8 +181,8 @@ static int set_clock_mode(struct spi *ctx, spi_clock_mode_t mode)
 
 static int set_frame_size(struct spi *ctx, size_t nbits)
 {
-    if (!picoRTOS_assert(nbits >= (size_t)4)) return -EINVAL;
-    if (!picoRTOS_assert(nbits <= (size_t)16)) return -EINVAL;
+    picoRTOS_assert(nbits >= (size_t)4, return -EINVAL);
+    picoRTOS_assert(nbits <= (size_t)16, return -EINVAL);
 
     ctx->base->CTAR[0] &= ~CTAR_FMSZ(CTAR_FMSZ_M);
     ctx->base->CTAR[0] |= CTAR_FMSZ(nbits - 1);
@@ -193,8 +193,8 @@ static int set_frame_size(struct spi *ctx, size_t nbits)
 
 static int set_mode(struct spi *ctx, spi_mode_t mode)
 {
-    if (!picoRTOS_assert(mode > SPI_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(mode < SPI_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(mode > SPI_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(mode < SPI_MODE_COUNT, return -EINVAL);
 
     if (mode == SPI_MODE_MASTER) ctx->base->MCR |= MCR_MSTR;
     else ctx->base->MCR &= ~MCR_MSTR;
@@ -204,8 +204,8 @@ static int set_mode(struct spi *ctx, spi_mode_t mode)
 
 static int set_cs_pol(struct spi *ctx, spi_cs_pol_t pol, size_t cs)
 {
-    if (!picoRTOS_assert(pol > SPI_CS_POL_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(pol < SPI_CS_POL_COUNT)) return -EINVAL;
+    picoRTOS_assert(pol > SPI_CS_POL_IGNORE, return -EINVAL);
+    picoRTOS_assert(pol < SPI_CS_POL_COUNT, return -EINVAL);
     /* TODO: check CS (devices ?) */
 
     if (pol == SPI_CS_POL_ACTIVE_LOW)
@@ -298,11 +298,11 @@ static int pop_frame(struct spi *ctx, uint8_t *frame)
 
 int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     /* 16bit check */
     if (ctx->frame_size > (size_t)8)
-        if (!picoRTOS_assert((n & 0x1) == 0)) return -EINVAL;
+        picoRTOS_assert((n & 0x1) == 0, return -EINVAL);
 
     size_t recv = 0;
     uint8_t *rx8 = rx;
