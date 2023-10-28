@@ -7,8 +7,8 @@
 struct WD_RENESAS_RA4_WDT;
 
 struct wd {
-  /*@temp@*/ struct WD_RENESAS_RA4_WDT *base;
-  clock_id_t clkid;
+    /*@temp@*/ struct WD_RENESAS_RA4_WDT *base;
+    clock_id_t clkid;
 };
 
 int wd_renesas_ra4_wdt_init(/*@out@*/ struct wd *ctx, clock_id_t clkid);

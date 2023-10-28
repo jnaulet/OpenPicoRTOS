@@ -103,7 +103,7 @@
 
 #define DEVICE_INTERRUPT_VECTOR_COUNT DEVICE_PID_COUNT
 
-/* By default, at startup the chip runs out of the Master Clock using 
+/* By default, at startup the chip runs out of the Master Clock using
  * the Fast RC oscillator running at 4 MHz */
 #define DEVICE_DEFAULT_SYSCLK_HZ 4000000
 

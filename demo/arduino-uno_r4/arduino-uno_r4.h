@@ -9,12 +9,12 @@
 #include "uart-renesas_ra4_sci.h"
 
 struct arduino_uno_r4 {
-  struct gpio TICK;
-  struct spi SPI;
-  struct pwm L;
-  struct uart UART;
-  struct adc A0;
-  struct twi I2C;
+    struct gpio TICK;
+    struct spi SPI;
+    struct pwm L;
+    struct uart UART;
+    struct adc A0;
+    struct twi I2C;
 };
 
 int arduino_uno_r4_init(/*@out@*/ struct arduino_uno_r4 *ctx);

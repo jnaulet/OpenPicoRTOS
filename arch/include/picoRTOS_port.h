@@ -224,9 +224,9 @@ extern /*@unused@*/ void arch_disable_interrupt(picoRTOS_irq_t irq);
 /* STATS */
 
 typedef enum {
-  ARCH_COUNTER_CURRENT,
-  ARCH_COUNTER_SINCE,
-  ARCH_COUNTER_COUNT
+    ARCH_COUNTER_CURRENT,
+    ARCH_COUNTER_SINCE,
+    ARCH_COUNTER_COUNT
 } arch_counter_t;
 
 /* Function: arch_counter
