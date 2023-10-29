@@ -1,4 +1,6 @@
-#ifndef SUPPORT_FOR_SMP
+#include <generated/autoconf.h>
+
+#ifndef CONFIG_SMP
 # include "picoRTOS.h"
 #else
 # include "picoRTOS-SMP.h"
@@ -21,13 +23,10 @@ static void tick_main(void *priv)
 {
     picoRTOS_assert_void(priv != NULL);
 
-    bool x = false;
     struct gpio *TICK = (struct gpio*)priv;
 
     for (;;) {
-        gpio_write(TICK, x);
-
-        x = !x;
+        gpio_toggle(TICK);
         picoRTOS_schedule();
     }
 }
@@ -48,17 +47,10 @@ static void led0_main(void *priv)
 
     for (;;) {
         picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
-
         picoRTOS_mutex_lock(&mutex);
 
-        /* turn on */
-        gpio_write_sleep(LED, true, LED_DELAY_SHORT);
-        /* turn off */
-        gpio_write_sleep(LED, false, LED_DELAY_SHORT);
-        /* on again */
-        gpio_write_sleep(LED, true, LED_DELAY_LONG);
-        /* off */
-        gpio_write_sleep(LED, false, 0);
+        gpio_write_sleep(LED, true, LED_DELAY_SHORT);   /* on */
+        gpio_write_sleep(LED, false, LED_DELAY_SHORT);  /* off */
 
         /* ipc */
         picoRTOS_cond_signal(&cond);
@@ -76,14 +68,8 @@ static void led1_main(void *priv)
         picoRTOS_mutex_lock(&mutex);
         picoRTOS_cond_wait(&cond, &mutex);
 
-        /* turn on */
-        gpio_write_sleep(LED, true, LED_DELAY_SHORT);
-        /* turn off */
-        gpio_write_sleep(LED, false, LED_DELAY_SHORT);
-        /* on again */
-        gpio_write_sleep(LED, true, LED_DELAY_LONG);
-        /* off */
-        gpio_write_sleep(LED, false, 0);
+        gpio_write_sleep(LED, true, LED_DELAY_LONG);    /* on */
+        gpio_write_sleep(LED, false, 0);                /* off */
 
         picoRTOS_mutex_unlock(&mutex);
     }
@@ -141,25 +127,27 @@ int main(void)
     static picoRTOS_stack_t stack4[CONFIG_DEFAULT_STACK_COUNT];
 
     picoRTOS_task_init(&task, tick_main, &evb.TICK, stack0, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-    picoRTOS_add_task(&task, (picoRTOS_priority_t)TASK_TICK_PRIO);
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
 
-#ifndef SUPPORT_FOR_SMP
-    picoRTOS_task_init(&task, led0_main, evb.LED, stack1, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-    picoRTOS_add_task(&task, (picoRTOS_priority_t)TASK_LED0_PRIO);
-    picoRTOS_task_init(&task, led1_main, evb.LED, stack2, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-    picoRTOS_add_task(&task, (picoRTOS_priority_t)TASK_LED1_PRIO);
+#ifndef CONFIG_SMP
+    picoRTOS_task_init(&task, led0_main, &evb.LED[0], stack1, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+    picoRTOS_task_init(&task, led1_main, &evb.LED[0], stack2, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
 #else
-    picoRTOS_task_init(&task, led0_main, evb.LED, stack1, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-    picoRTOS_SMP_add_task(&task, (picoRTOS_priority_t)TASK_LED0_PRIO, (picoRTOS_mask_t)0x1);
-    picoRTOS_task_init(&task, led1_main, evb.LED, stack2, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-    picoRTOS_SMP_add_task(&task, (picoRTOS_priority_t)TASK_LED1_PRIO, (picoRTOS_mask_t)0x2);
+    picoRTOS_task_init(&task, led0_main, &evb.LED[0], stack1, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_SMP_add_task(&task, picoRTOS_get_next_available_priority(), (picoRTOS_mask_t)0x1);
+    picoRTOS_task_init(&task, led1_main, &evb.LED[0], stack2, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_SMP_add_task(&task, picoRTOS_get_next_available_priority(), (picoRTOS_mask_t)0x2);
 #endif
 
-    picoRTOS_task_init(&task, adc_main, &evb.ADC, stack3, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-    picoRTOS_add_task(&task, (picoRTOS_priority_t)TASK_ADC_PRIO);
+    /*
+       picoRTOS_task_init(&task, adc_main, &evb.ADC, stack3, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+       picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
 
-    picoRTOS_task_init(&task, pwm_main, &evb.PWM, stack4, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-    picoRTOS_add_task(&task, (picoRTOS_priority_t)TASK_PWM_PRIO);
+       picoRTOS_task_init(&task, pwm_main, &evb.PWM, stack4, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+       picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+     */
 
     picoRTOS_start();
 

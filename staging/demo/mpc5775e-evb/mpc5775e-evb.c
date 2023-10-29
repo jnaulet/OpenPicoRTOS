@@ -26,10 +26,16 @@ static void clock_init(void)
 
 static void mux_init(void)
 {
-    /* struct mux MUX;
-     *
-     * TBD
-     */
+    struct mux MUX;
+
+    (void)mux_nxp_siu_init(&MUX, ADDR_SIU);
+
+    /* gpios */
+    (void)mux_nxp_siu_output(&MUX, (size_t)114, MUX_NXP_SIU_GPIO);  /* TICK: M_eTPUA0 */
+    (void)mux_nxp_siu_output(&MUX, (size_t)179, MUX_NXP_SIU_GPIO);  /* LED0: eMIOS0 */
+    (void)mux_nxp_siu_output(&MUX, (size_t)180, MUX_NXP_SIU_GPIO);  /* LED1: eMIOS1 */
+    (void)mux_nxp_siu_output(&MUX, (size_t)181, MUX_NXP_SIU_GPIO);  /* LED2: eMIOS2 */
+    (void)mux_nxp_siu_output(&MUX, (size_t)182, MUX_NXP_SIU_GPIO);  /* LED3: eMIOS3 */
 }
 
 static int adc_init(/*@partial@*/ struct mpc5775e_evb *ctx)
@@ -63,11 +69,11 @@ static int adc_init(/*@partial@*/ struct mpc5775e_evb *ctx)
 
 static int gpio_init(/*@partial@*/ struct mpc5775e_evb *ctx)
 {
-    (void)gpio_nxp_siu_init(&ctx->TICK, ADDR_GPIO_PTG, (size_t)18);
-    (void)gpio_nxp_siu_init(&ctx->LED[0], ADDR_GPIO_PTD, (size_t)18);
-    (void)gpio_nxp_siu_init(&ctx->LED[1], ADDR_GPIO_PTD, (size_t)19);
-    (void)gpio_nxp_siu_init(&ctx->LED[2], ADDR_GPIO_PTD, (size_t)20);
-    (void)gpio_nxp_siu_init(&ctx->LED[3], ADDR_GPIO_PTD, (size_t)21);
+    (void)gpio_nxp_siu_init(&ctx->TICK, ADDR_GPIO_PTD, (size_t)18);
+    (void)gpio_nxp_siu_init(&ctx->LED[0], ADDR_GPIO_PTF, (size_t)19);
+    (void)gpio_nxp_siu_init(&ctx->LED[1], ADDR_GPIO_PTF, (size_t)20);
+    (void)gpio_nxp_siu_init(&ctx->LED[2], ADDR_GPIO_PTF, (size_t)21);
+    (void)gpio_nxp_siu_init(&ctx->LED[3], ADDR_GPIO_PTF, (size_t)22);
 
     return 0;
 }
@@ -110,9 +116,9 @@ int mpc5775e_evb_init(struct mpc5775e_evb *ctx)
     clock_init();
     mux_init();
 
-    (void)adc_init(ctx);
+    //(void)adc_init(ctx);
     (void)gpio_init(ctx);
-    (void)pwm_init(ctx);
+    //(void)pwm_init(ctx);
 
     return 0;
 }
