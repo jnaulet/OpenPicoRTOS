@@ -137,8 +137,8 @@ static int adc_nxp_eqadc_register_cc(struct adc_nxp_eqadc *ctx, size_t channel)
 {
 #define BN_FROM_CHANNEL(x) ((((x) & 0x1) != 0) ? ADC_NXP_EQADC_CC_BN : 0)
 
-    if (!picoRTOS_assert(ctx->channel_count < (size_t)ADC_NXP_EQADC_CHANNEL_COUNT))
-        return -ENOMEM;
+    picoRTOS_assert(ctx->channel_count < (size_t)ADC_NXP_EQADC_CHANNEL_COUNT,
+                    return -ENOMEM);
 
     uint32_t cmd = (uint32_t)ADC_NXP_EQADC_CFIFO_EOQ;
 
@@ -174,7 +174,7 @@ static int adc_nxp_eqadc_register_cc(struct adc_nxp_eqadc *ctx, size_t channel)
 
 int adc_nxp_eqadc_setup(struct adc_nxp_eqadc *ctx, struct adc_nxp_eqadc_settings *settings)
 {
-    if (!picoRTOS_assert(settings->mode0 < ADC_NXP_EQADC_MODE0_COUNT)) return -EINVAL;
+    picoRTOS_assert(settings->mode0 < ADC_NXP_EQADC_MODE0_COUNT, return -EINVAL);
 
     int res;
 
@@ -206,7 +206,7 @@ int adc_nxp_eqadc_setup(struct adc_nxp_eqadc *ctx, struct adc_nxp_eqadc_settings
 
 int adc_nxp_eqadc_adc_init(struct adc *ctx, struct adc_nxp_eqadc *parent, size_t channel)
 {
-    if (!picoRTOS_assert(channel < (size_t)ADC_NXP_EQADC_CHANNEL_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)ADC_NXP_EQADC_CHANNEL_COUNT, return -EINVAL);
 
     int index;
 
@@ -235,7 +235,7 @@ static void channel_set_cal(struct adc *ctx, bool cal)
 
 static int channel_set_lst(struct adc *ctx, adc_nxp_eqadc_lst_t lst)
 {
-    if (!picoRTOS_assert(lst < ADC_NXP_EQADC_LST_COUNT)) return -EINVAL;
+    picoRTOS_assert(lst < ADC_NXP_EQADC_LST_COUNT, return -EINVAL);
 
     struct adc_nxp_eqadc *parent = ctx->parent;
 
@@ -286,7 +286,6 @@ int adc_read(struct adc *ctx, int *data)
 
 int adc_read_multiple(struct adc *ctx, int *data, size_t n)
 {
-    if (!picoRTOS_assert(n > 0)) return -EINVAL;
-
+    picoRTOS_assert(n > 0, return -EINVAL);
     return adc_read(ctx, data);
 }

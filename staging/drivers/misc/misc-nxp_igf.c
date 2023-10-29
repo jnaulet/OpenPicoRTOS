@@ -58,7 +58,7 @@ struct NXP_IGF {
 
 int nxp_igf_init(struct nxp_igf *ctx, int base, size_t channel)
 {
-    if (!picoRTOS_assert(channel < (size_t)NXP_IGF_CHANNEL_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)NXP_IGF_CHANNEL_COUNT, return -EINVAL);
 
     uint32_t *MCR;
 

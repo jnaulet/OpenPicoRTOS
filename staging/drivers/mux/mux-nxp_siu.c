@@ -127,8 +127,8 @@ int mux_nxp_siu_init(struct mux *ctx, int base)
 
 int mux_nxp_siu_output(struct mux *ctx, size_t pin, mux_nxp_siu_t mux)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_NXP_SIU_PCR_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(mux < MUX_NXP_SIU_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_NXP_SIU_PCR_COUNT, return -EINVAL);
+    picoRTOS_assert(mux < MUX_NXP_SIU_COUNT, return -EINVAL);
 
     /* pa */
     ctx->base->PCR[pin] &= ~PCR_PA(PCR_PA_M);
@@ -145,8 +145,8 @@ int mux_nxp_siu_output(struct mux *ctx, size_t pin, mux_nxp_siu_t mux)
 
 int mux_nxp_siu_input(struct mux *ctx, size_t pin, mux_nxp_siu_t mux)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_NXP_SIU_PCR_COUNT)) return -EINVAL;
-    if (!picoRTOS_assert(mux < MUX_NXP_SIU_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_NXP_SIU_PCR_COUNT, return -EINVAL);
+    picoRTOS_assert(mux < MUX_NXP_SIU_COUNT, return -EINVAL);
 
     /* pa */
     ctx->base->PCR[pin] &= ~PCR_PA(PCR_PA_M);
@@ -160,7 +160,7 @@ int mux_nxp_siu_input(struct mux *ctx, size_t pin, mux_nxp_siu_t mux)
 
 int mux_nxp_siu_pull_up(struct mux *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_NXP_SIU_PCR_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_NXP_SIU_PCR_COUNT, return -EINVAL);
 
     ctx->base->PCR[pin] |= (PCR_WPE | PCR_WPS);
     return 0;
@@ -168,7 +168,7 @@ int mux_nxp_siu_pull_up(struct mux *ctx, size_t pin)
 
 int mux_nxp_siu_pull_down(struct mux *ctx, size_t pin)
 {
-    if (!picoRTOS_assert(pin < (size_t)MUX_NXP_SIU_PCR_COUNT)) return -EINVAL;
+    picoRTOS_assert(pin < (size_t)MUX_NXP_SIU_PCR_COUNT, return -EINVAL);
 
     ctx->base->PCR[pin] |= PCR_WPE;
     ctx->base->PCR[pin] &= ~PCR_WPS;

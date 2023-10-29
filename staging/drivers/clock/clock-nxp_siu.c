@@ -1,5 +1,7 @@
 #include "clock-nxp_siu.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
 #include <stdint.h>
@@ -223,13 +225,10 @@ static int xosc_stable_clock_busywait(void)
 {
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    while (deadlock-- != 0)
-        if ((SIU->RSR & RSR_XOSC) != 0)
-            break;
+    while ((SIU->RSR & RSR_XOSC) == 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -237,13 +236,10 @@ static int pll0_lock_busywait(void)
 {
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    while (deadlock-- != 0)
-        if ((PLLDIG->PLL0SR & PLLnSR_LOCK) != 0)
-            break;
+    while ((PLLDIG->PLL0SR & PLLnSR_LOCK) == 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -251,13 +247,10 @@ static int pll1_lock_busywait(void)
 {
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    while (deadlock-- != 0)
-        if ((PLLDIG->PLL1SR & PLLnSR_LOCK) != 0)
-            break;
+    while ((PLLDIG->PLL1SR & PLLnSR_LOCK) != 0 && deadlock-- != 0)
+        arch_delay_us(1ul);
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
-
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
 }
 
@@ -268,10 +261,10 @@ static int setup_pll0(unsigned long freq,
 #define PLL0DV_MFD_COUNT    (PLLnDV_MFD_M + 1)
 #define PLL0DV_PREDIV_COUNT (PLL0DV_PREDIV_M + 1)
 
-    if (!picoRTOS_assert(phi_div > 0)) return -EINVAL;
-    if (!picoRTOS_assert(phi_div <= (unsigned long)PLLnDV_RFDPHI_M)) return -EINVAL;
-    if (!picoRTOS_assert(phi1_div > 4ul)) return -EINVAL;
-    if (!picoRTOS_assert(phi1_div <= (unsigned long)PLL0DV_RFDPHI1_M)) return -EINVAL;
+    picoRTOS_assert(phi_div > 0, return -EINVAL);
+    picoRTOS_assert(phi_div <= (unsigned long)PLLnDV_RFDPHI_M, return -EINVAL);
+    picoRTOS_assert(phi1_div > 4ul, return -EINVAL);
+    picoRTOS_assert(phi1_div <= (unsigned long)PLL0DV_RFDPHI1_M, return -EINVAL);
 
     unsigned long mfd;
     unsigned long prediv;
@@ -454,13 +447,11 @@ static int start_pcs(void)
 
     SIU->SYSDIV |= SYSDIV_PCSEN; /* enable pcs */
 
-    while (deadlock-- != 0)
-        if ((SIU->PCSIFR & PCSIFR_PCSI) != 0 &&
-            (SIU->PCSIFR & PCSIFR_PCSMS(PCSIFR_PCSMS_M)) == PCSIFR_PCSMS(3))
-            break;
+    while ((SIU->PCSIFR & PCSIFR_PCSI) == 0 &&
+           (SIU->PCSIFR & PCSIFR_PCSMS(PCSIFR_PCSMS_M)) != PCSIFR_PCSMS(3) &&
+           deadlock-- != 0) arch_delay_us(1ul);
 
-    if (!picoRTOS_assert(deadlock != -1))
-        return -EBUSY;
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
 
     /* ack */
     SIU->PCSIFR |= PCSIFR_PCSI;
@@ -521,8 +512,8 @@ int clock_nxp_siu_init(struct clock_settings *settings)
 
 clock_freq_t clock_get_freq(clock_id_t clkid)
 {
-    if (!picoRTOS_assert(clkid < (clock_id_t)CLOCK_NXP_SIU_COUNT))
-        return (clock_freq_t)-EINVAL;
+    picoRTOS_assert(clkid < (clock_id_t)CLOCK_NXP_SIU_COUNT,
+                    return (clock_freq_t)-EINVAL);
 
     switch (clkid) {
     case CLOCK_NXP_SIU_XOSC: return clocks.xosc;

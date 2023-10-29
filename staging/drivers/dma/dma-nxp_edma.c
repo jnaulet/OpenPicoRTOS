@@ -85,7 +85,8 @@ int dma_nxp_edma_init(struct dma_nxp_edma *ctx, int base)
 
 int dma_nxp_edma_dma_init(struct dma *ctx, struct dma_nxp_edma *parent, size_t channel)
 {
-    if (!picoRTOS_assert(channel < (size_t)DMA_NXP_EDMA_CHANNEL_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)DMA_NXP_EDMA_CHANNEL_COUNT,
+                    return -EINVAL);
 
     ctx->parent = parent;
     ctx->channel = channel;
@@ -111,7 +112,7 @@ static uint32_t nxp_edma_data_size(size_t size)
 
 static int setup_tcd_attr(struct dma *ctx, struct dma_xfer *xfer)
 {
-    if (!picoRTOS_assert(xfer->size <= sizeof(uint64_t))) return -EINVAL;
+    picoRTOS_assert(xfer->size <= sizeof(uint64_t), return -EINVAL);
 
     struct DMA_NXP_EDMA *base = ctx->parent->base;
 

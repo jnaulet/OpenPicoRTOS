@@ -85,7 +85,8 @@ int dmasg_nxp_edma_init(struct dmasg_nxp_edma *ctx, int base)
 
 int dmasg_nxp_edma_dmasg_init(struct dmasg *ctx, struct dmasg_nxp_edma *parent, size_t channel)
 {
-    if (!picoRTOS_assert(channel < (size_t)DMASG_NXP_EDMA_CHANNEL_COUNT)) return -EINVAL;
+    picoRTOS_assert(channel < (size_t)DMASG_NXP_EDMA_CHANNEL_COUNT,
+                    return -EINVAL);
 
     ctx->parent = parent;
     ctx->channel = channel;
@@ -111,10 +112,10 @@ static uint32_t nxp_edma_data_size(size_t size)
 
 static int setup_tcd_attr(struct dmasg *ctx, struct dmasg_xfer *xfer)
 {
-    if (!picoRTOS_assert(xfer->smod <= (size_t)TCD_ATTR_SMOD_M)) return -EINVAL;
-    if (!picoRTOS_assert(xfer->dmod <= (size_t)TCD_ATTR_DMOD_M)) return -EINVAL;
-    if (!picoRTOS_assert(xfer->ssize <= sizeof(uint64_t))) return -EINVAL;
-    if (!picoRTOS_assert(xfer->dsize <= sizeof(uint64_t))) return -EINVAL;
+    picoRTOS_assert(xfer->smod <= (size_t)TCD_ATTR_SMOD_M, return -EINVAL);
+    picoRTOS_assert(xfer->dmod <= (size_t)TCD_ATTR_DMOD_M, return -EINVAL);
+    picoRTOS_assert(xfer->ssize <= sizeof(uint64_t), return -EINVAL);
+    picoRTOS_assert(xfer->dsize <= sizeof(uint64_t), return -EINVAL);
 
     struct DMASG_NXP_EDMA *base = ctx->parent->base;
 
@@ -162,7 +163,7 @@ int dmasg_nxp_edma_dmasg_setup(struct dmasg *ctx, struct dmasg_xfer *xfer)
     if ((res = setup_tcd(ctx, xfer)) < 0)
         return res;
 
-    ctx->base->SERQ = (uint32_t)SERQ_SERQ(ctx->channel);
+    base->SERQ = (uint32_t)SERQ_SERQ(ctx->channel);
     return 0;
 }
 
