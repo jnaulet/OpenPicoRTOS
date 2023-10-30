@@ -128,7 +128,7 @@ struct SIU {
 #define SYSDIV_SYSCLKSEL_M  0x3u
 #define SYSDIV_SYSCLKSEL(x) (((x) & SYSDIV_SYSCLKSEL_M) << 12)
 #define SYSDIV_ETPUDIV      (1 << 8)
-#define SYSDIV_SYSCLKDIV_M  0x3u
+#define SYSDIV_SYSCLKDIV_M  0x7u
 #define SYSDIV_SYSCLKDIV(x) (((x) & SYSDIV_SYSCLKDIV_M) << 2)
 #define SYSDIV_PCSEN        (1 << 0)
 
@@ -354,6 +354,9 @@ static int setup_sysclk(unsigned long sysclkdiv)
     clocks.sysclk = clocks.pll1_phi / sysclkdiv;
     clocks.core_clk = (clock_freq_t)(clocks.pll1_phi / sysclkdiv);
     clocks.plat_clk = (clock_freq_t)(clocks.sysclk / 2ul);
+
+    /* set system clock */
+    arch_set_clock_frequency((unsigned long)clocks.sysclk);
 
     return 0;
 }
