@@ -10,17 +10,17 @@ c_src-y += some_other_sources.c
 # the 'skip-makefile' keyword to avoid local targets inclusion
 ifneq ($(skip-makefile),1)
 PWD := $(shell pwd)
-# 'KBUILD_SRC' is the directory containing the OpenPicoRTOS original sources
-KBUILD_SRC := path/to/OpenPicoRTOS
+# 'PICORTOS_SRC' is the directory containing the OpenPicoRTOS original sources
+PICORTOS_SRC := path/to/OpenPicoRTOS
 
 all: $(target)
         @
 
 $(target): FORCE
-        $(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD)
+        $(Q)$(MAKE) -C $(PICORTOS_SRC) O=$(PWD)
 
 %:
-        $(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) $@
+        $(Q)$(MAKE) -C $(PICORTOS_SRC) O=$(PWD) $@
 
 PHONY += FORCE
 FORCE:
