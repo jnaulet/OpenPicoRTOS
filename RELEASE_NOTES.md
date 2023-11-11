@@ -1,5 +1,14 @@
 # Release notes
 
+## picoRTOS v1.9.3
+### What's new ?
+
+Two new ports have been added: VLE PowerPCs e200z4 & e200z7.   
+Both support single core & dual core SMP configurations.
+
+The corresponding demos & drivers have been updated to the current APIs & stay for the
+most part totally untested. This will be the next step.
+
 ## picoRTOS v1.9.2
 ### What's new ?
 

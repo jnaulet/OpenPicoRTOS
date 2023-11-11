@@ -127,13 +127,13 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - Atmel TinyAVR (0+) Series
  - MIPS M51xx / PIC32Mx
  - RISC-V RV32IMAC
- - PowerPC e200z4 (staging)
- - PowerPC e200z7 (staging)
+ - PowerPC e200z4
+ - PowerPC e200z7
  - TI C2000 / c28x
 
 ### Multi-core SMP
- - PowerPC e200z4 SMP (staging)
- - PowerPC e200z7 SMP (staging)
+ - PowerPC e200z4 SMP
+ - PowerPC e200z7 SMP
  - RP2040 SMP
 
 ### Simulation
@@ -152,6 +152,8 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - Atmel ATtiny1607
  - GigaDevice GD32VF103
  - Microchip PIC32MZ-EF
+ - NXP MPC574x series
+ - NXP MPC577x series
  - Raspberry Pico RP2040
  - Renesas RA4M1
  - STMicro STM32H743/750
@@ -238,7 +240,7 @@ Basic demo code is provided for the following boards:
   - NXP Devkit MPC5748G (dual-core SMP) (staging)
   - NXP MPC5775E-EVB (dual-core SMP) (staging)
   - Sipeed Longan Nano
-  - DevEBox STM32H7xx_M (staging)
+  - DevEBox STM32H7xx_M
   - Texas Instruments Launchxl-f28379d
   - Raspberry Pi Pico (single core & SMP)
 
