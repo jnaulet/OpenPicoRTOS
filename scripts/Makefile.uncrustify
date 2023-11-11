@@ -11,6 +11,9 @@ skip-makefile := 1
 
 include scripts/Sources.include
 
+CROSS_COMPILE := $(CONFIG_CROSS_COMPILE:"%"=%)
+CC            := $(CROSS_COMPILE)gcc
+
 ifneq ($(srctree),$(src))
 include scripts/Kbuild.include
 
@@ -20,9 +23,17 @@ kbuild-file := $(if $(wildcard $(kbuild-dir)/Kbuild),$(kbuild-dir)/Kbuild,$(kbui
 include $(kbuild-file)
 endif # srctree == src
 
+inctree        = $(patsubst %/,%,$(addprefix -I,$(dir $(1))))
+
+c_flags        = $(RTOSINCLUDE) \
+	         $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
+                 $(filter -I%,$(ccflags-y)) $(filter -D%,$(ccflags-y))
+
+cmd_dep_h_c    = $(filter %.h,$(shell $(CC) $(c_flags) -MM $(1)))
+
 __uncrustify: $(c_src-y) $(c_src-)
 	$(Q)uncrustify -c $(srctree)/etc/uncrustify.cfg $(c_src-y) $(c_src-) \
-	--replace --no-backup
+	 $(call cmd_dep_h_c,$(c_src-y)) --replace --no-backup
 
 # Declare the contents of the .PHONY variable as phony.	 We keep that
 # information in a variable se we can use it in if_changed and friends.

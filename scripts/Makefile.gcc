@@ -10,7 +10,7 @@ skip-makefile := 1
 # Read auto.conf if it exists, otherwise ignore
 -include include/config/auto.conf
 
-CROSS_COMPILE  := $(CONFIG_CROSS_COMPILE:"%"=%)
+CROSS_COMPILE := $(CONFIG_CROSS_COMPILE:"%"=%)
 
 LD := $(CROSS_COMPILE)ld
 CC := $(CROSS_COMPILE)gcc
