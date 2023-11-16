@@ -221,11 +221,11 @@ static int adc_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
 static int can_init(/*@partial@*/ struct curiosity_20_pic32mz_ef *ctx)
 {
     struct can_settings CAN_settings = {
-        1000000ul,  /* bitrate */
-        (size_t)1,  /* tx_mailbox_count */
-        false,      /* tx_auto_abort (not supported anyway) */
-        false,      /* rx_overwrite (not supported anyway) */
-        true,       /* loopback */
+        1000000ul,              /* bitrate */
+        (size_t)1,              /* tx_mailbox_count */
+        CAN_TX_AUTO_ABORT_OFF,  /* tx_auto_abort (not supported anyway) */
+        CAN_RX_OVERWRITE_OFF,   /* rx_overwrite (not supported anyway) */
+        CAN_LOOPBACK_ON,        /* loopback */
     };
 
     (void)can_pic32mx_init(&ctx->CAN2, ADDR_CAN2, CLOCK_PIC32MX_PBCLK5);

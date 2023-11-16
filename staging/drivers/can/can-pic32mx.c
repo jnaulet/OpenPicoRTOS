@@ -360,6 +360,9 @@ static int set_opmod_busywait(struct can *ctx, uint32_t op)
 
 int can_setup(struct can *ctx, struct can_settings *settings)
 {
+    picoRTOS_assert(settings->tx_auto_abort < CAN_TX_AUTO_ABORT_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->rx_overwrite < CAN_RX_OVERWRITE_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->loopback < CAN_LOOPBACK_COUNT, return -EINVAL);
     picoRTOS_assert(settings->tx_mailbox_count < (size_t)CAN_PIC32MX_FIFO_COUNT,
                     return -EINVAL);
     int res;
@@ -374,11 +377,11 @@ int can_setup(struct can *ctx, struct can_settings *settings)
     if ((res = set_tx_mailboxes(ctx, settings->tx_mailbox_count)) < 0)
         return res;
 
-    ctx->tx_auto_abort = settings->tx_auto_abort;
-    ctx->rx_overwrite = settings->rx_overwrite;
+    ctx->tx_auto_abort = (settings->tx_auto_abort == CAN_TX_AUTO_ABORT_ON);
+    ctx->rx_overwrite = (settings->rx_overwrite == CAN_RX_OVERWRITE_ON);
 
     /* back to normal (or loopback) */
-    if (settings->loopback) {
+    if (settings->loopback != CAN_LOOPBACK_OFF) {
         ctx->opmod = (uint32_t)OPMOD_LOOPBACK;
         return set_opmod_busywait(ctx, (uint32_t)OPMOD_LOOPBACK);
     }

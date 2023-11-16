@@ -199,11 +199,11 @@ static void arduino_due_init_can(/*@partial@*/ struct arduino_due *ctx)
     static struct can CAN1;
 
     struct can_settings CAN_settings = {
-        125000ul,   /* bitrate */
-        (size_t)1,  /* tx_mailbox_count */
-        true,       /* tx_auto_abort */
-        true,       /* rx_overwrite */
-        false       /* loopback */
+        125000ul,               /* bitrate */
+        (size_t)1,              /* tx_mailbox_count */
+        CAN_TX_AUTO_ABORT_ON,   /* tx_auto_abort */
+        CAN_RX_OVERWRITE_ON,    /* rx_overwrite */
+        CAN_LOOPBACK_OFF        /* loopback */
     };
 
     (void)can_sam3x_init(&CAN0, ADDR_CAN0, CLOCK_SAM3X_PMC_PERIPH(PID_CAN0));

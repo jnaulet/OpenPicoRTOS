@@ -163,11 +163,11 @@ static void adc_init(/*@partial@*/ struct launchxl_f28379d *ctx)
 static void can_init(/*@partial@*/ struct launchxl_f28379d *ctx)
 {
     struct can_settings CAN_settings = {
-        500000ul,   /* bitrate */
-        (size_t)1,  /* tx_mailbox_count */
-        false,      /* tx_auto_abort */
-        false,      /* rx_overwrite */
-        true        /* loopback */
+        500000ul,               /* bitrate */
+        (size_t)1,              /* tx_mailbox_count */
+        CAN_TX_AUTO_ABORT_OFF,  /* tx_auto_abort */
+        CAN_RX_OVERWRITE_OFF,   /* rx_overwrite */
+        CAN_LOOPBACK_ON         /* loopback */
     };
 
     (void)can_ti_dcan_init(&ctx->CAN, ADDR_CANB, CLOCK_F28379X_SYSCLK);

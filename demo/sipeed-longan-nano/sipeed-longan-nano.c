@@ -192,11 +192,11 @@ static int can_init(/*@partial@*/ struct sipeed_longan_nano *ctx)
     (void)clock_gd32vf103_enable(CLOCK_GD32VF103_CLK_CAN1);
 
     struct can_settings CAN0_settings = {
-        500000ul,   /* bitrate */
-        (size_t)3,  /* tx_mailbox_count (hard-wired anyway) */
-        true,       /* tx_auto_abort */
-        true,       /* rx_overwrite */
-        true,       /* loopback */
+        500000ul,               /* bitrate */
+        (size_t)3,              /* tx_mailbox_count (hard-wired anyway) */
+        CAN_TX_AUTO_ABORT_ON,   /* tx_auto_abort */
+        CAN_RX_OVERWRITE_ON,    /* rx_overwrite */
+        CAN_LOOPBACK_ON,        /* loopback */
     };
 
     (void)can_gd32vf103_init(&ctx->CAN0, ADDR_CAN1, CLOCK_GD32VF103_APB1);

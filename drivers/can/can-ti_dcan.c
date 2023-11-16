@@ -301,12 +301,14 @@ int can_setup(struct can *ctx, struct can_settings *settings)
 {
     int res;
 
+    picoRTOS_assert(settings->loopback < CAN_LOOPBACK_COUNT, return -EINVAL);
+
     /* bitrate */
     if ((res = set_bitrate(ctx, settings->bitrate)) < 0)
         return res;
 
     /* loopback */
-    if (settings->loopback) {
+    if (settings->loopback == CAN_LOOPBACK_ON) {
         ctx->base->CAN_CTL |= CAN_CTL_TEST;
         ctx->base->CAN_TEST = (uint32_t)CAN_TEST_LBACK;
     }

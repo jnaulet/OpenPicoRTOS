@@ -256,18 +256,22 @@ int can_setup(struct can *ctx, struct can_settings *settings)
 {
     int res;
 
+    picoRTOS_assert(settings->tx_auto_abort < CAN_TX_AUTO_ABORT_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->rx_overwrite < CAN_RX_OVERWRITE_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->loopback < CAN_LOOPBACK_COUNT, return -EINVAL);
+
     if ((res = sleep_to_initial_working_mode(ctx)) < 0 ||
         (res = set_bitrate(ctx, settings->bitrate)) < 0)
         return res;
 
-    if (settings->tx_auto_abort) ctx->base->CAN_CTL |= CAN_CTL_ABOR;
+    if (settings->tx_auto_abort != CAN_TX_AUTO_ABORT_OFF) ctx->base->CAN_CTL |= CAN_CTL_ABOR;
     else ctx->base->CAN_CTL &= ~CAN_CTL_ABOR;
 
-    if (settings->rx_overwrite) ctx->base->CAN_CTL &= ~CAN_CTL_RFOD;
+    if (settings->rx_overwrite != CAN_RX_OVERWRITE_OFF) ctx->base->CAN_CTL &= ~CAN_CTL_RFOD;
     else ctx->base->CAN_CTL |= CAN_CTL_RFOD;
 
     /* loopback */
-    if (settings->loopback) ctx->base->CAN_BT |= CAN_BT_LCMOD;
+    if (settings->loopback != CAN_LOOPBACK_OFF) ctx->base->CAN_BT |= CAN_BT_LCMOD;
     else ctx->base->CAN_BT &= ~CAN_BT_LCMOD;
 
     /* ignore tx_mailboxes (set to 3 by hw) */

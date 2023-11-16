@@ -216,6 +216,9 @@ int can_setup(struct can *ctx, struct can_settings *settings)
 {
     int res;
 
+    picoRTOS_assert(settings->tx_auto_abort < CAN_TX_AUTO_ABORT_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->rx_overwrite < CAN_RX_OVERWRITE_COUNT, return -EINVAL);
+
     /* disable */
     ctx->base->CAN_MR &= ~CAN_MR_CANEN;
 
@@ -226,8 +229,8 @@ int can_setup(struct can *ctx, struct can_settings *settings)
     if ((res = set_tx_mailboxes(ctx, settings->tx_mailbox_count)) < 0)
         return res;
 
-    ctx->tx_auto_abort = settings->tx_auto_abort;
-    ctx->rx_overwrite = settings->rx_overwrite;
+    ctx->tx_auto_abort = (settings->tx_auto_abort == CAN_TX_AUTO_ABORT_ON);
+    ctx->rx_overwrite = (settings->rx_overwrite == CAN_RX_OVERWRITE_ON);
 
     /* ignore loopback */
 

@@ -3,6 +3,7 @@
 
 #include "can.h"
 #include "clock.h"
+#include <stdbool.h>
 
 struct CAN_SAM3X;
 

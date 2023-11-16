@@ -275,6 +275,7 @@ static void can_master_main(void *priv)
     for (;;) {
         int res;
         can_id_t id = 0;
+        int timeout = CONFIG_DEADLOCK_COUNT;
         char msg[CAN_DATA_COUNT] = { (char)0, (char)1, (char)2, (char)3,
                                      (char)4, (char)5, (char)6, (char)7 };
 
@@ -283,9 +284,10 @@ static void can_master_main(void *priv)
             continue;
         }
 
-        while (can_read(CAN, &id, msg, (size_t)res) == -EAGAIN)
+        while (can_read(CAN, &id, msg, (size_t)res) == -EAGAIN && timeout-- != 0)
             picoRTOS_schedule();
 
+        picoRTOS_assert_void_fatal(timeout != -1);
         picoRTOS_assert_void(id == (can_id_t)CAN_ID_S2M);
     }
 }

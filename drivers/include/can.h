@@ -4,7 +4,6 @@
 #include <errno.h>
 
 #include <stddef.h>
-#include <stdbool.h>
 #include "picoRTOS_types.h"
 
 struct can;
@@ -26,12 +25,30 @@ typedef unsigned int can_id_t;
 #define CAN_ACCEPT_STRICT     0x7ff
 #define CAN_ACCEPT_STRICT_EXT 0x1fffffff
 
+typedef enum {
+    CAN_TX_AUTO_ABORT_OFF,
+    CAN_TX_AUTO_ABORT_ON,
+    CAN_TX_AUTO_ABORT_COUNT
+} can_tx_auto_abort_t;
+
+typedef enum {
+    CAN_RX_OVERWRITE_OFF,
+    CAN_RX_OVERWRITE_ON,
+    CAN_RX_OVERWRITE_COUNT
+} can_rx_overwrite_t;
+
+typedef enum {
+    CAN_LOOPBACK_OFF,
+    CAN_LOOPBACK_ON,
+    CAN_LOOPBACK_COUNT
+} can_loopback_t;
+
 struct can_settings {
     unsigned long bitrate;
     size_t tx_mailbox_count; /* how many mbs are dedicated to tx */
-    bool tx_auto_abort;
-    bool rx_overwrite;
-    bool loopback;
+    can_tx_auto_abort_t tx_auto_abort;
+    can_rx_overwrite_t rx_overwrite;
+    can_loopback_t loopback;
 };
 
 /* Function: can_setup
