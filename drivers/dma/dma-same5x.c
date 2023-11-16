@@ -193,12 +193,14 @@ int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
 {
     picoRTOS_assert(xfer->size > 0, return -EINVAL);
     picoRTOS_assert(xfer->size <= sizeof(uint32_t), return -EINVAL);
+    picoRTOS_assert(xfer->incr_read <= DMA_XFER_INCREMENT_COUNT, return -EINVAL);
+    picoRTOS_assert(xfer->incr_write <= DMA_XFER_INCREMENT_COUNT, return -EINVAL);
 
     struct DMA_SAME5X_TD *TD = &ctx->parent->TD[ctx->channel];
 
     TD->BTCTRL = (uint16_t)(BTCTRL_STEPSIZE(0) |
-                            (xfer->incr_write ? BTCTRL_DSTINC : 0) |
-                            (xfer->incr_read ? BTCTRL_SRCINC : 0) |
+                            (xfer->incr_write != DMA_XFER_INCREMENT_OFF ? BTCTRL_DSTINC : 0) |
+                            (xfer->incr_read != DMA_XFER_INCREMENT_OFF ? BTCTRL_SRCINC : 0) |
                             BTCTRL_BEATSIZE(xfer->size >> 1) |
                             BTCTRL_BLOCKACT(0) |
                             BTCTRL_EVOSEL(0) |
@@ -206,10 +208,10 @@ int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
 
     TD->BTCNT = (uint32_t)(xfer->byte_count / xfer->size);
     /* SCRADDR computation */
-    if (!xfer->incr_read) TD->SRCADDR = (uint32_t)xfer->saddr;
+    if (xfer->incr_read == DMA_XFER_INCREMENT_OFF) TD->SRCADDR = (uint32_t)xfer->saddr;
     else TD->SRCADDR = (uint32_t)xfer->saddr + xfer->byte_count;
     /* DSTADDR computation */
-    if (!xfer->incr_write) TD->DSTADDR = (uint32_t)xfer->daddr;
+    if (xfer->incr_write == DMA_XFER_INCREMENT_OFF) TD->DSTADDR = (uint32_t)xfer->daddr;
     else TD->DSTADDR = (uint32_t)xfer->daddr + xfer->byte_count;
     /* no linked xfer */
     TD->DESCADDR = (uint32_t)0;

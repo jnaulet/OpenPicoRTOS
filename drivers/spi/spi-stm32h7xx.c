@@ -316,8 +316,8 @@ static int spi_xfer_dma_idle(struct spi *ctx, void *rx, const void *tx, size_t n
     struct dma_xfer fill = {
         (intptr_t)tx,                   /* source address */
         (intptr_t)&ctx->base->TXDR.U32, /* destination addresss */
-        true,                           /* incr_read */
-        false,                          /* incr_write */
+        DMA_XFER_INCREMENT_ON,          /* incr_read */
+        DMA_XFER_INCREMENT_OFF,         /* incr_write */
         ctx->frame_width,               /* size */
         n                               /* byte count */
     };
@@ -326,8 +326,8 @@ static int spi_xfer_dma_idle(struct spi *ctx, void *rx, const void *tx, size_t n
     struct dma_xfer drain = {
         (intptr_t)&ctx->base->RXDR.U32, /* source addresss */
         (intptr_t)rx,                   /* destination address */
-        false,                          /* incr_read */
-        true,                           /* incr_write */
+        DMA_XFER_INCREMENT_OFF,         /* incr_read */
+        DMA_XFER_INCREMENT_ON,          /* incr_write */
         ctx->frame_width,               /* size */
         n                               /* byte count */
     };

@@ -149,6 +149,8 @@ int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
 {
     picoRTOS_assert(xfer->size >= sizeof(uint16_t), return -EINVAL);
     picoRTOS_assert(xfer->size <= sizeof(uint32_t), return -EINVAL);
+    picoRTOS_assert(xfer->incr_read <= DMA_XFER_INCREMENT_COUNT, return -EINVAL);
+    picoRTOS_assert(xfer->incr_write <= DMA_XFER_INCREMENT_COUNT, return -EINVAL);
 
     ASM(" eallow");
 
@@ -157,12 +159,12 @@ int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
     else ctx->ch->MODE &= ~MODE_DATASIZE;
     /* burst */
     ctx->ch->BURST_SIZE = (uint16_t)0;
-    ctx->ch->SRC_BURST_STEP = (uint16_t)(xfer->incr_read ? xfer->size : 0);
-    ctx->ch->DST_BURST_STEP = (uint16_t)(xfer->incr_write ? xfer->size : 0);
+    ctx->ch->SRC_BURST_STEP = (uint16_t)(xfer->incr_read != DMA_XFER_INCREMENT_OFF ? xfer->size : 0);
+    ctx->ch->DST_BURST_STEP = (uint16_t)(xfer->incr_write != DMA_XFER_INCREMENT_OFF ? xfer->size : 0);
     /* transfer */
     ctx->ch->TRANSFER_SIZE = (uint16_t)(xfer->byte_count / xfer->size) - 1;
-    ctx->ch->SRC_TRANSFER_STEP = (uint16_t)(xfer->incr_read ? xfer->size : 0);
-    ctx->ch->DST_TRANSFER_STEP = (uint16_t)(xfer->incr_write ? xfer->size : 0);
+    ctx->ch->SRC_TRANSFER_STEP = (uint16_t)(xfer->incr_read != DMA_XFER_INCREMENT_OFF ? xfer->size : 0);
+    ctx->ch->DST_TRANSFER_STEP = (uint16_t)(xfer->incr_write != DMA_XFER_INCREMENT_OFF ? xfer->size : 0);
     /* addresses */
     ctx->ch->SRC_ADDR_SHADOW = (uint32_t)xfer->saddr;
     ctx->ch->SRC_BEG_ADDR_SHADOW = (uint32_t)xfer->saddr;

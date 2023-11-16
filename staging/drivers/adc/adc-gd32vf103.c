@@ -94,8 +94,8 @@ static int setup_dma(struct adc_gd32vf103 *ctx, /*@null@*/ struct dma *dma)
 
     ctx->xfer.saddr = (intptr_t)&ctx->base->ADC_RDATA;
     ctx->xfer.daddr = (intptr_t)ctx->result;
-    ctx->xfer.incr_read = false;
-    ctx->xfer.incr_write = true;
+    ctx->xfer.incr_read = DMA_XFER_INCREMENT_OFF;
+    ctx->xfer.incr_write = DMA_XFER_INCREMENT_ON;
     ctx->xfer.size = sizeof(uint32_t);
 
     ctx->dma = dma;

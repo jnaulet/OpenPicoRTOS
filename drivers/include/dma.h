@@ -8,14 +8,20 @@
 
 struct dma;
 
+typedef enum {
+    DMA_XFER_INCREMENT_OFF,
+    DMA_XFER_INCREMENT_ON,
+    DMA_XFER_INCREMENT_COUNT
+} dma_xfer_increment_t;
+
 struct dma_xfer {
-    intptr_t saddr;     /* source address */
-    intptr_t daddr;     /* destination address */
+    intptr_t saddr;                     /* source address */
+    intptr_t daddr;                     /* destination address */
     /* attributes */
-    bool incr_read;     /* increment read address after bus xfer */
-    bool incr_write;    /* increment write address after bus xfer */
-    size_t size;        /* size of bus xfer (0-4 usually) */
-    size_t byte_count;  /* byte count */
+    dma_xfer_increment_t incr_read;     /* increment read address after bus xfer */
+    dma_xfer_increment_t incr_write;    /* increment write address after bus xfer */
+    size_t size;                        /* size of bus xfer (0-4 usually) */
+    size_t byte_count;                  /* byte count */
 };
 
 /* Function: dma_setup

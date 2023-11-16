@@ -303,8 +303,8 @@ static int spi_xfer_dma_start(struct spi *ctx, void *rx, const void *tx, size_t 
     struct dma_xfer fill = {
         (intptr_t)tx,                   /* source address */
         (intptr_t)&ctx->base->SPITXBUF, /* destination address */
-        true,                           /* incr_read */
-        false,                          /* incr_write */
+        DMA_XFER_INCREMENT_ON,          /* incr_read */
+        DMA_XFER_INCREMENT_OFF,         /* incr_write */
         sizeof(uint16_t),               /* size */
         n                               /* byte count */
     };
@@ -313,8 +313,8 @@ static int spi_xfer_dma_start(struct spi *ctx, void *rx, const void *tx, size_t 
     struct dma_xfer drain = {
         (intptr_t)&ctx->base->SPIRXBUF, /* source address */
         (intptr_t)rx,                   /* destination address */
-        false,                          /* incr_read */
-        true,                           /* incr_write */
+        DMA_XFER_INCREMENT_OFF,         /* incr_read */
+        DMA_XFER_INCREMENT_ON,          /* incr_write */
         sizeof(uint16_t),               /* size */
         n                               /* byte count */
     };

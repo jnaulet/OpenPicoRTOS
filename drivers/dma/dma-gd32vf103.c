@@ -69,6 +69,8 @@ static int dma_prepare(struct dma *ctx, struct dma_xfer *xfer)
     picoRTOS_assert(xfer->size > 0, return -EAGAIN);
     picoRTOS_assert(xfer->size <= sizeof(uint32_t), return -EAGAIN);
     picoRTOS_assert(xfer->byte_count > 0, return -EAGAIN);
+    picoRTOS_assert(xfer->incr_read <= DMA_XFER_INCREMENT_COUNT, return -EINVAL);
+    picoRTOS_assert(xfer->incr_write <= DMA_XFER_INCREMENT_COUNT, return -EINVAL);
 
     /* this one is tricky, as the DMA is designed to transfer data between
      * memory & peripherals */
@@ -83,10 +85,10 @@ static int dma_prepare(struct dma *ctx, struct dma_xfer *xfer)
         ctx->ch->DMA_CHxMADDR = (uint32_t)xfer->daddr;
         ctx->ch->DMA_CHxCTL &= ~DMA_CHxCTL_DIR;
         /* increment read */
-        if (xfer->incr_read) ctx->ch->DMA_CHxCTL |= DMA_CHxCTL_PNAGA;
+        if (xfer->incr_read != DMA_XFER_INCREMENT_OFF) ctx->ch->DMA_CHxCTL |= DMA_CHxCTL_PNAGA;
         else ctx->ch->DMA_CHxCTL &= ~DMA_CHxCTL_PNAGA;
         /* increment write */
-        if (xfer->incr_write) ctx->ch->DMA_CHxCTL |= DMA_CHxCTL_MNAGA;
+        if (xfer->incr_write != DMA_XFER_INCREMENT_OFF) ctx->ch->DMA_CHxCTL |= DMA_CHxCTL_MNAGA;
         else ctx->ch->DMA_CHxCTL &= ~DMA_CHxCTL_MNAGA;
 
     }else{
@@ -95,10 +97,10 @@ static int dma_prepare(struct dma *ctx, struct dma_xfer *xfer)
         ctx->ch->DMA_CHxMADDR = (uint32_t)xfer->saddr;
         ctx->ch->DMA_CHxCTL |= DMA_CHxCTL_DIR;
         /* increment read */
-        if (xfer->incr_read) ctx->ch->DMA_CHxCTL |= DMA_CHxCTL_MNAGA;
+        if (xfer->incr_read != DMA_XFER_INCREMENT_OFF) ctx->ch->DMA_CHxCTL |= DMA_CHxCTL_MNAGA;
         else ctx->ch->DMA_CHxCTL &= ~DMA_CHxCTL_MNAGA;
         /* increment write */
-        if (xfer->incr_write) ctx->ch->DMA_CHxCTL |= DMA_CHxCTL_PNAGA;
+        if (xfer->incr_write != DMA_XFER_INCREMENT_OFF) ctx->ch->DMA_CHxCTL |= DMA_CHxCTL_PNAGA;
         else ctx->ch->DMA_CHxCTL &= ~DMA_CHxCTL_PNAGA;
     }
 

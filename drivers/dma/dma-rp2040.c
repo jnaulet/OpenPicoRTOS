@@ -99,15 +99,17 @@ int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
     picoRTOS_assert(xfer->size > 0, return -EINVAL);
     picoRTOS_assert(xfer->size != (size_t)3, return -EINVAL);
     picoRTOS_assert(xfer->size < (size_t)5, return -EINVAL);
+    picoRTOS_assert(xfer->incr_read <= DMA_XFER_INCREMENT_COUNT, return -EINVAL);
+    picoRTOS_assert(xfer->incr_write <= DMA_XFER_INCREMENT_COUNT, return -EINVAL);
 
     ctx->ch->READ_ADDR = (uint32_t)xfer->saddr;
     ctx->ch->WRITE_ADDR = (uint32_t)xfer->daddr;
     ctx->ch->TRANS_COUNT = (uint32_t)(xfer->byte_count / xfer->size);
 
-    if (xfer->incr_read) ctx->ch->CTRL_TRIG |= CTRL_TRIG_INCR_READ;
+    if (xfer->incr_read != DMA_XFER_INCREMENT_OFF) ctx->ch->CTRL_TRIG |= CTRL_TRIG_INCR_READ;
     else ctx->ch->CTRL_TRIG &= ~CTRL_TRIG_INCR_READ;
 
-    if (xfer->incr_write) ctx->ch->CTRL_TRIG |= CTRL_TRIG_INCR_WRITE;
+    if (xfer->incr_write != DMA_XFER_INCREMENT_OFF) ctx->ch->CTRL_TRIG |= CTRL_TRIG_INCR_WRITE;
     else ctx->ch->CTRL_TRIG &= ~CTRL_TRIG_INCR_WRITE;
 
     /* xfer size, default to byte */

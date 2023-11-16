@@ -119,6 +119,9 @@ int dma_stm32h7xx_init(struct dma *ctx, int base, size_t channel)
 
 int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
 {
+    picoRTOS_assert(xfer->incr_read <= DMA_XFER_INCREMENT_COUNT, return -EINVAL);
+    picoRTOS_assert(xfer->incr_write <= DMA_XFER_INCREMENT_COUNT, return -EINVAL);
+
     uint32_t SxCR = (uint32_t)SxCR_EN;
 
     /* disable */
@@ -136,8 +139,8 @@ int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
         ctx->ch->SxPAR = (uint32_t)xfer->saddr;
         ctx->ch->SxM0AR = (uint32_t)xfer->daddr;
 
-        if (xfer->incr_write) SxCR |= SxCR_MINC;                    /* dst */
-        if (xfer->incr_read) SxCR |= (SxCR_PINC | SxCR_PINCOS);     /* src */
+        if (xfer->incr_write != DMA_XFER_INCREMENT_OFF) SxCR |= SxCR_MINC;                      /* dst */
+        if (xfer->incr_read != DMA_XFER_INCREMENT_OFF) SxCR |= (SxCR_PINC | SxCR_PINCOS);       /* src */
 
     }else{
         /* memory to peripheral */
@@ -145,8 +148,8 @@ int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
         ctx->ch->SxM0AR = (uint32_t)xfer->saddr;
 
         SxCR |= SxCR_DIR(0x1);
-        if (xfer->incr_read) SxCR |= SxCR_MINC;                     /* src */
-        if (xfer->incr_write) SxCR |= (SxCR_PINC | SxCR_PINCOS);    /* dst */
+        if (xfer->incr_read != DMA_XFER_INCREMENT_OFF) SxCR |= SxCR_MINC;                       /* src */
+        if (xfer->incr_write != DMA_XFER_INCREMENT_OFF) SxCR |= (SxCR_PINC | SxCR_PINCOS);      /* dst */
     }
 
     /* enable & run */
