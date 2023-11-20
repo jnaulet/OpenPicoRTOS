@@ -71,12 +71,12 @@ static void itimer_init(void)
     arch_assert_void(res == 0);
 
     /* set interval */
-    itimer.it_interval.tv_sec = 0;
-    itimer.it_interval.tv_usec = 1000000 / CONFIG_TICK_HZ;
+    itimer.it_interval.tv_sec = 1l / (long)CONFIG_TICK_HZ;
+    itimer.it_interval.tv_usec = (1000000l / (long)CONFIG_TICK_HZ) % 1000000l;
 
     /* set current value */
-    itimer.it_value.tv_sec = 0;
-    itimer.it_value.tv_usec = 1000000 / CONFIG_TICK_HZ;
+    itimer.it_value.tv_sec = 1l / (long)CONFIG_TICK_HZ;
+    itimer.it_value.tv_usec = (1000000l / (long)CONFIG_TICK_HZ) % 1000000l;
 
     /* set tick */
     res = setitimer(ITIMER_REAL, &itimer, NULL);
