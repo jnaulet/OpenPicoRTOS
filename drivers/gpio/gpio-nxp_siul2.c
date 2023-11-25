@@ -11,6 +11,17 @@ struct GPIO_NXP_SIUL2 {
     volatile uint32_t MPGPDO;
 };
 
+/* Function: gpio_nxp_siul2_init
+ * Initializes a GPIO
+ *
+ * Parameters:
+ *  ctx - The GPIO to init
+ *  base - The GPIO block base address
+ *  pin - The GPIO pin number on that block
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int gpio_nxp_siul2_init(struct gpio *ctx, int base, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)GPIO_NXP_SIUL2_PIN_COUNT, return -EINVAL);
