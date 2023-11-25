@@ -24,6 +24,10 @@ config MUX_ATSAME5X
        depends on ARM
        bool "ATSAME5x/D5x series MUX"
 
+config MUX_NXP_SIUL2
+       depends on POWERPC
+       bool "NXP SIUL2 MUX"
+
 config MUX_STM32H7XX
        depends on ARM
        bool "STM32H7xx series MUX"

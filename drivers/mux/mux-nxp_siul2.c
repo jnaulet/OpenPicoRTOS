@@ -49,12 +49,33 @@ struct MUX_NXP_SIUL2 {
 #define IMCR_SSS_M  0xfu
 #define IMCR_SSS(x) ((x) & IMCR_SSS_M)
 
+/* Function: mux_nxp_siul2_init
+ * Initializes multiplexing on a port
+ *
+ * Parameters:
+ *  ctx - The mux to init
+ *  base - The base address of the port
+ *
+ * Returns:
+ * Always 0
+ */
 int mux_nxp_siul2_init(struct mux *ctx, int base)
 {
     ctx->base = (struct MUX_NXP_SIUL2*)base;
     return 0;
 }
 
+/* Function: mux_nxp_siul2_output
+ * Sets the selected pin to output
+ *
+ * Parameters:
+ *  ctx - The mux context
+ *  pin - The pin to set
+ *  mux - The alternative mux to apply
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_nxp_siul2_output(struct mux *ctx, size_t pin, mux_nxp_siul2_t mux)
 {
     picoRTOS_assert(pin < (size_t)MUX_NXP_SIUL2_PIN_COUNT, return -EINVAL);
@@ -71,6 +92,18 @@ int mux_nxp_siul2_output(struct mux *ctx, size_t pin, mux_nxp_siul2_t mux)
     return 0;
 }
 
+/* Function: mux_nxp_siul2_input
+ * Sets the selected pin to input
+ *
+ * Parameters:
+ *  ctx - The mux context
+ *  pin - The pin to set
+ *  mux - The alternative mux to apply
+ *  imcr - The input mux register to set (see IO signals description doc)
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_nxp_siul2_input(struct mux *ctx, size_t pin, mux_nxp_siul2_t mux, size_t imcr)
 {
     picoRTOS_assert(pin < (size_t)MUX_NXP_SIUL2_PIN_COUNT, return -EINVAL);
@@ -87,6 +120,16 @@ int mux_nxp_siul2_input(struct mux *ctx, size_t pin, mux_nxp_siul2_t mux, size_t
     return 0;
 }
 
+/* Function: mux_nxp_siul2_analog
+ * Sets the selected pin to analog input
+ *
+ * Parameters:
+ *  ctx - The mux context
+ *  pin - The pin to set
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_nxp_siul2_analog(struct mux *ctx, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)MUX_NXP_SIUL2_PIN_COUNT, return -EINVAL);
@@ -95,6 +138,16 @@ int mux_nxp_siul2_analog(struct mux *ctx, size_t pin)
     return 0;
 }
 
+/* Function: mux_nxp_siul2_pull_up
+ * Pulls the selected pin up
+ *
+ * Parameters:
+ *  ctx - The mux context
+ *  pin - The pin to set
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_nxp_siul2_pull_up(struct mux *ctx, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)MUX_NXP_SIUL2_PIN_COUNT, return -EINVAL);
@@ -104,6 +157,16 @@ int mux_nxp_siul2_pull_up(struct mux *ctx, size_t pin)
     return 0;
 }
 
+/* Function: mux_nxp_siul2_pull_down
+ * Pulls the selected pin down
+ *
+ * Parameters:
+ *  ctx - The mux context
+ *  pin - The pin to set
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_nxp_siul2_pull_down(struct mux *ctx, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)MUX_NXP_SIUL2_PIN_COUNT, return -EINVAL);
