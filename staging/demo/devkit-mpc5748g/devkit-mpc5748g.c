@@ -36,7 +36,7 @@ static void mux_init(void)
     (void)mux_nxp_siul2_input(&MUX, (size_t)19, MUX_NXP_SIUL2_ALT2, (size_t)200);   /* PB[3] LIN0RX */
     /* gpio */
     (void)mux_nxp_siul2_output(&MUX, (size_t)144, MUX_NXP_SIUL2_GPIO);              /* PJ[0] TICK */
-    (void)mux_nxp_siul2_output(&MUX, (size_t)4, MUX_NXP_SIUL2_GPIO);                /* PA[4] LED0 */
+    (void)mux_nxp_siul2_output(&MUX, (size_t)4, MUX_NXP_SIUL2_ALT1);                /* PA[4] LED0 */
     (void)mux_nxp_siul2_output(&MUX, (size_t)0, MUX_NXP_SIUL2_GPIO);                /* PA[0] LED1 */
     (void)mux_nxp_siul2_output(&MUX, (size_t)148, MUX_NXP_SIUL2_GPIO);              /* PJ[4] LED2 */
     (void)mux_nxp_siul2_output(&MUX, (size_t)117, MUX_NXP_SIUL2_GPIO);              /* PH[5] LED3 */
@@ -54,7 +54,7 @@ static void mux_init(void)
     (void)mux_nxp_siul2_input(&MUX, (size_t)17, MUX_NXP_SIUL2_ALT2, (size_t)188);   /* PB[1] CAN0_RX */
     /* uart */
     (void)mux_nxp_siul2_output(&MUX, (size_t)40, MUX_NXP_SIUL2_ALT1);               /* PC[8] LIN2_TX */
-    (void)mux_nxp_siul2_input(&MUX, (size_t)41, MUX_NXP_SIUL2_ALT3, (size_t)202);   /* PC[9] LIN2_RX */
+    (void)mux_nxp_siul2_input(&MUX, (size_t)41, MUX_NXP_SIUL2_ALT2, (size_t)202);   /* PC[9] LIN2_RX */
 }
 
 static int adc_init(/*@partial@*/ struct devkit_mpc5748g *ctx)
@@ -75,20 +75,17 @@ static int adc_init(/*@partial@*/ struct devkit_mpc5748g *ctx)
 
     /* ~0-100% */
     struct adc_settings ADC_settings = {
-        1,      /* multiplier */
-        650,    /* divider */
-        0,      /* offset */
+        24421,      /* multiplier */
+        1000000,    /* divider */
+        0,          /* offset */
     };
-
-    /* turn clock on */
-    // (void)clock_mpc574xx_set_pctl_run_cfg(CLOCK_MPC574XX_PCTL_ADC1, (size_t)0);
 
     (void)adc_nxp_sar_init(&ADC1, ADDR_ADC1);
     (void)adc_nxp_sar_setup(&ADC1, &ADC1_settings);
 
     /* channel */
-    (void)adc_nxp_sar_adc_init(&ctx->ADC1_P0, &ADC1, (size_t)0);
-    (void)adc_setup(&ctx->ADC1_P0, &ADC_settings);
+    (void)adc_nxp_sar_adc_init(&ctx->ADC_PWM.ADC1_P0, &ADC1, (size_t)9); /* ADC_1_P0 */
+    (void)adc_setup(&ctx->ADC_PWM.ADC1_P0, &ADC_settings);
 
     return 0;
 }
@@ -96,11 +93,11 @@ static int adc_init(/*@partial@*/ struct devkit_mpc5748g *ctx)
 static int can_init(/*@partial@*/ struct devkit_mpc5748g *ctx)
 {
     struct can_settings CAN_settings = {
-        500000ul,   /* bitrate */
-        (size_t)2,  /* tx_mailbox_count */
-        true,       /* tx_auto_abort */
-        false,      /* rx_overwrite */
-        true        /* loopback */
+        500000ul,               /* bitrate */
+        (size_t)2,              /* tx_mailbox_count */
+        CAN_TX_AUTO_ABORT_ON,   /* tx_auto_abort */
+        CAN_RX_OVERWRITE_OFF,   /* rx_overwrite */
+        CAN_LOOPBACK_ON         /* loopback */
     };
 
     (void)can_nxp_flexcan_init(&ctx->CAN0, ADDR_FLEXCAN0, CLOCK_MPC574XX_F40, (size_t)96);
@@ -153,12 +150,12 @@ static int pwm_init(/*@partial@*/ struct devkit_mpc5748g *ctx)
 
     struct pwm_nxp_emios_pwm_settings PWM_settings = {
         PWM_NXP_EMIOS_UCPRE_1,  /* ucpre */
-        false,                  /* polarity */
+        true,                   /* polarity */
     };
 
-    /* TBD */
-    (void)pwm_nxp_emios_pwm_init(&ctx->PWM, &C99_EMIOS0, (size_t)0);
-    return pwm_nxp_emios_pwm_setup(&ctx->PWM, &PWM_settings);
+    /* E0UC_4_G */
+    (void)pwm_nxp_emios_pwm_init(&ctx->ADC_PWM.LED0, &C99_EMIOS0, (size_t)4);
+    return pwm_nxp_emios_pwm_setup(&ctx->ADC_PWM.LED0, &PWM_settings);
 }
 
 static int spi_init(/*@partial@*/ struct devkit_mpc5748g *ctx)
@@ -178,6 +175,7 @@ static int spi_init(/*@partial@*/ struct devkit_mpc5748g *ctx)
     return 0;
 }
 
+/*@unused@*/
 static int twi_init(/*@partial@*/ struct devkit_mpc5748g *ctx)
 {
     struct twi_settings TWI_settings = {
@@ -223,7 +221,7 @@ int devkit_mpc5748g_init(struct devkit_mpc5748g *ctx)
     (void)lin_init(ctx);
     (void)pwm_init(ctx);
     (void)spi_init(ctx);
-    // (void)twi_init(ctx);
+    /* (void)twi_init(ctx); */
     (void)uart_init(ctx);
 
     return 0;

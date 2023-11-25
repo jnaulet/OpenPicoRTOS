@@ -110,28 +110,29 @@ static void adc_main(void *priv)
 {
     picoRTOS_assert_void(priv != NULL);
 
-    struct adc *ADC = (struct adc*)priv;
+    struct adc_pwm *ADC_PWM = (struct adc_pwm*)priv;
+    struct adc *ADC = &ADC_PWM->ADC1_P0;
+    struct pwm *PWM = &ADC_PWM->LED0;
+
+    (void)pwm_set_period(PWM, (pwm_period_us_t)100);
+    (void)pwm_set_duty_cycle(PWM, 0);
+    (void)pwm_start(PWM);
 
     for (;;) {
         int val = 0;
+        int deadlock = CONFIG_DEADLOCK_COUNT;
+
         /* get adc value */
-        if (adc_read(ADC, &val) == -EAGAIN)
+        while (adc_read(ADC, &val) == -EAGAIN && deadlock-- != 0)
             picoRTOS_schedule();
 
-        /* TBD */
+        picoRTOS_assert_void(deadlock != -1);
         picoRTOS_assert_void(val <= 100);
         picoRTOS_assert_void(val >= 0);
+
+        /* set LED brightness */
+        (void)pwm_set_duty_cycle(PWM, PWM_DUTY_CYCLE_PCENT(val));
     }
-}
-
-static void pwm_main(void *priv)
-{
-    picoRTOS_assert_void(priv != NULL);
-
-    struct pwm *PWM = (struct pwm*)priv;
-
-    for (;;)
-        picoRTOS_schedule();
 }
 
 /*
@@ -149,8 +150,8 @@ static void spi_main(void *priv)
 
         int res;
 
-        char rx[5] = { (char)0, (char)0, (char)0, (char)0, (char)0 };
-        char tx[5] = { (char)0xa5, (char)0x55, (char)0x5a, (char)0x55, (char)0x4d };
+        char rx[6] = { (char)0, (char)0, (char)0, (char)0, (char)0, (char)0 };
+        char tx[6] = { (char)0xa5, (char)0x55, (char)0x5a, (char)0x55, (char)0x4d, (char)0x4f };
 
         if ((res = spi_xfer(SPI, &rx[xfered], &tx[xfered], sizeof(tx) - xfered)) == -EAGAIN) {
             picoRTOS_schedule();
@@ -212,6 +213,33 @@ static void can_main(void *priv)
     }
 }
 
+/*
+ * console_main is a thread that simply echoes characters
+ */
+static void console_main(void *priv)
+{
+    picoRTOS_assert_fatal(priv != NULL, return );
+
+    struct uart *UART = (struct uart*)priv;
+
+    for (;;) {
+
+        char c = (char)0;
+        int deadlock = CONFIG_DEADLOCK_COUNT;
+
+        /* just echo */
+        if (uart_read(UART, &c, sizeof(c)) == -EAGAIN) {
+            picoRTOS_schedule();
+            continue;
+        }
+
+        while (uart_write(UART, &c, sizeof(c)) == -EAGAIN && deadlock-- != 0)
+            picoRTOS_schedule();
+
+        picoRTOS_assert_void(deadlock != -1);
+    }
+}
+
 int main(void)
 {
     static struct devkit_mpc5748g board;
@@ -229,6 +257,8 @@ int main(void)
     static picoRTOS_stack_t stack2[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack3[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack4[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack5[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack6[CONFIG_DEFAULT_STACK_COUNT];
 
     /* shared task */
     picoRTOS_task_init(&task, tick_main, &board.TICK, stack0, PICORTOS_STACK_COUNT(stack0));
@@ -247,11 +277,17 @@ int main(void)
     picoRTOS_SMP_add_task(&task, picoRTOS_get_next_available_priority(), (picoRTOS_mask_t)0x2);
 #endif
 
-    /* adc */
-    picoRTOS_task_init(&task, adc_main, &board.ADC1_P0, stack3, PICORTOS_STACK_COUNT(stack3));
+    /* adc + pwm */
+    picoRTOS_task_init(&task, adc_main, &board.ADC_PWM, stack3, PICORTOS_STACK_COUNT(stack3));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
-    /* pwm */
-    picoRTOS_task_init(&task, pwm_main, &board.PWM, stack4, PICORTOS_STACK_COUNT(stack4));
+    /* spi */
+    picoRTOS_task_init(&task, spi_main, &board.SPI, stack4, PICORTOS_STACK_COUNT(stack4));
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+    /* can */
+    picoRTOS_task_init(&task, can_main, &board.CAN0, stack5, PICORTOS_STACK_COUNT(stack5));
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+    /* uart */
+    picoRTOS_task_init(&task, console_main, &board.UART, stack6, PICORTOS_STACK_COUNT(stack6));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
 
     picoRTOS_start();

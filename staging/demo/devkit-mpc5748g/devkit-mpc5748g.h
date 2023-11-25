@@ -14,12 +14,14 @@
 #define DEVKIT_MPC5748G_LED_COUNT 8
 
 struct devkit_mpc5748g {
-    struct adc ADC1_P0;
+    struct adc_pwm {
+        struct adc ADC1_P0;
+        struct pwm LED0;
+    } ADC_PWM;
     struct can CAN0;
     struct flash FLASH;
     struct gpio LED[DEVKIT_MPC5748G_LED_COUNT];
     struct lin LIN0;
-    struct pwm PWM;
     struct spi SPI;
     struct twi I2C0;
     struct twi I2C1;
