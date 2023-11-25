@@ -8,8 +8,4 @@ config ADC_NXP_EQADC
        depends on POWERPC
        bool "NXP eQADC"
 
-config ADC_NXP_SAR
-       depends on POWERPC
-       bool "NXP MPC56/57xx series SAR ADC"
-
 endmenu

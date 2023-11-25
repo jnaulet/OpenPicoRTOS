@@ -55,6 +55,16 @@ struct ADC_NXP_SAR {
 #define CDR_CDATA_M 0xffffu
 #define CDR_VALID   (1 << 19)
 
+/* Function: adc_nxp_sar_init
+ * Inits a NXP ADC SAR block
+ *
+ * Parameters:
+ *  ctx - The ADC block to init
+ *  base - The ADC block base address
+ *
+ * Returns:
+ * Always 0
+ */
 int adc_nxp_sar_init(struct adc_nxp_sar *ctx, int base)
 {
     ctx->base = (struct ADC_NXP_SAR*)base;
@@ -65,6 +75,16 @@ int adc_nxp_sar_init(struct adc_nxp_sar *ctx, int base)
     return 0;
 }
 
+/* Function: adc_nxp_sar_setup
+ * Configures a NXP ADC SAR block
+ *
+ * Parameters:
+ *  ctx - The ADC block to init
+ *  base - The ADC block base address
+ *
+ * Returns:
+ * Always 0
+ */
 int adc_nxp_sar_setup(struct adc_nxp_sar *ctx, struct adc_nxp_sar_settings *settings)
 {
     if (settings->overwrite) ctx->base->MCR |= MCR_OWREN;
@@ -76,6 +96,17 @@ int adc_nxp_sar_setup(struct adc_nxp_sar *ctx, struct adc_nxp_sar_settings *sett
     return 0;
 }
 
+/* Function: adc_nxp_sar_adc_init
+ * Inits an ADC channel
+ *
+ * Parameters:
+ *  ctx - The ADC channel to init
+ *  parent - The parent ADC block
+ *  channel - The ADC channel number
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int adc_nxp_sar_adc_init(struct adc *ctx, struct adc_nxp_sar *parent, size_t channel)
 {
     picoRTOS_assert(channel < (size_t)ADC_NXP_SAR_CHANNEL_COUNT, return -EINVAL);
