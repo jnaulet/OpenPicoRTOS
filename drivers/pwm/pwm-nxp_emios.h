@@ -29,7 +29,7 @@ int pwm_nxp_emios_init(/*@out@*/ struct pwm_nxp_emios *ctx, int base, clock_id_t
 int pwm_nxp_emios_setup(struct pwm_nxp_emios *ctx, struct pwm_nxp_emios_settings *settings);
 
 struct pwm {
-    /*@temp@*/ struct pwm_nxp_emios *nxp_emios;
+    /*@temp@*/ struct pwm_nxp_emios *parent;
     /*@temp@*/ struct PWM_NXP_EMIOS_UC *uc;
     size_t ncycles;
     size_t ucpre;
@@ -48,7 +48,7 @@ struct pwm_nxp_emios_pwm_settings {
     bool polarity;
 };
 
-int pwm_nxp_emios_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_nxp_emios *nxp_emios, size_t channel);
+int pwm_nxp_emios_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_nxp_emios *parent, size_t channel);
 int pwm_nxp_emios_pwm_setup(struct pwm *ctx, struct pwm_nxp_emios_pwm_settings *settings);
 
 /* Runtime calls:
@@ -66,7 +66,7 @@ typedef enum {
 } pwm_nxp_emios_ipwm_state_t;
 
 struct ipwm {
-    /*@temp@*/ struct pwm_nxp_emios *nxp_emios;
+    /*@temp@*/ struct pwm_nxp_emios *parent;
     /*@temp@*/ struct PWM_NXP_EMIOS_UC *uc;
     pwm_nxp_emios_ipwm_state_t state;
     size_t ncycles;
@@ -88,7 +88,7 @@ struct pwm_nxp_emios_ipwm_settings {
     pwm_nxp_emios_ipwm_if_t filter;
 };
 
-int pwm_nxp_emios_ipwm_init(/*@out@*/ struct ipwm *ctx, struct pwm_nxp_emios *nxp_emios, size_t channel);
+int pwm_nxp_emios_ipwm_init(/*@out@*/ struct ipwm *ctx, struct pwm_nxp_emios *parent, size_t channel);
 int pwm_nxp_emios_ipwm_setup(struct ipwm *ctx, struct pwm_nxp_emios_ipwm_settings *settings);
 
 /* Runtime calls:

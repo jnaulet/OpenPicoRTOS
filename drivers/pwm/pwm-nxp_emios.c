@@ -38,6 +38,17 @@ struct PWM_NXP_EMIOS {
 #define S_UCIN (1 << 2)
 #define S_FLAG (1 << 0)
 
+/* Function: pwm_nxp_emios_init
+ * Inits an NXP eMIOS block
+ *
+ * Parameters:
+ *  ctx - The eMIOS block to init
+ *  base - The eMIOS block base address
+ *  clkid - The eMIOS input clock id
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int pwm_nxp_emios_init(struct pwm_nxp_emios *ctx, int base, clock_id_t clkid)
 {
     ctx->base = (struct PWM_NXP_EMIOS*)base;
@@ -52,6 +63,16 @@ int pwm_nxp_emios_init(struct pwm_nxp_emios *ctx, int base, clock_id_t clkid)
     return 0;
 }
 
+/* Function: pwm_nxp_emios_setup
+ * Configures an eMIOS block
+ *
+ * Parameters:
+ *  ctx - The eMIOS block to configure
+ *  settings - The eMIOS specific parameters
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int pwm_nxp_emios_setup(struct pwm_nxp_emios *ctx, struct pwm_nxp_emios_settings *settings)
 {
     picoRTOS_assert(settings->gpre >= (size_t)PWM_NXP_EMIOS_GPRE_MIN, return -EINVAL);
@@ -78,28 +99,49 @@ static int nxp_emios_get_UC(struct pwm_nxp_emios *ctx, size_t channel,
     /*@notreached@*/ return -EINVAL;
 }
 
-int pwm_nxp_emios_pwm_init(struct pwm *ctx, struct pwm_nxp_emios *nxp_emios, size_t channel)
+/* Function: pwm_nxp_emios_pwm_init
+ * Creates a PWM output from an eMIOS block
+ *
+ * Parameters:
+ *  ctx - The pwm to init
+ *  parent - The parent eMIOS block
+ * channel - The channel number
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
+int pwm_nxp_emios_pwm_init(struct pwm *ctx, struct pwm_nxp_emios *parent, size_t channel)
 {
     picoRTOS_assert(channel < (size_t)PWM_NXP_EMIOS_CHANNEL_COUNT, return -EINVAL);
 
     int res;
 
-    ctx->nxp_emios = nxp_emios;
+    ctx->parent = parent;
     ctx->ncycles = 0;
     ctx->uc = NULL;
     ctx->ucpre = (size_t)1;
 
-    if ((res = nxp_emios_get_UC(ctx->nxp_emios, channel, &ctx->uc)) < 0)
+    if ((res = nxp_emios_get_UC(ctx->parent, channel, &ctx->uc)) < 0)
         return res;
 
     ctx->uc->A = (uint32_t)0;
 
-    ctx->uc->C = (uint32_t)C_MODE(0x18);    /* set mode to OPWMFM */
+    ctx->uc->C = (uint32_t)C_MODE(0x58);    /* set mode to OPWMFM */
     ctx->uc->C &= ~C_EDPOL;                 /* clear on match */
 
     return 0;
 }
 
+/* Function: pwm_nxp_emios_pwm_setup
+ * Configures a PWM output from an eMIOS block
+ *
+ * Parameters:
+ *  ctx - The pwm to init
+ *  settings - The pwm output settings
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int pwm_nxp_emios_pwm_setup(struct pwm *ctx, struct pwm_nxp_emios_pwm_settings *settings)
 {
     picoRTOS_assert(settings->ucpre < PWM_NXP_EMIOS_UCPRE_COUNT, return -EINVAL);
@@ -122,7 +164,7 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
     picoRTOS_assert(period > 0, return -EINVAL);
 
     /* real nxp_emios channel frequency */
-    size_t hz = (size_t)ctx->nxp_emios->freq / (ctx->nxp_emios->gpre * ctx->ucpre);
+    size_t hz = (size_t)ctx->parent->freq / (ctx->parent->gpre * ctx->ucpre);
 
     ctx->ncycles = (hz / (size_t)1000000) * (size_t)period;
 
@@ -136,17 +178,6 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
 
 int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle)
 {
-    /* 0% */
-    if (duty_cycle == 0) {
-        ctx->uc->A = (uint32_t)ctx->ncycles;
-        return 0;
-    }
-    /* 100% */
-    if (duty_cycle == (pwm_duty_cycle_t)PWM_DUTY_CYCLE_MAX) {
-        ctx->uc->A = (uint32_t)0;
-        return 0;
-    }
-
     ctx->uc->A = (uint32_t)((size_t)duty_cycle * ctx->ncycles) >> 16;
     return 0;
 }
@@ -163,19 +194,19 @@ void pwm_stop(struct pwm *ctx)
 
 /* IPWM */
 
-int pwm_nxp_emios_ipwm_init(/*@out@*/ struct ipwm *ctx, struct pwm_nxp_emios *nxp_emios, size_t channel)
+int pwm_nxp_emios_ipwm_init(/*@out@*/ struct ipwm *ctx, struct pwm_nxp_emios *parent, size_t channel)
 {
     picoRTOS_assert(channel < (size_t)PWM_NXP_EMIOS_CHANNEL_COUNT, return -EINVAL);
 
     int res;
 
-    ctx->nxp_emios = nxp_emios;
+    ctx->parent = parent;
     ctx->ncycles = 0;
     ctx->uc = NULL;
     ctx->ucpre = (size_t)1;
     ctx->state = PWM_NXP_EMIOS_IPWM_STATE_IDLE;
 
-    if ((res = nxp_emios_get_UC(ctx->nxp_emios, channel, &ctx->uc)) < 0)
+    if ((res = nxp_emios_get_UC(ctx->parent, channel, &ctx->uc)) < 0)
         return res;
 
     ctx->uc->A = (uint32_t)0;
@@ -230,7 +261,7 @@ static int ipwm_get_period_idle(struct ipwm *ctx)
 
 static int ipwm_get_period_acq(struct ipwm *ctx, pwm_period_us_t *period)
 {
-    struct pwm_nxp_emios *nxp_emios = ctx->nxp_emios;
+    struct pwm_nxp_emios *parent = ctx->parent;
 
     if ((ctx->uc->S & S_FLAG) == 0)
         return -EAGAIN;
@@ -241,7 +272,7 @@ static int ipwm_get_period_acq(struct ipwm *ctx, pwm_period_us_t *period)
 
     /* convert to us format */
     uint32_t ncycles = (uint32_t)0xffffff & (A - B);
-    size_t hz = (size_t)nxp_emios->freq / (nxp_emios->gpre * ctx->ucpre);
+    size_t hz = (size_t)parent->freq / (parent->gpre * ctx->ucpre);
 
     *period = (pwm_period_us_t)(ncycles * 1000000ul / (uint32_t)hz);
 
@@ -282,7 +313,7 @@ static int ipwm_get_duty_cycle_idle(struct ipwm *ctx)
     ctx->uc->A = (uint32_t)0;
 
     /* set capture duration (1 tick) */
-    size_t hz = (size_t)ctx->nxp_emios->freq / (ctx->nxp_emios->gpre * ctx->ucpre);
+    size_t hz = (size_t)ctx->parent->freq / (ctx->parent->gpre * ctx->ucpre);
 
     ctx->uc->B = (uint32_t)(hz / (size_t)CONFIG_TICK_HZ);
 
