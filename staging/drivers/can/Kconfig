@@ -4,10 +4,6 @@ config CAN_GD32VF103
        depends on RISCV
        bool "GD32VF103 series CAN"
 
-config CAN_NXP_FLEXCAN
-       depends on POWERPC
-       bool "NXP FlexCAN CAN"
-
 config CAN_PIC32MX
        depends on MIPS
        bool "PIC32Mx series CAN"

@@ -366,8 +366,18 @@ static void nxp_flexcan_clear_ram(/*@partial@*/ struct can *ctx)
     }
 }
 
-/* public */
-
+/* Function: can_nxp_flexcan_init
+ * Init a FlexCAN interface
+ *
+ * Parameters:
+ *  ctx - The FlexCAN interface to init
+ *  base - The FlexCAN interface base address
+ *  clkid - The FlexCAN interface clock id
+ *  mailbox_count - The number of MBs associated with this FlexCAN interface (see doc)
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int can_nxp_flexcan_init(struct can *ctx, int base, clock_id_t clkid,
                          size_t mailbox_count)
 {
@@ -438,6 +448,16 @@ int can_nxp_flexcan_init(struct can *ctx, int base, clock_id_t clkid,
     return nxp_flexcan_unfreeze(ctx);
 }
 
+/* Function: can_nxp_flexcan_setup
+ * Configures a FlexCAN interface
+ *
+ * Parameters:
+ *  ctx - The FlexCAN interface to init
+ *  settings - The settings to apply
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int can_nxp_flexcan_setup(struct can *ctx, struct can_nxp_flexcan_settings *settings)
 {
     int res;
@@ -464,7 +484,7 @@ int can_setup(struct can *ctx, struct can_settings *settings)
     if ((res = nxp_flexcan_set_tx_mailboxes(ctx, settings->tx_mailbox_count)) < 0)
         return res;
 
-    if (settings->loopback) {
+    if (settings->loopback == CAN_LOOPBACK_ON) {
         ctx->base->CTRL1 |= CTRL1_LPB;
         ctx->base->MCR &= ~MCR_SRXDIS;
     }else{

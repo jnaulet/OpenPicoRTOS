@@ -8,4 +8,8 @@ config CAN_ATSAM3X
        depends on ARM
        bool "ATSAM3x series CAN"
 
+config CAN_NXP_FLEXCAN
+       depends on POWERPC || ARM
+       bool "NXP FlexCAN CAN"
+
 endmenu
