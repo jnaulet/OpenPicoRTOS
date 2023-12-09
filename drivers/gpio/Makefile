@@ -14,3 +14,4 @@ c_src-$(CONFIG_GPIO_TI_F28X) += $(drivers-gpio)/gpio-ti_f28x.c
 c_src-$(CONFIG_GPIO_TINYAVR) += $(drivers-gpio)/gpio-tinyavr.c
 c_src-$(CONFIG_GPIO_RENESAS_RA4) += $(drivers-gpio)/gpio-renesas_ra4.c
 c_src-$(CONFIG_GPIO_NXP_SIUL2) += $(drivers-gpio)/gpio-nxp_siul2.c
+c_src-$(CONFIG_GPIO_NXP_SIU) += $(drivers-gpio)/gpio-nxp_siu.c

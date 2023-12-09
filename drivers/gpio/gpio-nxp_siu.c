@@ -8,6 +8,17 @@ struct GPIO_NXP_SIU {
     uint32_t RESERVED1[15];
 };
 
+/* Function: gpio_nxp_siu_init
+ * Initializes a GPIO
+ *
+ * Parameters:
+ *  ctx - The GPIO to init
+ *  base - The GPIO block base address
+ *  pin - The GPIO pin number on that block
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int gpio_nxp_siu_init(struct gpio *ctx, int base, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)GPIO_NXP_SIU_PIN_COUNT, return -EINVAL);
