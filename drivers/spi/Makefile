@@ -14,3 +14,4 @@ c_src-$(CONFIG_SPI_STM32H7XX) += $(drivers-spi)/spi-stm32h7xx.c
 c_src-$(CONFIG_SPI_TI_F28X) += $(drivers-spi)/spi-ti_f28x.c
 c_src-$(CONFIG_SPI_TINYAVR) += $(drivers-spi)/spi-tinyavr.c
 c_src-$(CONFIG_SPI_RENESAS_RA4) += $(drivers-spi)/spi-renesas_ra4.c
+c_src-$(CONFIG_SPI_NXP_DSPI) += $(drivers-spi)/spi-nxp_dspi.c

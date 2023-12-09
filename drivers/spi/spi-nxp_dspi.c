@@ -12,7 +12,6 @@ struct SPI_NXP_DSPI {
     volatile uint32_t SR;
     volatile uint32_t RSER;
     volatile uint32_t PUSHR;
-    volatile uint32_t SLAVE;
     volatile uint32_t POPR;
     volatile uint32_t TXFR[4];  /* up to 16 ? */
     uint32_t RESERVED2[12];
@@ -74,18 +73,57 @@ struct SPI_NXP_DSPI {
 #define CTAR_BR_M    0xfu
 #define CTAR_BR(x)   ((x) & CTAR_BR_M)
 
-#define SR_TFFF (1 << 25)
-#define SR_RFDF (1 << 17)
+#define SR_TCF     (1u << 31)
+#define SR_TXRXS   (1 << 30)
+#define SR_SPITCF  (1 << 29)
+#define SR_EOQF    (1 << 28)
+#define SR_TFUF    (1 << 27)
+#define SR_DSITCF  (1 << 26)
+#define SR_TFFF    (1 << 25)
+#define SR_BSYF    (1 << 24)
+#define SR_CMDTCF  (1 << 23)
+#define SR_DPEF    (1 << 22)
+#define SR_SPEF    (1 << 21)
+#define SR_DDIF    (1 << 20)
+#define SR_RFOF    (1 << 19)
+#define SR_TFIWF   (1 << 18)
+#define SR_RFDF    (1 << 17)
+#define SR_CMDFFF  (1 << 16)
+#define SR_TXCTR_M  0xfu
+#define SR_TXCTR(x) (((x) & SR_TXCTR_M) << 15)
+#define SR_RXCTR_M  0xfu
+#define SR_RXCTR(x) (((x) & SR_RXCTR_M) << 4)
 
-#define PUSHR_PCS_M  0x3fu
-#define PUSHR_PCS(x) (((x) & PUSHR_PCS_M) << 16)
+#define PUSHR_CONT      (1u << 31)
+#define PUSHR_CTAS_M    0x7u
+#define PUSHR_CTAS(x)   (((x) & PUSHR_CTAS_M) << 28)
+#define PUSHR_EOQ       (1 << 27)
+#define PUSHR_CTCNT     (1 << 26)
+#define PUSHR_PE_MASC   (1 << 25)
+#define PUSHR_PE_MCSC   (1 << 24)
+#define PUSHR_PCS_M     0x3fu
+#define PUSHR_PCS(x)    (((x) & PUSHR_PCS_M) << 16)
+#define PUSHR_TXDATA_M  0xffffu
+#define PUSHR_TXDATA(x) ((x) & PUSHR_TXDATA_M)
 
+/* Function: spi_nxp_dspi_init
+ * Initializes a NXP SPI/DSPI interface
+ *
+ * Parameters:
+ *  ctx - The D/SPI to init
+ *  base - The SPI base address
+ *  clkid - The SPI input clock ID
+ *
+ * Returns:
+ * Always 0
+ */
 int spi_nxp_dspi_init(struct spi *ctx, int base, clock_id_t clkid)
 {
     ctx->base = (struct SPI_NXP_DSPI*)base;
     ctx->clkid = clkid;
     ctx->cs = 0;
     ctx->frame_size = (size_t)16;
+    ctx->frame_width = (size_t)2;
     ctx->balance = 0;
 
     ctx->base->MCR |= MCR_HALT;                 /* stop if running */
@@ -98,9 +136,6 @@ int spi_nxp_dspi_init(struct spi *ctx, int base, clock_id_t clkid)
     /* deactivate all interrupts */
     ctx->base->RSER = (uint32_t)0;
     ctx->base->SR = (uint32_t)-1;
-
-    /* run module */
-    ctx->base->MCR &= ~MCR_HALT;
 
     return 0;
 }
@@ -181,6 +216,8 @@ static int set_clock_mode(struct spi *ctx, spi_clock_mode_t mode)
 
 static int set_frame_size(struct spi *ctx, size_t nbits)
 {
+#define div_ceil(x, y) (((x) + ((y) - 1)) / (y))
+
     picoRTOS_assert(nbits >= (size_t)4, return -EINVAL);
     picoRTOS_assert(nbits <= (size_t)16, return -EINVAL);
 
@@ -188,6 +225,8 @@ static int set_frame_size(struct spi *ctx, size_t nbits)
     ctx->base->CTAR[0] |= CTAR_FMSZ(nbits - 1);
 
     ctx->frame_size = nbits;
+    ctx->frame_width = div_ceil(nbits, (size_t)8);
+
     return (int)nbits;
 }
 
@@ -252,24 +291,33 @@ int spi_setup(struct spi *ctx, const struct spi_settings *settings)
     return 0;
 }
 
-static int push_frame(struct spi *ctx, const uint8_t *frame)
+static int push_frame(struct spi *ctx, const uint8_t *frame, bool eoq)
 {
     int res;
+    uint32_t pushr = (uint32_t)(PUSHR_PCS(1 << ctx->cs) |
+                                (eoq ? PUSHR_EOQ : 0));
 
     /* if tx fifo full */
     if ((ctx->base->SR & SR_TFFF) == 0)
         return -EAGAIN;
 
     /* push data */
-    if (ctx->frame_size > (size_t)8) {
-        ctx->base->PUSHR = (uint32_t)(PUSHR_PCS(1 << ctx->cs) | *(uint16_t*)frame);
+    switch (ctx->frame_width) {
+    case sizeof(uint16_t):
+        ctx->base->PUSHR = pushr | (uint32_t)PUSHR_TXDATA(*(uint16_t*)frame);
         res = (int)sizeof(uint16_t);
-    }else{
-        ctx->base->PUSHR = (uint32_t)(PUSHR_PCS(1 << ctx->cs) | *frame);
+        break;
+
+    case sizeof(uint8_t):
+        ctx->base->PUSHR = pushr | (uint32_t)PUSHR_TXDATA(*frame);
         res = (int)sizeof(uint8_t);
+        break;
+
+    default:
+        picoRTOS_break();
+        /*@notreached@*/ return -EIO;
     }
 
-    /* ack flag */
     ctx->base->SR |= SR_TFFF;
     return res;
 }
@@ -283,15 +331,22 @@ static int pop_frame(struct spi *ctx, uint8_t *frame)
         return -EAGAIN;
 
     /* pop data */
-    if (ctx->frame_size > (size_t)8) {
+    switch (ctx->frame_width) {
+    case sizeof(uint16_t):
         *(uint16_t*)frame = (uint16_t)ctx->base->POPR;
         res = (int)sizeof(uint16_t);
-    }else{
+        break;
+
+    case sizeof(uint8_t):
         *frame = (uint8_t)ctx->base->POPR;
         res = (int)sizeof(uint8_t);
+        break;
+
+    default:
+        picoRTOS_break();
+        /*@notreached@*/ return -EIO;
     }
 
-    /* ack flag */
     ctx->base->SR |= SR_RFDF;
     return res;
 }
@@ -301,7 +356,7 @@ int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
     picoRTOS_assert(n > 0, return -EINVAL);
 
     /* 16bit check */
-    if (ctx->frame_size > (size_t)8)
+    if (ctx->frame_width > sizeof(uint8_t))
         picoRTOS_assert((n & 0x1) == 0, return -EINVAL);
 
     size_t recv = 0;
@@ -316,7 +371,8 @@ int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
 
         if (tx_n < n) {
             /* fill up TX FIFO */
-            if ((res = push_frame(ctx, &tx8[tx_n])) > 0) {
+            bool eoq = (tx_n + ctx->frame_width) == n;
+            if ((res = push_frame(ctx, &tx8[tx_n], eoq)) > 0) {
                 ctx->balance += res;
                 xfer_occurred = true;
             }
@@ -324,7 +380,7 @@ int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
 
         if ((res = pop_frame(ctx, &rx8[recv])) > 0) {
             recv += (size_t)res;
-            ctx->balance--;
+            ctx->balance -= res;
             xfer_occurred = true;
         }
 
