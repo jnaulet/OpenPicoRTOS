@@ -32,11 +32,22 @@
 
 #define ADDR_PLLDIG   0xffe74000
 
-#define ADDR_EDMA0    0xfff44000
-#define ADDR_EDMA1    0xfff54000
+#define ADDR_EDMAA    0xfff44000
+#define ADDR_EDMAB    0xfff54000
 
-#define ADDR_EQADC0   0xfff80000
-#define ADDR_EQADC1   0xc3e54000
+#define ADDR_EQADCA   0xfff80000
+#define ADDR_EQADCB   0xc3e54000
+
+#define ADDR_FLEXCANA 0xfffc0000
+#define ADDR_FLEXCANB 0xfffc4000
+#define ADDR_FLEXCANC 0xc3e60000
+#define ADDR_FLEXCAND 0xc3e64000
+
+#define ADDR_DSPIA    0xfff90000
+#define ADDR_DSPIB    0xfff94000
+#define ADDR_DSPIC    0xfff98000
+#define ADDR_DSPID    0xc3fdc000
+#define ADDR_DSPIE    0xc3fe0000
 
 #define ADDR_C55FMC   0xfffe8000
 
@@ -62,7 +73,7 @@
 
 /* FLEXCAN */
 #define CAN_NXP_FLEXCAN_DISABLE_MEM_ERR_DETECTION
-#define CAN_NXP_FLEXCAN_MB_COUNT 96
+#define CAN_NXP_FLEXCAN_MB_COUNT 64
 
 /* C55FMC FLASH */
 #define FLASH_NXP_C55FMC_SECTOR_COUNT     18
