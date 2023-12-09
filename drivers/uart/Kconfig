@@ -36,4 +36,8 @@ config UART_RENESAS_RA4_SCI
        depends on ARM
        bool "Renesas RA4 UART SCI"
 
+config UART_NXP_LINFLEXD
+       depends on POWERPC
+       bool "NXP LinFlexD UART"
+
 endmenu

@@ -76,6 +76,17 @@ static int request_init_mode(struct uart *ctx)
     return 0;
 }
 
+/* Function: uart_nxp_linflexd_init
+ * Initializes an UART on a LINFLexD interface
+ *
+ * Parameters:
+ *  ctx - The UART to init
+ *  base - The UART base address
+ *  clkid - The UART clock ID
+ *
+ * Returns:
+ * 0 if success, <0 error code otherwise
+ */
 int uart_nxp_linflexd_init(struct uart *ctx, int base, clock_id_t clkid)
 {
     int res;
@@ -211,57 +222,31 @@ int uart_setup(struct uart *ctx, const struct uart_settings *settings)
     return 0;
 }
 
-static int uart_write_start(struct uart *ctx, char c)
-{
-    ctx->base->BDRL = (uint32_t)0xffu & c;
-    ctx->state = UART_NXP_LINFLEXD_STATE_XFER;
-
-    return -EAGAIN;
-}
-
-static int uart_write_xfer(struct uart *ctx, const char *buf, size_t n)
-{
-    picoRTOS_assert(n > 0, return -EINVAL);
-
-    if ((ctx->base->UARTSR & UARTSR_DTFTFF) == 0)
-        return -EAGAIN;
-
-    ctx->base->UARTSR |= UARTSR_DTFTFF;
-    ctx->base->BDRL = (uint32_t)0xffu & *buf;
-
-    if (n == (size_t)1) {
-        ctx->state = UART_NXP_LINFLEXD_STATE_STOP;
-        return -EAGAIN;
-    }
-
-    return 1;
-}
-
-static int uart_write_stop(struct uart *ctx)
-{
-    if ((ctx->base->UARTSR & UARTSR_DTFTFF) == 0)
-        return -EAGAIN;
-
-    ctx->base->UARTSR |= UARTSR_DTFTFF;
-    ctx->state = UART_NXP_LINFLEXD_STATE_START;
-
-    return 1;
-}
-
 int uart_write(struct uart *ctx, const char *buf, size_t n)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
 
-    switch (ctx->state) {
-    case UART_NXP_LINFLEXD_STATE_START: return uart_write_start(ctx, *buf);
-    case UART_NXP_LINFLEXD_STATE_XFER: return uart_write_xfer(ctx, buf, n);
-    case UART_NXP_LINFLEXD_STATE_STOP: return uart_write_stop(ctx);
-    default: break;
+    size_t sent = 0;
+
+    while (sent != n) {
+        /* first xfer exception */
+        if (ctx->state == UART_NXP_LINFLEXD_STATE_START) {
+            ctx->state = UART_NXP_LINFLEXD_STATE_XFER;
+            ctx->base->BDRL = (uint32_t)0xffu & buf[sent++];
+            continue;
+        }
+
+        if ((ctx->base->UARTSR & UARTSR_DTFTFF) == 0)
+            return -EAGAIN;
+
+        ctx->base->UARTSR |= UARTSR_DTFTFF;
+        ctx->base->BDRL = (uint32_t)0xffu & buf[sent++];
     }
 
-    picoRTOS_break();
-    /*@notreached@*/
-    return -EIO;
+    if (sent == 0)
+        return -EAGAIN;
+
+    return (int)sent;
 }
 
 int uart_read(struct uart *ctx, char *buf, size_t n)
@@ -271,10 +256,11 @@ int uart_read(struct uart *ctx, char *buf, size_t n)
     size_t recv = 0;
 
     while (recv != n) {
-        if ((ctx->base->UARTSR & UARTSR_RFNE) == 0)
+        if ((ctx->base->UARTSR & UARTSR_DRFRFE) == 0)
             break;
 
-        buf[recv++] = (char)0xff & ctx->base->BDRL;
+        ctx->base->UARTSR = (uint32_t)UARTSR_DRFRFE;
+        buf[recv++] = (char)0xff & ctx->base->BDRM;
     }
 
     if (recv == 0)
