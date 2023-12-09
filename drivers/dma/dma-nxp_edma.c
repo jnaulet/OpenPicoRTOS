@@ -69,6 +69,16 @@ struct DMA_NXP_EDMA {
 #define TCD_ATTR_DSIZE_M  0x7u
 #define TCD_ATTR_DSIZE(x) ((x) & TCD_ATTR_DSIZE_M)
 
+/* Function: dma_nxp_edma_init
+ * Initialiases a NXP eDMA controller block
+ *
+ * Parameters:
+ *  ctx - The eDMA to init
+ *  base - The eDMA base address
+ *
+ * Returns:
+ * always 0
+ */
 int dma_nxp_edma_init(struct dma_nxp_edma *ctx, int base)
 {
     ctx->base = (struct DMA_NXP_EDMA*)base;
@@ -83,6 +93,17 @@ int dma_nxp_edma_init(struct dma_nxp_edma *ctx, int base)
     return 0;
 }
 
+/* Function: dma_nxp_edma_dma_init
+ * Initialiases a NXP eDMA controller channel
+ *
+ * Parameters:
+ *  ctx - The DMA channel to init
+ *  parent - The eDMA channel parent controller
+ *  channel - The channel number
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int dma_nxp_edma_dma_init(struct dma *ctx, struct dma_nxp_edma *parent, size_t channel)
 {
     picoRTOS_assert(channel < (size_t)DMA_NXP_EDMA_CHANNEL_COUNT,
@@ -133,7 +154,7 @@ static int setup_tcd(struct dma *ctx, struct dma_xfer *xfer)
     if ((res = setup_tcd_attr(ctx, xfer)) < 0)
         return res;
     /* source offset & last source adjustment */
-    if (xfer->incr_read) {
+    if (xfer->incr_read != DMA_XFER_INCREMENT_OFF) {
         base->TCD[ctx->channel].SOFF = (uint16_t)xfer->size;
         base->TCD[ctx->channel].SLAST = (uint32_t)-(int)xfer->byte_count;
     }else{
@@ -146,7 +167,7 @@ static int setup_tcd(struct dma *ctx, struct dma_xfer *xfer)
     /* destination address */
     base->TCD[ctx->channel].DADDR = (uint32_t)xfer->daddr;
     /* signed destination address offset & last destination adjustment sga */
-    if (xfer->incr_write) {
+    if (xfer->incr_write != DMA_XFER_INCREMENT_OFF) {
         base->TCD[ctx->channel].DOFF = (uint16_t)xfer->size;
         base->TCD[ctx->channel].DLASTSGA = (uint32_t)-(int)xfer->byte_count;
     }else{

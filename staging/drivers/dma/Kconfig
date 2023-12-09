@@ -1,7 +1,3 @@
 menu "DMA drivers"
 
-config DMA_NXP_EDMA
-       depends on POWERPC
-       bool "NXP eDMA DMA"
-
 endmenu

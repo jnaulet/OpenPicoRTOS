@@ -20,4 +20,8 @@ config DMA_TI_F28X
        depends on C2000
        bool "TI TMS320F28x series DMA"
 
+config DMA_NXP_EDMA
+       depends on POWERPC
+       bool "NXP eDMA DMA"
+
 endmenu

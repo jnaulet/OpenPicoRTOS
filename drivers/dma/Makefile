@@ -8,3 +8,4 @@ c_src-$(CONFIG_DMA_RP2040) += $(drivers-dma)/dma-rp2040.c
 c_src-$(CONFIG_DMA_ATSAME5X) += $(drivers-dma)/dma-same5x.c
 c_src-$(CONFIG_DMA_STM32H7XX) += $(drivers-dma)/dma-stm32h7xx.c
 c_src-$(CONFIG_DMA_TI_F28X) += $(drivers-dma)/dma-ti_f28x.c
+c_src-$(CONFIG_DMA_NXP_EDMA) += $(drivers-dma)/dma-nxp_edma.c
