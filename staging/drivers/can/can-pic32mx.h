@@ -3,7 +3,9 @@
 
 #include "can.h"
 #include "clock.h"
+
 #include <stdint.h>
+#include <stdbool.h>
 
 struct CAN_PIC32MX;
 
