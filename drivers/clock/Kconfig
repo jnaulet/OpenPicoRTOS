@@ -44,4 +44,8 @@ config CLOCK_RENESAS_RA4
        depends on ARM
        bool "Renesas RA4 clock"
 
+config CLOCK_MPC574XX
+       depends on POWERPC
+       bool "MPC574x series clock"
+
 endmenu

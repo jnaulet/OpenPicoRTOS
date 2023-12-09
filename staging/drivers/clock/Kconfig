@@ -1,9 +1,5 @@
 menu "Clock drivers"
 
-config CLOCK_MPC574XX
-       depends on POWERPC
-       bool "MPC574x series clock"
-
 config CLOCK_NXP_SIU
        depends on POWERPC
        bool "NXP SIU clock"

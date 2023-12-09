@@ -353,6 +353,15 @@ static int set_scalable_dividers(struct clock_settings *settings)
     return 0;
 }
 
+/* Function: clock_mpc574xx_init
+ * Inits the MPC574xx clock subsystem
+ *
+ * Parameters:
+ *  settings - The clock settings to apply
+ *
+ * Returns:
+ * 0 if success, <0 error code otherwise
+ */
 int clock_mpc574xx_init(struct clock_settings *settings)
 {
     int res;
@@ -399,6 +408,16 @@ int clock_mpc574xx_init(struct clock_settings *settings)
     return 0;
 }
 
+/* Function: clock_mpc574xx_set_run_pc
+ * Configures the RUN_PC register
+ *
+ * Parameters:
+ *  index - the RUN_PC register index
+ *  flags - The RUN_PC flags to apply (see doc)
+ *
+ * Returns:
+ * 0 if success, <0 error code otherwise
+ */
 int clock_mpc574xx_set_run_pc(size_t index, int flags)
 {
     picoRTOS_assert(index < (size_t)CLOCK_MPC574XX_RUN_PC_COUNT, return -EINVAL);
@@ -408,6 +427,16 @@ int clock_mpc574xx_set_run_pc(size_t index, int flags)
     return 0;
 }
 
+/* Function: clock_mpc574xx_set_lp_pc
+ * Configures the LP_PC register (Low Power)
+ *
+ * Parameters:
+ *  index - the LP_PC register index
+ *  flags - The LP_PC flags to apply (see doc)
+ *
+ * Returns:
+ * 0 if success, <0 error code otherwise
+ */
 int clock_mpc574xx_set_lp_pc(size_t index, int flags)
 {
     picoRTOS_assert(index < (size_t)CLOCK_MPC574XX_LP_PC_COUNT, return -EINVAL);
@@ -416,6 +445,16 @@ int clock_mpc574xx_set_lp_pc(size_t index, int flags)
     return 0;
 }
 
+/* Function: clock_mpc574xx_set_pctl_lp_cfg
+ * Configured the Low Power clock mode of a peripheral
+ *
+ * Parameters:
+ *  pctl - the peripheral control index
+ *  lp_pc - the LP PC index to associate to the peripheral
+ *
+ * Returns:
+ * 0 if success, <0 error code otherwise
+ */
 int clock_mpc574xx_set_pctl_lp_cfg(clock_mpc574xx_pctl_t pctl, size_t lp_pc)
 {
     picoRTOS_assert(pctl < CLOCK_MPC574XX_PCTL_COUNT, return -EINVAL);
@@ -428,6 +467,16 @@ int clock_mpc574xx_set_pctl_lp_cfg(clock_mpc574xx_pctl_t pctl, size_t lp_pc)
     return 0;
 }
 
+/* Function: clock_mpc574xx_set_pctl_run_cfg
+ * Configured the RUN clock mode of a peripheral
+ *
+ * Parameters:
+ *  pctl - the peripheral control index
+ *  run_pc - the RUN PC index to associate to the peripheral
+ *
+ * Returns:
+ * 0 if success, <0 error code otherwise
+ */
 int clock_mpc574xx_set_pctl_run_cfg(clock_mpc574xx_pctl_t pctl, size_t run_pc)
 {
     picoRTOS_assert(pctl < CLOCK_MPC574XX_PCTL_COUNT, return -EINVAL);
@@ -439,7 +488,6 @@ int clock_mpc574xx_set_pctl_run_cfg(clock_mpc574xx_pctl_t pctl, size_t run_pc)
     MC_ME->PCTL[index] |= PCTL_RUN_CFG(run_pc);
     return 0;
 }
-
 
 /* hooks */
 
