@@ -461,6 +461,15 @@ static int start_pcs(void)
     return 0;
 }
 
+/* Function: clock_nxp_siu_init
+ * Inits the SIU clock subsystem
+ *
+ * Parameters:
+ *  settings - The settings to apply
+ *
+ * Returns:
+ * 0 if success, <0 error code otherwise
+ */
 int clock_nxp_siu_init(struct clock_settings *settings)
 {
     int res;

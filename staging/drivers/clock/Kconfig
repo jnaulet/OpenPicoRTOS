@@ -1,7 +1,3 @@
 menu "Clock drivers"
 
-config CLOCK_NXP_SIU
-       depends on POWERPC
-       bool "NXP SIU clock"
-
 endmenu
