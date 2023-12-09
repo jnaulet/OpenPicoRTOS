@@ -14,3 +14,4 @@ c_src-$(CONFIG_MUX_TI_F28X) += $(drivers-mux)/mux-ti_f28x.c
 c_src-$(CONFIG_MUX_TINYAVR) += $(drivers-mux)/mux-tinyavr.c
 c_src-$(CONFIG_MUX_RENESAS_RA4) += $(drivers-mux)/mux-renesas_ra4.c
 c_src-$(CONFIG_MUX_NXP_SIUL2) += $(drivers-mux)/mux-nxp_siul2.c
+c_src-$(CONFIG_MUX_NXP_SIU) += $(drivers-mux)/mux-nxp_siu.c

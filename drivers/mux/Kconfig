@@ -44,4 +44,8 @@ config MUX_RENESAS_RA4
        depends on ARM
        bool "RENESAS RA4 MUX"
 
+config MUX_NXP_SIU
+       depends on POWERPC
+       bool "NXP SIU MUX"
+
 endmenu

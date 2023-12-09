@@ -94,18 +94,7 @@ struct MUX_NXP_SIU {
     uint32_t RESERVED12[33];
     volatile uint8_t GPDI[512];
     uint32_t RESERVED13[128];
-    volatile uint32_t IMUX0;
-    volatile uint32_t IMUX1;
-    volatile uint32_t IMUX2;
-    volatile uint32_t IMUX3;
-    volatile uint32_t IMUX4;
-    volatile uint32_t IMUX5;
-    uint32_t RESERVED14;
-    volatile uint32_t IMUX7;
-    uint32_t RESERVED15[2];
-    volatile uint32_t IMUX10;
-    uint32_t RESERVED16;
-    volatile uint32_t IMUX12;
+    volatile uint32_t IMUX[MUX_NXP_SIU_IMUX_COUNT];
 };
 
 #define PCR_PA_M   0x7u
@@ -119,12 +108,36 @@ struct MUX_NXP_SIU {
 #define PCR_WPE    (1 << 1)
 #define PCR_WPS    (1 << 0)
 
+#define IMUXn_MUXSEL0_M  0x3u
+#define IMUXn_MUXSEL0(x) ((x) & IMUXn_MUXSEL0_M)
+
+/* Function: mux_nxp_siu_init
+ * Initializes multiplexing on a port
+ *
+ * Parameters:
+ *  ctx - The mux to init
+ *  base - The base address of the port
+ *
+ * Returns:
+ * Always 0
+ */
 int mux_nxp_siu_init(struct mux *ctx, int base)
 {
     ctx->base = (struct MUX_NXP_SIU*)base;
     return 0;
 }
 
+/* Function: mux_nxp_siu_output
+ * Sets the selected pin to output
+ *
+ * Parameters:
+ *  ctx - The mux context
+ *  pin - The pin to set
+ *  mux - The alternative mux to apply
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_nxp_siu_output(struct mux *ctx, size_t pin, mux_nxp_siu_t mux)
 {
     picoRTOS_assert(pin < (size_t)MUX_NXP_SIU_PCR_COUNT, return -EINVAL);
@@ -143,6 +156,17 @@ int mux_nxp_siu_output(struct mux *ctx, size_t pin, mux_nxp_siu_t mux)
     return 0;
 }
 
+/* Function: mux_nxp_siu_input
+ * Sets the selected pin to input
+ *
+ * Parameters:
+ *  ctx - The mux context
+ *  pin - The pin to set
+ *  mux - The alternative mux to apply
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_nxp_siu_input(struct mux *ctx, size_t pin, mux_nxp_siu_t mux)
 {
     picoRTOS_assert(pin < (size_t)MUX_NXP_SIU_PCR_COUNT, return -EINVAL);
@@ -158,6 +182,42 @@ int mux_nxp_siu_input(struct mux *ctx, size_t pin, mux_nxp_siu_t mux)
     return 0;
 }
 
+/* Function: mux_nxp_siu_imux_muxsel
+ * Sets the IMUX MUXSEL value (see IO Signal Description for more details)
+ *
+ * Parameters:
+ *  ctx - The mux context
+ *  reg - The imux regsiter number
+ *  muxsel - The muxsel value (0-15)
+ *  value - The MUXSEL value (0-3)
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
+int mux_nxp_siu_imux_muxsel(struct mux *ctx, size_t reg, size_t muxsel, size_t value)
+{
+    picoRTOS_assert(reg < (size_t)MUX_NXP_SIU_IMUX_COUNT, return -EINVAL);
+    picoRTOS_assert(muxsel < (size_t)MUX_NXP_SIU_IMUX_MUXSEL_COUNT, return -EINVAL);
+    picoRTOS_assert(value <= (size_t)IMUXn_MUXSEL0_M, return -EINVAL);
+
+    size_t lshift = muxsel << 1;
+
+    ctx->base->IMUX[reg] &= ~(IMUXn_MUXSEL0(IMUXn_MUXSEL0_M) << lshift);
+    ctx->base->IMUX[reg] |= (IMUXn_MUXSEL0(value) << lshift);
+
+    return 0;
+}
+
+/* Function: mux_nxp_siu_pull_up
+ * Pulls the selected pin up
+ *
+ * Parameters:
+ *  ctx - The mux context
+ *  pin - The pin to set
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_nxp_siu_pull_up(struct mux *ctx, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)MUX_NXP_SIU_PCR_COUNT, return -EINVAL);
@@ -166,6 +226,16 @@ int mux_nxp_siu_pull_up(struct mux *ctx, size_t pin)
     return 0;
 }
 
+/* Function: mux_nxp_siu_pull_down
+ * Pulls the selected pin down
+ *
+ * Parameters:
+ *  ctx - The mux context
+ *  pin - The pin to set
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int mux_nxp_siu_pull_down(struct mux *ctx, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)MUX_NXP_SIU_PCR_COUNT, return -EINVAL);
