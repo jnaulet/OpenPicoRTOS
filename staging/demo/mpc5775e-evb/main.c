@@ -82,10 +82,14 @@ static void adc_main(void *priv)
     struct adc *adc = (struct adc*)priv;
 
     for (;;) {
-        int value = 0;
 
-        (void)adc_read(adc, &value);
-        picoRTOS_schedule();
+        int value = 0;
+        int deadlock = CONFIG_DEADLOCK_COUNT;
+
+        while (adc_read(adc, &value) == -EAGAIN && deadlock-- != 0)
+            picoRTOS_schedule();
+
+        picoRTOS_assert_void(deadlock != -1);
     }
 }
 
@@ -108,6 +112,84 @@ static void pwm_main(void *priv)
     }
 }
 
+/*
+ * This thread uses the loopback mode of the spi to send data and control it has been
+ * received correctly
+ */
+static void spi_main(void *priv)
+{
+    picoRTOS_assert_fatal(priv != NULL, return );
+
+    size_t xfered = 0;
+    struct spi *SPI = (struct spi*)priv;
+
+    for (;;) {
+
+        int res;
+
+        char rx[6] = { (char)0, (char)0, (char)0, (char)0, (char)0, (char)0 };
+        char tx[6] = { (char)0xa5, (char)0x55, (char)0x5a, (char)0x55, (char)0x4d, (char)0x4f };
+
+        if ((res = spi_xfer(SPI, &rx[xfered], &tx[xfered], sizeof(tx) - xfered)) == -EAGAIN) {
+            picoRTOS_schedule();
+            continue;
+        }
+
+        picoRTOS_assert_void(res > 0);
+
+        /* ack xfer */
+        xfered += (size_t)res;
+
+        if (xfered == sizeof(tx)) {
+            picoRTOS_assert_void(rx[0] == (char)0xa5);
+            picoRTOS_assert_void(rx[4] == (char)0x4d);
+            /* start again */
+            xfered = 0;
+        }
+    }
+}
+
+/*
+ * This thread uses the CAN loopback mode to send PINGPONG and check the data has been
+ * received correctly
+ */
+static void can_main(void *priv)
+{
+#define CAN_TEST_ID 0x6
+
+    picoRTOS_assert_fatal(priv != NULL, return );
+
+    struct can *CAN = (struct can*)priv;
+
+    (void)can_accept(CAN, (can_id_t)CAN_TEST_ID, 0);
+
+    for (;;) {
+
+        int res;
+        can_id_t id = 0;
+        int timeout = (int)PICORTOS_DELAY_MSEC(500l);
+
+        static const char tx[] = { "PINGPONG" };
+        char rx[CAN_DATA_COUNT] = { (char)0, (char)0, (char)0, (char)0,
+                                    (char)0, (char)0, (char)0, (char)0 };
+
+        /* ping */
+        if ((res = can_write(CAN, (can_id_t)CAN_TEST_ID, tx, (size_t)CAN_DATA_COUNT)) == -EAGAIN) {
+            picoRTOS_schedule();
+            continue;
+        }
+
+        /* pong */
+        while (((res = can_read(CAN, &id, rx, sizeof(rx)))) == -EAGAIN && timeout-- != 0)
+            picoRTOS_schedule();
+
+        picoRTOS_assert_void(res == (int)sizeof(rx));
+        picoRTOS_assert_void(timeout != -1);
+        picoRTOS_assert_void(id == (can_id_t)CAN_TEST_ID);
+        picoRTOS_assert_void(rx[7] == 'G');
+    }
+}
+
 int main(void)
 {
     static struct mpc5775e_evb evb;
@@ -125,29 +207,36 @@ int main(void)
     static picoRTOS_stack_t stack2[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack3[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack4[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack5[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack6[CONFIG_DEFAULT_STACK_COUNT];
 
     picoRTOS_task_init(&task, tick_main, &evb.TICK, stack0, (size_t)CONFIG_DEFAULT_STACK_COUNT);
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
 
 #ifndef CONFIG_SMP
-    picoRTOS_task_init(&task, led0_main, &evb.LED[0], stack1, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_task_init(&task, led0_main, &evb.LED0, stack1, (size_t)CONFIG_DEFAULT_STACK_COUNT);
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
-    picoRTOS_task_init(&task, led1_main, &evb.LED[0], stack2, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_task_init(&task, led1_main, &evb.LED1, stack2, (size_t)CONFIG_DEFAULT_STACK_COUNT);
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
 #else
-    picoRTOS_task_init(&task, led0_main, &evb.LED[0], stack1, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_task_init(&task, led0_main, &evb.LED0, stack1, (size_t)CONFIG_DEFAULT_STACK_COUNT);
     picoRTOS_SMP_add_task(&task, picoRTOS_get_next_available_priority(), (picoRTOS_mask_t)0x1);
-    picoRTOS_task_init(&task, led1_main, &evb.LED[0], stack2, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_task_init(&task, led1_main, &evb.LED1, stack2, (size_t)CONFIG_DEFAULT_STACK_COUNT);
     picoRTOS_SMP_add_task(&task, picoRTOS_get_next_available_priority(), (picoRTOS_mask_t)0x2);
 #endif
 
-    /*
-       picoRTOS_task_init(&task, adc_main, &evb.ADC, stack3, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-       picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
-
-       picoRTOS_task_init(&task, pwm_main, &evb.PWM, stack4, (size_t)CONFIG_DEFAULT_STACK_COUNT);
-       picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
-     */
+    /* adc */
+    picoRTOS_task_init(&task, adc_main, &evb.ADC, stack3, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+    /* pwm */
+    picoRTOS_task_init(&task, pwm_main, &evb.PWM, stack4, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+    /* spi */
+    picoRTOS_task_init(&task, spi_main, &evb.SPI, stack5, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+    /* can */
+    picoRTOS_task_init(&task, can_main, &evb.CAN, stack6, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
 
     picoRTOS_start();
 

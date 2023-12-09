@@ -34,53 +34,54 @@ static void mux_init(void)
     (void)mux_nxp_siu_output(&MUX, (size_t)114, MUX_NXP_SIU_GPIO);  /* TICK: M_eTPUA0 */
     (void)mux_nxp_siu_output(&MUX, (size_t)179, MUX_NXP_SIU_GPIO);  /* LED0: eMIOS0 */
     (void)mux_nxp_siu_output(&MUX, (size_t)180, MUX_NXP_SIU_GPIO);  /* LED1: eMIOS1 */
-    (void)mux_nxp_siu_output(&MUX, (size_t)181, MUX_NXP_SIU_GPIO);  /* LED2: eMIOS2 */
-    (void)mux_nxp_siu_output(&MUX, (size_t)182, MUX_NXP_SIU_GPIO);  /* LED3: eMIOS3 */
+
+    /* pwm */
+    (void)mux_nxp_siu_output(&MUX, (size_t)181, MUX_NXP_SIU_ALT1);  /* PWM:  eMIOS2 */
+
+    /* spi */
+    (void)mux_nxp_siu_input(&MUX, (size_t)190, MUX_NXP_SIU_ALT2);   /* SPI_D:  eMIOS11 */
+    (void)mux_nxp_siu_output(&MUX, (size_t)192, MUX_NXP_SIU_ALT2);  /* SPI_D:  eMIOS13 */
+    (void)mux_nxp_siu_imux_muxsel(&MUX, (size_t)2, (size_t)10, (size_t)2);
 }
 
 static int adc_init(/*@partial@*/ struct mpc5775e_evb *ctx)
 {
-    static struct adc_nxp_eqadc ANB;
-    static struct dma_nxp_edma DMA_B;
+    static struct adc_nxp_eqadc ANA;
+    static struct dma_nxp_edma DMA_A;
     /* dma channels */
-    static struct dma DMA_B_CH0;    /* fill */
-    static struct dma DMA_B_CH1;    /* drain */
-
-    struct adc_nxp_eqadc_settings ANB_settings;
+    static struct dma DMA_A_CH0;    /* fill */
+    static struct dma DMA_A_CH1;    /* drain */
+    struct adc_nxp_eqadc_settings ANA_settings;
 
     /* setup dma (see doc for appropriate channel) */
-    (void)dma_nxp_edma_init(&DMA_B, ADDR_EDMA1);
-    (void)dma_nxp_edma_dma_init(&DMA_B_CH0, &DMA_B, (size_t)0);
-    (void)dma_nxp_edma_dma_init(&DMA_B_CH1, &DMA_B, (size_t)1);
+    (void)dma_nxp_edma_init(&DMA_A, ADDR_EDMAA);
+    (void)dma_nxp_edma_dma_init(&DMA_A_CH0, &DMA_A, (size_t)0);
+    (void)dma_nxp_edma_dma_init(&DMA_A_CH1, &DMA_A, (size_t)1);
 
     /* setup eqadc (warning: incomplete) */
-    ANB_settings.mode0 = ADC_NXP_EQADC_MODE0_SINGLE_SCAN;
-    ANB_settings.fill = &DMA_B_CH0;
-    ANB_settings.drain = &DMA_B_CH1;
+    ANA_settings.mode0 = ADC_NXP_EQADC_MODE0_SINGLE_SCAN;
+    ANA_settings.fill = &DMA_A_CH0;
+    ANA_settings.drain = &DMA_A_CH1;
 
-    (void)adc_nxp_eqadc_init(&ANB, ADDR_EQADC1);
-    (void)adc_nxp_eqadc_setup(&ANB, &ANB_settings);
+    (void)adc_nxp_eqadc_init(&ANA, ADDR_EQADCA);
+    (void)adc_nxp_eqadc_setup(&ANA, &ANA_settings);
 
     /* channel */
-    (void)adc_nxp_eqadc_adc_init(&ctx->ADC, &ANB, (size_t)20);
-
+    (void)adc_nxp_eqadc_adc_init(&ctx->ADC, &ANA, (size_t)3);
     return 0;
 }
 
 static int gpio_init(/*@partial@*/ struct mpc5775e_evb *ctx)
 {
     (void)gpio_nxp_siu_init(&ctx->TICK, ADDR_GPIO_PTD, (size_t)18);
-    (void)gpio_nxp_siu_init(&ctx->LED[0], ADDR_GPIO_PTF, (size_t)19);
-    (void)gpio_nxp_siu_init(&ctx->LED[1], ADDR_GPIO_PTF, (size_t)20);
-    (void)gpio_nxp_siu_init(&ctx->LED[2], ADDR_GPIO_PTF, (size_t)21);
-    (void)gpio_nxp_siu_init(&ctx->LED[3], ADDR_GPIO_PTF, (size_t)22);
+    (void)gpio_nxp_siu_init(&ctx->LED0, ADDR_GPIO_PTF, (size_t)19);
+    (void)gpio_nxp_siu_init(&ctx->LED1, ADDR_GPIO_PTF, (size_t)20);
 
     return 0;
 }
 
 static int pwm_init(/*@partial@*/ struct mpc5775e_evb *ctx)
 {
-    static struct nxp_igf IGF0;
     static struct pwm_nxp_emios eMIOS0;
     struct pwm_nxp_emios_settings eMIOS_settings = {
         (size_t)1, /* GPRE */
@@ -94,19 +95,41 @@ static int pwm_init(/*@partial@*/ struct mpc5775e_evb *ctx)
         false,                  /* polarity */
     };
 
-    (void)pwm_nxp_emios_pwm_init(&ctx->PWM, &eMIOS0, (size_t)0);
+    (void)pwm_nxp_emios_pwm_init(&ctx->PWM, &eMIOS0, (size_t)2);
     (void)pwm_nxp_emios_pwm_setup(&ctx->PWM, &PWM_settings);
 
-    struct pwm_nxp_emios_ipwm_settings IPWM_settings = {
-        PWM_NXP_EMIOS_UCPRE_1,      /* ucpre */
-        false,                      /* polarity */
-        IPWM_NXP_EMIOS_IF_BYPASSED, /* filter */
+    return 0;
+}
+
+static int spi_init(/*@partial@*/ struct mpc5775e_evb *ctx)
+{
+    struct spi_settings SPI_settings = {
+        1000000ul,     /* bitrate */
+        SPI_MODE_MASTER,
+        SPI_CLOCK_MODE_0,
+        (size_t)16, /* frame size */
+        SPI_CS_POL_ACTIVE_LOW,
+        0           /* cs */
     };
 
-    (void)pwm_nxp_emios_ipwm_init(&ctx->IPWM, &eMIOS0, (size_t)1);
-    (void)pwm_nxp_emios_ipwm_setup(&ctx->IPWM, &IPWM_settings);
+    (void)spi_nxp_dspi_init(&ctx->SPI, ADDR_DSPID, CLOCK_NXP_SIU_XOSC);
+    (void)spi_setup(&ctx->SPI, &SPI_settings);
 
-    (void)nxp_igf_init(&IGF0, ADDR_IGF0, (size_t)1);
+    return 0;
+}
+
+static int can_init(/*@partial@*/ struct mpc5775e_evb *ctx)
+{
+    struct can_settings CAN_settings = {
+        500000ul,               /* bitrate */
+        (size_t)2,              /* tx_mailbox_count */
+        CAN_TX_AUTO_ABORT_ON,   /* tx_auto_abort */
+        CAN_RX_OVERWRITE_OFF,   /* rx_overwrite */
+        CAN_LOOPBACK_ON         /* loopback */
+    };
+
+    (void)can_nxp_flexcan_init(&ctx->CAN, ADDR_FLEXCANA, CLOCK_NXP_SIU_XOSC, (size_t)64);
+    (void)can_setup(&ctx->CAN, &CAN_settings);
 
     return 0;
 }
@@ -116,9 +139,11 @@ int mpc5775e_evb_init(struct mpc5775e_evb *ctx)
     clock_init();
     mux_init();
 
-    //(void)adc_init(ctx);
+    (void)adc_init(ctx);
     (void)gpio_init(ctx);
-    //(void)pwm_init(ctx);
+    (void)pwm_init(ctx);
+    (void)spi_init(ctx);
+    (void)can_init(ctx);
 
     return 0;
 }
