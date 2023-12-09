@@ -156,18 +156,18 @@ static int adc_nxp_eqadc_register_cc(struct adc_nxp_eqadc *ctx, size_t channel)
     /* dma fill */
     ctx->fill_xfer.saddr = (intptr_t)ctx->cmd;
     ctx->fill_xfer.size = sizeof(uint32_t);
-    ctx->fill_xfer.incr_read = true;
+    ctx->fill_xfer.incr_read = DMA_XFER_INCREMENT_ON;
     ctx->fill_xfer.byte_count = (size_t)(ctx->channel_count + 1) * sizeof(uint32_t);
     ctx->fill_xfer.daddr = (intptr_t)&ctx->base->CFPR[0];
-    ctx->fill_xfer.incr_write = false;
+    ctx->fill_xfer.incr_write = DMA_XFER_INCREMENT_OFF;
 
     /* dma drain */
     ctx->drain_xfer.saddr = (intptr_t)&ctx->base->RFPR[0];
     ctx->drain_xfer.size = sizeof(uint32_t);
-    ctx->fill_xfer.incr_read = false;
+    ctx->fill_xfer.incr_read = DMA_XFER_INCREMENT_OFF;
     ctx->drain_xfer.byte_count = (size_t)(ctx->channel_count + 1) * sizeof(uint32_t);
     ctx->drain_xfer.daddr = (intptr_t)ctx->result;
-    ctx->fill_xfer.incr_write = true;
+    ctx->fill_xfer.incr_write = DMA_XFER_INCREMENT_ON;
 
     return (int)ctx->channel_count++;
 }
@@ -175,8 +175,6 @@ static int adc_nxp_eqadc_register_cc(struct adc_nxp_eqadc *ctx, size_t channel)
 int adc_nxp_eqadc_setup(struct adc_nxp_eqadc *ctx, struct adc_nxp_eqadc_settings *settings)
 {
     picoRTOS_assert(settings->mode0 < ADC_NXP_EQADC_MODE0_COUNT, return -EINVAL);
-
-    int res;
 
     ctx->fill = settings->fill;
     ctx->drain = settings->drain;
@@ -195,11 +193,6 @@ int adc_nxp_eqadc_setup(struct adc_nxp_eqadc *ctx, struct adc_nxp_eqadc_settings
         /*@notreached@*/ return -EINVAL;
     }
 
-    /* start */
-    if ((res = dma_setup(ctx->fill, &ctx->fill_xfer)) < 0 ||
-        (res = dma_setup(ctx->drain, &ctx->drain_xfer)) < 0)
-        return res;
-
     ctx->mode0 = settings->mode0;
     return 0;
 }
@@ -207,20 +200,27 @@ int adc_nxp_eqadc_setup(struct adc_nxp_eqadc *ctx, struct adc_nxp_eqadc_settings
 int adc_nxp_eqadc_adc_init(struct adc *ctx, struct adc_nxp_eqadc *parent, size_t channel)
 {
     picoRTOS_assert(channel < (size_t)ADC_NXP_EQADC_CHANNEL_COUNT, return -EINVAL);
+    picoRTOS_assert(parent->fill != NULL, return -EIO);
+    picoRTOS_assert(parent->drain != NULL, return -EIO);
 
-    int index;
+    int res;
 
     ctx->parent = parent;
     ctx->channel = channel;
 
-    if ((index = adc_nxp_eqadc_register_cc(parent, channel)) < 0)
-        return index;
+    if ((res = adc_nxp_eqadc_register_cc(parent, channel)) < 0)
+        return res;
 
-    ctx->channel_index = (size_t)index;
+    ctx->channel_index = (size_t)res;
     /* calibration */
     ctx->multiplier = 1;
     ctx->divider = 1;
     ctx->offset = 0;
+
+    /* start */
+    if ((res = dma_setup(parent->fill, &parent->fill_xfer)) < 0 ||
+        (res = dma_setup(parent->drain, &parent->drain_xfer)) < 0)
+        return res;
 
     return 0;
 }
