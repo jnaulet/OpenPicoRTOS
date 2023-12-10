@@ -237,7 +237,7 @@ Basic demo code is provided for the following boards:
   - ATtiny817-Xplained Mini
   - ATtiny1607 Curiosity Nano
   - Curiosity 2.0 PIC32 MZ EF
-  - NXP Devkit MPC5748G (dual-core SMP) (staging)
+  - NXP Devkit MPC5748G (dual-core SMP)
   - NXP MPC5775E-EVB (dual-core SMP) (staging)
   - Sipeed Longan Nano
   - DevEBox STM32H7xx_M

@@ -1,5 +1,16 @@
 # Release notes
 
+## picoRTOS v1.9.4
+### What's new ?
+
+The HAL & associated drivers have been modified to remove more booleans and make the structure inits more human-readable.
+
+NXP Devkit-MPC5748G has been unstaged after MUX, GPIO, ADC, PWM, FlexCAN, UART (LinFlexD), SPI/DSPI & clock drivbers has been roughly tested.
+
+NXP MPC5775B/E demo has been improved to include drivers from MPC574xx series. DMA, GPIO, MUX & clock have been unstaged, too.
+
+Check & distcheck ahve been run & improved (especially the MIPS-related ones).
+
 ## picoRTOS v1.9.3
 ### What's new ?
 

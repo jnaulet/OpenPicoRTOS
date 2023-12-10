@@ -48,6 +48,7 @@ Group: hw-specific  {
    Group: ATMega / AVR  {
 
       File: ADC  (no auto-title, drivers/adc/adc-avr.c)
+      File: adc/adc-nxp_sar.c  (drivers/adc/adc-nxp_sar.c)
       File: EEPROM  (no auto-title, drivers/eeprom/eeprom-avr.c)
       File: GPIO  (no auto-title, drivers/gpio/gpio-avr.c)
       File: MUX  (no auto-title, drivers/mux/mux-avr.c)
@@ -68,7 +69,6 @@ Group: hw-specific  {
 
       File: ADC  (no auto-title, drivers/adc/adc-ti_type4.c)
       File: CAN  (no auto-title, drivers/can/can-ti_dcan.c)
-      File: Clocks  (no auto-title, drivers/clock/clock-f28379x.c)
       File: DMA  (no auto-title, drivers/dma/dma-ti_f28x.c)
       File: GPIO  (no auto-title, drivers/gpio/gpio-ti_f28x.c)
       File: MUX  (no auto-title, drivers/mux/mux-ti_f28x.c)
@@ -76,6 +76,7 @@ Group: hw-specific  {
       File: SPI  (no auto-title, drivers/spi/spi-ti_f28x.c)
       File: TWI  (no auto-title, drivers/twi/twi-ti_f28x.c)
       File: Watchdog  (no auto-title, drivers/wd/wd-ti_f28x.c)
+      File: Clocks  (no auto-title, drivers/clock/clock-f28379x.c)
       }  # Group: C2000
 
    Group: GD32VF103  {
@@ -90,6 +91,21 @@ Group: hw-specific  {
       File: UART  (no auto-title, drivers/uart/uart-gd32vf103.c)
       File: Watchdog  (no auto-title, drivers/wd/wd-gd32vf103_fwdgt.c)
       }  # Group: GD32VF103
+
+   Group: NXP MPC57xx  {
+
+      File: CAN  (no auto-title, drivers/can/can-nxp_flexcan.c)
+      File: Clocks &lparen;MPC574xx&rparen;  (no auto-title, drivers/clock/clock-mpc574xx.c)
+      File: Clocks &lparen;SIU&rparen;  (no auto-title, drivers/clock/clock-nxp_siu.c)
+      File: DMA &lparen;eDMA&rparen;  (no auto-title, drivers/dma/dma-nxp_edma.c)
+      File: GPIO &lparen;SIU&rparen;  (no auto-title, drivers/gpio/gpio-nxp_siu.c)
+      File: GPIO &lparen;SIUL2&rparen;  (no auto-title, drivers/gpio/gpio-nxp_siul2.c)
+      File: MUX &lparen;SIU&rparen;  (no auto-title, drivers/mux/mux-nxp_siu.c)
+      File: MUX &lparen;SIUL2&rparen;  (no auto-title, drivers/mux/mux-nxp_siul2.c)
+      File: PWM &lparen;eMIOS&rparen;  (no auto-title, drivers/pwm/pwm-nxp_emios.c)
+      File: SPI &lparen;DSPI&rparen;  (no auto-title, drivers/spi/spi-nxp_dspi.c)
+      File: UART &lparen;LinFlexD&rparen;  (no auto-title, drivers/uart/uart-nxp_linflexd.c)
+      }  # Group: NXP MPC57xx
 
    Group: PIC32MX  {
 
