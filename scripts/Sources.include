@@ -3,6 +3,7 @@
 #
 
 # archs
+include arch/8051/Makefile
 include arch/arm/Makefile
 include arch/avr/Makefile
 include arch/c2000/Makefile

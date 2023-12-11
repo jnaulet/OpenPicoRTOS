@@ -1,0 +1,140 @@
+#
+# SDCC compiler build
+#
+
+PHONY := __sdcc
+__sdcc:
+
+skip-makefile := 1
+
+# Read auto.conf if it exists, otherwise ignore
+-include include/config/auto.conf
+
+CC := sdcc
+
+include scripts/Kbuild.include
+include scripts/Sources.include
+
+# optimization options
+opt-$(CONFIG_CC_OPTIMIZE_FOR_SIZE) += --opt-code-size
+opt-$(CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE1) += --opt-code-speed
+opt-$(CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE2) += --opt-code-speed
+opt-$(CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE3) += --opt-code-speed
+
+# debug options
+ccflags-$(CONFIG_DEBUG) += --debug
+ccflags-$(CONFIG_NDEBUG) += -DNDEBUG
+ldflags-$(CONFIG_DEBUG) += --debug
+
+# The filename Kbuild has precedence over Makefile
+kbuild-dir := $(if $(filter /%,$(src)),$(src),$(srctree)/$(src))
+kbuild-file := $(if $(wildcard $(kbuild-dir)/Kbuild),$(kbuild-dir)/Kbuild,$(kbuild-dir)/Makefile)
+include $(kbuild-file)
+
+# If the save-* variables changed error out
+ifeq ($(KBUILD_NOPEDANTIC),)
+        ifneq ("$(save-cflags)","$(CFLAGS)")
+                $(error CFLAGS was changed in "$(kbuild-file)". Fix it to use EXTRA_CFLAGS)
+        endif
+endif
+
+inctree     = $(patsubst %/,%,$(addprefix -I,$(dir $(1))))
+
+c_flags     = --std-c99 $(opt-y) $(debug-y) $(RTOSINCLUDE) \
+              $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
+              $(ccflags-y) $(subst ",,$(CONFIG_EXTRA_CFLAGS))
+
+a_flags     = $(debug-y) $(RTOSINCLUDE) \
+              $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
+              $(asflags-y) $(subst ",,$(CONFIG_EXTRA_CFLAGS))
+
+ld_flags    = $(LDFLAGS) $(ldflags-y) $(subst ",,$(CONFIG_EXTRA_LDFLAGS))
+
+ifneq ($(KBUILD_SRC),)
+# Create output directory if not already present
+_dummy := $(shell [ -d $(src) ] || mkdir -p $(src))
+
+# Create directories for object files if directory does not exist
+# Needed when obj-y := dir/file.o syntax is used
+_dummy := $(foreach d,$(src-dirs), $(shell [ -d $(d) ] || mkdir -p $(d)))
+endif
+
+ifndef src
+$(warning kbuild: Makefile.sdcc is included improperly)
+endif
+
+# ===========================================================================
+
+__sdcc: $(target) $(always)
+          @:
+
+# Prepare object files (.o)
+# ---------------------------------------------------------------------------
+obj-y := $(c_src-y:%.c=%.o)
+obj-y += $(a_src-y:%.asm=%.o)
+
+# Compile C sources (.c)
+# ---------------------------------------------------------------------------
+
+# C (.c) files
+# The C file is compiled and updated dependency information is generated.
+# (See cmd_cc_o_c + relevant part of rule_cc_o_c)
+
+quiet_cmd_cc_o_c = CC $(quiet_modtag)  $@
+cmd_cc_o_c = $(CC) $(c_flags) -o $@ -c $<
+
+# Built-in and composite module parts
+%.o: %.c FORCE
+	$(call if_changed,cc_o_c)
+
+# Compile assembler sources (.asm)
+# ---------------------------------------------------------------------------
+
+quiet_cmd_as_o_S = AS $(quiet_modtag)  $@
+cmd_as_o_S       = $(CC) $(a_flags) -o $@ -c $<
+
+%.o: %.asm FORCE
+	$(call if_changed,as_o_S)
+
+targets += $(real-objs-y) $(lib-y)
+targets += $(extra-y) $(MAKECMDGOALS) $(always)
+
+#
+# Rule to compile a set of .o files into one .o file
+#
+ifdef target
+quiet_cmd_link_o_target = LD      $@
+# If the list of objects to link is empty, just create an empty built-in.o
+cmd_link_o_target = $(if $(strip $(obj-y)),\
+		      $(CC) $(ld_flags) -o $@ $(filter $(obj-y), $^) $(map), \
+		      rm -f $@; $(AR) rcs$(KBUILD_ARFLAGS) $@)
+
+$(target): $(obj-y) FORCE
+	$(call if_changed,link_o_target)
+
+targets += $(target)
+endif # target
+
+# Add FORCE to the prequisites of a target to force it to be always rebuilt.
+# ---------------------------------------------------------------------------
+
+PHONY += FORCE
+
+FORCE:
+
+# Read all saved command lines and dependencies for the $(targets) we
+# may be building above, using $(if_changed{,_dep}). As an
+# optimization, we don't need to read them if the target does not
+# exist, we will rebuild anyway in that case.
+
+targets := $(wildcard $(sort $(targets)))
+cmd_files := $(wildcard $(foreach f,$(targets),$(dir $(f)).$(notdir $(f)).cmd))
+
+ifneq ($(cmd_files),)
+  include $(cmd_files)
+endif
+
+# Declare the contents of the .PHONY variable as phony.  We keep that
+# information in a variable se we can use it in if_changed and friends.
+
+.PHONY: $(PHONY)

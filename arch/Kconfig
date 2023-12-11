@@ -2,6 +2,9 @@ choice
 	prompt "Architecture select"
 	default ARM
 
+config 8051
+       bool "8051 architecture"
+
 config ARM
        bool "ARM architecture"
 
@@ -28,6 +31,7 @@ config WIN32
 
 endchoice
 
+source "arch/8051/Kconfig"
 source "arch/arm/Kconfig"
 source "arch/avr/Kconfig"
 source "arch/c2000/Kconfig"

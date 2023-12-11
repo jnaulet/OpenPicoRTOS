@@ -1,0 +1,19 @@
+menu "8051 architecture"
+     depends on 8051
+
+choice
+        prompt "MCU series"
+        default MACH_UCSIM51
+
+config MACH_UCSIM51
+       bool "SDCC uCSim_51"
+
+config MACH_N76E003
+       bool "Nuvoton N76E003 series"
+
+config MACH_EZUSBFX2
+       bool "Cypress EZ-USB FX2"
+
+endchoice
+
+endmenu

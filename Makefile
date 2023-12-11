@@ -297,12 +297,16 @@ endif # $(dot-config)
 
 # The all: target is the default when no target is given on the
 # command line.
-all: FORCE
+build_script := Makefile.gcc
 ifdef CONFIG_C2000
-	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.cl2000 src=$(CURDIR)
-else
-	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.gcc src=$(CURDIR)
+build_script := Makefile.cl2000
 endif
+ifdef CONFIG_8051
+build_script := Makefile.sdcc
+endif
+
+all: FORCE
+	$(Q)$(MAKE) -f $(srctree)/scripts/$(build_script) src=$(CURDIR)
 
 uncrustify:
 	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.uncrustify src=$(CURDIR)
