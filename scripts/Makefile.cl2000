@@ -26,6 +26,11 @@ opt-$(CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE3) += -O3
 debug-$(CONFIG_DEBUG) += -g
 define-$(CONFIG_NDEBUG) += -DNDEBUG
 
+# attributes
+ccattributes := -D"__ATTRIBUTE_ALIGNED__(x)=__attribute__((aligned(x)))"
+ccattributes += -D"__ATTRIBUTE_UNUSED__=__attribute__((unused))"
+ccattributes += -D"__ATTRIBUTE_NAKED__=__attribute__((naked))"
+
 # map
 ifeq ($(CONFIG_MAP),y)
 map = --map_file=$@.map
@@ -54,7 +59,7 @@ c_flags     = -v28 -mt --c99 -ps $(debug-y) --preproc_dependency=$(depfile) \
               $(RTOSINCLUDE) $(float-y) $(abi-y) \
               $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
               --preproc_with_compile -I$(toolchain-dir)/include \
-              $(define-y) $(subst ",,$(CONFIG_EXTRA_CFLAGS))
+              $(define-y) $(subst ",,$(CONFIG_EXTRA_CFLAGS)) $(ccattributes)
 
 a_flags     = -v28 -mt $(debug-y) $(RTOSINCLUDE) \
               $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \

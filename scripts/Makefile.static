@@ -20,6 +20,11 @@ include scripts/Sources.include
 # debug options
 ccflags-$(CONFIG_NDEBUG) += -DNDEBUG
 
+# attributes
+ccattributes := -D"__ATTRIBUTE_ALIGNED__(x)"=
+ccattributes += -D__ATTRIBUTE_UNUSED__=
+ccattributes += -D__ATTRIBUTE_NAKED__=
+
 # The filename Kbuild has precedence over Makefile
 kbuild-dir := $(if $(filter /%,$(src)),$(src),$(srctree)/$(src))
 kbuild-file := $(if $(wildcard $(kbuild-dir)/Kbuild),$(kbuild-dir)/Kbuild,$(kbuild-dir)/Makefile)
@@ -29,7 +34,7 @@ inctree        = $(patsubst %/,%,$(addprefix -I,$(dir $(1))))
 
 c_flags        = $(RTOSINCLUDE) \
 	         $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
-                 $(filter -I%,$(ccflags-y)) $(filter -D%,$(ccflags-y))
+                 $(filter -I%,$(ccflags-y)) $(filter -D%,$(ccflags-y)) $(ccattributes)
 
 SPLINTFLAGS := -checks +unixlib $(c_flags)
 CPPCHECKFLAGS := --enable=all --inline-suppr $(c_flags)

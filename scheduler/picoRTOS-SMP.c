@@ -1,7 +1,6 @@
 #include "picoRTOS-SMP.h"
 #include "picoRTOS-SMP_port.h"
 
-
 /* CHECK FOR OBVIOUS ERRORS */
 
 #ifndef CONFIG_SMP_CORES
@@ -66,7 +65,7 @@ struct picoRTOS_SMP_core {
     picoRTOS_pid_t pid_count;
     picoRTOS_core_t main_core;
     struct picoRTOS_task_core task[TASK_COUNT];
-} __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
+} __ATTRIBUTE_ALIGNED__(ARCH_L1_DCACHE_LINESIZE);
 
 struct picoRTOS_SMP_stack {
     /* core 0 already has a stack, this is a waste of memory
@@ -382,7 +381,7 @@ void picoRTOS_start(void)
     arch_start_first_task(TASK_BY_PID(TASK_IDLE_PID).sp);
 }
 
-void picoRTOS_suspend()
+void picoRTOS_suspend(void)
 {
     picoRTOS_assert_fatal(picoRTOS.is_running, return );
 
@@ -390,7 +389,7 @@ void picoRTOS_suspend()
     arch_spin_lock();
 }
 
-void picoRTOS_resume()
+void picoRTOS_resume(void)
 {
     picoRTOS_assert_fatal(picoRTOS.is_running, return );
 

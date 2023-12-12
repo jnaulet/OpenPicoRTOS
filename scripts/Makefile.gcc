@@ -30,6 +30,11 @@ opt-$(CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE3) += -O3
 debug-$(CONFIG_DEBUG) += -g3
 ccflags-$(CONFIG_NDEBUG) += -DNDEBUG
 
+# attributes
+ccattributes := -D"__ATTRIBUTE_ALIGNED__(x)=__attribute__((aligned(x)))"
+ccattributes += -D"__ATTRIBUTE_UNUSED__=__attribute__((unused))"
+ccattributes += -D"__ATTRIBUTE_NAKED__=__attribute__((naked))"
+
 # map
 ifeq ($(CONFIG_MAP),y)
 map = -Wl,-Map=$@.map
@@ -57,7 +62,7 @@ inctree        = $(patsubst %/,%,$(addprefix -I,$(dir $(1))))
 
 c_flags        = -Wp,-MD,$(depfile) $(opt-y) $(debug-y) $(RTOSINCLUDE) -Wpedantic \
                  $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
-                 $(ccflags-y) $(subst ",,$(CONFIG_EXTRA_CFLAGS))
+                 $(ccflags-y) $(subst ",,$(CONFIG_EXTRA_CFLAGS)) $(ccattributes)
 
 a_flags        = -Wp,-MD,$(depfile) $(debug-y) $(RTOSINCLUDE) \
                  $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \

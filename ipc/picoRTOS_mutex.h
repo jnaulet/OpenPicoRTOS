@@ -8,7 +8,7 @@
 struct picoRTOS_mutex {
     picoRTOS_atomic_t owner;
     size_t count;
-} __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
+} __ATTRIBUTE_ALIGNED__(ARCH_L1_DCACHE_LINESIZE);
 
 /* macro for static init */
 #define PICORTOS_MUTEX_INITIALIZER              \

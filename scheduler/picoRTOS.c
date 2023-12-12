@@ -1,7 +1,6 @@
 #include "picoRTOS.h"
 #include "picoRTOS_port.h"
 
-
 /* CHECK FOR OBVIOUS ERRORS */
 
 #if CONFIG_DEFAULT_STACK_COUNT < ARCH_MIN_STACK_COUNT
@@ -56,7 +55,7 @@ struct picoRTOS_core {
     picoRTOS_pid_t pid_count;
     struct picoRTOS_task_core task[TASK_COUNT];
     picoRTOS_stack_t idle_stack[ARCH_MIN_STACK_COUNT];
-} __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
+} __ATTRIBUTE_ALIGNED__(ARCH_L1_DCACHE_LINESIZE);
 
 /* main core component */
 static struct picoRTOS_core picoRTOS;
@@ -385,7 +384,7 @@ void picoRTOS_start(void)
 /* Function: picoRTOS_suspend
  * Suspends the scheduling. Typical use is critical sections
  */
-void picoRTOS_suspend()
+void picoRTOS_suspend(void)
 {
     picoRTOS_assert_fatal(picoRTOS.is_running, return );
     arch_suspend();
@@ -394,7 +393,7 @@ void picoRTOS_suspend()
 /* Function: picoRTOS_resume
  * Resumes the scheduling. Typical use is critical sections
  */
-void picoRTOS_resume()
+void picoRTOS_resume(void)
 {
     picoRTOS_assert_fatal(picoRTOS.is_running, return );
     arch_resume();
