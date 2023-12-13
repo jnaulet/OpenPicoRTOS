@@ -652,10 +652,7 @@ void picoRTOS_disable_interrupt(picoRTOS_irq_t irq)
 void picoRTOS_invalidate_dcache(/*@unused@*/ void *addr, size_t n)
 {
     picoRTOS_assert_void_fatal(n > 0);
-
-#ifdef CONFIG_CACHE_MAINTENANCE
     arch_invalidate_dcache(addr, n);
-#endif
 }
 
 /* Function: picoRTOS_flush_dcache
@@ -668,8 +665,5 @@ void picoRTOS_invalidate_dcache(/*@unused@*/ void *addr, size_t n)
 void picoRTOS_flush_dcache(/*@unused@*/ void *addr, size_t n)
 {
     picoRTOS_assert_void_fatal(n > 0);
-
-#ifdef CONFIG_CACHE_MAINTENANCE
     arch_flush_dcache(addr, n);
-#endif
 }

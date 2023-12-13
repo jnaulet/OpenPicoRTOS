@@ -180,6 +180,20 @@ picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
     return 0;
 }
 
+/* CACHES */
+
+void arch_invalidate_dcache(/*@unused@*/ void *addr, /*@unused@*/ size_t n)
+{
+    /*@i@*/ (void)addr;
+    /*@i@*/ (void)n;
+}
+
+void arch_flush_dcache(/*@unused@*/ void *addr, /*@unused@*/ size_t n)
+{
+    /*@i@*/ (void)addr;
+    /*@i@*/ (void)n;
+}
+
 /* CLOCK */
 
 void arch_set_clock_frequency(unsigned long freq)

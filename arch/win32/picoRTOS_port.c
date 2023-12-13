@@ -142,3 +142,17 @@ void arch_enable_interrupt(/*@unused@*/ picoRTOS_irq_t irq __attribute__((unused
 void arch_disable_interrupt(/*@unused@*/ picoRTOS_irq_t irq __attribute__((unused)))
 {
 }
+
+/* CACHES: unsupported */
+
+void arch_invalidate_dcache(/*@unused@*/ void *addr, /*@unused@*/ size_t n)
+{
+    /*@i@*/ (void)addr;
+    /*@i@*/ (void)n;
+}
+
+void arch_flush_dcache(/*@unused@*/ void *addr, /*@unused@*/ size_t n)
+{
+    /*@i@*/ (void)addr;
+    /*@i@*/ (void)n;
+}
