@@ -29,11 +29,14 @@ struct picoRTOS_task_core {
         picoRTOS_cycles_t counter;
         picoRTOS_cycles_t watermark_lo;
         picoRTOS_cycles_t watermark_hi;
+        size_t deadline_miss;
     } stat;
     /* shared priority support */
     picoRTOS_priority_t prio;
     picoRTOS_priority_t sub;
     size_t sub_count;
+    /* deadline */
+    size_t deadline_miss;
 };
 
 /* user-defined tasks + idle */
@@ -74,10 +77,13 @@ static void task_core_init(/*@out@*/ struct picoRTOS_task_core *task)
     task->stat.counter = (picoRTOS_cycles_t)-1;
     task->stat.watermark_lo = (picoRTOS_cycles_t)-1;
     task->stat.watermark_hi = (picoRTOS_cycles_t)0;
+    task->stat.deadline_miss = 0;
     /* shared priority support */
     task->prio = (picoRTOS_priority_t)TASK_COUNT;
     task->sub = (picoRTOS_priority_t)0;
     task->sub_count = (size_t)1;
+    /* deadline */
+    task->deadline_miss = 0;
 }
 
 static bool task_core_is_available(struct picoRTOS_task_core *task)
@@ -447,19 +453,30 @@ void picoRTOS_sleep_until(picoRTOS_tick_t *ref, picoRTOS_tick_t period)
     picoRTOS_assert_fatal(period > 0, return );
     picoRTOS_assert_fatal(picoRTOS.is_running, return );
 
+    struct picoRTOS_task_core *task = &TASK_CURRENT();
     picoRTOS_tick_t tick = picoRTOS_get_tick();
     picoRTOS_tick_t elapsed = tick - *ref;
+
+    /* anyway */
+    *ref = *ref + period;
 
     /* check the clock */
     if (elapsed < period) {
         picoRTOS_tick_t delay = period - elapsed;
-        *ref = *ref + period;
         arch_syscall(PICORTOS_SYSCALL_SLEEP, (void*)delay);
-    }else{
-        /* missed the clock: reset to tick and signal */
+        /* clean output */
+        task->deadline_miss = 0;
+        return;
+    }
+
+    /* missed the clock: retry until deadlock */
+    if (++task->deadline_miss > (size_t)CONFIG_DEADLOCK_COUNT) {
         picoRTOS_break();
         /*@notreached@*/ *ref = tick;
     }
+
+    /* stats */
+    task->stat.deadline_miss++;
 }
 
 /* Function: picoRTOS_kill

@@ -7,6 +7,7 @@ BUILD_DIR = build
 
 CFLAGS := -I.  -Istub -I$(PICORTOS_DIR) -g3 -O0
 CFLAGS += -I$(PICORTOS_DIR)/arch/include
+CFLAGS += -D"__ATTRIBUTE_ALIGN__(x)=__attribute__((aligned(x)))"
 
 LDFLAGS :=
 
