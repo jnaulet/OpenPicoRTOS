@@ -14,7 +14,7 @@ picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
 
 /* AVR is one of the rare CPUs that can switch contexts without an interrupt,
  * so this is directly defined in assembly language */
-/*@external@*/ extern void arch_syscall(picoRTOS_syscall_t syscall, void *priv);
+/*@external@*/ extern void arch_syscall(syscall_t syscall, void *priv);
 
 /* RTC registers */
 #define RTC_CTRLA   ((volatile unsigned char*)(ADDR_RTC + 0x0))

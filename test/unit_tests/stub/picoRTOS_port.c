@@ -26,7 +26,7 @@ void arch_start_first_task(picoRTOS_stack_t *sp)
 {
 }
 
-void arch_syscall(picoRTOS_syscall_t syscall, void *priv)
+void arch_syscall(syscall_t syscall, void *priv)
 {
 }
 

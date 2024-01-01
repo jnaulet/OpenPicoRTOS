@@ -17,7 +17,7 @@ picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
 /*@external@*/ extern void arch_dcbf(uint32_t addr);
 /*@external@*/ extern void arch_dec_init(uint32_t value);
 /*@external@*/ extern void arch_start_first_task(picoRTOS_stack_t *sp);
-/*@external@*/ extern void arch_syscall(picoRTOS_syscall_t syscall, void *priv);
+/*@external@*/ extern void arch_syscall(syscall_t syscall, void *priv);
 /*@external@*/ extern picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *var,
                                                               picoRTOS_atomic_t old,
                                                               picoRTOS_atomic_t val);

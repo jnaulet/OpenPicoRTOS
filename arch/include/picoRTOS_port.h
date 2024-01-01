@@ -8,16 +8,31 @@
 
 /* Enum: picoRTOS syscalls
  *
- * PICORTOS_SYSCALL_SLEEP - A task asked to sleep
- * PICORTOS_SYSCALL_KILL - A task committed suicide
- * PICORTOS_SYSCALL_SWITCH_CONTEXT - A task asked to be postponed to the next tick
+ * SYSCALL_SLEEP - A task asked to sleep
+ * SYSCALL_SLEEP_UNTIL - A task asked to sleep until a ref + period deadline
+ * SYSCALL_KILL - A task committed suicide
+ * SYSCALL_SWITCH_CONTEXT - A task asked to be postponed to the next tick
  */
 typedef enum {
-    PICORTOS_SYSCALL_SLEEP,
-    PICORTOS_SYSCALL_KILL,
-    PICORTOS_SYSCALL_SWITCH_CONTEXT,
-    PICORTOS_SYSCALL_COUNT
-} picoRTOS_syscall_t;
+    SYSCALL_SLEEP,
+    SYSCALL_SLEEP_UNTIL,
+    SYSCALL_KILL,
+    SYSCALL_SWITCH_CONTEXT,
+    SYSCALL_COUNT
+} syscall_t;
+
+struct syscall_sleep {
+    picoRTOS_tick_t delay;
+};
+
+struct syscall_sleep_until {
+    picoRTOS_tick_t ref;
+    picoRTOS_tick_t period;
+};
+
+struct syscall_kill {
+    picoRTOS_pid_t pid;
+};
 
 /* Function: picoRTOS_syscall
  * Executes a syscall
@@ -34,7 +49,7 @@ typedef enum {
  */
 extern /*@exposed@*/ /*@null@*/
 picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp,
-                                   picoRTOS_syscall_t syscall,
+                                   syscall_t syscall,
                                    /*@null@*/ void *priv);
 /* Function: picoRTOS_tick
  * Executes a tick increment
@@ -146,7 +161,7 @@ extern /*@noreturn@*/ void arch_start_first_task(picoRTOS_stack_t *sp);
  * See also:
  *  <picoRTOS_syscall>
  */
-extern void arch_syscall(picoRTOS_syscall_t syscall, /*@null@*/ void *priv);
+extern void arch_syscall(syscall_t syscall, /*@null@*/ void *priv);
 
 /* Function: arch_idle
  * The default idle function/task

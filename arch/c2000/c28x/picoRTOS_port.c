@@ -34,7 +34,7 @@ picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
                                           /*@null@*/ void *priv);
 
 /*@external@*/ extern void arch_start_first_task(picoRTOS_stack_t *sp);
-/*@external@*/ extern void arch_syscall(picoRTOS_syscall_t syscall, void *priv);
+/*@external@*/ extern void arch_syscall(syscall_t syscall, void *priv);
 /*@external@*/ extern picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr);
 
 /* CLOCK */

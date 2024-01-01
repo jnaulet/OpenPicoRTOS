@@ -29,14 +29,14 @@ struct picoRTOS_task_core {
         picoRTOS_cycles_t counter;
         picoRTOS_cycles_t watermark_lo;
         picoRTOS_cycles_t watermark_hi;
-        size_t deadline_miss;
+        size_t deadline_miss_count;
     } stat;
     /* shared priority support */
     picoRTOS_priority_t prio;
     picoRTOS_priority_t sub;
     size_t sub_count;
     /* deadline */
-    size_t deadline_miss;
+    size_t deadline_miss_count;
 };
 
 /* user-defined tasks + idle */
@@ -77,13 +77,13 @@ static void task_core_init(/*@out@*/ struct picoRTOS_task_core *task)
     task->stat.counter = (picoRTOS_cycles_t)-1;
     task->stat.watermark_lo = (picoRTOS_cycles_t)-1;
     task->stat.watermark_hi = (picoRTOS_cycles_t)0;
-    task->stat.deadline_miss = 0;
+    task->stat.deadline_miss_count = 0;
     /* shared priority support */
     task->prio = (picoRTOS_priority_t)TASK_COUNT;
     task->sub = (picoRTOS_priority_t)0;
     task->sub_count = (size_t)1;
     /* deadline */
-    task->deadline_miss = 0;
+    task->deadline_miss_count = 0;
 }
 
 static bool task_core_is_available(struct picoRTOS_task_core *task)
@@ -411,7 +411,7 @@ void picoRTOS_resume(void)
 void picoRTOS_schedule(void)
 {
     picoRTOS_assert_fatal(picoRTOS.is_running, return );
-    arch_syscall(PICORTOS_SYSCALL_SWITCH_CONTEXT, NULL);
+    arch_syscall(SYSCALL_SWITCH_CONTEXT, NULL);
 }
 
 /* Function: picoRTOS_sleep
@@ -424,7 +424,7 @@ void picoRTOS_schedule(void)
 void picoRTOS_sleep(picoRTOS_tick_t delay)
 {
     picoRTOS_assert_fatal(picoRTOS.is_running, return );
-    arch_syscall(PICORTOS_SYSCALL_SLEEP, (void*)delay);
+    arch_syscall(SYSCALL_SLEEP, (struct syscall_sleep*)&delay);
 }
 
 /* Function: picoRTOS_sleep_until
@@ -453,30 +453,10 @@ void picoRTOS_sleep_until(picoRTOS_tick_t *ref, picoRTOS_tick_t period)
     picoRTOS_assert_fatal(period > 0, return );
     picoRTOS_assert_fatal(picoRTOS.is_running, return );
 
-    struct picoRTOS_task_core *task = &TASK_CURRENT();
-    picoRTOS_tick_t tick = picoRTOS_get_tick();
-    picoRTOS_tick_t elapsed = tick - *ref;
+    struct syscall_sleep_until sc = { *ref, period };
 
-    /* anyway */
-    *ref = *ref + period;
-
-    /* check the clock */
-    if (elapsed < period) {
-        picoRTOS_tick_t delay = period - elapsed;
-        arch_syscall(PICORTOS_SYSCALL_SLEEP, (void*)delay);
-        /* clean output */
-        task->deadline_miss = 0;
-        return;
-    }
-
-    /* missed the clock: retry until deadlock */
-    if (++task->deadline_miss > (size_t)CONFIG_DEADLOCK_COUNT) {
-        picoRTOS_break();
-        /*@notreached@*/ *ref = tick;
-    }
-
-    /* stats */
-    task->stat.deadline_miss++;
+    arch_syscall(SYSCALL_SLEEP_UNTIL, &sc);
+    *ref = sc.ref; /* update ref */
 }
 
 /* Function: picoRTOS_kill
@@ -485,7 +465,7 @@ void picoRTOS_sleep_until(picoRTOS_tick_t *ref, picoRTOS_tick_t period)
 void picoRTOS_kill(void)
 {
     picoRTOS_assert_fatal(picoRTOS.is_running, return );
-    arch_syscall(PICORTOS_SYSCALL_KILL, NULL);
+    arch_syscall(SYSCALL_KILL, NULL);
 }
 
 /* Function: picoRTOS_self
@@ -493,9 +473,7 @@ void picoRTOS_kill(void)
  */
 picoRTOS_pid_t picoRTOS_self(void)
 {
-    picoRTOS_assert_fatal(picoRTOS.is_running,
-                          return (picoRTOS_pid_t)-1);
-
+    picoRTOS_assert_fatal(picoRTOS.is_running, return (picoRTOS_pid_t)-1);
     return (picoRTOS_pid_t)picoRTOS.index;
 }
 
@@ -504,20 +482,41 @@ picoRTOS_pid_t picoRTOS_self(void)
  */
 picoRTOS_tick_t picoRTOS_get_tick(void)
 {
-    picoRTOS_assert_fatal(picoRTOS.is_running,
-                          return (picoRTOS_tick_t)-1);
-
+    picoRTOS_assert_fatal(picoRTOS.is_running, return (picoRTOS_tick_t)-1);
     return picoRTOS.tick;
 }
 
 /* SYSCALLS */
 
-static void syscall_sleep(struct picoRTOS_task_core *task, picoRTOS_tick_t delay)
+static void syscall_sleep(struct picoRTOS_task_core *task, struct syscall_sleep *sc)
 {
-    if (delay > 0) {
-        task->tick = picoRTOS.tick + delay;
+    if (sc->delay > 0) {
+        task->tick = picoRTOS.tick + sc->delay;
         task->state = PICORTOS_TASK_STATE_SLEEP;
     }
+}
+
+static void syscall_sleep_until(struct picoRTOS_task_core *task, struct syscall_sleep_until *sc)
+{
+    picoRTOS_tick_t elapsed = picoRTOS.tick - sc->ref;
+
+    if (elapsed < sc->period) {
+        task->tick = sc->ref + sc->period;
+        sc->ref = task->tick;
+        task->state = PICORTOS_TASK_STATE_SLEEP;
+        /* error management */
+        task->deadline_miss_count = 0;
+        return;
+    }
+
+    /* missed the clock: retry until deadlock */
+    if (++task->deadline_miss_count > (size_t)CONFIG_DEADLOCK_COUNT) {
+        picoRTOS_break();
+        /*@notreached@*/ sc->ref = picoRTOS.tick;
+    }
+
+    /* stats */
+    task->stat.deadline_miss_count++;
 }
 
 static void syscall_kill(struct picoRTOS_task_core *task)
@@ -547,10 +546,9 @@ syscall_switch_context(struct picoRTOS_task_core *task)
     return task;
 }
 
-picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, picoRTOS_syscall_t syscall, void *priv)
+picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, syscall_t syscall, void *priv)
 {
-    picoRTOS_assert_fatal(syscall < PICORTOS_SYSCALL_COUNT,
-                          return NULL);
+    picoRTOS_assert_fatal(syscall < SYSCALL_COUNT, return NULL);
 
     struct picoRTOS_task_core *task = &TASK_CURRENT();
 
@@ -561,9 +559,23 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, picoRTOS_syscall_t sysc
     task->sp = sp;
 
     switch (syscall) {
-    case PICORTOS_SYSCALL_SLEEP: syscall_sleep(task, (picoRTOS_tick_t)priv); break;
-    case PICORTOS_SYSCALL_KILL: syscall_kill(task); break;
-    default: /* PICORTOS_SYSCALL_SWITCH_CONTEXT */ break;
+    case SYSCALL_SLEEP:
+        picoRTOS_assert_fatal(priv != NULL, return NULL);
+        syscall_sleep(task, (struct syscall_sleep*)priv);
+        break;
+
+    case SYSCALL_SLEEP_UNTIL:
+        picoRTOS_assert_fatal(priv != NULL, return NULL);
+        syscall_sleep_until(task, (struct syscall_sleep_until*)priv);
+        break;
+
+    case SYSCALL_KILL:
+        syscall_kill(task);
+        break;
+
+    default:
+        /* SYSCALL_SWITCH_CONTEXT */
+        break;
     }
 
     task = syscall_switch_context(task);

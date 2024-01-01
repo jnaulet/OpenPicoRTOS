@@ -57,7 +57,7 @@ int main(void)
     (void)PICORTOS_QUEUE_READ(&queue, &dummy);
 
     /* dummy internal calls just to force check */
-    (void)picoRTOS_syscall(stack, PICORTOS_SYSCALL_SLEEP, NULL);
+    (void)picoRTOS_syscall(stack, SYSCALL_SLEEP, NULL);
     (void)picoRTOS_tick(stack);
 
     picoRTOS_kill();
