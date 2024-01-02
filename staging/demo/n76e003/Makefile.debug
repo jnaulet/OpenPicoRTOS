@@ -1,0 +1,48 @@
+sdcc_path := C:\Program Files (x86)\Nuvoton Tools\Toolchain\SDCC
+
+AS := sdas8051 -jy -w -los
+CC := sdcc
+BASENAME := n76e003
+
+CFLAGS := --std-c99 -mmcs51 --model-large --stack-auto --int-long-reent
+CFLAGS += --xram-size 768 --code-size 18432
+CFLAGS += --debug --nooverlay --nogcse --nolabelopt --noinduction --noloopreverse --no-peep
+CFLAGS += -I. -I"$(sdcc_path)\include" -D"__ATTRIBUTE_ALIGNED__(x)="
+
+LDFLAGS += -L"$(sdcc_path)\lib\large-stack-auto"
+
+a_files := startup.S picoRTOS_portasm.S
+c_files := $(wildcard *.c)
+
+rel_files := $(a_files:%.S=%.rel)
+rel_files += $(c_files:%.c=%.rel)
+
+rel-elf_files := $(a_files:%.S=%.rel)
+rel-elf_files += $(c_files:%.c=%-elf.rel)
+
+all: $(BASENAME).hex $(BASENAME).elf
+
+$(BASENAME).hex: $(rel_files)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+$(BASENAME).elf: $(rel-elf_files)
+	$(CC) $(CFLAGS) --out-fmt-elf $^ $(LDFLAGS) -o $@
+
+%.rel: %.S
+	$(AS) $@ $<
+
+%.rel: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+%-elf.rel: %.c
+	$(CC) $(CFLAGS) --out-fmt-elf -c $< -o $@
+
+clean:
+	rm -f *.elf *.cdb *.hex *.ihx *.lk *.map *.mem *.omf
+	rm -f *.adb *.asm *.lst *.rel *.rst *.sym
+
+help:
+	sdcc -h
+	sdas8051 -h
+
+.PHONY: clean
