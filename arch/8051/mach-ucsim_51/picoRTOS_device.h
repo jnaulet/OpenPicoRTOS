@@ -28,6 +28,7 @@
 #define ADDR_P2S    0xb5
 #define ADDR_IP     0xb8
 #define ADDR_T2CON  0xc8
+#define ADDR_T2MOD  0xc9
 #define ADDR_RCAP2L 0xca
 #define ADDR_RCAP2H 0xcb
 #define ADDR_TL2    0xcc

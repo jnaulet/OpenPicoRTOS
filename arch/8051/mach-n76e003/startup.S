@@ -5,14 +5,14 @@
 	.globl __sdcc_gsinit_startup
 	.globl _vn
 
-	.include "../include/macros.S"
+	.include "macros.S"
 
 	.module vectors
 
-	.area CSEG (CODE)
+	.area HOME (CODE)
 	.globl Reset_Handler
 Reset_Handler:
-	ljmp __sdcc_gsinit_startup
+	ljmp __non_interruptible_startup
 
 	;; vectors
 	VECTOR #0, Default_Handler		; External Interrupt 0
@@ -33,3 +33,7 @@ Reset_Handler:
 	VECTOR #15, Default_Handler		; Serial port 1 interrupt
 	VECTOR #16, Default_Handler		; Timer 3 overflow
 	VECTOR #17, Default_Handler		; Self Wake-up Timer interrupt
+
+__non_interruptible_startup:
+	clr ea
+	ljmp __sdcc_gsinit_startup

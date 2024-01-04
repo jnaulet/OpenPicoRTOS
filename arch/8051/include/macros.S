@@ -1,6 +1,6 @@
-        ;; common macros for 8051s
+	;; common macros for 8051s
 
-        .macro VECTOR num, handler
+	.macro VECTOR num, handler
 	mov _vn, num
 	ljmp handler
 	.ds 2

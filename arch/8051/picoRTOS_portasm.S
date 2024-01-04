@@ -19,11 +19,10 @@
 	ar0 = 0x00
 
 	.macro SAVE_CONTEXT_STEP1
-	push sp
-	push ie
-	clr ea			; no re-entrance
-	push psw
 	push a
+	mov a, sp
+	push a
+	push psw
 	push dpl
 	push dph
 	push b
@@ -105,10 +104,9 @@ loop:
 	pop b
 	pop dph
 	pop dpl
-	pop a
 	pop psw
-	pop ie			; restore interrupts
-	dec sp
+	dec sp			; ignore saved sp
+	pop a
 	.endm
 
 	;; *dptr++ = rS;
@@ -174,6 +172,7 @@ fn_priv:
 	push ar7
 	mov dpl, r4
 	mov dph, r5
+	mov b, #0
 	ret			; call fn(priv)
 epilogue:
 	RESTORE_CONTEXT
@@ -181,15 +180,17 @@ epilogue:
 
 	.globl _arch_save_first_context
 _arch_save_first_context:
+	push _bp
 	mov _bp, sp
-	pop ar0			; ignore ret_h
-	pop ar0			; ignore ret_l
+	dec sp			; ignore prev _bp
+	dec sp			; ignore ret_h
+	dec sp			; ignore ret_l
 	;; get stacked params
-	pop ar4			; fn >> 8
-	pop ar3			; fn
-	pop ar2			; priv >> 16
-	pop ar1			; priv >> 8
-	pop ar0			; priv
+	pop ar4		; fn >> 8
+	pop ar3		; fn
+	dec sp		; priv >> 16: ignore
+	pop ar2		; priv >> 8
+	pop ar1		; priv
 	;; put stack addr on top
 	;; mov dpl, r5 -> already set
 	;; mov dph, r6 -> already set
@@ -202,75 +203,94 @@ _arch_save_first_context:
 	MOVX_DPTRxx #1		; r1
 	MOVX_DPTRxx #0		; r0
 	MOVX_DPTRxx _bp		; _bp
-	MOVX_DPTRxx r2		; b   : 0xff & (priv >> 16)
-	MOVX_DPTRxx r1		; dph : 0xff & (priv >> 8)
-	MOVX_DPTRxx r0		; dpl : 0xff & priv
-	MOVX_DPTRxx #65		; a
+	MOVX_DPTRxx #0		; b   : 0xff & (priv >> 16)
+	MOVX_DPTRxx r2		; dph : 0xff & (priv >> 8)
+	MOVX_DPTRxx r1		; dpl : 0xff & priv
 	MOVX_DPTRxx #0		; psw
-	mov r0, ie		; ie (auto-enable)
-	orl ar0, #INITIAL_IE
-	MOVX_DPTRxx r0
-	MOVX_DPTRxx #255	; sp
+	MOVX_DPTRxx #83		; sp
+	MOVX_DPTRxx #65		; a
 	MOVX_DPTRxx r4		; reti_h : 0xff & (fn >> 8)
 	MOVX_DPTRxx r3		; reti_l : 0xff & fn
 	;; default stack is empty
 	;; task-specific data will be stored here
-	MOVX_DPTRxx r6		; sp_h : 0xff & (stack >> 8)
-	MOVX_DPTRxx r5		; sp_l : 0xff & stack
+	MOVX_DPTRxx r6		; xsp_h : 0xff & (stack >> 8)
+	MOVX_DPTRxx r5		; xsp_l : 0xff & stack
 	;; restore sp & ret
 	mov sp, _bp
+	pop _bp
 	ret
 
 	.globl _arch_start_first_task
 _arch_start_first_task:
 	;; mov dpl, r5 -> already set
 	;; mov dph, r6 -> already set
-	;; ignore r7
+	;; ignore b, r7
 	RESTORE_CONTEXT
+	setb ea			; enable interrupts
 	ret
 
 	.globl _arch_syscall
 _arch_syscall:
-	SAVE_CONTEXT
-	;; param sp is r7:r6:r5
-	mov r5, dpl
-	mov r6, dph
-	mov r7, b
-	;; point to beginning of sp
-	mov sp, #__start__stack + 1
-	pop dph
-	pop dpl
-	;; fish for dpl (syscall) in r4
-	ADD_DPTR #11
-	movx a, @dptr
-	mov r4, a
-	;; restore caller stack
-	ADD_DPTR #4
-	movx a, @dptr
-	mov sp, a
-	;; continue normal operation
+	clr ea			; simulate interrupt entrance
+	push _bp
+	mov _bp, sp
+	mov r7, dpl		; r7: syscall
+	DPTR_FROM_SP		; dptr: stack
+	;; reserve space on top of xsp
+	mov a, sp
+	clr c
+	subb a, #__start__stack
+	mov r0, a
+	ADD_DPTR r0
+	ADD_DPTR #15
+	;; stack parameters
+	mov a, _bp
 	add a, #0xfb
-	;; priv >> 16
 	mov r0, a
 	mov a, @r0
-	push a
-	;; priv >> 8
+	push a			; priv >> 16
 	inc r0
 	mov a, @r0
-	push a
-	;; priv
+	push a			; priv >> 8
 	inc r0
 	mov a, @r0
-	push a
-	;; syscall
-	push ar4
-	;; sp
-	mov dpl, r5
-	mov dph, r6
+	push a			; priv
+	push ar7		; syscall
 	mov b, #0
-	;; finally, call
 	lcall _picoRTOS_syscall
+	mov a, sp
+	add a, #0xfc
+	mov sp, a
+	pop _bp
+	;; post-treatment
+	mov _bpl, dpl		; store next xsp_l
+	mov _bph, dph		; store next xsp_h
+	SAVE_CONTEXT
+	mov dpl, _bpl		; load back next xsp/dpl
+	mov dph, _bph		; load back next xsp/dph
 	RESTORE_CONTEXT
+	setb ea			; enable interrupts
+	ret
+
+	.globl _arch_compare_and_swap
+_arch_compare_and_swap:
+	clr ea
+	mov a, sp
+	add a, #0xfe
+	mov r0, a		; r0: &old
+	dec a
+	mov r1, a		; r1: &new
+	movx a, @dptr	; a: *var
+	xrl a, @r0
+	jnz _arch_compare_and_swap_fail
+	mov a, @r1
+	movx @dptr, a
+	mov dpl, @r0
+	sjmp _arch_compare_and_swap_exit
+_arch_compare_and_swap_fail:
+	mov dpl, @r1
+_arch_compare_and_swap_exit:
+	setb ea
 	ret
 
 	.area DSEG (DATA)
@@ -278,6 +298,9 @@ _arch_syscall:
 	.globl _vn
 _vn:
 	.ds 1			; vector number
+
+_bpl:	.ds 1
+_bph:	.ds 1
 
 	.area XSEG (XDATA)
 

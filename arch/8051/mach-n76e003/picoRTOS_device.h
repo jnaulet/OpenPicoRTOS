@@ -43,20 +43,20 @@
 #define ADDR_WDCON   0xaa
 #define ADDR_BODCON1 0xab
 #define ADDR_P3M1    0xac
-#define ADDR_P3S     0xac /* page1 */
+#define ADDR_P3S     0xac   /* page1 */
 #define ADDR_P3M2    0xad
-#define ADDR_P3SR    0cad /* page1 */
+#define ADDR_P3SR    0cad   /* page1 */
 #define ADDR_IAPFD   0xae
 #define ADDR_IAPCN   0xaf
 #define ADDR_P3      0xb0
 #define ADDR_P0M1    0xb1
-#define ADDR_P0S     0xb1 /* page1 */
+#define ADDR_P0S     0xb1   /* page1 */
 #define ADDR_P0M2    0xb2
-#define ADDR_P0SR    0xb2 /* page1 */
+#define ADDR_P0SR    0xb2   /* page1 */
 #define ADDR_P1M1    0xb3
-#define ADDR_P1S     0xb3 /* page1 */
+#define ADDR_P1S     0xb3   /* page1 */
 #define ADDR_P1M2    0xb4
-#define ADDR_P1SR    0xb4 /* page1 */
+#define ADDR_P1SR    0xb4   /* page1 */
 #define ADDR_P2S     0xb5
 #define ADDR_IPH     0xb7
 #define ADDR_PWMINTC 0xb7 /* page1 */
@@ -73,22 +73,20 @@
 #define ADDR_ADCRL   0xc2
 #define ADDR_ADCRH   0xc3
 #define ADDR_T3CON   0xc4
-#define ADDR_PWM4H   0xc4 /* page1 */
+#define ADDR_PWM4H   0xc4   /* page1 */
 #define ADDR_RL3     0xc5
-#define ADDR_PWM5H   0xc5 /* page1 */
+#define ADDR_PWM5H   0xc5   /* page1 */
 #define ADDR_RH3     0xc6
-#define ADDR_PIOCON1 0xc6 /* page1 */
+#define ADDR_PIOCON1 0xc6   /* page1 */
 #define ADDR_TA      0xc7
 #define ADDR_T2CON   0xc8
 #define ADDR_T2MOD   0xc9
-#define ADDR_RCAP2L  0xca
-#define ADDR_RCMP2L  ADDR_RCAP2L
-#define ADDR_RCAP2H  0xcb
-#define ADDR_RCMP2H  ADDR_RCAP2H
+#define ADDR_RCMP2L  0xca
+#define ADDR_RCMP2H  0xcb
 #define ADDR_TL2     0xcc
-#define ADDR_PWM4L   0xcc /* page1 */
+#define ADDR_PWM4L   0xcc   /* page1 */
 #define ADDR_TH2     0xcd
-#define ADDR_PWM5L   0xcd /* page1 */
+#define ADDR_PWM5L   0xcd   /* page1 */
 #define ADDR_ADCMPL  0xce
 #define ADDR_ADCMPH  0xcf
 #define ADDR_PSW     0xd0
@@ -143,24 +141,24 @@
 
 /* IRQs */
 
-#define IRQ_IE_0    0  /* External Interrupt 0 */
-#define IRQ_TF_0    1  /* Timer 0 overflow */
-#define IRQ_IE_1    2  /* External Interrupt 1 */
-#define IRQ_TF_1    3  /* Timer 1 overflow */
-#define IRQ_RI_TI_0 4  /* Serial port 0 interrupt */
-#define IRQ_TF_2    5  /* Timer 2 event */
-#define IRQ_SI      6  /* I2C status/timer-out-interrupt */
-#define IRQ_PIF     7  /* Pin interrupt */
-#define IRQ_BOD     8  /* Brown-out detection interrupt */
-#define IRQ_SPI     9  /* SPI interrupt */
-#define IRQ_WDTF    10 /* WDT interrupt */
-#define IRQ_ADCF    11 /* ADC interrupt */
-#define IRQ_CAPF    12 /* Input capture interrupt */
-#define IRQ_PWMF    13 /* PWM interrupt */
-#define IRQ_FBF     14 /* Fault Brake interrupt */
-#define IRQ_RI_TI_1 15 /* Serial port 1 interrupt */
-#define IRQ_TF_3    16 /* Timer 3 overflow */
-#define IRQ_WKTF    17 /* Self Wake-up Timer interrupt */
+#define IRQ_IE_0    0   /* External Interrupt 0 */
+#define IRQ_TF_0    1   /* Timer 0 overflow */
+#define IRQ_IE_1    2   /* External Interrupt 1 */
+#define IRQ_TF_1    3   /* Timer 1 overflow */
+#define IRQ_RI_TI_0 4   /* Serial port 0 interrupt */
+#define IRQ_TF_2    5   /* Timer 2 event */
+#define IRQ_SI      6   /* I2C status/timer-out-interrupt */
+#define IRQ_PIF     7   /* Pin interrupt */
+#define IRQ_BOD     8   /* Brown-out detection interrupt */
+#define IRQ_SPI     9   /* SPI interrupt */
+#define IRQ_WDTF    10  /* WDT interrupt */
+#define IRQ_ADCF    11  /* ADC interrupt */
+#define IRQ_CAPF    12  /* Input capture interrupt */
+#define IRQ_PWMF    13  /* PWM interrupt */
+#define IRQ_FBF     14  /* Fault Brake interrupt */
+#define IRQ_RI_TI_1 15  /* Serial port 1 interrupt */
+#define IRQ_TF_3    16  /* Timer 3 overflow */
+#define IRQ_WKTF    17  /* Self Wake-up Timer interrupt */
 
 #define DEVICE_INTERRUPT_VECTOR_COUNT 18
 #define DEVICE_DEFAULT_SYSCLK_HZ      16000000ul

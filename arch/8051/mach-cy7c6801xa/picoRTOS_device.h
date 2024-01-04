@@ -62,19 +62,21 @@
 
 /* IRQs */
 
-#define IRQ_IE_0    0   /* External Interrupt 0 */
-#define IRQ_TF_0    1   /* Timer 0 overflow */
-#define IRQ_IE_1    2   /* External Interrupt 1 */
-#define IRQ_TF_1    3   /* Timer 1 overflow */
+#define IRQ_IE0     0   /* External Interrupt 0 */
+#define IRQ_TF0     1   /* Timer 0 overflow */
+#define IRQ_IE1     2   /* External Interrupt 1 */
+#define IRQ_TF1     3   /* Timer 1 overflow */
 #define IRQ_RI_TI_0 4   /* Serial port 0 interrupt */
-#define IRQ_TF_2    5   /* Timer 2 event */
+#define IRQ_TF2     5   /* Timer 2 event */
+#define IRQ_RESUME  6   /* WAKEUP / WU2 Pin or USB Resume */
+#define IRQ_RI_TI_1 7   /* Serial port 1 interrupt */
+#define IRQ_USB     8   /* USB */
+#define IRQ_I2C     9   /* I2C */
+#define IRQ_IE4     10  /* GPIF / FIFOs / INT4 Pin */
+#define IRQ_IE5     11  /* INT5# Pin */
+#define IRQ_IE6     12  /* INT6 Pin */
 
-#define DEVICE_INTERRUPT_VECTOR_COUNT 12
+#define DEVICE_INTERRUPT_VECTOR_COUNT 13
 #define DEVICE_DEFAULT_SYSCLK_HZ      12000000ul
-
-/* TIMER2 REGs */
-
-#define ADDR_xIE_wET2 ADDR_IE
-#define xIE_ET2       (1 << 5)
 
 #endif

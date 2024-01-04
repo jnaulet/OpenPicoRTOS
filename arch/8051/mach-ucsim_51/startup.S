@@ -5,14 +5,14 @@
 	.globl __sdcc_gsinit_startup
 	.globl _vn
 
-	.include "../include/macros.S"
+	.include "macros.S"
 
 	.module vectors
 
-	.area CSEG (CODE)
+	.area HOME (CODE)
 	.globl Reset_Handler
 Reset_Handler:
-	ljmp __sdcc_gsinit_startup
+	ljmp __non_interruptible_startup
 
 	;; vectors
 	VECTOR #0, Default_Handler		; INT0# Pin
@@ -21,3 +21,7 @@ Reset_Handler:
 	VECTOR #3, Default_Handler		; Timer 1 Overflow
 	VECTOR #4, Default_Handler		; USART0 Rx & Tx
 	VECTOR #5, Timer2_Handler		; Timer 2 Overflow
+
+__non_interruptible_startup:
+	clr ea
+	ljmp __sdcc_gsinit_startup

@@ -5,14 +5,14 @@
 	.globl __sdcc_gsinit_startup
 	.globl _vn
 
-	.include "../include/macros.S"
+	.include "macros.S"
 
 	.module vectors
 
 	.area CSEG (CODE)
 	.globl Reset_Handler
 Reset_Handler:
-	ljmp __sdcc_gsinit_startup
+	ljmp __non_interruptible_startup
 
 	;; vectors
 	VECTOR #0, Default_Handler		; INT0# Pin
@@ -28,3 +28,7 @@ Reset_Handler:
 	VECTOR #10, Default_Handler		; GPIF / FIFOs / INT4 Pin
 	VECTOR #11, Default_Handler		; INT5# Pin
 	VECTOR #12, Default_Handler		; INT6 Pin
+
+__non_interruptible_startup:
+	clr ea
+	ljmp __sdcc_gsinit_startup

@@ -22,6 +22,7 @@ opt-$(CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE2) += --opt-code-speed
 opt-$(CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE3) += --opt-code-speed
 
 # debug options
+asflags-$(CONFIG_DEBUG) += -j -y
 ccflags-$(CONFIG_DEBUG) += --debug
 ccflags-$(CONFIG_NDEBUG) += -DNDEBUG
 ldflags-$(CONFIG_DEBUG) += --debug
@@ -56,6 +57,9 @@ a_flags     = $(debug-y) $(RTOSINCLUDE) \
               $(asflags-y) $(subst ",,$(CONFIG_EXTRA_CFLAGS)) -los
 
 ld_flags    = $(LDFLAGS) $(ldflags-y) $(subst ",,$(CONFIG_EXTRA_LDFLAGS))
+
+cmd_dep_h_c = $(sort $(filter %.h,\
+	        $(foreach c,$(1),$(shell $(CC) $(c_flags) -MM $(c)))))
 
 ifneq ($(KBUILD_SRC),)
 # Create output directory if not already present
@@ -113,7 +117,7 @@ quiet_cmd_link_rel_target = LD      $@
 # If the list of objects to link is empty, just create an empty built-in.o
 cmd_link_rel_target = $(if $(strip $(obj-y)), \
 		      $(CC) $(ld_flags) $(filter $(obj-y), $^) -o $@, \
-		      rm -f $@; $(AR) rcs$(KBUILD_ARFLAGS) $@)
+		      rm -f $@; $(AR) rcs $(KBUILD_ARFLAGS) $@)
 
 $(target): $(obj-y) FORCE
 	$(call if_changed,link_rel_target)

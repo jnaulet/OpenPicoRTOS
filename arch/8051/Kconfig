@@ -9,11 +9,16 @@ config MACH_UCSIM51
        bool "SDCC uCSim_51"
 
 config MACH_N76E003
-       bool "Nuvoton N76E003 series"
+       bool "Nuvoton N76E003 Series"
 
-config MACH_EZUSBFX2
-       bool "Cypress EZ-USB FX2"
+config MACH_CY7C6801xA
+       bool "Cypress CY7C6801xA Series"
 
 endchoice
+
+config XDATA_SIZE
+       int "Amount of RAM allocated for XDATA"
+       depends on MACH_CY7C6801xA
+       default 2048
 
 endmenu
