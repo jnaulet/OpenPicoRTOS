@@ -184,7 +184,6 @@ picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
         picoRTOS_cycles_t prd = (picoRTOS_cycles_t)CPUTIMER2->PRD;
         picoRTOS_cycles_t tim = (picoRTOS_cycles_t)CPUTIMER2->TIM;
 
-
         if (t > prd) return prd + 1;            /* 1st tick */
         if (tim > t) return (prd - tim) + t;    /* rollover */
         /* normal */
