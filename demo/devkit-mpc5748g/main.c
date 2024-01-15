@@ -17,7 +17,7 @@
 
 static void tick_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct gpio *TICK = (struct gpio*)priv;
 
@@ -30,6 +30,7 @@ static void tick_main(void *priv)
 /* IPC test */
 static struct picoRTOS_mutex mutex = PICORTOS_MUTEX_INITIALIZER;
 static struct picoRTOS_cond cond = PICORTOS_COND_INITIALIZER;
+static struct picoRTOS_cond cond_r = PICORTOS_COND_INITIALIZER;
 
 static void gpio_write_sleep(struct gpio *gpio, bool enabled, picoRTOS_tick_t delay)
 {
@@ -39,13 +40,12 @@ static void gpio_write_sleep(struct gpio *gpio, bool enabled, picoRTOS_tick_t de
 
 static void led0_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct gpio *LED = (struct gpio*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
 
     for (;;) {
-        picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
         picoRTOS_mutex_lock(&mutex);
 
         /* turn on */
@@ -63,7 +63,7 @@ static void led0_main(void *priv)
 
         /* wait for led1 to finish */
         picoRTOS_mutex_lock(&mutex);
-        picoRTOS_cond_wait(&cond, &mutex);
+        picoRTOS_cond_wait(&cond_r, &mutex);
 
         /* turn off */
         gpio_write_sleep(&LED[3], true, LED_DELAY_LONG);
@@ -72,12 +72,13 @@ static void led0_main(void *priv)
         gpio_write_sleep(&LED[0], true, LED_DELAY_LONG);
 
         picoRTOS_mutex_unlock(&mutex);
+        picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
     }
 }
 
 static void led1_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct gpio *LED = (struct gpio*)priv;
 
@@ -98,17 +99,14 @@ static void led1_main(void *priv)
         gpio_write_sleep(&LED[4], true, LED_DELAY_LONG);
 
         /* signal to task led0 */
-        picoRTOS_cond_signal(&cond);
+        picoRTOS_cond_signal(&cond_r);
         picoRTOS_mutex_unlock(&mutex);
-
-        /* force scheduling */
-        picoRTOS_schedule();
     }
 }
 
 static void adc_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct adc_pwm *ADC_PWM = (struct adc_pwm*)priv;
     struct adc *ADC = &ADC_PWM->ADC1_P0;
@@ -264,7 +262,7 @@ int main(void)
     picoRTOS_task_init(&task, tick_main, &board.TICK, stack0, PICORTOS_STACK_COUNT(stack0));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
 
-#ifndef SUPPORT_FOR_SMP
+#ifndef CONFIG_SMP
     picoRTOS_task_init(&task, led0_main, board.LED, stack1, PICORTOS_STACK_COUNT(stack1));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
     picoRTOS_task_init(&task, led1_main, board.LED, stack2, PICORTOS_STACK_COUNT(stack2));
