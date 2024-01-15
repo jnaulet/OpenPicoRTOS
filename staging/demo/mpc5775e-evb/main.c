@@ -21,7 +21,7 @@ static void gpio_write_sleep(struct gpio *led, bool enabled, picoRTOS_tick_t del
 
 static void tick_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct gpio *TICK = (struct gpio*)priv;
 
@@ -40,7 +40,7 @@ static struct picoRTOS_cond cond = PICORTOS_COND_INITIALIZER;
 
 static void led0_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct gpio *LED = (struct gpio*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -60,7 +60,7 @@ static void led0_main(void *priv)
 
 static void led1_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct gpio *LED = (struct gpio*)priv;
 
@@ -77,7 +77,7 @@ static void led1_main(void *priv)
 
 static void adc_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct adc *adc = (struct adc*)priv;
 
@@ -95,7 +95,7 @@ static void adc_main(void *priv)
 
 static void pwm_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     pwm_duty_cycle_t duty = 0;
     struct pwm *pwm = (struct pwm*)priv;
