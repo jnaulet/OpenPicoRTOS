@@ -125,6 +125,9 @@ void arch_core_init(picoRTOS_core_t core,
 
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
+    /* setup core1 init protection */
+    arch_spin_lock();
+
     /* prepare core1 stack */
     stack = (picoRTOS_stack_t*)__Stack1Top - 1;
     *stack = (picoRTOS_stack_t)sp;
@@ -147,6 +150,23 @@ void arch_core_init(picoRTOS_core_t core,
     }
 
     arch_assert_void(deadlock != -1);
+
+    /* wait until core1 is idling */
+    arch_spin_lock();
+    arch_spin_unlock();
+}
+
+/* cppcheck-suppress constParameter */
+void arch_idle(void *null)
+{
+    arch_assert_void(null == NULL);
+
+    /* unlock core0 init */
+    if (arch_core() != 0)
+        arch_spin_unlock();
+
+    for (;;)
+        ASM("wfe");
 }
 
 picoRTOS_core_t arch_core(void)
