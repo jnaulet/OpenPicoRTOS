@@ -30,4 +30,9 @@ config CACHE_MAINTENANCE
        default y if E200Z4
        default n if E200Z7
 
+config DEBUG_AUX_CORE_STARTUP
+       bool "Debug auxiliary core startup (Warning: not for production)"
+       depends on SMP
+       default n
+
 endmenu
