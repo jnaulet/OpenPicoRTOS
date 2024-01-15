@@ -41,6 +41,8 @@ int picoRTOS_mutex_trylock(struct picoRTOS_mutex *mutex)
     picoRTOS_atomic_t unused = (picoRTOS_atomic_t)-1;
     picoRTOS_atomic_t pid = (picoRTOS_atomic_t)picoRTOS_self();
 
+    picoRTOS_invalidate_dcache(mutex, sizeof(*mutex));
+
     /* mutex is re-entrant */
     if (arch_compare_and_swap(&mutex->owner, unused, pid) != unused &&
         mutex->owner != pid)
