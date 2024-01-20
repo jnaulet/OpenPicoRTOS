@@ -10,9 +10,11 @@ struct picoRTOS_mutex {
     size_t count;
 } __ATTRIBUTE_ALIGNED__(ARCH_L1_DCACHE_LINESIZE);
 
+#define PICORTOS_MUTEX_NOOWNER -1
+
 /* macro for static init */
 #define PICORTOS_MUTEX_INITIALIZER              \
-    { (picoRTOS_atomic_t)-1, (size_t)0 }
+    { (picoRTOS_atomic_t)PICORTOS_MUTEX_NOOWNER, (size_t)0 }
 
 void picoRTOS_mutex_init(/*@out@*/ struct picoRTOS_mutex *mutex);           /* init mutex */
 

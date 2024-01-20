@@ -5,6 +5,8 @@
 # error no deadlock defined for locks
 #endif
 
+#define nobody (picoRTOS_atomic_t)PICORTOS_MUTEX_NOOWNER
+
 /* Function: picoRTOS_mutex_init
  * Initialises a mutex
  *
@@ -22,7 +24,7 @@
  */
 void picoRTOS_mutex_init(struct picoRTOS_mutex *mutex)
 {
-    mutex->owner = (picoRTOS_atomic_t)-1;
+    mutex->owner = nobody;
     mutex->count = 0;
     picoRTOS_flush_dcache(mutex, sizeof(*mutex));
 }
@@ -38,13 +40,12 @@ void picoRTOS_mutex_init(struct picoRTOS_mutex *mutex)
  */
 int picoRTOS_mutex_trylock(struct picoRTOS_mutex *mutex)
 {
-    picoRTOS_atomic_t unused = (picoRTOS_atomic_t)-1;
     picoRTOS_atomic_t pid = (picoRTOS_atomic_t)picoRTOS_self();
 
     picoRTOS_invalidate_dcache(mutex, sizeof(*mutex));
 
     /* mutex is re-entrant */
-    if (arch_compare_and_swap(&mutex->owner, unused, pid) != unused &&
+    if (arch_compare_and_swap(&mutex->owner, nobody, pid) != nobody &&
         mutex->owner != pid)
         return -EAGAIN;
 
@@ -96,7 +97,7 @@ void picoRTOS_mutex_unlock(struct picoRTOS_mutex *mutex)
     picoRTOS_assert_fatal(mutex->count > 0, return );
 
     if (--mutex->count == 0)
-        mutex->owner = (picoRTOS_atomic_t)-1;
+        mutex->owner = nobody;
 
     picoRTOS_flush_dcache(mutex, sizeof(*mutex));
 }
