@@ -4,4 +4,8 @@ config CLOCK_N76E003
        depends on 8051
        bool "Nuvoton N76E003 clock"
 
+config CLOCK_CY7C6801XA
+       depends on 8051
+       bool "Cypress CY7C6801xA clock"
+
 endmenu
