@@ -17,6 +17,15 @@ static struct {
     clock_freq_t cpu;
 } clocks;
 
+/* Function: clock_cy7c6801xa_init
+ * Intializes the cy7c6801xa clock system
+ *
+ * Parameters:
+ *  settings - The clocks settings
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int clock_cy7c6801xa_init(struct clock_settings *settings)
 {
     picoRTOS_assert(settings->clkspd < CLOCK_CY7C6801XA_CLKSPD_COUNT, return -EINVAL);
