@@ -1,13 +1,15 @@
 #ifndef PICORTOS_TYPES_H
 #define PICORTOS_TYPES_H
 
+#include <stdint.h>
+
 /* optimize for speed */
 typedef unsigned char picoRTOS_stack_t;
 typedef unsigned int picoRTOS_tick_t;
-typedef unsigned int picoRTOS_priority_t;
-typedef unsigned int picoRTOS_pid_t;
+typedef uint8_t picoRTOS_priority_t;
+typedef uint8_t picoRTOS_pid_t;
 typedef unsigned char picoRTOS_atomic_t;
-typedef unsigned int picoRTOS_irq_t;
+typedef uint8_t picoRTOS_irq_t;
 typedef unsigned int picoRTOS_cycles_t;
 
 typedef int picoRTOS_intptr_t;
