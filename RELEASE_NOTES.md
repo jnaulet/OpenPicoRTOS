@@ -1,5 +1,19 @@
 # Release notes
 
+## picoRTOS v1.9.5
+### What's new ?
+
+The biggest improvement of this release is the support for the Intel 8051 / MCS51 family of microcontrollers and the associated support
+for SDCC as a compiler.
+
+Code for ucsim_51, Nuvoton n76e003 & Cypress/Infineon Cy7c6801xA chips is provided as an example. This is still incomplete, though, as
+no driver (except for the clocks) has been provided, only the kernel runs.
+
+Major fixes have been added to the SMP ports (main cores are now waiting until the auxiliary ones are idling before running the scheduler).
+Chips that do not support bus snooping are now using the mutexes properly.
+
+Finally, 8bits int types have been used whenever possible on 8bit architectures (AVR & 8051).
+
 ## picoRTOS v1.9.4
 ### What's new ?
 

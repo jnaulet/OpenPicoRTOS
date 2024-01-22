@@ -24,6 +24,7 @@ picoRTOS is a small hard RTOS with as little overhead as humanly possible.
 
 OpenPicoRTOS has been designed with these requirements in mind:
   - Compliance with "The Power Of 10" from the NASA/JPL (https://en.wikipedia.org/wiki/The_Power_of_10:_Rules_for_Developing_Safety-Critical_Code)
+  - Compliance with MISRA C 2012
   - Limited use of inline assembly:
     - Inline assembly should be side-effect free (no use or modification of variables)
     - Inline assembly can be safely removed from the static analysis
@@ -125,6 +126,7 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - ARM Cortex-M7
  - Atmel ATMega (AVR5+)
  - Atmel TinyAVR (0+) Series
+ - Intel 8051 / MCS51
  - MIPS M51xx / PIC32Mx
  - RISC-V RV32IMAC
  - PowerPC e200z4
@@ -150,8 +152,10 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - Atmel ATSAMD5x/E5x
  - Atmel ATtiny817
  - Atmel ATtiny1607
+ - Cypress CY7C6801xA / EZ-USB FX2
  - GigaDevice GD32VF103
  - Microchip PIC32MZ-EF
+ - Nuvoton N76E003
  - NXP MPC574x series
  - NXP MPC577x series
  - Raspberry Pico RP2040
@@ -237,6 +241,8 @@ Basic demo code is provided for the following boards:
   - ATtiny817-Xplained Mini
   - ATtiny1607 Curiosity Nano
   - Curiosity 2.0 PIC32 MZ EF
+  - Infineon EZ-USB FX2LP
+  - Nuvoton N76E003 / MCU-E003
   - NXP Devkit MPC5748G (dual-core SMP)
   - NXP MPC5775E-EVB (dual-core SMP) (staging)
   - Sipeed Longan Nano

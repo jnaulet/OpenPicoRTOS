@@ -48,7 +48,6 @@ Group: hw-specific  {
    Group: ATMega / AVR  {
 
       File: ADC  (no auto-title, drivers/adc/adc-avr.c)
-      File: adc/adc-nxp_sar.c  (drivers/adc/adc-nxp_sar.c)
       File: EEPROM  (no auto-title, drivers/eeprom/eeprom-avr.c)
       File: GPIO  (no auto-title, drivers/gpio/gpio-avr.c)
       File: MUX  (no auto-title, drivers/mux/mux-avr.c)
@@ -79,6 +78,11 @@ Group: hw-specific  {
       File: Clocks  (no auto-title, drivers/clock/clock-f28379x.c)
       }  # Group: C2000
 
+   Group: Cy7C6801xA  {
+
+      File: Clocks  (no auto-title, drivers/clock/clock-cy7c6801xa.c)
+      }  # Group: Cy7C6801xA
+
    Group: GD32VF103  {
 
       File: Clocks  (no auto-title, drivers/clock/clock-gd32vf103.c)
@@ -92,11 +96,22 @@ Group: hw-specific  {
       File: Watchdog  (no auto-title, drivers/wd/wd-gd32vf103_fwdgt.c)
       }  # Group: GD32VF103
 
+   Group: Nuvoton N76E003  {
+
+      File: Clocks  (no auto-title, drivers/clock/clock-n76e003.c)
+      }  # Group: Nuvoton N76E003
+
    Group: NXP MPC57xx  {
 
+      File: ADC &lparen;SAR&rparen;  (no auto-title, drivers/adc/adc-nxp_sar.c)
       File: CAN  (no auto-title, drivers/can/can-nxp_flexcan.c)
-      File: Clocks &lparen;MPC574xx&rparen;  (no auto-title, drivers/clock/clock-mpc574xx.c)
-      File: Clocks &lparen;SIU&rparen;  (no auto-title, drivers/clock/clock-nxp_siu.c)
+
+      Group: Clock  {
+
+         File: Clocks &lparen;MPC574xx&rparen;  (no auto-title, drivers/clock/clock-mpc574xx.c)
+         File: Clocks &lparen;SIU&rparen;  (no auto-title, drivers/clock/clock-nxp_siu.c)
+         }  # Group: Clock
+
       File: DMA &lparen;eDMA&rparen;  (no auto-title, drivers/dma/dma-nxp_edma.c)
       File: GPIO &lparen;SIU&rparen;  (no auto-title, drivers/gpio/gpio-nxp_siu.c)
       File: GPIO &lparen;SIUL2&rparen;  (no auto-title, drivers/gpio/gpio-nxp_siul2.c)
