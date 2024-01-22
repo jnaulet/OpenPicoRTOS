@@ -125,6 +125,15 @@ static int ckswt_osc_flirc(void)
     return 0;
 }
 
+/* Function: clock_n76e003_init
+ * Intializes the n76e003 clock system
+ *
+ * Parameters:
+ *  settings - The clocks settings
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int clock_n76e003_init(struct clock_settings *settings)
 {
     picoRTOS_assert(settings->clkdiv > 0, return -EINVAL);

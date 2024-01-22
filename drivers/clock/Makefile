@@ -16,3 +16,4 @@ c_src-$(CONFIG_CLOCK_TINYAVR) += $(drivers-clock)/clock-tinyavr.c
 c_src-$(CONFIG_CLOCK_RENESAS_RA4) += $(drivers-clock)/clock-renesas_ra4.c
 c_src-$(CONFIG_CLOCK_MPC574XX) += $(drivers-clock)/clock-mpc574xx.c
 c_src-$(CONFIG_CLOCK_NXP_SIU) += $(drivers-clock)/clock-nxp_siu.c
+c_src-$(CONFIG_CLOCK_N76E003) += $(drivers-clock)/clock-n76e003.c

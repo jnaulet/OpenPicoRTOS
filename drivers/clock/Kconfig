@@ -52,4 +52,8 @@ config CLOCK_NXP_SIU
        depends on POWERPC
        bool "NXP SIU clock"
 
+config CLOCK_N76E003
+       depends on 8051
+       bool "Nuvoton N76E003 clock"
+
 endmenu
