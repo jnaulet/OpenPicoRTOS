@@ -353,22 +353,14 @@ CLEAN_DIRS  +=
 CLEAN_FILES +=
 
 # Directories & files removed with 'make mrproper'
-MRPROPER_DIRS  += include/config include/generated
-MRPROPER_FILES += .config .config.old tags TAGS cscope* GPATH GTAGS GRTAGS GSYMS
+MRPROPER_DIRS  += include/config include/generated scripts/basic scripts/kconfig
+MRPROPER_FILES += .config .config.old
 
 # clean - Delete most, but leave enough to build external modules
 #
-clean: rm-dirs  := $(CLEAN_DIRS)
-clean: rm-files := $(CLEAN_FILES)
-clean-dirs      := $(addprefix _clean_, $(clean-dirs))
-
-PHONY += $(clean-dirs) clean archclean
-$(clean-dirs):
-	$(Q)$(MAKE) $(clean)=$(patsubst _clean_%,%,$@)
-
-clean: $(clean-dirs)
-	$(call cmd,rmdirs)
-	$(call cmd,rmfiles)
+PHONY += clean
+clean:
+	$(Q)$(MAKE) -f $(srctree)/scripts/$(build_script) __clean src=$(CURDIR)
 	@find . $(RCS_FIND_IGNORE) \
 		\( -name '*.[oas]' -o -name '.*.cmd' \
 		-o -name '.*.d' -o -name '.*.tmp' -o -name '*.mod.c' \
@@ -377,17 +369,9 @@ clean: $(clean-dirs)
 
 # mrproper - Delete all generated files, including .config
 #
-mrproper: rm-dirs  := $(wildcard $(MRPROPER_DIRS))
-mrproper: rm-files := $(wildcard $(MRPROPER_FILES))
-mrproper-dirs      := $(addprefix _mrproper_, scripts)
-
-PHONY += $(mrproper-dirs) mrproper
-$(mrproper-dirs):
-	$(Q)$(MAKE) $(clean)=$(patsubst _mrproper_%,%,$@)
-
-mrproper: clean $(mrproper-dirs)
-	$(call cmd,rmdirs)
-	$(call cmd,rmfiles)
+mrproper: clean
+	$(Q)rm -fR $(MRPROPER_DIRS)
+	$(Q)rm -f $(MRPROPER_FILES)
 
 # distclean
 #

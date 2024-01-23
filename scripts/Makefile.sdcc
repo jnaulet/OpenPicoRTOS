@@ -125,6 +125,29 @@ $(target): $(obj-y) FORCE
 targets += $(target)
 endif # target
 
+# Add clean targets
+# ---------------------------------------------------------------------------
+
+obj-clean := $(obj-y)
+obj-clean += $(obj-y:%.rel=%.asm)
+obj-clean += $(obj-y:%.rel=%.lst) 
+obj-clean += $(obj-y:%.rel=%.rst) 
+obj-clean += $(obj-y:%.rel=%.sym) 
+obj-clean += $(notdir $(obj-y:%.rel=%.adb))
+
+targets-clean := $(target)
+targets-clean += $(basename $(target)).cdb
+targets-clean += $(basename $(target)).hex
+targets-clean += $(basename $(target)).ihx
+targets-clean += $(basename $(target)).lk
+targets-clean += $(basename $(target)).map
+targets-clean += $(basename $(target)).mem
+targets-clean += $(basename $(target)).omf
+
+PHONY := __clean
+__clean:
+	rm -f $(obj-clean) $(targets-clean)
+
 # Add FORCE to the prequisites of a target to force it to be always rebuilt.
 # ---------------------------------------------------------------------------
 

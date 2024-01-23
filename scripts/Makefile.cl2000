@@ -140,6 +140,16 @@ $(target): $(obj-y) FORCE
 targets += $(target)
 endif # target
 
+# Add clean targets
+# ---------------------------------------------------------------------------
+
+obj-clean := $(obj-y)
+targets-clean := $(target)
+
+PHONY := __clean
+__clean:
+	rm -f $(obj-clean) $(targets-clean)
+
 # Add FORCE to the prequisites of a target to force it to be always rebuilt.
 # ---------------------------------------------------------------------------
 
