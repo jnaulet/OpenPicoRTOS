@@ -16,10 +16,17 @@ typedef enum {
     CLOCK_N76E003_FOSC_COUNT
 } clock_n76e003_fosc_t;
 
-#define CLOCK_N76E003_CKDIV_MAX 510
+typedef enum {
+    CLOCK_N76E003_FHIRC_16_0MHZ,
+    CLOCK_N76E003_FHIRC_16_6MHZ,
+    CLOCK_N76E003_FHIRC_COUNT
+} clock_n76e003_fhirc_t;
+
+#define CLOCK_N76E003_CLKDIV_MAX 510
 
 struct clock_settings {
     clock_n76e003_fosc_t fosc;
+    clock_n76e003_fhirc_t fhirc;
     unsigned long feclk; /* 0 is allowed */
     unsigned int clkdiv;
 };

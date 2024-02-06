@@ -8,16 +8,24 @@
 #define TA_KEY_INV 0x55
 
 #ifndef S_SPLINT_S
-__sfr __at(ADDR_TA)    TA;
-__sfr __at(ADDR_CKSWT) CKSWT;
-__sfr __at(ADDR_CKEN)  CKEN;
-__sfr __at(ADDR_CKDIV) CKDIV;
+__sfr __at(ADDR_TA)      TA;
+__sfr __at(ADDR_PCON)    PCON;
+__sfr __at(ADDR_RCTRIM0) RCTRIM0;
+__sfr __at(ADDR_RCTRIM1) RCTRIM1;
+__sfr __at(ADDR_CKSWT)   CKSWT;
+__sfr __at(ADDR_CKEN)    CKEN;
+__sfr __at(ADDR_CKDIV)   CKDIV;
 #else
 static unsigned char TA;
+static unsigned char PCON;
+static unsigned char RCTRIM0;
+static unsigned char RCTRIM1;
 static unsigned char CKSWT;
 static unsigned char CKEN;
 static unsigned char CKDIV;
 #endif
+
+#define PCON_POF (1 < 4)
 
 #define CKSWT_HIRCST (1 << 5)
 #define CKSWT_LIRCST (1 << 4)
@@ -35,13 +43,13 @@ static unsigned char CKDIV;
 #define CKCON_T0M    (1 << 3)
 #define CKCON_CLOEN  (1 << 1)
 
-#define FHIRC_FREQ_HZ 16000000ul
 #define FLIRC_FREQ_HZ 10000ul
 
 static struct {
     clock_freq_t fsys;
     clock_freq_t fosc;
     clock_freq_t feclk;
+    clock_freq_t fhirc;
 } clocks;
 
 static int enabled_and_stable_busywait(unsigned char mask)
@@ -75,7 +83,7 @@ static int ckswt_osc_fhirc(void)
     CKSWT = (unsigned char)CKSWT_OSC(0);
 
     /* clock */
-    clocks.fosc = (clock_freq_t)FHIRC_FREQ_HZ;
+    clocks.fosc = clocks.fhirc;
 
     return 0;
 }
@@ -125,6 +133,37 @@ static int ckswt_osc_flirc(void)
     return 0;
 }
 
+static int setup_fhirc(clock_n76e003_fhirc_t fhirc)
+{
+    picoRTOS_assert(fhirc < CLOCK_N76E003_FHIRC_COUNT, return -EINVAL);
+
+    unsigned int rctrim = (((unsigned int)RCTRIM0) << 1) |
+                          (((unsigned int)RCTRIM1) & 0x1u) - 15u;
+
+    unsigned char rctrim0 = (unsigned char)(rctrim >> 1);
+    unsigned char rctrim1 = (unsigned char)(rctrim & 0x1u);
+
+    if (fhirc == CLOCK_N76E003_FHIRC_16_0MHZ) {
+        clocks.fhirc = (clock_freq_t)16000000ul;
+        return 0;
+    }
+
+    /* trim */
+    TA = (unsigned char)TA_KEY;
+    TA = (unsigned char)TA_KEY_INV;
+    RCTRIM0 = rctrim0;
+
+    TA = (unsigned char)TA_KEY;
+    TA = (unsigned char)TA_KEY_INV;
+    RCTRIM1 = rctrim1;
+
+    /* clear POF */
+    PCON &= ~PCON_POF;
+    clocks.fhirc = (clock_freq_t)16600000ul;
+
+    return 0;
+}
+
 /* Function: clock_n76e003_init
  * Intializes the n76e003 clock system
  *
@@ -138,10 +177,13 @@ int clock_n76e003_init(struct clock_settings *settings)
 {
     picoRTOS_assert(settings->clkdiv > 0, return -EINVAL);
     picoRTOS_assert(settings->clkdiv == 1u || (settings->clkdiv & 0x1u) == 0, return -EINVAL);
-    picoRTOS_assert(settings->clkdiv <= (unsigned int)CLOCK_N76E003_CKDIV_MAX, return -EINVAL);
+    picoRTOS_assert(settings->clkdiv <= (unsigned int)CLOCK_N76E003_CLKDIV_MAX, return -EINVAL);
     picoRTOS_assert(settings->fosc < CLOCK_N76E003_FOSC_COUNT, return -EINVAL);
 
     int res;
+
+    if ((res = setup_fhirc(settings->fhirc)) < 0)
+        return res;
 
     switch (settings->fosc) {
     case CLOCK_N76E003_FOSC_FHIRC: res = ckswt_osc_fhirc(); break;
@@ -173,12 +215,9 @@ clock_freq_t clock_get_freq(clock_id_t clkid)
     case CLOCK_N76E003_FSYS: return clocks.fsys;
     case CLOCK_N76E003_FOSC: return clocks.fosc;
     case CLOCK_N76E003_FECLK: return clocks.feclk;
-    case CLOCK_N76E003_FHIRC: return (clock_freq_t)FHIRC_FREQ_HZ;
-    case CLOCK_N76E003_FLIRC: return (clock_freq_t)FLIRC_FREQ_HZ;
+    case CLOCK_N76E003_FHIRC: return clocks.fhirc;
     default: break;
     }
 
-    picoRTOS_break();
-    /*@notreached@*/
-    return (clock_freq_t)-EIO;
+    return (clock_freq_t)FLIRC_FREQ_HZ;
 }
