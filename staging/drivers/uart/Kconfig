@@ -1,3 +1,7 @@
 menu "UART drivers"
 
+config UART_N76E003
+       depends on 8051
+       bool "Nuvoton N76E003 series UART"
+
 endmenu
