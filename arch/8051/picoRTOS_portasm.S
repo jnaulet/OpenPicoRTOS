@@ -90,8 +90,7 @@ loop:
 	cjne a, dph, loop
 	.endm
 
-	.macro RESTORE_CONTEXT
-	RESTORE_CONTEXT_STEP1
+	.macro RESTORE_CONTEXT_STEP2
 	pop ar7
 	pop ar6
 	pop ar5
@@ -107,6 +106,11 @@ loop:
 	pop psw
 	dec sp			; ignore saved sp
 	pop a
+	.endm
+
+	.macro RESTORE_CONTEXT
+	RESTORE_CONTEXT_STEP1
+	RESTORE_CONTEXT_STEP2
 	.endm
 
 	;; *dptr++ = rS;
@@ -128,22 +132,22 @@ loop:
 
 	.area CSEG (CODE)
 
-	.globl Timer2_Handler
-Timer2_Handler:
+	.globl SysTick_Handler
+SysTick_Handler:
 	SAVE_CONTEXT
-	anl t2con, #0x7f
 	;; sp passed as _bp +1 (dpl:dph:b), ignore b
 	mov b, #0
 	lcall _picoRTOS_tick
 	RESTORE_CONTEXT
+	ACK_SYSTICK
 	reti
 
 	.globl Default_Handler
 Default_Handler:
-	SAVE_CONTEXT
+	SAVE_CONTEXT_STEP1
 	;; point to the right entry
 	mov a, _vn
-	mov b, #4
+	mov b, #5
 	mul ab
 	mov dptr, #_ISR_TABLE
 	add a, dpl
@@ -175,7 +179,7 @@ fn_priv:
 	mov b, #0
 	ret			; call fn(priv)
 epilogue:
-	RESTORE_CONTEXT
+	RESTORE_CONTEXT_STEP2
 	reti
 
 	.globl _arch_save_first_context
@@ -226,7 +230,7 @@ _arch_start_first_task:
 	;; mov dph, r6 -> already set
 	;; ignore b, r7
 	RESTORE_CONTEXT
-	setb ea			; enable interrupts
+	setb ea
 	ret
 
 	.globl _arch_syscall
@@ -269,7 +273,7 @@ _arch_syscall:
 	mov dpl, _bpl		; load back next xsp/dpl
 	mov dph, _bph		; load back next xsp/dph
 	RESTORE_CONTEXT
-	setb ea			; enable interrupts
+	setb ea
 	ret
 
 	.globl _arch_compare_and_swap

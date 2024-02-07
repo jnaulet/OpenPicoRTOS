@@ -9,7 +9,7 @@ include-$(CONFIG_8051) += -I$(arch-8051)/include
 
 # machines
 a_src-$(CONFIG_MACH_N76E003) += $(arch-8051)/mach-n76e003/startup.S
-c_src-$(CONFIG_MACH_N76E003) += $(arch-8051)/mach-n76e003/timer-t2.c
+c_src-$(CONFIG_MACH_N76E003) += $(arch-8051)/mach-n76e003/timer-wkt.c
 c_src-$(CONFIG_MACH_N76E003) += $(arch-8051)/mach-n76e003/interrupt.c
 a_src-$(CONFIG_MACH_UCSIM51) += $(arch-8051)/mach-ucsim_51/startup.S
 c_src-$(CONFIG_MACH_UCSIM51) += $(arch-8051)/mach-mcs51/timer-t2.c

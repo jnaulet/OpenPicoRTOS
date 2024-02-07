@@ -54,16 +54,6 @@ picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
     return arch_save_first_context(stack, fn, priv);
 }
 
-/* cppcheck-suppress constParameter */
-void arch_idle(void *null)
-{
-    arch_assert_void(null == NULL);
-
-    for (;;)
-        /* setting IDL here will stop timer2, unfortunately */
-        ASM(" nop");
-}
-
 /* ATOMIC OPS EMULATION */
 
 picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr)

@@ -1,7 +1,7 @@
 	;; startup is handled by sdcc, just define
 	;; vectors here (for the moment)
 	.globl Default_Handler
-	.globl Timer2_Handler
+	.globl SysTick_Handler
 	.globl __sdcc_gsinit_startup
 	.globl _vn
 
@@ -20,7 +20,7 @@ Reset_Handler:
 	VECTOR #2, Default_Handler		; INT1# Pin
 	VECTOR #3, Default_Handler		; Timer 1 Overflow
 	VECTOR #4, Default_Handler		; USART0 Rx & Tx
-	VECTOR #5, Timer2_Handler		; Timer 2 Overflow
+	VECTOR #5, SysTick_Handler		; Timer 2 Overflow
 	VECTOR #6, Default_Handler		; WAKEUP / WU2 Pin or USB Resume
 	VECTOR #7, Default_Handler		; USART1 Rx & Tx
 	VECTOR #8, Default_Handler		; USB

@@ -163,9 +163,7 @@
 #define DEVICE_INTERRUPT_VECTOR_COUNT 18
 #define DEVICE_DEFAULT_SYSCLK_HZ      16000000ul
 
-/* TIMER2 REGs */
-
-#define ADDR_xIE_wET2 ADDR_EIE
-#define xIE_ET2       (1 << 7)
+/* selectable systick management */
+extern void arch_ack_systick(void);
 
 #endif

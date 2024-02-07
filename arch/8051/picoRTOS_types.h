@@ -15,7 +15,7 @@ typedef unsigned int picoRTOS_cycles_t;
 typedef int picoRTOS_intptr_t;
 
 #define ARCH_INTIAL_STACK_COUNT 20
-#define ARCH_MIN_STACK_COUNT    (ARCH_INTIAL_STACK_COUNT + 2)
+#define ARCH_MIN_STACK_COUNT    (ARCH_INTIAL_STACK_COUNT + 8)
 
 /* no cache */
 #define ARCH_L1_DCACHE_LINESIZE sizeof(unsigned char)

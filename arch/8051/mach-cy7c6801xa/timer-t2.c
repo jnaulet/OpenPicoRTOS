@@ -87,3 +87,12 @@ void arch_delay_us(unsigned long n)
     while (ncycles-- != 0)
         ASM(" nop");
 }
+
+/* cppcheck-suppress constParameter */
+void arch_idle(void *null)
+{
+    arch_assert_void(null == NULL);
+
+    for (;;)
+        ASM(" nop");
+}

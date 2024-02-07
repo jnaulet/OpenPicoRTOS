@@ -21,4 +21,21 @@ config XDATA_SIZE
        depends on MACH_CY7C6801xA
        default 2048
 
+choice
+        prompt "N76E003 System Timer"
+        default N76E003_TIMER_WKT
+        depends on MACH_N76E003
+
+config N76E003_TIMER_T2
+       bool "Use T2 timer"
+       help
+         Beware, the max TICK_HZ on this system is 500Hz
+
+config N76E003_TIMER_WKT
+       bool "Use Wakeup timer"
+       help
+         Beware, the max TICK_HZ with this option is 100Hz
+
+endchoice
+
 endmenu
