@@ -2,6 +2,7 @@ target := n76e003.ihx
 debug := $(target:%.ihx=debug/%.hex)
 
 c_src-y += main.c
+c_src-y += n76e003.c
 
 ifneq ($(skip-makefile),1)
 PWD := $(shell pwd)
@@ -39,13 +40,13 @@ a_dep-y += $(patsubst -I%/include, %/include/macros.S, \
             $(filter %/include,$(asflags-y)))
 
 $(local-y): $(a_src-y) $(a_dep-y) $(c_src-y)
-	mkdir -p $(dir $@)
-	cp -f $^ $(sort $(call cmd_dep_h_c,$(c_src-y))) $(dir $@)
+	install -D -m 0644 -t $(dir $@) $^ $(sort $(call cmd_dep_h_c,$(c_src-y)))
 
 $(debug): $(local-y)
 	mkdir -p $(dir $@)/generated
 	cp -f Makefile.debug $(dir $@)/Makefile
 	cp -f $(dir $@)/autoconf.h $(dir $@)/generated
+	rm -f $(dir $@)/autoconf.h
 	make -C $(dir $@)
 
 .PHONY: $(local-y)
