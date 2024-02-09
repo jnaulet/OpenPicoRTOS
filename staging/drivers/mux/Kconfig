@@ -1,3 +1,7 @@
 menu "MUX drivers"
 
+config MUX_N76E003
+       depends on 8051
+       bool "Nuvoton N76E003 series MUX"
+
 endmenu
