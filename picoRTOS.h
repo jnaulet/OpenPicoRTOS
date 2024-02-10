@@ -104,10 +104,10 @@ void picoRTOS_flush_dcache(void *addr, size_t n);
 /* Macro: picoRTOS_assert(x, or_else)
  * Returns x, throws a debug exception & executes or_else if x is false,
  * unless -DNDEBUG */
-# define picoRTOS_assert(x, or_else)            \
-    if (!(x)) {                                   \
-        picoRTOS_break(); /*@notreached@*/          \
-        or_else;                                    \
+# define picoRTOS_assert(x, or_else)                \
+    if (!(x)) {                                       \
+        picoRTOS_break(); /*@notreached@*/              \
+        { or_else; }                                    \
     }
 /* Macro: picoRTOS_assert_void(x)
  * Throws a debug exception if x is false, unless -DNDEBUG */
@@ -123,16 +123,16 @@ void picoRTOS_flush_dcache(void *addr, size_t n);
 # define picoRTOS_break() for (;;) {}
 # define picoRTOS_assert(x, or_else) if (!(x)) { or_else; }
 # define picoRTOS_assert_void(x) {}
-# define picoRTOS_assert_fatal(x, or_else)      \
-    if (!(x)) {                                   \
-        picoRTOS_suspend();                         \
-        picoRTOS_break(); /*@notreached@*/          \
-        or_else;                                    \
+# define picoRTOS_assert_fatal(x, or_else)          \
+    if (!(x)) {                                       \
+        picoRTOS_suspend();                             \
+        picoRTOS_break(); /*@notreached@*/              \
+        { or_else; }                                    \
     }
-# define picoRTOS_assert_void_fatal(x) \
-    if (!(x)) {                          \
-        picoRTOS_suspend();                \
-        picoRTOS_break();                  \
+# define picoRTOS_assert_void_fatal(x)                           \
+    if (!(x)) {                                                    \
+        picoRTOS_suspend();                                          \
+        picoRTOS_break();                                            \
     }
 #endif
 
