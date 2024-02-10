@@ -14,13 +14,13 @@ PWD := $(shell pwd)
 PICORTOS_SRC := path/to/OpenPicoRTOS
 
 all: $(target)
-        @
+	@
 
 $(target): FORCE
-        $(Q)$(MAKE) -C $(PICORTOS_SRC) O=$(PWD)
+	$(Q)$(MAKE) -C $(PICORTOS_SRC) O=$(PWD)
 
 %:
-        $(Q)$(MAKE) -C $(PICORTOS_SRC) O=$(PWD) $@
+	$(Q)$(MAKE) -C $(PICORTOS_SRC) O=$(PWD) $@
 
 PHONY += FORCE
 FORCE:
