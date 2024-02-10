@@ -2,5 +2,5 @@
 	.equ INITIAL_IE, 0xa0
 
 	.macro ACK_SYSTICK
-	anl 0x8f, #0xef
+	anl t2con, #0x7c
 	.endm

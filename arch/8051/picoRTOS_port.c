@@ -72,7 +72,7 @@ extern struct {
 
 void arch_register_interrupt(picoRTOS_irq_t irq, arch_isr_fn fn, void *priv)
 {
-    arch_assert_void(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT);
+    arch_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return );
 
     ISR_TABLE[irq].fn = fn;
     ISR_TABLE[irq].priv = priv;

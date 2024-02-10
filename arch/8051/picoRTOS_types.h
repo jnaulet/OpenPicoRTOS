@@ -14,8 +14,8 @@ typedef unsigned int picoRTOS_cycles_t;
 
 typedef int picoRTOS_intptr_t;
 
-#define ARCH_INTIAL_STACK_COUNT 20
-#define ARCH_MIN_STACK_COUNT    (ARCH_INTIAL_STACK_COUNT + 8)
+#define ARCH_INTIAL_STACK_COUNT 17
+#define ARCH_MIN_STACK_COUNT    (ARCH_INTIAL_STACK_COUNT + 5)
 
 /* no cache */
 #define ARCH_L1_DCACHE_LINESIZE sizeof(unsigned char)
@@ -25,7 +25,7 @@ typedef int picoRTOS_intptr_t;
 # define ASM(x) {}
 #else
 # define ASM(x) { __asm__ (x); }
-# define arch_break() ASM(" .word 0x80fe") /* branch to self */
+# define arch_break() ASM(" sjmp .") /* branch to self */
 #endif
 
 #endif

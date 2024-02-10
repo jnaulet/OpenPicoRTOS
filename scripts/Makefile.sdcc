@@ -48,7 +48,7 @@ endif
 
 inctree     = $(patsubst %/,%,$(addprefix -I,$(dir $(1))))
 
-c_flags     = --std-c99 $(opt-y) $(debug-y) $(RTOSINCLUDE) \
+c_flags     = --std-c99 --fomit-frame-pointer $(opt-y) $(debug-y) $(RTOSINCLUDE) \
               $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
               $(ccflags-y) $(subst ",,$(CONFIG_EXTRA_CFLAGS)) $(ccattributes)
 

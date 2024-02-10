@@ -5,7 +5,6 @@
 	.globl _picoRTOS_tick
 	.globl _picoRTOS_syscall
 
-	.globl _bp
 	.globl _vn
 	.globl __start__stack
 
@@ -20,13 +19,10 @@
 
 	.macro SAVE_CONTEXT_STEP1
 	push a
-	mov a, sp
-	push a
 	push psw
 	push dpl
 	push dph
 	push b
-	push _bp
 	push ar0
 	push ar1
 	push ar2
@@ -41,12 +37,12 @@
 	.macro DPTR_FROM_SP
 	mov r0, #__start__stack
 	mov dpl, @r0
-	mov r0, #__start__stack + 1
+	inc r0
 	mov dph, @r0
+	mov b, #0
 	.endm
 
-	.macro SAVE_CONTEXT ?loop
-	SAVE_CONTEXT_STEP1
+	.macro SAVE_CONTEXT_STEP2 ?loop
 	DPTR_FROM_SP
 loop:
 	;; emtpy stack to dptr++
@@ -56,6 +52,11 @@ loop:
 	;; until sp is back to "zero"
 	mov a, sp
 	cjne a, #__start__stack - 1, loop
+	.endm
+
+	.macro SAVE_CONTEXT
+	SAVE_CONTEXT_STEP1
+	SAVE_CONTEXT_STEP2
 	.endm
 
 	;; --dptr
@@ -99,12 +100,10 @@ loop:
 	pop ar2
 	pop ar1
 	pop ar0
-	pop _bp
 	pop b
 	pop dph
 	pop dpl
 	pop psw
-	dec sp			; ignore saved sp
 	pop a
 	.endm
 
@@ -135,8 +134,6 @@ loop:
 	.globl SysTick_Handler
 SysTick_Handler:
 	SAVE_CONTEXT
-	;; sp passed as _bp +1 (dpl:dph:b), ignore b
-	mov b, #0
 	lcall _picoRTOS_tick
 	RESTORE_CONTEXT
 	ACK_SYSTICK
@@ -155,27 +152,31 @@ Default_Handler:
 	mov a, dph
 	addc a, #0
 	mov dph, a
-	;; get fn to r6:r7
+	;; get fn to r3:r4
 	movx a, @dptr
-	mov r6, a
+	mov r3, a
 	inc dptr
-	movx a, @dptr
-	mov r7, a
-	inc dptr
-	;; get priv in r4:r5
 	movx a, @dptr
 	mov r4, a
 	inc dptr
+	;; get priv in r5:r6:r7
 	movx a, @dptr
 	mov r5, a
+	inc dptr
+	movx a, @dptr
+	mov r6, a
+	;; inc dptr
+	;; movx a, @dptr
+	;; mov r7, a
 	;; prepare to call fn(priv)
 	lcall fn_priv
 	sjmp epilogue
 fn_priv:
-	push ar6
-	push ar7
-	mov dpl, r4
-	mov dph, r5
+	push ar3
+	push ar4
+	mov dpl, r5
+	mov dph, r6
+	;; mov b, r7
 	mov b, #0
 	ret			; call fn(priv)
 epilogue:
@@ -184,9 +185,6 @@ epilogue:
 
 	.globl _arch_save_first_context
 _arch_save_first_context:
-	push _bp
-	mov _bp, sp
-	dec sp			; ignore prev _bp
 	dec sp			; ignore ret_h
 	dec sp			; ignore ret_l
 	;; get stacked params
@@ -206,12 +204,10 @@ _arch_save_first_context:
 	MOVX_DPTRxx #2		; r2
 	MOVX_DPTRxx #1		; r1
 	MOVX_DPTRxx #0		; r0
-	MOVX_DPTRxx _bp		; _bp
 	MOVX_DPTRxx #0		; b   : 0xff & (priv >> 16)
 	MOVX_DPTRxx r2		; dph : 0xff & (priv >> 8)
 	MOVX_DPTRxx r1		; dpl : 0xff & priv
 	MOVX_DPTRxx #0		; psw
-	MOVX_DPTRxx #83		; sp
 	MOVX_DPTRxx #65		; a
 	MOVX_DPTRxx r4		; reti_h : 0xff & (fn >> 8)
 	MOVX_DPTRxx r3		; reti_l : 0xff & fn
@@ -220,15 +216,13 @@ _arch_save_first_context:
 	MOVX_DPTRxx r6		; xsp_h : 0xff & (stack >> 8)
 	MOVX_DPTRxx r5		; xsp_l : 0xff & stack
 	;; restore sp & ret
-	mov sp, _bp
-	pop _bp
+	mov a, sp
+	add a, #7
+	mov sp, a
 	ret
 
 	.globl _arch_start_first_task
 _arch_start_first_task:
-	;; mov dpl, r5 -> already set
-	;; mov dph, r6 -> already set
-	;; ignore b, r7
 	RESTORE_CONTEXT
 	setb ea
 	ret
@@ -236,42 +230,44 @@ _arch_start_first_task:
 	.globl _arch_syscall
 _arch_syscall:
 	clr ea			; simulate interrupt entrance
-	push _bp
-	mov _bp, sp
-	mov r7, dpl		; r7: syscall
-	DPTR_FROM_SP		; dptr: stack
-	;; reserve space on top of xsp
+	SAVE_CONTEXT_STEP1
+	;; reserve space on xstack
+	DPTR_FROM_SP
 	mov a, sp
 	clr c
-	subb a, #__start__stack
+	subb a, #__start__stack - 1
 	mov r0, a
 	ADD_DPTR r0
-	ADD_DPTR #15
-	;; stack parameters
-	mov a, _bp
-	add a, #0xfb
+	;; fish for caller params
+	;; priv on stack
+	mov a, sp
+	add a, #0xef
 	mov r0, a
-	mov a, @r0
-	push a			; priv >> 16
+	mov a, @r0		; priv
+	push a
 	inc r0
-	mov a, @r0
-	push a			; priv >> 8
+	mov a, @r0		; priv
+	push a
 	inc r0
-	mov a, @r0
-	push a			; priv
-	push ar7		; syscall
-	mov b, #0
+	mov a, @r0		; priv
+	push a
+	;; dpl on stack
+	mov a, r0
+	add a, #0x5
+	mov r0, a
+	mov a, @r0		; syscall
+	push a
 	lcall _picoRTOS_syscall
+	;; restore caller stack
 	mov a, sp
 	add a, #0xfc
 	mov sp, a
-	pop _bp
 	;; post-treatment
-	mov _bpl, dpl		; store next xsp_l
-	mov _bph, dph		; store next xsp_h
-	SAVE_CONTEXT
-	mov dpl, _bpl		; load back next xsp/dpl
-	mov dph, _bph		; load back next xsp/dph
+	mov r5, dpl		; save next dptr
+	mov r6, dph
+	SAVE_CONTEXT_STEP2
+	mov dpl, r5		; load back next dptr
+	mov dph, r6
 	RESTORE_CONTEXT
 	setb ea
 	ret
@@ -300,11 +296,7 @@ _arch_compare_and_swap_exit:
 	.area DSEG (DATA)
 
 	.globl _vn
-_vn:
-	.ds 1			; vector number
-
-_bpl:	.ds 1
-_bph:	.ds 1
+_vn:	.ds 1			; vector number
 
 	.area XSEG (XDATA)
 
