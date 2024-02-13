@@ -2,7 +2,7 @@ AS := sdas8051 -jy -w -los
 CC := sdcc
 BASENAME := ucsim_51
 
-CFLAGS := --std-c99 -mmcs51 --model-large --stack-auto --int-long-reent
+CFLAGS := --std-c99 -mmcs51 --model-large --stack-auto --int-long-reent --fomit-frame-pointer
 CFLAGS += --debug --nooverlay --nogcse --nolabelopt --noinduction --noloopreverse --no-peep
 CFLAGS += -I. -I"$(sdcc_path)\include" -D"__ATTRIBUTE_ALIGNED__(x)="
 
