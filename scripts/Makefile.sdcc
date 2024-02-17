@@ -31,6 +31,7 @@ ldflags-$(CONFIG_DEBUG) += --debug
 ccattributes := -D"__ATTRIBUTE_ALIGNED__(x)="
 ccattributes += -D"__ATTRIBUTE_UNUSED__="
 ccattributes += -D"__ATTRIBUTE_NAKED__=__naked"
+ccattributes += -D"__ATTRIBUTE_PACKED__="
 
 # map ?
 

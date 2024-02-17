@@ -24,6 +24,7 @@ ccflags-$(CONFIG_NDEBUG) += -DNDEBUG
 ccattributes := -D"__ATTRIBUTE_ALIGNED__(x)"=
 ccattributes += -D__ATTRIBUTE_UNUSED__=
 ccattributes += -D__ATTRIBUTE_NAKED__=
+ccattributes += -D__ATTRIBUTE_PACKED__=
 
 # The filename Kbuild has precedence over Makefile
 kbuild-dir := $(if $(filter /%,$(src)),$(src),$(srctree)/$(src))

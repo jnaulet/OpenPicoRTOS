@@ -30,6 +30,7 @@ define-$(CONFIG_NDEBUG) += -DNDEBUG
 ccattributes := -D"__ATTRIBUTE_ALIGNED__(x)=__attribute__((aligned(x)))"
 ccattributes += -D"__ATTRIBUTE_UNUSED__=__attribute__((unused))"
 ccattributes += -D"__ATTRIBUTE_NAKED__=__attribute__((naked))"
+ccattributes += -D"__ATTRIBUTE_PACKED__=__attribute__((packed))"
 
 # map
 ifeq ($(CONFIG_MAP),y)
