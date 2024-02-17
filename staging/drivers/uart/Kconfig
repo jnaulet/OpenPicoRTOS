@@ -4,4 +4,8 @@ config UART_N76E003
        depends on 8051
        bool "Nuvoton N76E003 series UART"
 
+config UART_AVR_IRQDRIVEN
+       depends on AVR
+       bool "AVR/ATmega series UART (irq driven)"
+
 endmenu
