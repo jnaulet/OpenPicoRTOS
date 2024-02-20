@@ -45,7 +45,34 @@ More information here: https://github.com/jnaulet/OpenPicoRTOS/blob/main/etc/Req
 To create a project compatible with OpenPicoRTOS you first need to add a specific kind of Makefile to your project.   
 You can find a very basic template here: https://github.com/jnaulet/OpenPicoRTOS/blob/v1.9.x/etc/Makefile.template
 
-This offers you access to a new set of targets for the OpenPicoRTOS build system directly in your project directory:
+### Step2: configuration of your project
+
+Simply type:
+
+    # make menuconfig
+
+![screenshot](etc/images/make-menuconfig.png)
+
+And configure your project according to your needs.
+You can find a lot of examples in the demo directory.
+
+### Step3: Compilation of your project
+
+    # make
+
+### Step4: Static analysis of your project
+
+    # make staticcheck
+
+or, alternatively:
+
+    # make splint
+    # make cppcheck
+
+### Bonus: all availables targets
+
+Using the template makefile automatically offers you access to a new set of targets for the OpenPicoRTOS build system,
+directly in your project directory:
 
 ```
 Cleaning targets:
@@ -88,28 +115,6 @@ Static analysis targets:
   make V=0|1 [targets] 0 => quiet build (default), 1 => verbose build
 
 ```
-
-### Step2: configuration of your project
-
-Simply type:
-
-    # make menuconfig
-
-And configure your project according to your needs.
-You can find a lot of examples in the demo directory.
-
-### Step3: Compilation of your project
-
-    # make
-
-### Step4: Static analysis of your project
-
-    # make staticcheck
-
-or, alternatively:
-
-    # make splint
-    # make cppcheck
 
 ## API Documentation
 
