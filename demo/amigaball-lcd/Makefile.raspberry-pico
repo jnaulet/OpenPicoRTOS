@@ -1,0 +1,20 @@
+board := raspberry-pico
+target := $(board).elf
+
+include Makefile.common
+
+ifeq ($(skip-makefile),)
+# RP2040 UF2
+ELF2UF2 := elf2uf2/elf2uf2
+TARGETS += raspberry-pico.uf2
+
+all: $(board).uf2
+	@
+
+%.uf2: %.elf $(ELF2UF2)
+	$(ELF2UF2) $< $@
+
+$(ELF2UF2):
+	g++ elf2uf2/main.cpp -o $@
+
+endif

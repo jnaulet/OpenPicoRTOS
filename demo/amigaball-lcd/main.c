@@ -1,8 +1,12 @@
 #include "board.h"
 #include "picoRTOS.h"
 
+#define CONFIG_SHORT_STACK_COUNT   (CONFIG_DEFAULT_STACK_COUNT / 2)
 
-#define CONFIG_SHORT_STACK_COUNT   128
+static struct render {
+    long x;
+    long y;
+} render;
 
 static uint16_t bgcolxy(long x, long y)
 {
@@ -18,20 +22,31 @@ static uint16_t bgcolxy(long x, long y)
 
 /*@external@*/ extern long amigaBall(long x_, long y_, long ph_);
 
-static void amigaBall_render(uint16_t *pfb, long px, long py, long ph)
+static void amigaBall_render_zero(void)
+{
+    render.x = 0;
+    render.y = 0;
+}
+
+static void amigaBall_render_n(uint16_t *pfb, long px, long py, long ph, size_t n)
 {
     /* Render into framebuffer */
-    long x, y;
+    for (; render.y < LCD_HEIGHT; render.y++) {
+        for (; render.x < LCD_WIDTH; render.x++) {
 
-    for (y = 0; y < LCD_HEIGHT; y++)
-        for (x = 0; x < LCD_WIDTH; x++) {
-            long fx = (x * 256) - px;
-            long fy = (y * 256) - py;
+            long fx = (render.x * 256) - px;
+            long fy = (render.y * 256) - py;
             long c = amigaBall(fx, fy, ph);
 
             if (c >= 0) *pfb++ = LCD_PX16((uint16_t)c);
-            else *pfb++ = LCD_PX16(bgcolxy(x, y));
+            else *pfb++ = LCD_PX16(bgcolxy(render.x, render.y));
+
+            if (n-- == 0)
+                return;
         }
+        /* Quick & dirty fix */
+        render.x = 0;
+    }
 }
 
 #ifndef LCD_FPS
@@ -40,6 +55,8 @@ static void amigaBall_render(uint16_t *pfb, long px, long py, long ph)
 
 static void lcd_main(void *priv)
 {
+    picoRTOS_assert_fatal(priv != NULL, return );
+
     picoRTOS_tick_t ref;
     static struct lcd lcd;
     struct lcd_phys *phys = (struct lcd_phys*)priv;
@@ -58,17 +75,25 @@ static void lcd_main(void *priv)
 
     for (;;) {
 
+        int n = LCD_FB_DIVIDER;
+
+        /* init */
+        amigaBall_render_zero();
+        lcd_zero(&lcd);
+
         /* Render ball & refresh */
-        (void)amigaBall_render(lcd.fb, px, py, ph);
-        (void)lcd_refresh(&lcd);
+        while (n-- != 0) {
+            (void)amigaBall_render_n(lcd.fb, px, py, ph, (size_t)LCD_FB_PIXELS);
+            (void)lcd_refresh(&lcd);
+        }
 
         /* Update ball position */
         px += dx;
         py += dy;
 
         /* Rotation */
-        if (dx > 0) ph += 256;
-        else ph -= 256;
+        if (dx > 0) ph += 256l;
+        else ph -= 256l;
 
         /* Floor */
         if (py > (16l * 256l)) {
@@ -89,7 +114,7 @@ static void lcd_main(void *priv)
         }
 
         /* Apply gravity */
-        dy += 16;
+        dy += 16l;
 
         /* LCD_FPS refresh rate */
         picoRTOS_sleep_until(&ref, (picoRTOS_tick_t)(CONFIG_TICK_HZ / LCD_FPS));
@@ -98,6 +123,8 @@ static void lcd_main(void *priv)
 
 static void led_main(void *priv)
 {
+    picoRTOS_assert_fatal(priv != NULL, return );
+
     struct gpio *LED = (struct gpio*)priv;
 
     for (;;) {
@@ -115,12 +142,12 @@ static void led_main(void *priv)
 
 static void wd_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert_fatal(priv != NULL, return );
 
     struct wd *WD = (struct wd*)priv;
 
     for (;;) {
-        picoRTOS_sleep(PICORTOS_DELAY_MSEC(7));
+        picoRTOS_sleep(PICORTOS_DELAY_MSEC(7l));
         wd_refresh(WD);
     }
 }

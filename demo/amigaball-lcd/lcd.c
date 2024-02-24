@@ -1,7 +1,6 @@
 #include "lcd.h"
 #include "picoRTOS.h"
 
-
 #define LCD_MODE_CMD(ctx)   gpio_write((ctx)->dc, false)
 #define LCD_MODE_DATA(ctx)  gpio_write((ctx)->dc, true)
 #define LCD_CS_ENABLE(ctx)  gpio_write((ctx)->cs, false)
@@ -56,16 +55,29 @@ static int lcd_xfer8(struct lcd *ctx, uint_least8_t x)
 static int lcd_xfer16(struct lcd *ctx, uint16_t x)
 {
     int res = 0;
+    size_t xfered = 0;
     uint16_t dummy = 0;
     int timeout = (int)PICORTOS_DELAY_SEC(1);
+
+    uint8_t *x8 = (uint8_t*)&x;
 
     /* word mode */
     (void)lcd_16bit(ctx);
 
+    /* FIXME */
+#if defined(CONFIG_AVR) && !defined(S_SPLINT_S)
+    x = __builtin_bswap16(x);
+#endif
+
     /* xfer word */
-    while (timeout-- != 0)
-        if ((res = spi_xfer(ctx->spi, &dummy, &x, sizeof(x))) != -EAGAIN)
-            break;
+    while (xfered != sizeof(x) && timeout-- != 0) {
+        if ((res = spi_xfer(ctx->spi, &dummy, &x8[xfered], sizeof(x) - xfered)) == -EAGAIN) {
+            picoRTOS_schedule();
+            continue;
+        }
+
+        xfered += (size_t)res;
+    }
 
     picoRTOS_assert(timeout != -1, return -EBUSY);
     return res;
@@ -91,6 +103,8 @@ static int lcd_u16(struct lcd *ctx, uint16_t x)
 
 static void lcd_set_addr(struct lcd *ctx, long x, long y, long w, long h)
 {
+    LCD_CS_ENABLE(ctx);
+
     /* x */
     (void)lcd_reg(ctx, (uint_least8_t)0x2a);
     (void)lcd_u16(ctx, (uint16_t)(x + 1l));
@@ -101,17 +115,26 @@ static void lcd_set_addr(struct lcd *ctx, long x, long y, long w, long h)
     (void)lcd_u16(ctx, (uint16_t)(y + h + 25l));
     /* end */
     (void)lcd_reg(ctx, (uint_least8_t)0x2c);
+
+    LCD_CS_DISABLE(ctx);
 }
 
 static void lcd_clear(/*@partial@*/ struct lcd *ctx, uint16_t color)
 {
-    size_t n = (size_t)(LCD_WIDTH * LCD_HEIGHT);
+    int n = LCD_FB_DIVIDER;
 
-    /* set fb to zero */
-    while (n-- != 0)
-        ctx->fb[n] = color;
+    lcd_zero(ctx);
 
-    (void)lcd_refresh(ctx);
+    while (n-- != 0) {
+
+        size_t i = (size_t)LCD_FB_PIXELS;
+
+        /* set fb to zero */
+        while (i-- != 0)
+            ctx->fb[i] = color;
+
+        (void)lcd_refresh(ctx);
+    }
 }
 
 static int lcd_run_init_seq(/*@partial@*/ struct lcd *ctx)
@@ -139,6 +162,9 @@ static int lcd_run_init_seq(/*@partial@*/ struct lcd *ctx)
         0x36, 0x78, 0xff,   /* memory data access control */
         0x29, 0xff,         /* display on */
         0x11, 0xff,         /* sleep out */
+#ifdef CONFIG_AVR
+        0x12, 0xff,         /* partial mode */
+#endif
         0xff
     };
 
@@ -153,6 +179,8 @@ static int lcd_run_init_seq(/*@partial@*/ struct lcd *ctx)
         while (*p != 0xff)
             (void)lcd_u8(ctx, (uint_least8_t)*p++);
     }
+
+    LCD_CS_DISABLE(ctx);
 
     /* Clear display */
     lcd_clear(ctx, (uint16_t)0);
@@ -179,16 +207,21 @@ int lcd_init(struct lcd *ctx, struct lcd_phys *phys)
     return lcd_run_init_seq(ctx);
 }
 
-int lcd_refresh(struct lcd *ctx)
+void lcd_zero(struct lcd *ctx)
 {
-    size_t xfered = 0;
-    int timeout = (int)PICORTOS_DELAY_MSEC(200l);
-    uint_least8_t *fb8 = (uint_least8_t*)ctx->fb;
-
     lcd_set_addr(ctx, 0, 0, LCD_WIDTH, LCD_HEIGHT);
 
     LCD_MODE_DATA(ctx);
     (void)lcd_16bit(ctx);
+}
+
+int lcd_refresh(struct lcd *ctx)
+{
+    size_t xfered = 0;
+    int timeout = (int)PICORTOS_DELAY_MSEC(2000l / (long)LCD_FPS);
+    uint_least8_t *fb8 = (uint_least8_t*)ctx->fb;
+
+    LCD_CS_ENABLE(ctx);
 
     while (xfered < sizeof(ctx->fb) && timeout-- != 0) {
         int res;
@@ -202,6 +235,7 @@ int lcd_refresh(struct lcd *ctx)
         xfered += (size_t)res;
     }
 
+    LCD_CS_DISABLE(ctx);
     picoRTOS_assert(timeout != -1, return -EBUSY);
     return 0;
 }

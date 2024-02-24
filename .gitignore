@@ -66,3 +66,5 @@ dkms.conf
 /demo/curiosity-2.0-pic32mz-ef/curiosity-2.0-pic32mz-ef.X/dist/
 *.uf2
 *.d_raw
+/demo/amigaball-lcd/arduino-nano-v3.debug/amigaball-lcd.X/build/
+/demo/amigaball-lcd/arduino-nano-v3.debug/amigaball-lcd.X/dist/

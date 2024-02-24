@@ -1,0 +1,65 @@
+# 1st: sources & targets
+target := arduino-nano-v3.elf
+debug  := arduino-nano-v3.debug/$(target)
+hex    := $(target:%.elf=%.hex)
+
+c_src-y += main.c
+c_src-y += lcd.c
+c_src-y += amigaball.c
+c_src-y += board/arduino-nano-v3.c
+
+# avoid double-inclusion
+ifneq ($(skip-makefile),1)
+PWD := $(shell pwd)
+PICORTOS_SRC := ../..
+TTY ?= /dev/ttyUSB0
+
+all: $(hex)
+	@
+
+$(target): FORCE
+	$(Q)$(MAKE) -C $(PICORTOS_SRC) O=$(PWD)
+
+$(hex): $(target)
+	avr-objcopy -O ihex -R .eeprom $< $@
+
+upload: $(hex)
+	avrdude -v -patmega328p -carduino -P$(TTY) \
+	-b115200 -D -Uflash:w:$<:i
+
+config:
+	ln -sf Makefile.atmega328p Kbuild
+	$(Q)$(MAKE) -C $(PICORTOS_SRC) O=$(PWD) arduino-nano-v3_defconfig
+
+clean: FORCE
+	$(Q)$(MAKE) -C $(PICORTOS_SRC) O=$(PWD) $@
+	@rm -f $(target) $(hex) *.map
+
+%:
+	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) $@
+
+PHONY += FORCE
+FORCE:
+
+else
+#
+# extend build for debug
+#
+$(target): $(debug)
+
+# Copy sources to debug/
+$(debug): $(a_src-y) $(a_dep-y) $(c_src-y)
+	install -D -m 0644 -t $(dir $@) $^ $(sort $(call cmd_dep_h_c,$(c_src-y)))
+	mkdir -p $(dir $@)/generated
+	cp -f $(dir $@)/autoconf.h $(dir $@)/generated
+	rm -f $(dir $@)/autoconf.h
+#	Some cflags
+	@echo "== Additional options =="
+	@echo '$(ccattributes)'
+	@echo "== =="
+
+PHONY += $(debug)
+
+endif
+
+.PHONY: $(PHONY)

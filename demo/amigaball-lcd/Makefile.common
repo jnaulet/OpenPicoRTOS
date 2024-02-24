@@ -1,0 +1,33 @@
+# to include
+c_src-y += main.c
+c_src-y += lcd.c
+c_src-y += amigaball.c
+c_src-y += board/$(board).c
+
+# avoid double-inclusion
+ifneq ($(skip-makefile),1)
+PWD := $(shell pwd)
+PICORTOS_SRC := ../..
+
+all: $(target)
+	@
+
+.config:
+	$(Q)$(MAKE) -C $(PICORTOS_SRC) O=$(PWD) $(board)_defconfig
+
+$(target): .config FORCE
+	ln -sf Makefile.$(board) Makefile
+	$(Q)$(MAKE) -C $(PICORTOS_SRC) O=$(PWD)
+
+config: FORCE
+	$(Q)$(MAKE) -C $(PICORTOS_SRC) O=$(PWD) $(board)_defconfig
+
+%:
+	$(Q)$(MAKE) -C $(PICORTOS_SRC) O=$(PWD) $@
+
+PHONY += FORCE
+FORCE:
+
+endif
+
+.PHONY: $(PHONY)

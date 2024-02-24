@@ -1,0 +1,7 @@
+board := launchxl-f28379d
+target := $(board).elf
+
+include Makefile.common
+
+ifeq ($(skip-makefile),)
+endif
