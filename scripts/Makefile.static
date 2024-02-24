@@ -35,7 +35,8 @@ inctree        = $(patsubst %/,%,$(addprefix -I,$(dir $(1))))
 
 c_flags        = $(RTOSINCLUDE) \
 	         $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
-                 $(filter -I%,$(ccflags-y)) $(filter -D%,$(ccflags-y)) $(ccattributes)
+                 $(filter -I%,$(ccflags-y)) $(filter -D%,$(ccflags-y)) \
+                 $(subst ",,$(CONFIG_EXTRA_CFLAGS)) $(ccattributes)
 
 SPLINTFLAGS := -checks +unixlib $(c_flags)
 CPPCHECKFLAGS := --enable=all --inline-suppr $(c_flags)
