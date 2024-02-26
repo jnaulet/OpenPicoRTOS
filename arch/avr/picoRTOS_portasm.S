@@ -1,8 +1,5 @@
 	/* Declarations */
-	.extern picoRTOS_tick
 	.extern picoRTOS_syscall
-
-	#include "picoRTOS_device.h"
 
 	.equ GPIOR1, 0x2a
 	.equ GPIOR2, 0x2b
@@ -146,22 +143,6 @@ arch_start_first_task:
 	RESTORE_CONTEXT
 	reti	/* auto-enable interrupts */
 
-	.type arch_SYSTICK, %function
-	.global arch_SYSTICK
-arch_SYSTICK:
-	/* ack RTC OVF */
-	ldi r24, 0x1
-	sts ADDR_RTC + 0x3, r24
-	/* get task sp to r25:r24 */
-	in r25, GPIOR2
-	in r24, GPIOR1
-	/* execute tick */
-	call picoRTOS_tick
-	/* store back task sp */
-	out GPIOR2, r25
-	out GPIOR1, r24
-	ret
-
 	.type arch_syscall, %function
 	.global arch_syscall
 arch_syscall:
@@ -180,7 +161,11 @@ arch_syscall:
 	mov r25, r29
 	mov r24, r28
 	/* syscall */
+#ifdef __AVR_HAVE_JMP_CALL__
 	call picoRTOS_syscall
+#else
+	rcall picoRTOS_syscall
+#endif
 	/* jump out */
 	out GPIOR2, r25
 	out GPIOR1, r24
@@ -190,7 +175,7 @@ arch_syscall:
 	/* INTERRUPTS */
 
 	#include "picoRTOS_device.h"
-	
+
 	.global ISR_TABLE
 	.comm ISR_TABLE, DEVICE_INTERRUPT_VECTOR_COUNT, 4
 
