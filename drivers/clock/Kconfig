@@ -8,6 +8,10 @@ config CLOCK_ATMEGA328P
        depends on AVR
        bool "ATMega328P clock"
 
+config CLOCK_ATTINY88
+       depends on AVR
+       bool "ATTiny88 clock"
+
 config CLOCK_F28379X
        depends on C2000
        bool "TI TMS320F28379x clock"
