@@ -71,6 +71,13 @@ a_flags        = -Wp,-MD,$(depfile) $(debug-y) $(RTOSINCLUDE) \
 
 ld_flags       = $(LDFLAGS) $(ldflags-y) $(subst ",,$(CONFIG_EXTRA_LDFLAGS))
 
+dep_flags      = $(RTOSINCLUDE) \
+	         $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
+                 $(filter -I%,$(ccflags-y)) $(filter -D%,$(ccflags-y)) \
+                 $(subst ",,$(CONFIG_EXTRA_CFLAGS)) $(ccattributes)
+
+cmd_dep_h_c    = $(filter %.h,$(shell $(CC) $(dep_flags) -MM $(1)))
+
 ifneq ($(KBUILD_SRC),)
 # Create output directory if not already present
 _dummy := $(shell [ -d $(src) ] || mkdir -p $(src))
