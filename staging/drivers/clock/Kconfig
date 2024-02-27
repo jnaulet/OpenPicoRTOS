@@ -1,3 +1,7 @@
 menu "Clock drivers"
 
+config CLOCK_LGT8FX8P
+       depends on AVR
+       bool "LogicGreen LGT8FX8P clock"
+
 endmenu
