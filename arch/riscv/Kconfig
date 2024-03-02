@@ -8,8 +8,12 @@ choice
 config RV32IMAC
        bool "RISC-V RV32IMAC series"
 
+config RV32EC
+       bool "RISC-V RV32EC series"
+
 endchoice
 
 source arch/riscv/rv32imac/Kconfig
+source arch/riscv/rv32ec/Kconfig
 
 endmenu

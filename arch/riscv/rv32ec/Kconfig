@@ -1,0 +1,16 @@
+choice
+	prompt "RV32EC device"
+	depends on RV32EC
+
+config MACH_CH32V003
+       bool "WinChipHead CH32V003"
+
+endchoice
+
+config RV32EC_LIBGCC_DIV_MULT
+       bool "Provide libgcc files for software div & mult (older GCCs)"
+       default y
+       depends on RV32EC
+       help
+       On some older versions of GCC, software division & multiplication
+       is not implemented, this provides the files/hooks
