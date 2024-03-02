@@ -1,0 +1,27 @@
+target := mh-tiny.elf
+
+CC := avr-gcc
+
+AFLAGS := -g3 -x assembler-with-cpp -flto -mmcu=attiny88 -D__ATTiny88__
+CFLAGS := -Os -g3 -I. -Wpedantic -ffunction-sections -fdata-sections -flto -fno-fat-lto-objects -mmcu=attiny88 -D__ATTiny88__  -D"__ATTRIBUTE_ALIGNED__(x)=__attribute__((aligned(x)))" -D"__ATTRIBUTE_UNUSED__=__attribute__((unused))" -D"__ATTRIBUTE_NAKED__=__attribute__((naked))" -D"__ATTRIBUTE_PACKED__=__attribute__((packed))"
+LDFLAGS := -flto -fuse-linker-plugin -Wl,--gc-sections -mmcu=attiny88 -D__ATTiny88__ -lm
+
+a_files := $(wildcard *.S)
+c_files := $(wildcard *.c)
+
+o_files := $(a_files:%.S=%.o)
+o_files += $(c_files:%.c=%.o)
+
+all: $(target)
+
+$(target): $(o_files)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+%.o: %.S
+	$(CC) $(AFLAGS) -c $< -o $@
+
+clean:
+	rm -f *.o
