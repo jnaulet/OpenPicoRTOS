@@ -25,7 +25,7 @@ int gpio_avr_init(struct gpio *ctx, int base, size_t pin)
     picoRTOS_assert(pin < (size_t)8, return -EINVAL);
 
     ctx->base = (struct GPIO_AVR*)base;
-    ctx->pin = pin;
+    ctx->mask = (uint8_t)(1 << pin);
     ctx->invert = false;
 
     return 0;
@@ -53,21 +53,16 @@ int gpio_setup(struct gpio *ctx, struct gpio_settings *settings)
 
 void gpio_write(struct gpio *ctx, bool value)
 {
-    if (value ^ ctx->invert) ctx->base->PORT |= (1 << ctx->pin);
-    else ctx->base->PORT &= ~(1 << ctx->pin);
+    if (value ^ ctx->invert) ctx->base->PORT |= ctx->mask;
+    else ctx->base->PORT &= ~ctx->mask;
 }
 
 bool gpio_read(struct gpio *ctx)
 {
-    uint8_t mask = (uint8_t)(1 << ctx->pin);
-
-    return ((ctx->base->PIN & mask) != 0) ^ ctx->invert;
+    return ((ctx->base->PIN & ctx->mask) != 0) ^ ctx->invert;
 }
 
 void gpio_toggle(struct gpio *ctx)
 {
-    uint8_t mask = (uint8_t)(1 << ctx->pin);
-
-    if ((ctx->base->PIN & mask) == 0) ctx->base->PORT |= mask;
-    else ctx->base->PORT &= ~mask;
+    ctx->base->PORT ^= ctx->mask;
 }

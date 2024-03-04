@@ -3,12 +3,13 @@
 
 #include "gpio.h"
 #include <stddef.h>
+#include <stdint.h>
 
 struct GPIO_AVR;
 
 struct gpio {
     /*@temp@*/ struct GPIO_AVR *base;
-    size_t pin;
+    uint8_t mask;
     bool invert;
 };
 
