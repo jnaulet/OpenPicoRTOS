@@ -4,4 +4,8 @@ config CLOCK_LGT8FX8P
        depends on AVR
        bool "LogicGreen LGT8FX8P clock"
 
+config CLOCK_STM32F10XXX
+       depends on ARM
+       bool "STMicro STM32F10xxx series clock"
+
 endmenu
