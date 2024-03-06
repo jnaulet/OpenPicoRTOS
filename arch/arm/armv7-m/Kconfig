@@ -4,5 +4,8 @@ choice
 
 config MACH_ATSAM3X8E
        bool "Atmel ATSAM3X8E"
-       
+
+config MACH_STM32F10XXX
+       bool "STMicro STM32F10xxx Series"
+
 endchoice
