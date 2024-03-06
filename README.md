@@ -129,8 +129,8 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - ARM Cortex-M3
  - ARM Cortex-M4/F
  - ARM Cortex-M7
- - Atmel ATMega (AVR5+)
- - Atmel TinyAVR (0+) Series
+ - Atmel ATMega Series
+ - Atmel TinyAVR Series
  - Intel 8051 / MCS51
  - MIPS M51xx / PIC32Mx
  - RISC-V RV32IMAC
@@ -156,9 +156,11 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - Atmel ATSAM3X8E
  - Atmel ATSAMD5x/E5x
  - Atmel ATtiny817
+ - Atmel ATtiny88
  - Atmel ATtiny1607
  - Cypress CY7C6801xA / EZ-USB FX2
  - GigaDevice GD32VF103
+ - LogicGreen LGT8F328P
  - Microchip PIC32MZ-EF
  - Nuvoton N76E003
  - NXP MPC574x series
@@ -241,12 +243,14 @@ Basic demo code is provided for the following boards:
   - Adafruit ItsyBitsy M4 Express
   - Arduino Due
   - Arduino Mega2560
+  - Arduino Nano v3 + LGT8Fx clone (staging)
   - Arduino Uno
   - Arduino Uno R4 Minima
   - ATtiny817-Xplained Mini
   - ATtiny1607 Curiosity Nano
   - Curiosity 2.0 PIC32 MZ EF
   - Infineon EZ-USB FX2LP
+  - MH-Tiny / MH-Tiny88 (staging)
   - Nuvoton N76E003 / MCU-E003
   - NXP Devkit MPC5748G (dual-core SMP)
   - NXP MPC5775E-EVB (dual-core SMP) (staging)
