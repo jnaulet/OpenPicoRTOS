@@ -4,4 +4,8 @@ config MUX_N76E003
        depends on 8051
        bool "Nuvoton N76E003 series MUX"
 
+config MUX_STM32F10XXX
+       depends on ARM
+       bool "STMicro STM32F10XXX series MUX"
+
 endmenu
