@@ -12,6 +12,10 @@ config UART_AVR
        depends on AVR
        bool "AVR/ATMega series UART"
 
+config UART_AVR_IRQDRIVEN
+       depends on UART_AVR
+       bool "Support for IRQ-driven options"
+
 config UART_GD32VF103
        depends on RISCV
        bool "GD32VF103 series UART"

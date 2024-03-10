@@ -29,7 +29,7 @@ struct uart {
     /*@null@*/ /*@temp@*/ char *tx_buf;
 };
 
-struct uart_avr_irq_settings {
+struct uart_avr_irqdriven_settings {
     picoRTOS_irq_t irq_rx;
     picoRTOS_irq_t irq_udre;
     /*@temp@*/ char *rx_buf;
@@ -39,7 +39,7 @@ struct uart_avr_irq_settings {
 };
 
 int uart_avr_init(/*@out@*/ struct uart *ctx, int base, clock_id_t clkid);
-int uart_avr_set_mode_irqdriven(struct uart *ctx, struct uart_avr_irq_settings *settings);
+int uart_avr_setup_irqdriven(struct uart *ctx, struct uart_avr_irqdriven_settings *settings);
 
 /* Runtime calls:
  * int uart_setup(struct uart *ctx, const struct uart_settings *settings);

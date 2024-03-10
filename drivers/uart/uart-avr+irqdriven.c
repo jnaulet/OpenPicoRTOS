@@ -71,19 +71,6 @@ static void uart_udre_isr(void *priv)
         ctx->base->UCSRnB &= ~UCSRnB_UDRIE;
 }
 
-/* Function: uart_avr_irqdriven_init
- * Initializes an UART
- *
- * Parameters:
- *  ctx - The UART to init
- *  base - The UART base address
- *  clkid - The UART clock ID
- *  irq_rx - The USAT RX IRQ number
- *  irq_udre - The USART UDRE IRQ number
- *
- * Returns:
- * Always 0
- */
 int uart_avr_init(struct uart *ctx, int base, clock_id_t clkid)
 {
     ctx->base = (struct USART_AVR*)base;
@@ -99,7 +86,17 @@ int uart_avr_init(struct uart *ctx, int base, clock_id_t clkid)
     return 0;
 }
 
-int uart_avr_set_mode_irqdriven(struct uart *ctx, struct uart_avr_irq_settings *settings)
+/* Function: uart_avr_setup_irqdriven
+ * Activates IRQ-driven options for the UART
+ *
+ * Parameters:
+ *  ctx - The UART to setup
+ *  settings - The UART IRQ setup parameters (see .h)
+ *
+ * Returns:
+ * -errno if errno, 0 otherwise
+ */
+int uart_avr_setup_irqdriven(struct uart *ctx, struct uart_avr_irqdriven_settings *settings)
 {
     picoRTOS_assert(settings->irq_rx <= (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return -EINVAL);
     picoRTOS_assert(settings->irq_udre <= (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return -EINVAL);
