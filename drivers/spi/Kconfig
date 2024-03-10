@@ -12,6 +12,10 @@ config SPI_AVR
        depends on AVR
        bool "AVR/ATMega series SPI"
 
+config SPI_AVR_IRQDRIVEN
+       depends on SPI_AVR
+       bool "Support for IRQ-driven options"
+
 config SPI_AVR_USART
        depends on AVR
        bool "AVR/ATMega series SPIM on USART"

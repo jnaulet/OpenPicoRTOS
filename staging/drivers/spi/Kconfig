@@ -1,7 +1,3 @@
 menu "SPI drivers"
 
-config SPI_AVR_IRQDRIVEN
-       depends on AVR
-       bool "AVR/ATmega series SPI (irq-driven)"
-
 endmenu

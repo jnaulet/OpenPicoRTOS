@@ -34,15 +34,15 @@ struct spi {
     /*@null@*/ /*@temp@*/ uint8_t *tx_buf;
 };
 
-struct spi_avr_irq_settings {
-  picoRTOS_irq_t irq;
-  /*@temp@*/ uint8_t *rx_buf;
-  /*@temp@*/ uint8_t *tx_buf;
-  uint8_t mask;
+struct spi_avr_irqdriven_settings {
+    picoRTOS_irq_t irq;
+    /*@temp@*/ uint8_t *rx_buf;
+    /*@temp@*/ uint8_t *tx_buf;
+    uint8_t mask;
 };
 
 int spi_avr_init(/*@out@*/ struct spi *ctx, int base, clock_id_t clkid);
-int spi_avr_set_mode_irqdriven(struct spi *ctx, struct spi_avr_irq_settings *settings);
+int spi_avr_setup_irqdriven(struct spi *ctx, struct spi_avr_irqdriven_settings *settings);
 
 /* Runtime calls:
  * int spi_setup(struct spi *ctx, const struct spi_settings *settings);

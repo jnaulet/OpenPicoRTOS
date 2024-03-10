@@ -5,7 +5,7 @@ drivers-spi := $(srctree)/drivers/spi
 
 c_src-$(CONFIG_SPI_ARM_PL022) += $(drivers-spi)/spi-arm_pl022.c
 c_src-$(CONFIG_SPI_ATMEL_SERCOM) += $(drivers-spi)/spi-atmel_sercom.c
-c_src-$(CONFIG_SPI_AVR) += $(drivers-spi)/spi-avr.c
+c_src-$(CONFIG_SPI_AVR) += $(drivers-spi)/spi-avr$(CONFIG_SPI_AVR_IRQDRIVEN:y=+irqdriven).c
 c_src-$(CONFIG_SPI_AVR_USART) += $(drivers-spi)/spi-avr_usart.c
 c_src-$(CONFIG_SPI_GD32VF103) += $(drivers-spi)/spi-gd32vf103.c
 c_src-$(CONFIG_SPI_PIC32MX) += $(drivers-spi)/spi-pic32mx.c

@@ -52,17 +52,6 @@ static void spi_isr(void *priv)
         ctx->state = SPI_AVR_STATE_START;
 }
 
-/* Function: spi_avr_init
- * Initializes a SPI
- *
- * Parameters:
- *  ctx - The SPI to init
- *  base - The SPI base address
- *  speed - The SPI speed (normal or 2x)
- *
- * Returns:
- * 0 if success, -errno otherwise
- */
 int spi_avr_init(struct spi *ctx, int base, clock_id_t clkid)
 {
     /* internals */
@@ -77,7 +66,17 @@ int spi_avr_init(struct spi *ctx, int base, clock_id_t clkid)
     return 0;
 }
 
-int spi_avr_set_mode_irqdriven(struct spi *ctx, struct spi_avr_irq_settings *settings)
+/* Function: spi_avr_setup_irqdriven
+ * Configured SPI into IRQ-driven mode
+ *
+ * Parameters:
+ *  ctx - The SPI to setop
+ *  settings - The IRQ settings to apply
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
+int spi_avr_setup_irqdriven(struct spi *ctx, struct spi_avr_irqdriven_settings *settings)
 {
     picoRTOS_assert(settings->irq <= (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return -EINVAL);
     picoRTOS_assert((settings->mask & (settings->mask + 1)) == 0, return -EINVAL);
