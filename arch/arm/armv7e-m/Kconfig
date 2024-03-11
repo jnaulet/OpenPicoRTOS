@@ -11,6 +11,9 @@ config MACH_STM32H7XX
 config MACH_RENESAS_RA4
        bool "Renesas RA4 Series"
 
+config MACH_STM32F401X
+       bool "STMicro STM32F401x Series"
+
 endchoice
 
 choice
