@@ -8,4 +8,8 @@ config CLOCK_STM32F10XXX
        depends on ARM
        bool "STMicro STM32F10xxx series clock"
 
+config CLOCK_STM32F401X
+       depends on ARM
+       bool "STMicro STM32F401x series clock"
+
 endmenu
