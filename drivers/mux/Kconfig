@@ -30,7 +30,7 @@ config MUX_NXP_SIUL2
 
 config MUX_STM32H7XX
        depends on ARM
-       bool "STM32H7xx series MUX"
+       bool "STMicro STM32H7xx/STM32F401x series MUX"
 
 config MUX_TI_F28X
        depends on C2000

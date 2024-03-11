@@ -26,7 +26,9 @@ config GPIO_ATSAME5X
 
 config GPIO_STM32H7XX
        depends on ARM
-       bool "STM32H7xx series GPIOs"
+       bool "STM32H7xx/STM32F401x series GPIOs"
+       help
+           This driver is compatible with STM32H7xx & STM32F401x Series
 
 config GPIO_TI_F28X
        depends on C2000
