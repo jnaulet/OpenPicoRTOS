@@ -167,7 +167,8 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - NXP MPC577x series
  - Raspberry Pico RP2040
  - Renesas RA4M1
- - STMicro STM32H743/750
+ - STMicroelectronics STM32F10xxx series
+ - STMicroelectronics STM32H743/750
  - Texas Instruments TMS320F2837xD
 
 ## Working principle
@@ -256,6 +257,7 @@ Basic demo code is provided for the following boards:
   - NXP MPC5775E-EVB (dual-core SMP) (staging)
   - Sipeed Longan Nano
   - DevEBox STM32H7xx_M
+  - STM32F103C8T6
   - Texas Instruments Launchxl-f28379d
   - Raspberry Pi Pico (single core & SMP)
 
