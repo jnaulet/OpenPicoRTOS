@@ -80,7 +80,17 @@ int spi_gd32vf103_init(struct spi *ctx, int base, clock_id_t clkid)
     return 0;
 }
 
-int spi_gd32vf103_setup(struct spi *ctx, struct spi_gd32vf103_settings *settings)
+/* Function: spi_gd32vf103_setup_dma
+ * Configures a gd32vf103 SPI for DMA use
+ *
+ * Parameters:
+ *  ctx - The SPI to init
+ *  settings - The settings to apply
+ *
+ * Returns:
+ * Always 0
+ */
+int spi_gd32vf103_setup_dma(struct spi *ctx, struct spi_gd32vf103_dma_settings *settings)
 {
     ctx->threshold = settings->threshold;
     ctx->fill = settings->fill;
