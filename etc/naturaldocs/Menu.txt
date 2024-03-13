@@ -57,10 +57,12 @@ Group: hw-specific  {
 
          File: SPI  (no auto-title, drivers/spi/spi-avr.c)
          File: SPI / USART  (no auto-title, drivers/spi/spi-avr_usart.c)
+         File: SPI &lparen;IRQ-driven&rparen;  (no auto-title, drivers/spi/spi-avr+irqdriven.c)
          }  # Group: Spi
 
       File: TWI  (no auto-title, drivers/twi/twi-avr.c)
       File: UART  (no auto-title, drivers/uart/uart-avr.c)
+      File: UART &lparen;IRQ-driven&rparen;  (no auto-title, drivers/uart/uart-avr+irqdriven.c)
       File: Watchdog  (no auto-title, drivers/wd/wd-avr.c)
       }  # Group: ATMega / AVR
 
@@ -96,12 +98,12 @@ Group: hw-specific  {
       File: Watchdog  (no auto-title, drivers/wd/wd-gd32vf103_fwdgt.c)
       }  # Group: GD32VF103
 
-   Group: Nuvoton N76E003  {
+   Group: N76E003  {
 
       File: Clocks  (no auto-title, drivers/clock/clock-n76e003.c)
-      }  # Group: Nuvoton N76E003
+      }  # Group: N76E003
 
-   Group: NXP MPC57xx  {
+   Group: MPC57xx  {
 
       File: ADC &lparen;SAR&rparen;  (no auto-title, drivers/adc/adc-nxp_sar.c)
       File: CAN  (no auto-title, drivers/can/can-nxp_flexcan.c)
@@ -120,7 +122,7 @@ Group: hw-specific  {
       File: PWM &lparen;eMIOS&rparen;  (no auto-title, drivers/pwm/pwm-nxp_emios.c)
       File: SPI &lparen;DSPI&rparen;  (no auto-title, drivers/spi/spi-nxp_dspi.c)
       File: UART &lparen;LinFlexD&rparen;  (no auto-title, drivers/uart/uart-nxp_linflexd.c)
-      }  # Group: NXP MPC57xx
+      }  # Group: MPC57xx
 
    Group: PIC32MX  {
 
