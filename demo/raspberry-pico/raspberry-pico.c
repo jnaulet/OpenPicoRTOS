@@ -142,7 +142,7 @@ static void raspberry_pico_init_spi(/*@partial@*/ struct raspberry_pico *ctx)
     };
 
     struct spi_arm_pl022_settings loopback = {
-        NULL, NULL, (size_t)0, true
+        true
     };
 
     (void)rp2040_unreset(&RESET, RP2040_RESET_SPI1);
