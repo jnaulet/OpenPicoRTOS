@@ -20,12 +20,14 @@ typedef enum {
 } spi_ti_f28x_state_t;
 
 struct spi_ti_f28x_settings {
-    /* DMA */
-    /*@temp@*/ /*@null@*/ struct dma *fill;
-    /*@temp@*/ /*@null@*/ struct dma *drain;
-    size_t threshold;
     /* loopback */
     bool loopback;
+};
+
+struct spi_ti_f28x_dma_settings {
+    /*@temp@*/ struct dma *fill;
+    /*@temp@*/ struct dma *drain;
+    size_t threshold;
 };
 
 struct spi {
@@ -43,6 +45,7 @@ struct spi {
 
 int spi_ti_f28x_init(/*@out@*/ struct spi *ctx, int base, clock_id_t clkid);
 int spi_ti_f28x_setup(struct spi *ctx, struct spi_ti_f28x_settings *settings);
+int spi_ti_f28x_setup_dma(struct spi *ctx, struct spi_ti_f28x_dma_settings *settings);
 
 /*
  * Runtime calls:

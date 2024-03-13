@@ -139,7 +139,7 @@ static int set_loopback(struct spi *ctx, bool loopback)
 }
 
 /* Function: spi_ti_f28x_setup
- * Configures SPI specifics (DMA, loopback)
+ * Configures SPI specifics (loopback, ...)
  *
  * Parameters:
  *  ctx - The spi to setup
@@ -150,11 +150,26 @@ static int set_loopback(struct spi *ctx, bool loopback)
  */
 int spi_ti_f28x_setup(struct spi *ctx, struct spi_ti_f28x_settings *settings)
 {
+    return set_loopback(ctx, settings->loopback);
+}
+
+/* Function: spi_ti_f28x_setup_dma
+ * Configures SPI for DMA use
+ *
+ * Parameters:
+ *  ctx - The spi to setup
+ *  settings - The settings to apply
+ *
+ * Returns:
+ * Always 0
+ */
+int spi_ti_f28x_setup_dma(struct spi *ctx, struct spi_ti_f28x_dma_settings *settings)
+{
     ctx->fill = settings->fill;
     ctx->drain = settings->drain;
     ctx->threshold = settings->threshold;
 
-    return set_loopback(ctx, settings->loopback);
+    return 0;
 }
 
 /* hooks */
