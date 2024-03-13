@@ -19,12 +19,14 @@ typedef enum {
 } spi_arm_pl022_state_t;
 
 struct spi_arm_pl022_settings {
-    /* DMA */
-    /*@temp@*/ /*@null@*/ struct dma *fill;
-    /*@temp@*/ /*@null@*/ struct dma *drain;
-    size_t threshold;
     /* loopback */
     bool loopback;
+};
+
+struct spi_arm_pl022_dma_settings {
+    /*@temp@*/ struct dma *fill;
+    /*@temp@*/ struct dma *drain;
+    size_t threshold;
 };
 
 struct spi {
@@ -42,6 +44,7 @@ struct spi {
 
 int spi_arm_pl022_init(/*@out@*/ struct spi *ctx, int base, clock_id_t clkid);
 int spi_arm_pl022_setup(struct spi *ctx, struct spi_arm_pl022_settings *settings);
+int spi_arm_pl022_setup_dma(struct spi *ctx, struct spi_arm_pl022_dma_settings *settings);
 
 /* Runtime calls:
  * int spi_setup(struct spi *ctx, const struct spi_settings *settings);
