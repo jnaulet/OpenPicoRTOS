@@ -154,8 +154,8 @@ int spi_stm32h7xx_init(struct spi *ctx, int base, clock_id_t clkid)
     return 0;
 }
 
-/* Function: spi_stm32h7xx_setup
- * Configures a spi port
+/* Function: spi_stm32h7xx_setup_dma
+ * Configures a spi port for DMA use
  *
  * Parameters:
  *  ctx - The SPI instance
@@ -164,7 +164,7 @@ int spi_stm32h7xx_init(struct spi *ctx, int base, clock_id_t clkid)
  * Returns:
  * Always 0
  */
-int spi_stm32h7xx_setup(struct spi *ctx, struct spi_stm32h7xx_settings *settings)
+int spi_stm32h7xx_setup_dma(struct spi *ctx, struct spi_stm32h7xx_dma_settings *settings)
 {
     ctx->fill = settings->fill;
     ctx->drain = settings->drain;

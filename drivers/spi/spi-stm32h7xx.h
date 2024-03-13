@@ -16,10 +16,9 @@ typedef enum {
     SPI_STM32H7XX_STATE_COUNT
 } spi_stm32h7xx_state_t;
 
-struct spi_stm32h7xx_settings {
-    /* DMA */
-    /*@temp@*/ /*@null@*/ struct dma *fill;
-    /*@temp@*/ /*@null@*/ struct dma *drain;
+struct spi_stm32h7xx_dma_settings {
+    /*@temp@*/ struct dma *fill;
+    /*@temp@*/ struct dma *drain;
     size_t threshold;
 };
 
@@ -38,7 +37,7 @@ struct spi {
 };
 
 int spi_stm32h7xx_init(/*@out@*/ struct spi *ctx, int base, clock_id_t clkid);
-int spi_stm32h7xx_setup(struct spi *ctx, struct spi_stm32h7xx_settings *settings);
+int spi_stm32h7xx_setup_dma(struct spi *ctx, struct spi_stm32h7xx_dma_settings *settings);
 
 /* Runtime calls:
  * int spi_setup(struct spi *ctx, const struct spi_settings *settings);
