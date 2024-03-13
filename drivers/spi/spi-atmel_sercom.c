@@ -122,8 +122,8 @@ int spi_atmel_sercom_init(struct spi *ctx, int base, clock_id_t clkid)
     return 0;
 }
 
-/* Function: spi_atmel_sercom_setup
- * Configures a SERCOM SPI
+/* Function: spi_atmel_sercom_setup_dma
+ * Configures a SERCOM SPI for DMA use
  *
  * Parameters:
  *  ctx - The SPI to init
@@ -132,7 +132,7 @@ int spi_atmel_sercom_init(struct spi *ctx, int base, clock_id_t clkid)
  * Returns:
  * Always 0
  */
-int spi_atmel_sercom_setup(struct spi *ctx, struct spi_atmel_sercom_settings *settings)
+int spi_atmel_sercom_setup_dma(struct spi *ctx, struct spi_atmel_sercom_dma_settings *settings)
 {
     ctx->fill = settings->fill;
     ctx->drain = settings->drain;

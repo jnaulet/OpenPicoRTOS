@@ -16,13 +16,10 @@ typedef enum {
     SPI_ATMEL_SERCOM_STATE_DMA_COUNT
 } spi_atmel_sercom_state_t;
 
-struct spi_atmel_sercom_settings {
-    /* DMA */
-    /*@temp@*/ /*@null@*/ struct dma *fill;
-    /*@temp@*/ /*@null@*/ struct dma *drain;
+struct spi_atmel_sercom_dma_settings {
+    /*@temp@*/ struct dma *fill;
+    /*@temp@*/ struct dma *drain;
     size_t threshold;
-    /* loopback */
-    bool loopback;
 };
 
 struct spi {
@@ -39,7 +36,7 @@ struct spi {
 };
 
 int spi_atmel_sercom_init(/*@out@*/ struct spi *ctx, int base, clock_id_t clkid);
-int spi_atmel_sercom_setup(struct spi *ctx, struct spi_atmel_sercom_settings *settings);
+int spi_atmel_sercom_setup_dma(struct spi *ctx, struct spi_atmel_sercom_dma_settings *settings);
 
 /* Runtime calls:
  * int spi_setup(struct spi *ctx, const struct spi_settings *settings);
