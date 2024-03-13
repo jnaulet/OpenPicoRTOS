@@ -94,7 +94,7 @@ static int spi_init(/*@partial@*/ struct board *ctx)
     static struct dma DMA0_CH1;
     static struct dma DMA0_CH2;
 
-    struct spi_gd32vf103_settings DMA_settings;
+    struct spi_gd32vf103_dma_settings DMA_settings;
     struct spi_settings SPI0_settings = {
         54000000ul, /* bitrate */
         SPI_MODE_MASTER,
@@ -118,7 +118,7 @@ static int spi_init(/*@partial@*/ struct board *ctx)
     DMA_settings.fill = &DMA0_CH2;
     DMA_settings.drain = &DMA0_CH1;
     DMA_settings.threshold = (size_t)16; /* FIXME */
-    (void)spi_gd32vf103_setup(&SPI0, &DMA_settings);
+    (void)spi_gd32vf103_setup_dma(&SPI0, &DMA_settings);
 
     /* physical layer */
     ctx->lcd_phys.spi = &SPI0;

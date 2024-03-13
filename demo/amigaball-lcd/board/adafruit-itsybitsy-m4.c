@@ -142,7 +142,7 @@ static int spi_init(/*@partial@*/ struct board *ctx)
     static struct dma SPI_RX;
     static struct dma_same5x DMAC;
 
-    struct spi_atmel_sercom_settings DMA_settings;
+    struct spi_atmel_sercom_dma_settings DMA_settings;
     struct spi_settings SPI_settings = {
         60000000ul, /* bitrate */
         SPI_MODE_MASTER,
@@ -161,11 +161,10 @@ static int spi_init(/*@partial@*/ struct board *ctx)
     DMA_settings.fill = &SPI_TX;
     DMA_settings.drain = &SPI_RX;
     DMA_settings.threshold = (size_t)16;
-    DMA_settings.loopback = false;
 
     /* SPI */
     (void)spi_atmel_sercom_init(&SPI, ADDR_SERCOM1, CLOCK_SAME5X_SERCOM1_CORE);
-    (void)spi_atmel_sercom_setup(&SPI, &DMA_settings);
+    (void)spi_atmel_sercom_setup_dma(&SPI, &DMA_settings);
     (void)spi_setup(&SPI, &SPI_settings);
 
     /* physical layer */

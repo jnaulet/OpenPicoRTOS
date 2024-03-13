@@ -126,7 +126,7 @@ static void spi_init(/*@partial@*/ struct board *ctx)
 
     static struct dma DMA_SPI2_RX;
     static struct dma DMA_SPI2_TX;
-    struct spi_stm32h7xx_settings DMA_settings;
+    struct spi_stm32h7xx_dma_settings DMA_settings;
 
     (void)spi_stm32h7xx_init(&SPI, ADDR_SPI2_I2S2, CLOCK_STM32H7XX_PLL1_Q_CK);
     (void)spi_setup(&SPI, &SPI_settings);
@@ -138,7 +138,7 @@ static void spi_init(/*@partial@*/ struct board *ctx)
     DMA_settings.fill = &DMA_SPI2_TX;
     DMA_settings.drain = &DMA_SPI2_RX;
     DMA_settings.threshold = (size_t)16;
-    (void)spi_stm32h7xx_setup(&SPI, &DMA_settings);
+    (void)spi_stm32h7xx_setup_dma(&SPI, &DMA_settings);
 
     /*  physical layer */
     ctx->lcd_phys.spi = &SPI;

@@ -72,7 +72,7 @@ static void init_spi(/*@partial@*/ struct board *ctx)
 
     static struct dma DMA_SPI1_TX;
     static struct dma DMA_SPI1_RX;
-    struct spi_arm_pl022_settings DMA_settings;
+    struct spi_arm_pl022_dma_settings DMA_settings;
 
     (void)rp2040_unreset(&RESET, RP2040_RESET_DMA);
     (void)rp2040_unreset(&RESET, RP2040_RESET_SPI1);
@@ -87,8 +87,7 @@ static void init_spi(/*@partial@*/ struct board *ctx)
     DMA_settings.fill = &DMA_SPI1_TX;
     DMA_settings.drain = &DMA_SPI1_RX;
     DMA_settings.threshold = (size_t)16;
-    DMA_settings.loopback = false;
-    (void)spi_arm_pl022_setup(&SPI, &DMA_settings);
+    (void)spi_arm_pl022_setup_dma(&SPI, &DMA_settings);
 
     /* physical layer */
     ctx->lcd_phys.spi = &SPI;

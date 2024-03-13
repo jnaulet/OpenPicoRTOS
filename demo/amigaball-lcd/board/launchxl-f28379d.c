@@ -83,7 +83,7 @@ static void spi_init(/*@partial@*/ struct board *ctx)
     /* DMA */
     static struct dma SPI_TX;
     static struct dma SPI_RX;
-    struct spi_ti_f28x_settings DMA_settings;
+    struct spi_ti_f28x_dma_settings DMA_settings;
 
     (void)dma_ti_f28x_init(&SPI_TX, ADDR_DMA, (size_t)0, DMA_TI_F28X_CHSRCSEL_SPITXDMAA);
     (void)dma_ti_f28x_init(&SPI_RX, ADDR_DMA, (size_t)1, DMA_TI_F28X_CHSRCSEL_SPIRXDMAA);
@@ -92,7 +92,6 @@ static void spi_init(/*@partial@*/ struct board *ctx)
     DMA_settings.fill = &SPI_TX;
     DMA_settings.drain = &SPI_RX;
     DMA_settings.threshold = (size_t)16;
-    DMA_settings.loopback = false;
 
     /* SPI */
     (void)spi_ti_f28x_init(&SPI, ADDR_SPIA, CLOCK_F28379X_LSPCLK);
@@ -102,7 +101,7 @@ static void spi_init(/*@partial@*/ struct board *ctx)
      * and i'm not patient enough to look for a solution, so this is
      * disabled and FPS will be limited to 12 for the moment
      *
-     * (void)spi_ti_f28x_setup(&SPI, &DMA_settings);
+     * (void)spi_ti_f28x_dma_setup(&SPI, &DMA_settings);
      */
 
     /* physical layer */
