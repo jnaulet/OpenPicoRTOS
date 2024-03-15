@@ -33,6 +33,7 @@ a_src-$(CONFIG_MACH_ATSAME5X) += $(arch-arm)/armv7e-m/mach-atsame5x/startup.S
 a_src-$(CONFIG_MACH_STM32H7XX) += $(arch-arm)/armv7e-m/mach-stm32h7xx/startup.S
 a_src-$(CONFIG_MACH_RENESAS_RA4) += $(arch-arm)/armv7e-m/mach-renesas_ra4/startup.S
 a_src-$(CONFIG_MACH_STM32F401X) += $(arch-arm)/armv7e-m/mach-stm32f401x/startup.S
+a_src-$(CONFIG_MACH_STM32L4X) += $(arch-arm)/armv7e-m/mach-stm32l4x/startup.S
 
 ccflags-$(CONFIG_ARM) += -mthumb $(arch-y) $(fpu-y)
 asflags-$(CONFIG_ARM) += -mthumb $(arch-y) $(fpu-y)

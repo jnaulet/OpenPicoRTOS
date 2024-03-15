@@ -23,14 +23,14 @@ source arch/arm/armv7e-m/Kconfig
 config L1_CACHE_LINESIZE
        int "Data cache line size"
        depends on ARMV7EM
-       default 32 if MACH_STM32H7XX
-       default 16 if MACH_ATSAME5X
+       default 32 if (MACH_STM32H7XX || MACH_STM32L4X)
+       default 16 if (MACH_ATSAME5X || MACH_STM32F401X)
        default 4 if MACH_RENESAS_RA4
 
 config CACHE_MAINTENANCE
        bool "Cache maintenance operations"
        depends on ARMV7EM
-       default y if MACH_STM32H7XX
+       default y if (MACH_STM32H7XX || MACH_STM32L4X)
        default n if (MACH_ATSAME5X || MACH_RENESAS_RA4)
        
 endmenu
