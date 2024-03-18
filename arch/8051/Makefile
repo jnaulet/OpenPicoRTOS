@@ -17,6 +17,9 @@ c_src-$(CONFIG_MACH_UCSIM51) += $(arch-8051)/mach-mcs51/interrupt.c
 a_src-$(CONFIG_MACH_CY7C6801xA) += $(arch-8051)/mach-cy7c6801xa/startup.S
 c_src-$(CONFIG_MACH_CY7C6801xA) += $(arch-8051)/mach-cy7c6801xa/timer-t2.c
 c_src-$(CONFIG_MACH_CY7C6801xA) += $(arch-8051)/mach-cy7c6801xa/interrupt.c
+a_src-$(CONFIG_MACH_STC12C5AXX) += $(arch-8051)/mach-stc12c5axx/startup.S
+c_src-$(CONFIG_MACH_STC12C5AXX) += $(arch-8051)/mach-stc12c5axx/timer-t0.c
+c_src-$(CONFIG_MACH_STC12C5AXX) += $(arch-8051)/mach-stc12c5axx/interrupt.c
 
 # N76E003 memory map
 mcu-$(CONFIG_MACH_N76E003) += --xram-size 768
@@ -28,6 +31,9 @@ mcu-$(CONFIG_MACH_CY7C6801xA) += --xram-loc $(code-size)
 mcu-$(CONFIG_MACH_CY7C6801xA) += --xram-size $(CONFIG_XDATA_SIZE)
 mcu-$(CONFIG_MACH_CY7C6801xA) += --code-size $(code-size)
 endif
+# STC12C5Axx memory map
+mcu-$(CONFIG_MACH_STC12C5AXX) += --xram-size 1024
+mcu-$(CONFIG_MACH_STC12C5AXX) += --code-size 61440
 
 c_src-$(CONFIG_8051) += $(arch-8051)/picoRTOS_port.c
 a_src-$(CONFIG_8051) += $(arch-8051)/picoRTOS_portasm.S
