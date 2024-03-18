@@ -219,8 +219,10 @@ static int setup_pll(struct clock_settings *settings)
 #define VCO_MAX    432000000ul
 #define VCO_IN_MAX 2000000ul
 #define VCO_IN_MIN 1000000ul
+#define PLL_P_MAX  84000000ul
 
     picoRTOS_assert(settings->pllsrc < CLOCK_STM32F401X_PLLSRC_COUNT, return -EINVAL);
+    picoRTOS_assert(settings->pll_p <= PLL_P_MAX, return -EINVAL);
 
     unsigned long in;
     unsigned long m, n, p;
@@ -314,7 +316,7 @@ static int set_hpre(unsigned int prescaler)
     case 1: RCC->RCC_CFGR |= RCC_CFGR_HPRE(0); break;
     case 2: RCC->RCC_CFGR |= RCC_CFGR_HPRE(8); break;
     case 4: RCC->RCC_CFGR |= RCC_CFGR_HPRE(9); break;
-    case 5: RCC->RCC_CFGR |= RCC_CFGR_HPRE(10); break;
+    case 8: RCC->RCC_CFGR |= RCC_CFGR_HPRE(10); break;
     case 16: RCC->RCC_CFGR |= RCC_CFGR_HPRE(11); break;
     case 64: RCC->RCC_CFGR |= RCC_CFGR_HPRE(12); break;
     case 128: RCC->RCC_CFGR |= RCC_CFGR_HPRE(13); break;
