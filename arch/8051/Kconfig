@@ -14,6 +14,9 @@ config MACH_N76E003
 config MACH_CY7C6801xA
        bool "Cypress CY7C6801xA Series"
 
+config MACH_STC12C5AXX
+       bool "STC MCU STC12CA5xx Series"
+
 endchoice
 
 config XDATA_SIZE
@@ -37,5 +40,16 @@ config N76E003_TIMER_WKT
          Beware, the max TICK_HZ with this option is 100Hz
 
 endchoice
+
+config SYSCLK_HZ
+       int "Main clock frequency"
+       depends on MACH_STC12C5AXX
+       default 22100000
+
+config SYSCLK_DIV
+       int "Clock source divider (1-128)"
+       range 1 128
+       default 1
+       depends on MACH_STC12C5AXX
 
 endmenu

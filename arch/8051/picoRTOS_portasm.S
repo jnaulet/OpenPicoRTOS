@@ -19,7 +19,6 @@
 
 	.macro SAVE_CONTEXT_STEP1
 	push a
-	push psw
 	push dpl
 	push dph
 	push b
@@ -31,6 +30,8 @@
 	push ar5
 	push ar6
 	push ar7
+	push psw
+	mov  psw, #0
 	.endm
 
 	;; dptr = *(u16*)__start_stack
@@ -92,6 +93,7 @@ loop:
 	.endm
 
 	.macro RESTORE_CONTEXT_STEP2
+	pop psw
 	pop ar7
 	pop ar6
 	pop ar5
@@ -103,7 +105,6 @@ loop:
 	pop b
 	pop dph
 	pop dpl
-	pop psw
 	pop a
 	.endm
 
@@ -133,10 +134,10 @@ loop:
 
 	.globl SysTick_Handler
 SysTick_Handler:
+	ACK_SYSTICK		; more deterministic point
 	SAVE_CONTEXT
 	lcall _picoRTOS_tick
 	RESTORE_CONTEXT
-	ACK_SYSTICK
 	reti
 
 	.globl Default_Handler
@@ -196,6 +197,7 @@ _arch_save_first_context:
 	;; put stack addr on top
 	;; mov dpl, r5 -> already set
 	;; mov dph, r6 -> already set
+	MOVX_DPTRxx #0		; psw
 	MOVX_DPTRxx #7		; r7
 	MOVX_DPTRxx #6		; r6
 	MOVX_DPTRxx #5		; r5
@@ -207,7 +209,6 @@ _arch_save_first_context:
 	MOVX_DPTRxx #0		; b   : 0xff & (priv >> 16)
 	MOVX_DPTRxx r2		; dph : 0xff & (priv >> 8)
 	MOVX_DPTRxx r1		; dpl : 0xff & priv
-	MOVX_DPTRxx #0		; psw
 	MOVX_DPTRxx #65		; a
 	MOVX_DPTRxx r4		; reti_h : 0xff & (fn >> 8)
 	MOVX_DPTRxx r3		; reti_l : 0xff & fn
@@ -253,7 +254,7 @@ _arch_syscall:
 	push a
 	;; dpl on stack
 	mov a, r0
-	add a, #0x5
+	add a, #0x4
 	mov r0, a
 	mov a, @r0		; syscall
 	push a
