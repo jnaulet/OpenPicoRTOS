@@ -16,4 +16,8 @@ config CLOCK_STM32L4X
        depends on ARM
        bool "STMicro STM32L4x series clock"
 
+config CLOCK_STC12C5AXX
+       depends on 8051
+       bool "STC MCU STC12C5Axx series clock"
+
 endmenu
