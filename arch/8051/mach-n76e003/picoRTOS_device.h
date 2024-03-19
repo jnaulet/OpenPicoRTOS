@@ -139,6 +139,13 @@
 #define ADDR_EIP1    0xfe
 #define ADDR_EIPH1   0xff
 
+/* 8051-compatibility layer */
+
+#define ADDR_P0M0 ADDR_P0M2
+#define ADDR_P1M0 ADDR_P1M2
+#define ADDR_P2M0 ADDR_P2M2
+#define ADDR_P3M0 ADDR_P3M2
+
 /* IRQs */
 
 #define IRQ_IE_0    0   /* External Interrupt 0 */
