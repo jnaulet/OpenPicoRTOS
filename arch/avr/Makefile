@@ -34,7 +34,7 @@ include-$(CONFIG_MACH_ATTINY1607) += -I$(arch-avr)/mach-attiny1607
 include-$(CONFIG_MACH_LGT8FX8P)   += -I$(arch-avr)/mach-lgt8fx8p
 
 ccflags-$(CONFIG_AVR)    += $(include-y) -ffunction-sections -fdata-sections
-ccflags-$(CONFIG_AVR)    += -fpack-struct -fshort-enums $(mcu-y)
+ccflags-$(CONFIG_AVR)    += -fpack-struct -fshort-enums -Wno-address $(mcu-y)
 ccflags-$(CONFIG_ATMEGA) += -flto -fno-fat-lto-objects
 asflags-$(CONFIG_AVR)    += $(include-y) -x assembler-with-cpp $(mcu-y)
 asflags-$(CONFIG_ATMEGA) += -flto
