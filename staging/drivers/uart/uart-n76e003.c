@@ -105,18 +105,22 @@ static void uart0_isr(void *priv)
     struct uart *ctx = (struct uart*)priv;
 
     /* UART 0 */
-    if ((SCON & SCONx_TI) != (unsigned char)0) {
-        SCON &= ~SCONx_TI;
-        if (uart_fifo_pop(&ctx->tx_fifo, &c) == 1)
-            SBUF = (unsigned char)c;
-        else
-            ctx->tx_trig = true;
-    }
-
-    if ((SCON & SCONx_RI) != (unsigned char)0) {
-        (void)uart_fifo_push(&ctx->rx_fifo, (char)SBUF);
-        SCON &= ~SCONx_RI;
-    }
+    do {
+        /* TX */
+        if ((SCON & SCONx_TI) != (unsigned char)0) {
+            SCON &= ~SCONx_TI; /* ack */
+            if (uart_fifo_pop(&ctx->tx_fifo, &c) == 1)
+                SBUF = (unsigned char)c;
+            else
+                ctx->tx_trig = true;
+        }
+        /* RX */
+        if ((SCON & SCONx_RI) != (unsigned char)0) {
+            (void)uart_fifo_push(&ctx->rx_fifo, (char)SBUF);
+            SCON &= ~SCONx_RI; /* ack */
+        }
+        /* retry to save on context saving */
+    } while((SCON & (SCONx_RI | SCONx_TI)) != (unsigned char)0);
 }
 
 static void uart1_isr(void *priv)
@@ -125,18 +129,21 @@ static void uart1_isr(void *priv)
     struct uart *ctx = (struct uart*)priv;
 
     /* UART 1 */
-    if ((SCON_1 & SCONx_TI) != (unsigned char)0) {
-        SCON_1 &= ~SCONx_TI;
-        if (uart_fifo_pop(&ctx->tx_fifo, &c) == 1)
-            SBUF_1 = (unsigned char)c;
-        else
-            ctx->tx_trig = true;
-    }
-
-    if ((SCON_1 & SCONx_RI) != (unsigned char)0) {
-        (void)uart_fifo_push(&ctx->rx_fifo, (char)SBUF_1);
-        SCON_1 &= ~SCONx_RI;
-    }
+    do {
+        /* TX */
+        if ((SCON_1 & SCONx_TI) != (unsigned char)0) {
+            SCON_1 &= ~SCONx_TI;
+            if (uart_fifo_pop(&ctx->tx_fifo, &c) == 1)
+                SBUF_1 = (unsigned char)c;
+            else
+                ctx->tx_trig = true;
+        }
+        /* RX */
+        if ((SCON_1 & SCONx_RI) != (unsigned char)0) {
+            (void)uart_fifo_push(&ctx->rx_fifo, (char)SBUF_1);
+            SCON_1 &= ~SCONx_RI;
+        }
+    } while((SCON_1 & (SCONx_RI | SCONx_TI)) != (unsigned char)0);
 }
 
 int uart_n76e003_init(/*@out@*/ struct uart *ctx, uart_n76e003_t uart)
