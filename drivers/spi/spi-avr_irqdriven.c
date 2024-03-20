@@ -1,4 +1,4 @@
-#include "spi-avr+irqdriven.h"
+#include "spi-avr_irqdriven.h"
 
 #include "picoRTOS.h"
 #include "picoRTOS_device.h"
@@ -39,17 +39,21 @@ static void spi_isr(void *priv)
     picoRTOS_assert(ctx->rx_buf != NULL, return );
     picoRTOS_assert(ctx->tx_buf != NULL, return );
 
-    if (fifo_head_is_writable(&ctx->rx_fifo)) {
-        ctx->rx_buf[ctx->rx_fifo.w] = ctx->base->SPDR;
-        fifo_head_push(&ctx->rx_fifo);
-    }
+    do {
+        if (fifo_head_is_writable(&ctx->rx_fifo)) {
+            ctx->rx_buf[ctx->rx_fifo.w] = ctx->base->SPDR;
+            fifo_head_push(&ctx->rx_fifo);
+        }
 
-    /* stream next char if available */
-    if (fifo_head_is_readable(&ctx->tx_fifo)) {
-        fifo_head_pop(&ctx->tx_fifo);
-        ctx->base->SPDR = ctx->tx_buf[ctx->tx_fifo.r];
-    }else
-        ctx->state = SPI_AVR_STATE_START;
+        /* stream next char if available */
+        if (fifo_head_is_readable(&ctx->tx_fifo)) {
+            fifo_head_pop(&ctx->tx_fifo);
+            ctx->base->SPDR = ctx->tx_buf[ctx->tx_fifo.r];
+        }else
+            ctx->state = SPI_AVR_STATE_START;
+        /* try to send as many bytes as possible to avoid
+         * systematic context switching */
+    } while ((ctx->base->SPSR & SPSR_SPIF) != 0);
 }
 
 int spi_avr_init(struct spi *ctx, int base, clock_id_t clkid)
