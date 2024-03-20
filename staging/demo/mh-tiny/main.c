@@ -49,7 +49,7 @@ static void spi_main(void *priv)
 
     size_t xfered = 0;
     struct spi *SPI = (struct spi*)priv;
-    
+
     static char rx[] = { (char)0, (char)0, (char)0, (char)0, (char)0, (char)0 };
     static char tx[] = { (char)0xa5, (char)0x55, (char)0x5a, (char)0x55, (char)0x4d, (char)0x4e };
 

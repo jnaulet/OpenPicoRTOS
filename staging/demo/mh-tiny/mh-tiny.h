@@ -3,7 +3,7 @@
 
 #include "gpio-avr.h"
 #include "mux-avr.h"
-#include "spi-avr+irqdriven.h"
+#include "spi-avr_irqdriven.h"
 #include "wd-avr.h"
 
 struct mh_tiny {

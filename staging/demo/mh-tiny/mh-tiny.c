@@ -18,7 +18,7 @@ static void init_mux(void)
     (void)mux_avr_output(&PORTB, (size_t)2, true);  /* _SS */
 
     (void)mux_avr_output(&PORTD, (size_t)0, false); /* LED */
-    (void)mux_avr_output(&PORTD, (size_t)1, true); /* TICK */
+    (void)mux_avr_output(&PORTD, (size_t)1, true);  /* TICK */
 }
 
 static void init_spi(/*@partial@*/ struct mh_tiny *ctx)
@@ -35,12 +35,12 @@ static void init_spi(/*@partial@*/ struct mh_tiny *ctx)
     static uint8_t rx_buf[8];
     static uint8_t tx_buf[8];
     struct spi_avr_irqdriven_settings IRQ_settings = {
-      (picoRTOS_irq_t)IRQ_SPI_STC,
-      rx_buf,
-      tx_buf,
-      (uint8_t)sizeof(rx_buf) - 1,
+        (picoRTOS_irq_t)IRQ_SPI_STC,
+        rx_buf,
+        tx_buf,
+        (uint8_t)sizeof(rx_buf) - 1,
     };
-    
+
     (void)spi_avr_init(&ctx->SPI, ADDR_SPI, CLOCK_ATTINY88_CLKIO);
     (void)spi_setup(&ctx->SPI, &SPI_settings);
     /* IRQ mode */

@@ -42,21 +42,21 @@ else
 #
 # extend build for debug
 #
-$(target): $(debug)
+#$(target): $(debug)
 
 # Copy sources to debug/
-$(debug): $(a_src-y) $(a_dep-y) $(c_src-y)
-	install -D -m 0644 -t $(dir $@) $^ $(sort $(call cmd_dep_h_c,$(c_src-y)))
-	mkdir -p $(dir $@)/generated
-	cp -f $(dir $@)/autoconf.h $(dir $@)/generated
-	rm -f $(dir $@)/autoconf.h
-	cp -f Makefile.debug $(dir $@)/Makefile
+#$(debug): $(a_src-y) $(a_dep-y) $(c_src-y)
+#	install -D -m 0644 -t $(dir $@) $^ $(sort $(call cmd_dep_h_c,$(c_src-y)))
+#	mkdir -p $(dir $@)/generated
+#	cp -f $(dir $@)/autoconf.h $(dir $@)/generated
+#	rm -f $(dir $@)/autoconf.h
+#	cp -f Makefile.debug $(dir $@)/Makefile
 #	Some cflags
-	@echo "== Additional options =="
-	@echo '$(ccattributes)'
-	@echo "== =="
+#	@echo "== Additional options =="
+#	@echo '$(ccattributes)'
+#	@echo "== =="
 
-PHONY += $(local-y)
+#PHONY += $(local-y)
 
 endif
 
