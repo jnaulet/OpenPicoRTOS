@@ -54,27 +54,28 @@ include $(kbuild-file)
 
 # If the save-* variables changed error out
 ifeq ($(KBUILD_NOPEDANTIC),)
-        ifneq ("$(save-cflags)","$(CFLAGS)")
-                $(error CFLAGS was changed in "$(kbuild-file)". Fix it to use EXTRA_CFLAGS)
-        endif
+	ifneq ("$(save-cflags)","$(CFLAGS)")
+		$(error CFLAGS was changed in "$(kbuild-file)". Fix it to use EXTRA_CFLAGS)
+	endif
 endif
 
-inctree        = $(patsubst %/,%,$(addprefix -I,$(dir $(1))))
+inctree	 = $(patsubst %/,%,$(addprefix -I,$(dir $(1))))
 
-c_flags        = -Wp,-MD,$(depfile) $(opt-y) $(debug-y) $(RTOSINCLUDE) -Wpedantic \
-                 $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
-                 $(ccflags-y) $(subst ",,$(CONFIG_EXTRA_CFLAGS)) $(ccattributes)
+c_flags	 = -Wp,-MD,$(depfile) -Wpedantic -Wall -Wextra \
+		 $(opt-y) $(debug-y) $(RTOSINCLUDE) \
+		 $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
+		 $(ccflags-y) $(subst ",,$(CONFIG_EXTRA_CFLAGS)) $(ccattributes)
 
-a_flags        = -Wp,-MD,$(depfile) $(debug-y) $(RTOSINCLUDE) \
-                 $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
-                 $(asflags-y) $(subst ",,$(CONFIG_EXTRA_CFLAGS))
+a_flags	 = -Wp,-MD,$(depfile) $(debug-y) $(RTOSINCLUDE) \
+		 $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
+		 $(asflags-y) $(subst ",,$(CONFIG_EXTRA_CFLAGS))
 
 ld_flags       = $(LDFLAGS) $(ldflags-y) $(subst ",,$(CONFIG_EXTRA_LDFLAGS))
 
 dep_flags      = $(RTOSINCLUDE) \
-	         $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
-                 $(filter -I%,$(ccflags-y)) $(filter -D%,$(ccflags-y)) \
-                 $(subst ",,$(CONFIG_EXTRA_CFLAGS)) $(ccattributes)
+		 $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
+		 $(filter -I%,$(ccflags-y)) $(filter -D%,$(ccflags-y)) \
+		 $(subst ",,$(CONFIG_EXTRA_CFLAGS)) $(ccattributes)
 
 cmd_dep_h_c    = $(filter %.h,$(shell $(CC) $(dep_flags) -MM $(1)))
 
@@ -94,7 +95,7 @@ endif
 # ===========================================================================
 
 __gcc: $(target) $(always)
-          @:
+	  @:
 
 # Prepare object files (.o)
 # ---------------------------------------------------------------------------
@@ -113,8 +114,8 @@ cmd_cc_o_c = $(CC) $(c_flags) -c -o $@ $<
 
 define rule_cc_o_c
 	$(call echo-cmd,cc_o_c) $(cmd_cc_o_c);				  \
-	scripts/basic/fixdep $(depfile) $@ '$(call make-cmd,cc_o_c)' >    \
-	                                              $(dot-target).tmp;  \
+	scripts/basic/fixdep $(depfile) $@ '$(call make-cmd,cc_o_c)' >	  \
+						      $(dot-target).tmp;  \
 	rm -f $(depfile);						  \
 	mv -f $(dot-target).tmp $(dot-target).cmd
 endef
