@@ -1,4 +1,4 @@
-#include "uart-avr+irqdriven.h"
+#include "uart-avr_irqdriven.h"
 
 #include "picoRTOS.h"
 #include "picoRTOS_device.h"
@@ -45,16 +45,25 @@ struct USART_AVR {
 
 static void uart_rx_isr(void *priv)
 {
+    int deadlock = CONFIG_DEADLOCK_COUNT;
     struct uart *ctx = (struct uart*)priv;
 
     picoRTOS_assert(ctx->rx_buf != NULL, return );
 
-    if ((ctx->base->UCSRnA & UCSRnA_RXC) != 0) {
+    while ((ctx->base->UCSRnA & UCSRnA_RXC) != 0 &&
+           deadlock-- != 0) {
+        /* store data if possible */
         if (fifo_head_is_writable(&ctx->rx_fifo)) {
             ctx->rx_buf[ctx->rx_fifo.w] = (char)ctx->base->UDRn;
             fifo_head_push(&ctx->rx_fifo);
+        }else{ /* drop */
+            /*@i@*/ (void)ctx->base->UDRn;
+            break;
         }
     }
+
+    /* check */
+    picoRTOS_assert_void(deadlock != -1);
 }
 
 static void uart_udre_isr(void *priv)
@@ -63,12 +72,16 @@ static void uart_udre_isr(void *priv)
 
     picoRTOS_assert(ctx->tx_buf != NULL, return );
 
-    if (fifo_head_is_readable(&ctx->tx_fifo)) {
-        fifo_head_pop(&ctx->tx_fifo);
-        ctx->base->UDRn = (uint8_t)ctx->tx_buf[ctx->tx_fifo.r];
-    }else
-        /* disable */
-        ctx->base->UCSRnB &= ~UCSRnB_UDRIE;
+    do{
+        if (fifo_head_is_readable(&ctx->tx_fifo)) {
+            fifo_head_pop(&ctx->tx_fifo);
+            ctx->base->UDRn = (uint8_t)ctx->tx_buf[ctx->tx_fifo.r];
+        }else{
+            /* disable */
+            ctx->base->UCSRnB &= ~UCSRnB_UDRIE;
+            break;
+        }
+    } while((ctx->base->UCSRnA & UCSRnA_UDRE) != 0);
 }
 
 int uart_avr_init(struct uart *ctx, int base, clock_id_t clkid)

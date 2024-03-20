@@ -5,7 +5,7 @@ drivers-uart := $(srctree)/drivers/uart
 
 c_src-$(CONFIG_UART_ARM_PL011) += $(drivers-uart)/uart-arm_pl011.c
 c_src-$(CONFIG_UART_ATMEL_SERCOM) += $(drivers-uart)/uart-atmel_sercom.c
-c_src-$(CONFIG_UART_AVR) += $(drivers-uart)/uart-avr$(CONFIG_UART_AVR_IRQDRIVEN:y=+irqdriven).c
+c_src-$(CONFIG_UART_AVR) += $(drivers-uart)/uart-avr$(CONFIG_UART_AVR_IRQDRIVEN:y=_irqdriven).c
 c_src-$(CONFIG_UART_GD32VF103) += $(drivers-uart)/uart-gd32vf103.c
 c_src-$(CONFIG_UART_PIC32MX) += $(drivers-uart)/uart-pic32mx.c
 c_src-$(CONFIG_UART_ATSAM3X) += $(drivers-uart)/uart-sam3x.c
