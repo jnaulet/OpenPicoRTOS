@@ -255,27 +255,3 @@ ISR_TABLE:
 	.long 0
 	.long 0
 	.endr
-
-	.section .vectors
-__vectors:
-	j Reset_Handler
-	.word 0
-	.word 0
-	.word MachineSoftwareInterrupt_Handler
-	.word 0
-	.word 0
-	.word 0
-	.word MachineTimerInterrupt_Handler
-	.word 0
-	.word 0
-	.word 0
-	.word 0
-	.word 0
-	.word 0
-	.word 0
-	.word 0
-	.rept DEVICE_INTERRUPT_VECTOR_COUNT
-	.word PlatformDefined_Handler
-	.endr
-
-	def_irq_handler MachineSoftwareInterrupt_Handler

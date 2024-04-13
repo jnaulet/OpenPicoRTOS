@@ -23,7 +23,7 @@ include-$(CONFIG_RISCV) += -I$(arch-riscv)/include \
 
 # machines
 a_src-$(CONFIG_MACH_GD32VF103) += $(arch-riscv)/rv32imac/mach-gd32vf103/startup.S
-c_src-$(CONFIG_MACH_GD32VF103) += $(arch-riscv)/rv32imac/mach-gd32vf103/intc.c
+c_src-$(CONFIG_MACH_GD32VF103) += $(arch-riscv)/rv32imac/mach-gd32vf103/intc-eclic.c
 a_src-$(CONFIG_MACH_CH32V003) += $(arch-riscv)/rv32ec/mach-ch32v003rm/startup.S
 c_src-$(CONFIG_MACH_CH32V003) += $(arch-riscv)/rv32ec/mach-ch32v003rm/intc-pfic.c
 c_src-$(CONFIG_MACH_CH32V003) += $(arch-riscv)/rv32ec/mach-ch32v003rm/timer-stk.c
