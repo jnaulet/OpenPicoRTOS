@@ -211,7 +211,7 @@ scripts/basic/%: scripts_basic ;
 # Detect when mixed targets is specified, and make a second invocation
 # of make so .config is not included in this case either (for *config).
 
-no-dot-config-targets := uncrustify check distcheck naturaldocs cloc
+no-dot-config-targets := indent uncrustify check distcheck naturaldocs cloc
 
 run-from-root  := 0
 config-targets := 0
@@ -308,20 +308,23 @@ endif
 all: FORCE
 	$(Q)$(MAKE) -f $(srctree)/scripts/$(build_script) src=$(CURDIR)
 
-uncrustify:
+uncrustify: FORCE
 	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.uncrustify src=$(CURDIR)
 
-naturaldocs:
+# alias
+indent: uncrustify
+
+naturaldocs: FORCE
 	naturaldocs -i . \
 	  -xi docs -xi demo -xi staging -xi scripts -xi test -xi samples \
 	  -p etc/naturaldocs \
 	  -o HTML docs
 
-cloc:
+cloc: FORCE
 	cloc scheduler/picoRTOS.c
 	cloc scheduler/picoRTOS-SMP.c
 
-check:
+check: FORCE
 	cd test && ./run_tests.sh
 
 distcheck: FORCE
