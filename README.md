@@ -134,6 +134,7 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - Intel 8051 / MCS51
  - MIPS M51xx / PIC32Mx
  - RISC-V RV32IMAC
+ - RISC-V RV32EC
  - PowerPC e200z4
  - PowerPC e200z7
  - TI C2000 / c28x
@@ -172,6 +173,7 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - STMicroelectronics STM32F401x series
  - STMicroelectronics STM32H743/750
  - Texas Instruments TMS320F2837xD
+ - WCH CH32V003
 
 ## Working principle
 
@@ -264,6 +266,7 @@ Basic demo code is provided for the following boards:
   - STMicro STM32F401RCT6 development board (staging)
   - Texas Instruments Launchxl-f28379d
   - Raspberry Pi Pico (single core & SMP)
+  - WCH CH32V003F4P6 eval board (staging)
 
 A portability demo is available in demo/amigaball-lcd and works with the
 follwing boards (+0.96" LCD):

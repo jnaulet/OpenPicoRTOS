@@ -1,5 +1,24 @@
 # Release notes
 
+## picoRTOS v1.9.7
+### What's new ?
+
+Minor update, support for a new architecture:
+
+    - RISC-V: support for RV32EC + WCH CH32V003
+    - CH32V003 minimal drivers (clock, mux, gpio) + demo
+
+## picoRTOS v1.9.6
+### What's new ?
+
+This is a minor update, but kinda major in some ways.
+
+    - 8051: improved architecture + clock management system(s)
+    - AVR: total refactoring of the ports (merged ATMegza & ATTiny) + associated demos
+    - STM32F10xxx: support for a new ARMV7-M machine + minimal drivers (clock, mux, gpio)
+    - STM32F401x: support for new ARMv7e-M machine + minimal drivers (clock)
+    - Refactoring of DMA setup in existing SPI drivers (to match +irqdriven naming conventions)
+
 ## picoRTOS v1.9.5
 ### What's new ?
 
