@@ -20,4 +20,8 @@ config CLOCK_STC12C5AXX
        depends on 8051
        bool "STC MCU STC12C5Axx series clock"
 
+config CLOCK_CH32V003
+       depends on RISCV
+       bool "WCH CH32V003 series clock"
+
 endmenu
