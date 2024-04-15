@@ -12,4 +12,8 @@ config GPIO_STM32F10XXX
        depends on ARM
        bool "STMicro STM32F10XXX series GPIOs"
 
+config GPIO_WCH_CH32X
+       depends on RISCV
+       bool "WCH CH32x series GPIOs"
+
 endmenu
