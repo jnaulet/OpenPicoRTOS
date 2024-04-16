@@ -1,3 +1,5 @@
+![picoRTOS](etc/images/banner.png)
+
 # OpenPicoRTOS [![Latest Release](https://img.shields.io/github/release-date/jnaulet/OpenPicoRTOS)](https://img.shields.io) [![Commits since](https://img.shields.io/github/commits-since/jnaulet/OpenPicoRTOS/latest/v1.9.x)](https://img.shields.io)
 
 Very small, safe, lightning fast, yet portable preemptive RTOS with SMP support.
