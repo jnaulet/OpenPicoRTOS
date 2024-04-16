@@ -24,12 +24,12 @@ include-$(CONFIG_RISCV) += -I$(arch-riscv)/include \
 # machines
 a_src-$(CONFIG_MACH_GD32VF103) += $(arch-riscv)/rv32imac/mach-gd32vf103/startup.S
 c_src-$(CONFIG_MACH_GD32VF103) += $(arch-riscv)/rv32imac/mach-gd32vf103/intc-eclic.c
-a_src-$(CONFIG_MACH_CH32V003) += $(arch-riscv)/rv32ec/mach-ch32v003rm/startup.S
-c_src-$(CONFIG_MACH_CH32V003) += $(arch-riscv)/rv32ec/mach-ch32v003rm/intc-pfic.c
-c_src-$(CONFIG_MACH_CH32V003) += $(arch-riscv)/rv32ec/mach-ch32v003rm/timer-stk.c
+a_src-$(CONFIG_MACH_CH32V003) += $(arch-riscv)/rv32ec/mach-ch32v003/startup.S
+c_src-$(CONFIG_MACH_CH32V003) += $(arch-riscv)/rv32ec/mach-ch32v003/intc-pfic.c
+c_src-$(CONFIG_MACH_CH32V003) += $(arch-riscv)/rv32ec/mach-ch32v003/timer-stk.c
 # FIXME: libgcc is supposed to implement this
-a_src-$(CONFIG_RV32EC_LIBGCC_DIV_MULT) += $(arch-riscv)/rv32ec/mach-ch32v003rm/gcc/div.S
-a_src-$(CONFIG_RV32EC_LIBGCC_DIV_MULT) += $(arch-riscv)/rv32ec/mach-ch32v003rm/gcc/muldi3.S
+a_src-$(CONFIG_RV32EC_LIBGCC_DIV_MULT) += $(arch-riscv)/rv32ec/mach-ch32v003/gcc/div.S
+a_src-$(CONFIG_RV32EC_LIBGCC_DIV_MULT) += $(arch-riscv)/rv32ec/mach-ch32v003/gcc/muldi3.S
 
 ccflags-$(CONFIG_RISCV) += $(include-y) $(arch-y) $(abi-y) $(cmodel-y) -ffreestanding
 asflags-$(CONFIG_RISCV) += $(include-y) $(arch-y) $(abi-y) $(cmodel-y)
