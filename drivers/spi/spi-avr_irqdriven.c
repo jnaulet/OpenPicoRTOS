@@ -38,6 +38,7 @@ static void spi_isr(void *priv)
 
     picoRTOS_assert(ctx->rx_buf != NULL, return );
     picoRTOS_assert(ctx->tx_buf != NULL, return );
+    picoRTOS_assert(ctx->ss != NULL, return );
 
     do {
         if (fifo_head_is_writable(&ctx->rx_fifo)) {
@@ -49,8 +50,10 @@ static void spi_isr(void *priv)
         if (fifo_head_is_readable(&ctx->tx_fifo)) {
             fifo_head_pop(&ctx->tx_fifo);
             ctx->base->SPDR = ctx->tx_buf[ctx->tx_fifo.r];
-        }else
+        }else{
             ctx->state = SPI_AVR_STATE_START;
+            (void)gpio_write(ctx->ss, true);
+        }
         /* try to send as many bytes as possible to avoid
          * systematic context switching */
     } while ((ctx->base->SPSR & SPSR_SPIF) != 0);
@@ -196,7 +199,10 @@ int spi_setup(struct spi *ctx, const struct spi_settings *settings)
 
     /* frame_size: ignore */
     /* cs_pol: ignore */
-    /* cs: ignore */
+
+    /* cs: awful */
+    if (settings->cs != 0)
+        ctx->ss = (struct gpio *)settings->cs;
 
     return res;
 }
@@ -248,6 +254,7 @@ static int irqdriven_run_state_start(struct spi *ctx, void *rx,
     picoRTOS_assert(n > 0, return -EINVAL);
     picoRTOS_assert(ctx->rx_buf != NULL, return -EIO);
     picoRTOS_assert(ctx->tx_buf != NULL, return -EIO);
+    picoRTOS_assert(ctx->ss != NULL, return -EIO);
 
     int recv = 0;
     int sent = 1;
@@ -277,9 +284,10 @@ static int irqdriven_run_state_start(struct spi *ctx, void *rx,
     }
 
     /* force-sent 1st byte */
+    (void)gpio_write(ctx->ss, false);
     ctx->base->SPDR = *tx8;
-    ctx->state = SPI_AVR_STATE_XFER;
 
+    ctx->state = SPI_AVR_STATE_XFER;
     return -EAGAIN;
 }
 

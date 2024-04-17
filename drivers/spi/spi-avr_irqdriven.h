@@ -4,6 +4,7 @@
 #include "spi.h"
 #include "fifo.h"
 #include "clock.h"
+#include "gpio.h"
 
 #include <stdint.h>
 #include "picoRTOS_types.h"
@@ -32,6 +33,7 @@ struct spi {
     struct fifo_head8 tx_fifo;
     /*@null@*/ /*@temp@*/ uint8_t *rx_buf;
     /*@null@*/ /*@temp@*/ uint8_t *tx_buf;
+    /*@null@*/ /*@temp@*/ struct gpio *ss;
 };
 
 struct spi_avr_irqdriven_settings {
