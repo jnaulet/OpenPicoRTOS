@@ -59,6 +59,7 @@
 #define ADDR_USART0 0xc0
 #define ADDR_USART1 0xc8
 #define ADDR_USART2 0xd0
+#define ADDR_USART3 0x130
 
 /* IRQs */
 
