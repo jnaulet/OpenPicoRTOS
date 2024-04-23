@@ -91,6 +91,7 @@ int uart_avr_init(struct uart *ctx, int base, clock_id_t clkid)
     ctx->mode = UART_AVR_MODE_NORMAL;
     ctx->rx_buf = NULL;
     ctx->tx_buf = NULL;
+    ctx->state = UART_AVR_STATE_START;
 
     /* turn on */
     ctx->base->UCSRnA = (uint8_t)UCSRnA_U2X;
@@ -225,7 +226,7 @@ int uart_setup(struct uart *ctx, const struct uart_settings *settings)
     return 0;
 }
 
-static int uart_write_irqdriven(struct uart *ctx, const char *buf, size_t n)
+static int uart_write_irqdriven_start(struct uart *ctx, const char *buf, size_t n)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
     picoRTOS_assert(ctx->tx_buf != NULL, return -EIO);
@@ -245,7 +246,35 @@ static int uart_write_irqdriven(struct uart *ctx, const char *buf, size_t n)
 
     /* trigger udre isr */
     ctx->base->UCSRnB |= UCSRnB_UDRIE;
-    return sent;
+    /* state machine */
+    ctx->state = UART_AVR_STATE_XFER;
+    ctx->sent = (int)n; /* FIXME */
+
+    return -EAGAIN;
+}
+
+static int uart_write_irqdriven_xfer(struct uart *ctx)
+{
+    if (!fifo_head_is_readable(&ctx->tx_fifo)) {
+        ctx->state = UART_AVR_STATE_START;
+        return ctx->sent;
+    }
+
+    return -EAGAIN;
+}
+
+static int uart_write_irqdriven(struct uart *ctx, const char *buf, size_t n)
+{
+    picoRTOS_assert(n > 0, return -EINVAL);
+
+    switch (ctx->state) {
+    case UART_AVR_STATE_START: return uart_write_irqdriven_start(ctx, buf, n);
+    case UART_AVR_STATE_XFER: return uart_write_irqdriven_xfer(ctx);
+    default: break;
+    }
+
+    picoRTOS_break();
+    /*@notreached@*/ return -EIO;
 }
 
 static int uart_read_irqdriven(struct uart *ctx, char *buf, size_t n)

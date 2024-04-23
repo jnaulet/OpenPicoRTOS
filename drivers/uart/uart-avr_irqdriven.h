@@ -18,6 +18,12 @@ typedef enum {
     UART_AVR_MODE_COUNT
 } uart_avr_mode_t;
 
+typedef enum {
+    UART_AVR_STATE_START,
+    UART_AVR_STATE_XFER,
+    UART_AVR_STATE_COUNT
+} uart_avr_state_t;
+
 struct uart {
     /*@temp@*/ struct USART_AVR *base;
     clock_id_t clkid;
@@ -27,6 +33,8 @@ struct uart {
     struct fifo_head8 tx_fifo;
     /*@null@*/ /*@temp@*/ char *rx_buf;
     /*@null@*/ /*@temp@*/ char *tx_buf;
+    uart_avr_state_t state;
+    int sent;
 };
 
 struct uart_avr_irqdriven_settings {
