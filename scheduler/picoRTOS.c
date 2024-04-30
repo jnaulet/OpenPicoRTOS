@@ -33,10 +33,15 @@ struct picoRTOS_task_core {
     } stat;
     /* shared priority support */
     picoRTOS_priority_t prio;
-    picoRTOS_priority_t sub;
-    size_t sub_count;
+    picoRTOS_priority_t sub_prio;
     /* deadline */
     size_t deadline_miss_count;
+};
+
+/* round-robin support */
+struct picoRTOS_task_sub {
+    picoRTOS_priority_t tick;
+    picoRTOS_priority_t count;
 };
 
 /* user-defined tasks + idle */
@@ -46,6 +51,8 @@ struct picoRTOS_task_core {
 /* shortcut for current task */
 #define TASK_CURRENT() (picoRTOS.task[picoRTOS.index])
 #define TASK_BY_PID(x) (picoRTOS.task[(x)])
+/* shortcut for current sub */
+#define SUB_BY_PRIO(x) (picoRTOS.sub[(x)])
 
 /* cache alignment */
 #define L1_CACHE_ALIGN(x, a)         L1_CACHE_ALIGN_MASK((x), ((a) - 1))
@@ -57,6 +64,7 @@ struct picoRTOS_core {
     picoRTOS_tick_t tick;
     picoRTOS_pid_t pid_count;
     struct picoRTOS_task_core task[TASK_COUNT];
+    struct picoRTOS_task_sub sub[TASK_COUNT];
     picoRTOS_stack_t idle_stack[ARCH_MIN_STACK_COUNT];
 } __ATTRIBUTE_ALIGNED__(ARCH_L1_DCACHE_LINESIZE);
 
@@ -80,8 +88,7 @@ static void task_core_init(/*@out@*/ struct picoRTOS_task_core *task)
     task->stat.deadline_miss_count = 0;
     /* shared priority support */
     task->prio = (picoRTOS_priority_t)TASK_COUNT;
-    task->sub = (picoRTOS_priority_t)0;
-    task->sub_count = (size_t)1;
+    task->sub_prio = (picoRTOS_priority_t)0;
     /* deadline */
     task->deadline_miss_count = 0;
 }
@@ -90,7 +97,7 @@ static bool task_core_is_available(struct picoRTOS_task_core *task)
 {
     /* task is ready and it's its turn */
     return task->state == PICORTOS_TASK_STATE_READY &&
-           ((size_t)picoRTOS.tick % task->sub_count) == (size_t)task->sub;
+           SUB_BY_PRIO(task->prio).tick == task->sub_prio;
 }
 
 static void task_core_quickcpy(/*@out@*/ struct picoRTOS_task_core *dst,
@@ -134,6 +141,18 @@ static void task_core_stat_finish(struct picoRTOS_task_core *task)
         task->stat.watermark_hi = task->stat.counter;
 }
 
+static void task_sub_init(/*@out@*/ struct picoRTOS_task_sub *sub)
+{
+    sub->tick = 0;
+    sub->count = (picoRTOS_priority_t)1;
+}
+
+static void task_sub_inc(struct picoRTOS_task_sub *sub)
+{
+    if (++sub->tick == sub->count)
+        sub->tick = 0;
+}
+
 /* Group: picoRTOS scheduler API */
 
 static void task_idle_init(void)
@@ -168,8 +187,10 @@ void picoRTOS_init(void)
     /* zero all tasks */
     size_t n = (size_t)TASK_COUNT;
 
-    while (n-- != 0)
+    while (n-- != 0) {
         task_core_init(&TASK_BY_PID(n));
+        task_sub_init(&SUB_BY_PRIO(n));
+    }
 
     /* IDLE */
     task_idle_init();
@@ -355,23 +376,20 @@ static void core_sort_tasks(void)
 static void core_arrange_shared_priorities(void)
 {
     picoRTOS_pid_t pid;
-    picoRTOS_priority_t sub = (picoRTOS_priority_t)0;
+    picoRTOS_priority_t sub_prio = (picoRTOS_priority_t)0;
 
     /* count subs */
     for (pid = (picoRTOS_pid_t)1;
          pid < (picoRTOS_pid_t)CONFIG_TASK_COUNT; pid++) {
+        /* get current prio */
+        picoRTOS_priority_t prio = TASK_BY_PID(pid).prio;
         /* increment sub priority & count */
-        if (TASK_BY_PID(pid).prio == TASK_BY_PID(pid - 1).prio) {
-            TASK_BY_PID(pid).sub = ++sub;
-            TASK_BY_PID(pid).sub_count = (size_t)sub + 1;
+        if (prio == TASK_BY_PID(pid - 1).prio) {
+            TASK_BY_PID(pid).sub_prio = ++sub_prio;
+            SUB_BY_PRIO(prio).count = sub_prio + 1;
         }else
-            sub = (picoRTOS_priority_t)0;
+            sub_prio = (picoRTOS_priority_t)0;
     }
-
-    /* adjust sub_count */
-    for (pid = (picoRTOS_pid_t)CONFIG_TASK_COUNT; pid-- != 0;)
-        if (TASK_BY_PID(pid).prio == TASK_BY_PID(pid + 1).prio)
-            TASK_BY_PID(pid).sub_count = (size_t)TASK_BY_PID(pid + 1).sub_count;
 }
 
 /* Function: picoRTOS_start
@@ -537,6 +555,8 @@ syscall_switch_context(struct picoRTOS_task_core *task)
     /* ignore sleeping, empty tasks & out-of-round sub-tasks */
     while (!task_core_is_available(&TASK_CURRENT()));
 
+    /* round-robin management */
+    task_sub_inc(&SUB_BY_PRIO(task->prio));
     /* refresh current task pointer */
     task = &TASK_CURRENT();
 
@@ -593,6 +613,9 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
 
     /* stats */
     task_core_stat_finish(task);
+
+    /* round-robin management */
+    task_sub_inc(&SUB_BY_PRIO(task->prio));
 
     /* store current sp */
     task->sp = sp;
