@@ -460,7 +460,7 @@ static int hse_setup(unsigned long hz)
     /* otherwise */
     RCC->CR |= CR_HSEON;
 
-    while ((RCC->CR & CR_HSERDY) == 0 & deadlock-- != 0)
+    while ((RCC->CR & CR_HSERDY) == 0 && deadlock-- != 0)
         arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
