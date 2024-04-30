@@ -50,7 +50,7 @@ int wd_avr_setup(struct wd *ctx, struct wd_avr_settings *settings)
 
 int wd_start(struct wd *ctx)
 {
-    volatile register uint8_t *WDTCSR = &ctx->base->WDTCSR;
+    register volatile uint8_t *WDTCSR = &ctx->base->WDTCSR;
     register uint8_t value = (uint8_t)WDTCSR_WDP(ctx->cycles) |
                              ((ctx->cycles > WD_AVR_CYCLES_256K) ? WDTCSR_WDP3 : 0) |
                              WDTCSR_WDE;
@@ -64,7 +64,7 @@ int wd_start(struct wd *ctx)
 
 int wd_stop(struct wd *ctx)
 {
-    volatile register uint8_t *WDTCSR = &ctx->base->WDTCSR;
+    register volatile uint8_t *WDTCSR = &ctx->base->WDTCSR;
 
     ASM("wdr");
     *WDTCSR = (uint8_t)(WDTCSR_WDCE | WDTCSR_WDE);
@@ -75,5 +75,6 @@ int wd_stop(struct wd *ctx)
 
 void wd_refresh(/*@unused@*/ struct wd *ctx)
 {
+    /*@i@*/ (void)ctx;
     ASM("wdr");
 }
