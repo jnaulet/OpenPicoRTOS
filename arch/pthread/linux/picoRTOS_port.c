@@ -141,6 +141,8 @@ picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
     int res;
     struct thread *t = (struct thread*)stack;
 
+    /*@i@*/ (void)stack_count;
+
     t->fn = fn;
     t->priv = priv;
     (void)sigemptyset(&t->sigset);

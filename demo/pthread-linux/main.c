@@ -85,4 +85,5 @@ int main(void)
     picoRTOS_add_task(&task, TASK_BLINK_PRIO);
 
     picoRTOS_start();
+    /*@notreached@*/ return 0;
 }

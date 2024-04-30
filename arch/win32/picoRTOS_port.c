@@ -42,6 +42,13 @@ void arch_resume(void)
     suspended = false;
 }
 
+static arch_entry_point_fn entry_point;
+static unsigned long __attribute__((stdcall)) start_routine(void *priv)
+{
+    entry_point(priv);
+    return 0ul;
+}
+
 picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
                                      size_t stack_count,
                                      arch_entry_point_fn fn,
@@ -49,7 +56,10 @@ picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
 {
     struct thread *t = (struct thread*)stack;
 
-    t->wthread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)fn, priv,
+    /*@i@*/ (void)stack_count;
+    entry_point = fn;
+
+    t->wthread = CreateThread(NULL, 0, start_routine, priv,
                               CREATE_SUSPENDED | STACK_SIZE_PARAM_IS_A_RESERVATION, NULL);
 
     return (picoRTOS_stack_t*)t;
