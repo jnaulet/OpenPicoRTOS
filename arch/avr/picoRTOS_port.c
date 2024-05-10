@@ -47,6 +47,7 @@ picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
                                      arch_entry_point_fn fn,
                                      void *priv)
 {
+    arch_assert_void(stack_count >= (size_t)ARCH_MIN_STACK_COUNT);
     /* AVRs have a post-decrementing stack */
     return arch_save_first_context(stack + (stack_count - 1), fn, priv);
 }
