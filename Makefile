@@ -304,6 +304,9 @@ endif
 ifdef CONFIG_8051
 build_script := Makefile.sdcc
 endif
+ifdef CONFIG_HCS08
+build_script := Makefile.sdcc
+endif
 
 all: FORCE
 	$(Q)$(MAKE) -f $(srctree)/scripts/$(build_script) src=$(CURDIR)

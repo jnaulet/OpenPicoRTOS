@@ -14,6 +14,9 @@ config AVR
 config C2000
        bool "C2000 architecture"
 
+config HCS08
+       bool "HCS08 architecture"
+
 config MIPS
 	bool "MIPS architecture"
 
@@ -35,6 +38,7 @@ source "arch/8051/Kconfig"
 source "arch/arm/Kconfig"
 source "arch/avr/Kconfig"
 source "arch/c2000/Kconfig"
+source "arch/hcs08/Kconfig"
 source "arch/mips/Kconfig"
 source "arch/powerpc/Kconfig"
 source "arch/riscv/Kconfig"

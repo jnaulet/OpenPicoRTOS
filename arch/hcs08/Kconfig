@@ -1,0 +1,34 @@
+menu "HCS08 architecture"
+     depends on HCS08
+
+choice
+        prompt "MCU series"
+        default MACH_MC9S08PT60
+
+config MACH_MC9S08PT60
+       bool "NXP MC9S08PT60"
+       select MACH_MC9S08PTXX
+
+config MACH_MC9S08PT32
+       bool "NXP MC9S08PT32"
+       select MACH_MC9S08PTXX
+
+endchoice
+
+config MACH_MC9S08PTXX
+       bool
+
+choice
+        prompt "SysTick clock selection"
+	default MACH_MC9S08PTXX_MTIM1
+	depends on MACH_MC9S08PTXX
+
+config SYSTICK_MC9S08PTXX_MTIM1
+       bool "Use MTIM1 as SysTick clock"
+
+config SYSTICK_MC9S08PTXX_RTC
+       bool "Use RTC as SysTick clock"
+
+endchoice
+
+endmenu

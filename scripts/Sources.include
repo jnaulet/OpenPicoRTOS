@@ -7,6 +7,7 @@ include arch/8051/Makefile
 include arch/arm/Makefile
 include arch/avr/Makefile
 include arch/c2000/Makefile
+include arch/hcs08/Makefile
 include arch/mips/Makefile
 include arch/powerpc/Makefile
 include arch/pthread/Makefile
