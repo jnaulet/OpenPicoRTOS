@@ -24,4 +24,8 @@ config CLOCK_CH32V003
        depends on RISCV
        bool "WCH CH32V003 series clock"
 
+config CLOCK_MC9S08PTXX
+       depends on HCS08
+       bool "NXP MC9S08PTxx series clock"
+
 endmenu
