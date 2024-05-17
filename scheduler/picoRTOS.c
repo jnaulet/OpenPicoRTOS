@@ -550,10 +550,11 @@ syscall_switch_context(struct picoRTOS_task_core *task)
     task_core_stat_finish(task);
 
     /* choose next task to run */
-    do
+    do {
         picoRTOS.index++;
-    /* ignore sleeping, empty tasks & out-of-round sub-tasks */
-    while (!task_core_is_available(&TASK_CURRENT()));
+        picoRTOS_assert_void_fatal(picoRTOS.index < (picoRTOS_pid_t)TASK_COUNT);
+        /* ignore sleeping, empty tasks & out-of-round sub-tasks */
+    } while (!task_core_is_available(&TASK_CURRENT()));
 
     /* round-robin management */
     task_sub_inc(&SUB_BY_PRIO(task->prio));

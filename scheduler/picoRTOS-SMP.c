@@ -518,10 +518,11 @@ syscall_switch_context(struct picoRTOS_task_core *task)
     if (task->state == PICORTOS_TASK_STATE_BUSY)
         task->state = PICORTOS_TASK_STATE_DONE;
 
-    do
+    do {
         picoRTOS.index[core]++;
-    /* ignore sleeping, empty tasks & out-of-round sub-tasks */
-    while (!task_core_is_available(&TASK_CURRENT_CORE(core), mask));
+        picoRTOS_assert_void_fatal(picoRTOS.index[core] < (picoRTOS_pid_t)TASK_COUNT);
+        /* ignore sleeping, empty tasks & out-of-round sub-tasks */
+    } while (!task_core_is_available(&TASK_CURRENT_CORE(core), mask));
 
     /* round-robin management */
     task_sub_inc(&SUB_BY_PRIO(task->prio));
