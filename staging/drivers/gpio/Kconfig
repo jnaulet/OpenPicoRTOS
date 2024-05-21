@@ -16,4 +16,8 @@ config GPIO_WCH_CH32X
        depends on RISCV
        bool "WCH CH32x series GPIOs"
 
+config GPIO_MC9S08PTXX
+       depends on HCS08
+       bool "NXP MC9S08PTxx series GPIOs"
+
 endmenu
