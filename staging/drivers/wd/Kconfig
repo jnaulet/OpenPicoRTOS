@@ -4,4 +4,8 @@ config WD_RENESAS_RA4_WDT
        depends on ARM
        bool "Renesas RA4 WDT Watchdog"
 
+config WD_MC9S08PTXX_WDOG
+       depends on HCS08
+       bool "NXP MC9S08PTxx Series Watchdog"
+
 endmenu
