@@ -45,7 +45,7 @@
 #define ADDR_P3M1    0xac
 #define ADDR_P3S     0xac   /* page1 */
 #define ADDR_P3M2    0xad
-#define ADDR_P3SR    0cad   /* page1 */
+#define ADDR_P3SR    0xad   /* page1 */
 #define ADDR_IAPFD   0xae
 #define ADDR_IAPCN   0xaf
 #define ADDR_P3      0xb0
@@ -141,10 +141,10 @@
 
 /* 8051-compatibility layer */
 
-#define ADDR_P0M0 ADDR_P0M2
-#define ADDR_P1M0 ADDR_P1M2
-#define ADDR_P2M0 ADDR_P2M2
-#define ADDR_P3M0 ADDR_P3M2
+#define ADDR_P0M0 ADDR_P0M2 /* HDR2ASM_SKIP */
+#define ADDR_P1M0 ADDR_P1M2 /* HDR2ASM_SKIP */
+#define ADDR_P2M0 ADDR_P2M2 /* HDR2ASM_SKIP */
+#define ADDR_P3M0 ADDR_P3M2 /* HDR2ASM_SKIP */
 
 /* IRQs */
 
@@ -172,5 +172,6 @@
 
 /* selectable systick management */
 extern void arch_ack_systick(void);
+#define ACK_SYSTICK _arch_ack_systick
 
 #endif
