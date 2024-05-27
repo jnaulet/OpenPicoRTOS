@@ -11,6 +11,7 @@ skip-makefile := 1
 -include include/config/auto.conf
 
 CC := sdcc
+PERL := perl
 
 include scripts/Kbuild.include
 include scripts/Sources.include
@@ -51,7 +52,8 @@ inctree     = $(patsubst %/,%,$(addprefix -I,$(dir $(1))))
 
 c_flags     = --std-c99 --fomit-frame-pointer $(opt-y) $(debug-y) $(RTOSINCLUDE) \
               $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
-              $(ccflags-y) $(subst ",,$(CONFIG_EXTRA_CFLAGS)) $(ccattributes)
+              $(ccflags-y) $(subst ",,$(CONFIG_EXTRA_CFLAGS)) $(ccattributes) \
+              -Wa-Iinclude
 
 a_flags     = $(debug-y) $(RTOSINCLUDE) \
               $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
@@ -75,10 +77,27 @@ ifndef src
 $(warning kbuild: Makefile.sdcc is included improperly)
 endif
 
+# asm deps
+a_deps-y += include/generated/picoRTOS_device.S
+
 # ===========================================================================
 
 __sdcc: $(target) $(always)
           @:
+
+# Create picoRTOS_device.S from picoRTOS_device.h
+# ---------------------------------------------------------------------------
+
+# HEADER (.h) to ASM (.S) files
+# The S file is compiled and updated dependency information is generated.
+# (See cmd_pl_rel_h + relevant part of rule_pl_rel_h)
+
+quiet_cmd_pl_rel_h = PL $(quiet_modtag)  $@
+cmd_pl_rel_h = $(PERL) $(srctree)/scripts/hdr2asm.pl \
+	       $(filter %/picoRTOS_device.h,$(call cmd_dep_h_c,$(c_src-y))) > $@
+
+include/generated/picoRTOS_device.S: FORCE
+	$(call if_changed,pl_rel_h)
 
 # Prepare object files (.rel)
 # ---------------------------------------------------------------------------
@@ -104,7 +123,7 @@ cmd_cc_rel_c = $(CC) $(c_flags) -o $@ -c $<
 quiet_cmd_as_rel_S = AS $(quiet_modtag)  $@
 cmd_as_rel_S       = $(sdas-y) $(a_flags) -o $@ $<
 
-%.rel: %.S FORCE
+%.rel: %.S $(a_deps-y) FORCE
 	$(call if_changed,as_rel_S)
 
 targets += $(real-objs-y) $(lib-y)
