@@ -18,6 +18,6 @@ source staging/drivers/pwm/Kconfig
 source staging/drivers/spi/Kconfig
 source staging/drivers/twi/Kconfig
 source staging/drivers/uart/Kconfig
-# source staging/drivers/wd/Kconfig
+source staging/drivers/wd/Kconfig
 
 endmenu
