@@ -28,4 +28,7 @@ typedef int picoRTOS_intptr_t;
 # define arch_break() ASM(" sjmp .") /* branch to self */
 #endif
 
+/* very-specific */
+void arch_timer_ack(void);
+
 #endif

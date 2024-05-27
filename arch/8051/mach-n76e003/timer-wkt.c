@@ -95,7 +95,7 @@ void arch_idle(void *null)
         ASM(" orl 0x87, #1");
 }
 
-void arch_ack_systick(void)
+void arch_timer_ack(void)
 {
     ASM(" anl 0x8f, #0xef");
 }

@@ -170,8 +170,4 @@
 #define DEVICE_INTERRUPT_VECTOR_COUNT 18
 #define DEVICE_DEFAULT_SYSCLK_HZ      16000000ul
 
-/* selectable systick management */
-extern void arch_ack_systick(void);
-#define ACK_SYSTICK _arch_ack_systick
-
 #endif

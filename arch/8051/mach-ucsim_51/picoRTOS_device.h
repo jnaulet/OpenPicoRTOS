@@ -60,6 +60,6 @@
 /* TIMER2 REGs */
 
 #define ADDR_xIE_wET2 ADDR_IE
-#define xIE_ET2       (1 << 5)
+#define xIE_ET2       (1 << 5) /* HDR2ASM_SKIP */
 
 #endif

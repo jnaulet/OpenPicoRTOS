@@ -63,12 +63,6 @@ static unsigned char IE;
 #define LATENCY            8ul
 #define T0                 ~(((INTERNAL_SYSCLK_HZ / CONFIG_TICK_HZ) / 12ul) - LATENCY)
 
-void arch_reload_timer(void)
-{
-    TL0 = (unsigned char)T0;
-    TH0 = (unsigned char)(T0 >> 8);
-}
-
 void arch_timer_init(void)
 {
     /* init divider */
@@ -110,4 +104,10 @@ void arch_idle(void *null)
 
     for (;;)
         ASM(" orl pcon, #1");
+}
+
+void arch_timer_ack(void)
+{
+    TL0 = (unsigned char)T0;
+    TH0 = (unsigned char)(T0 >> 8);
 }

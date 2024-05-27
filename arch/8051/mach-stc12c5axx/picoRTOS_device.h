@@ -97,7 +97,4 @@
 #define DEVICE_INTERRUPT_VECTOR_COUNT 10
 #define DEVICE_DEFAULT_SYSCLK_HZ      22100000ul
 
-/* timer t0 non-auto-reload */
-extern void arch_reload_timer(void);
-
 #endif

@@ -1,9 +1,11 @@
 	.module picoRTOS_portasm
 
-	.include "picoRTOS_device.inc"
+	.include "generated/picoRTOS_device.S"
 
 	.globl _picoRTOS_tick
 	.globl _picoRTOS_syscall
+
+	.globl _arch_timer_ack
 
 	.globl _vn
 	.globl __start__stack
@@ -134,8 +136,9 @@ loop:
 
 	.globl SysTick_Handler
 SysTick_Handler:
-	ACK_SYSTICK		; more deterministic point
-	SAVE_CONTEXT
+	SAVE_CONTEXT_STEP1
+	lcall _arch_timer_ack
+	SAVE_CONTEXT_STEP2
 	lcall _picoRTOS_tick
 	RESTORE_CONTEXT
 	reti

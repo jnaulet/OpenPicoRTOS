@@ -96,3 +96,8 @@ void arch_idle(void *null)
     for (;;)
         ASM(" nop");
 }
+
+void arch_timer_ack(void)
+{
+    ASM(" anl t2con, #0x7f");
+}
