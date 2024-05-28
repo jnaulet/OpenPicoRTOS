@@ -11,7 +11,7 @@ struct wd {
     clock_id_t clkid;
 };
 
-int wd_mc9s08ptxx_wdt_init(/*@out@*/ struct wd *ctx, clock_id_t clkid);
+int wd_mc9s08ptxx_init(/*@out@*/ struct wd *ctx, clock_id_t clkid);
 
 /* Implements:
  * int wd_start(struct wd *ctx);

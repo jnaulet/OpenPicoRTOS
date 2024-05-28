@@ -34,7 +34,7 @@ struct WD_MC9S08PTXX {
 #define CS2_CLK_M  0x3u
 #define CS2_CLK(x) ((x) & CS2_CLK_M)
 
-int wd_mc9s08ptxx_wdt_init(struct wd *ctx, clock_id_t clkid)
+int wd_mc9s08ptxx_init(struct wd *ctx, clock_id_t clkid)
 {
     ctx->base = (struct WD_MC9S08PTXX*)ADDR_WDOG;
     ctx->clkid = clkid;
@@ -50,7 +50,12 @@ int wd_start(struct wd *ctx)
 
 int wd_stop(struct wd *ctx)
 {
+    /* deactivate wdog (write once) */
     ctx->base->CS1 &= ~CS1_EN;
+    ctx->base->CS2 = (uint8_t)CS2_CLK(1);
+    ctx->base->TOVALH = (uint8_t)0;
+    ctx->base->TOVALL = (uint8_t)4;
+
     return 0;
 }
 
