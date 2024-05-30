@@ -1,3 +1,7 @@
 menu "SPI drivers"
 
+config SPI_MC9S08PTXX
+       depends on HCS08
+       bool "NXP MC9S08PTxx Series SPI"
+
 endmenu
