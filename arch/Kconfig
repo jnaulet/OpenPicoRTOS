@@ -34,6 +34,12 @@ config WIN32
 
 endchoice
 
+config CC
+       string
+       default "gcc" if ARM || AVR || MIPS || POWERPC || RISCV || PTHREAD || WIN32
+       default "sdcc" if 8051 || HCS08
+       default "cl2000" if C2000
+
 source "arch/8051/Kconfig"
 source "arch/arm/Kconfig"
 source "arch/avr/Kconfig"

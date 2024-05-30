@@ -298,14 +298,8 @@ endif # $(dot-config)
 # The all: target is the default when no target is given on the
 # command line.
 build_script := Makefile.gcc
-ifdef CONFIG_C2000
-build_script := Makefile.cl2000
-endif
-ifdef CONFIG_8051
-build_script := Makefile.sdcc
-endif
-ifdef CONFIG_HCS08
-build_script := Makefile.sdcc
+ifdef CONFIG_CC
+build_script := Makefile.$(CONFIG_CC)
 endif
 
 all: FORCE
