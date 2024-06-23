@@ -38,21 +38,18 @@ static void spi_isr(void *priv)
 
     picoRTOS_assert(ctx->rx_buf != NULL, return );
     picoRTOS_assert(ctx->tx_buf != NULL, return );
-    picoRTOS_assert(ctx->ss != NULL, return );
+    /* picoRTOS_assert(ctx->ss != NULL, return ); */
 
     do {
+        /* rx bytes */
         if (fifo_head_is_writable(&ctx->rx_fifo)) {
             ctx->rx_buf[ctx->rx_fifo.w] = ctx->base->SPDR;
             fifo_head_push(&ctx->rx_fifo);
         }
-
         /* stream next char if available */
         if (fifo_head_is_readable(&ctx->tx_fifo)) {
             fifo_head_pop(&ctx->tx_fifo);
             ctx->base->SPDR = ctx->tx_buf[ctx->tx_fifo.r];
-        }else{
-            ctx->state = SPI_AVR_STATE_START;
-            (void)gpio_write(ctx->ss, true);
         }
         /* try to send as many bytes as possible to avoid
          * systematic context switching */
@@ -65,8 +62,12 @@ int spi_avr_init(struct spi *ctx, int base, clock_id_t clkid)
     ctx->base = (struct SPI_AVR*)base;
     ctx->clkid = clkid;
     ctx->state = SPI_AVR_STATE_START;
+    ctx->count = 0;
     ctx->mode = SPI_AVR_MODE_NORMAL;
-
+    ctx->rx_buf = NULL;
+    ctx->tx_buf = NULL;
+    ctx->ss = NULL;
+    
     /* enable */
     ctx->base->SPCR |= SPCR_SPE;
 
@@ -248,22 +249,45 @@ static int spi_xfer_normal(struct spi *ctx, void *rx, const void *tx, size_t n)
     return -EIO;
 }
 
-static int irqdriven_run_state_start(struct spi *ctx, void *rx,
-                                     const void *tx, size_t n)
+static int irqdriven_run_state_start(struct spi *ctx, const void *tx, size_t n)
 {
-    picoRTOS_assert(n > 0, return -EINVAL);
+  picoRTOS_assert(n > 0, return -EINVAL);
+  picoRTOS_assert(ctx->tx_buf != NULL, return -EIO);
+  
+  int sent = 0;
+  const uint8_t *tx8 = (const uint8_t*)tx;
+
+  while ((size_t)sent != n) {
+    if (fifo_head_is_writable(&ctx->tx_fifo)) {
+      ctx->tx_buf[ctx->tx_fifo.w] = tx8[sent++];
+      fifo_head_push(&ctx->tx_fifo);
+    }else
+      break;
+  }
+
+  /* force-sent 1st byte */
+  if(ctx->ss != NULL)
+    (void)gpio_write(ctx->ss, false);
+  
+  fifo_head_pop(&ctx->tx_fifo);
+  ctx->base->SPDR = ctx->tx_buf[ctx->tx_fifo.r];
+  
+  ctx->state = SPI_AVR_STATE_XFER;
+  ctx->count = (size_t)sent;
+  
+  return -EAGAIN;
+}
+
+static int irqdriven_run_state_xfer(struct spi *ctx, void *rx)
+{
+  /* picoRTOS_assert(n > 0, return -EINVAL); */
     picoRTOS_assert(ctx->rx_buf != NULL, return -EIO);
-    picoRTOS_assert(ctx->tx_buf != NULL, return -EIO);
-    picoRTOS_assert(ctx->ss != NULL, return -EIO);
+    /* picoRTOS_assert(ctx->ss != NULL, return -EIO); */
 
     int recv = 0;
-    int sent = 1;
-
     uint8_t *rx8 = (uint8_t*)rx;
-    const uint8_t *tx8 = (const uint8_t*)tx;
-
-    /* first: try to rx */
-    while ((size_t)recv != n) {
+    
+    while ((size_t)recv != ctx->count) {
         if (fifo_head_is_readable(&ctx->rx_fifo)) {
             fifo_head_pop(&ctx->rx_fifo);
             rx8[recv++] = ctx->rx_buf[ctx->rx_fifo.r];
@@ -271,24 +295,17 @@ static int irqdriven_run_state_start(struct spi *ctx, void *rx,
             break;
     }
 
-    if (recv != 0)
-        return recv;
+    if (recv == 0)
+        return -EAGAIN;
 
-    /* no rx: trigger a block tx */
-    while ((size_t)sent != n) {
-        if (fifo_head_is_writable(&ctx->tx_fifo)) {
-            ctx->tx_buf[ctx->tx_fifo.w] = tx8[sent++];
-            fifo_head_push(&ctx->tx_fifo);
-        }else
-            break;
+    ctx->count -= (size_t)recv;
+    if(ctx->count == 0){
+      ctx->state = SPI_AVR_STATE_START;
+      if(ctx->ss != NULL)
+        (void)gpio_write(ctx->ss, true);
     }
-
-    /* force-sent 1st byte */
-    (void)gpio_write(ctx->ss, false);
-    ctx->base->SPDR = *tx8;
-
-    ctx->state = SPI_AVR_STATE_XFER;
-    return -EAGAIN;
+    
+    return recv;
 }
 
 static int spi_xfer_irqdriven(struct spi *ctx, void *rx, const void *tx, size_t n)
@@ -296,8 +313,8 @@ static int spi_xfer_irqdriven(struct spi *ctx, void *rx, const void *tx, size_t 
     picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
-    case SPI_AVR_STATE_START: return irqdriven_run_state_start(ctx, rx, tx, n);
-    case SPI_AVR_STATE_XFER: return -EAGAIN; /* wait for xfer to finish */
+    case SPI_AVR_STATE_START: return irqdriven_run_state_start(ctx, tx, n);
+    case SPI_AVR_STATE_XFER: return irqdriven_run_state_xfer(ctx, rx);
     default: break;
     }
 

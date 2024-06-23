@@ -27,6 +27,7 @@ struct spi {
     /*@temp@*/ struct SPI_AVR *base;
     clock_id_t clkid;
     spi_avr_state_t state;
+    size_t count;
     spi_avr_mode_t mode;
     /* IRQ-driven opt */
     struct fifo_head8 rx_fifo;
