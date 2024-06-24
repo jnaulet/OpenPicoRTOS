@@ -67,7 +67,7 @@ int spi_avr_init(struct spi *ctx, int base, clock_id_t clkid)
     ctx->rx_buf = NULL;
     ctx->tx_buf = NULL;
     ctx->ss = NULL;
-    
+
     /* enable */
     ctx->base->SPCR |= SPCR_SPE;
 
@@ -251,42 +251,42 @@ static int spi_xfer_normal(struct spi *ctx, void *rx, const void *tx, size_t n)
 
 static int irqdriven_run_state_start(struct spi *ctx, const void *tx, size_t n)
 {
-  picoRTOS_assert(n > 0, return -EINVAL);
-  picoRTOS_assert(ctx->tx_buf != NULL, return -EIO);
-  
-  int sent = 0;
-  const uint8_t *tx8 = (const uint8_t*)tx;
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(ctx->tx_buf != NULL, return -EIO);
 
-  while ((size_t)sent != n) {
-    if (fifo_head_is_writable(&ctx->tx_fifo)) {
-      ctx->tx_buf[ctx->tx_fifo.w] = tx8[sent++];
-      fifo_head_push(&ctx->tx_fifo);
-    }else
-      break;
-  }
+    int sent = 0;
+    const uint8_t *tx8 = (const uint8_t*)tx;
 
-  /* force-sent 1st byte */
-  if(ctx->ss != NULL)
-    (void)gpio_write(ctx->ss, false);
-  
-  fifo_head_pop(&ctx->tx_fifo);
-  ctx->base->SPDR = ctx->tx_buf[ctx->tx_fifo.r];
-  
-  ctx->state = SPI_AVR_STATE_XFER;
-  ctx->count = (size_t)sent;
-  
-  return -EAGAIN;
+    while ((size_t)sent != n) {
+        if (fifo_head_is_writable(&ctx->tx_fifo)) {
+            ctx->tx_buf[ctx->tx_fifo.w] = tx8[sent++];
+            fifo_head_push(&ctx->tx_fifo);
+        }else
+            break;
+    }
+
+    /* force-sent 1st byte */
+    if (ctx->ss != NULL)
+        (void)gpio_write(ctx->ss, false);
+
+    fifo_head_pop(&ctx->tx_fifo);
+    ctx->base->SPDR = ctx->tx_buf[ctx->tx_fifo.r];
+
+    ctx->state = SPI_AVR_STATE_XFER;
+    ctx->count = (size_t)sent;
+
+    return -EAGAIN;
 }
 
 static int irqdriven_run_state_xfer(struct spi *ctx, void *rx)
 {
-  /* picoRTOS_assert(n > 0, return -EINVAL); */
+    /* picoRTOS_assert(n > 0, return -EINVAL); */
     picoRTOS_assert(ctx->rx_buf != NULL, return -EIO);
     /* picoRTOS_assert(ctx->ss != NULL, return -EIO); */
 
     int recv = 0;
     uint8_t *rx8 = (uint8_t*)rx;
-    
+
     while ((size_t)recv != ctx->count) {
         if (fifo_head_is_readable(&ctx->rx_fifo)) {
             fifo_head_pop(&ctx->rx_fifo);
@@ -299,12 +299,12 @@ static int irqdriven_run_state_xfer(struct spi *ctx, void *rx)
         return -EAGAIN;
 
     ctx->count -= (size_t)recv;
-    if(ctx->count == 0){
-      ctx->state = SPI_AVR_STATE_START;
-      if(ctx->ss != NULL)
-        (void)gpio_write(ctx->ss, true);
+    if (ctx->count == 0) {
+        ctx->state = SPI_AVR_STATE_START;
+        if (ctx->ss != NULL)
+            (void)gpio_write(ctx->ss, true);
     }
-    
+
     return recv;
 }
 

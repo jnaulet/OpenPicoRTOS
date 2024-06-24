@@ -28,21 +28,17 @@ struct SPI_AVR {
  * Parameters:
  *  ctx - The SPI to init
  *  base - The SPI base address
- *  speed - The SPI speed (normal or 2x)
+ *  clkid - The SPI source clock id
  *
  * Returns:
  * 0 if success, -errno otherwise
  */
-int spi_avr_init(struct spi *ctx, int base, spi_avr_speed_t speed)
+int spi_avr_init(struct spi *ctx, int base, clock_id_t clkid)
 {
-    picoRTOS_assert(speed < SPI_AVR_SPEED_COUNT, return -EINVAL);
-
     /* internals */
     ctx->base = (struct SPI_AVR*)base;
+    ctx->clkid = clkid;
     ctx->state = SPI_AVR_STATE_START;
-
-    if (speed == SPI_AVR_SPEED_SPI2X)
-        ctx->base->SPSR |= SPSR_SPI2X;
 
     /* enable */
     ctx->base->SPCR |= SPCR_SPE;
@@ -101,6 +97,31 @@ static int set_clkmode(struct spi *ctx, spi_clock_mode_t clkmode)
     return 0;
 }
 
+static int set_bitrate(struct spi *ctx, unsigned long bitrate)
+{
+    picoRTOS_assert(bitrate > 0, return -EINVAL);
+
+    size_t i;
+    clock_freq_t freq = clock_get_freq(ctx->clkid);
+    static const unsigned spr[] = { 4u, 0u, 5u, 1u, 6u, 2u, 3u };
+
+    /* try to find the closest value */
+    for (i = 0; i < sizeof(spr); i++) {
+        unsigned long approx = (unsigned long)freq >> (i + 1);
+        if (approx <= bitrate) {
+            /* sck freq */
+            ctx->base->SPCR &= ~SPCR_SPR(SPCR_SPR_M);
+            ctx->base->SPCR |= SPCR_SPR(spr[i]);
+            ctx->base->SPSR &= ~SPSR_SPI2X;
+            ctx->base->SPSR |= SPSR_SPI2X & (spr[i] >> 2);
+            return 0;
+        }
+    }
+
+    picoRTOS_break();
+    /*@notreached@*/ return -EINVAL;
+}
+
 int spi_setup(struct spi *ctx, const struct spi_settings *settings)
 {
     int res = 0;
@@ -115,7 +136,11 @@ int spi_setup(struct spi *ctx, const struct spi_settings *settings)
         (res = set_clkmode(ctx, settings->clkmode)) < 0)
         return res;
 
-    /* bitrate: ignore */
+    /* bitrate */
+    if (settings->bitrate != 0 &&
+        (res = set_bitrate(ctx, settings->bitrate)) < 0)
+        return res;
+
     /* frame_size: ignore */
     /* cs_pol: ignore */
     /* cs: ignore */

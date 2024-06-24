@@ -2,14 +2,9 @@
 #define SPI_AVR_H
 
 #include "spi.h"
+#include "clock.h"
 
 struct SPI_AVR;
-
-typedef enum {
-    SPI_AVR_SPEED_SPI1X,
-    SPI_AVR_SPEED_SPI2X,
-    SPI_AVR_SPEED_COUNT
-} spi_avr_speed_t;
 
 typedef enum {
     SPI_AVR_STATE_START,
@@ -19,10 +14,11 @@ typedef enum {
 
 struct spi {
     /*@temp@*/ struct SPI_AVR *base;
+    clock_id_t clkid;
     spi_avr_state_t state;
 };
 
-int spi_avr_init(/*@out@*/ struct spi *ctx, int base, spi_avr_speed_t speed);
+int spi_avr_init(/*@out@*/ struct spi *ctx, int base, clock_id_t clkid);
 
 /* Runtime calls:
  * int spi_setup(struct spi *ctx, const struct spi_settings *settings);
