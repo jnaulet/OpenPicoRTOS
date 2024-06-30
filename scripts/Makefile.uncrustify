@@ -3,6 +3,7 @@
 #
 
 PHONY := __uncrustify
+__uncrustify:
 
 skip-makefile := 1
 
@@ -13,6 +14,8 @@ include scripts/Sources.include
 
 CROSS_COMPILE := $(CONFIG_CROSS_COMPILE:"%"=%)
 CC            := $(CROSS_COMPILE)gcc
+
+ccflags-y += $(subst ",,$(CONFIG_EXTRA_CFLAGS))
 
 ifneq ($(srctree),$(src))
 include scripts/Kbuild.include
