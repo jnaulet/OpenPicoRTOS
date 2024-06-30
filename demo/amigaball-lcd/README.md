@@ -11,10 +11,13 @@ Currently it runs on the following platforms:
   - Adafruit ItsyBitsy M4 Express (SAMD51)
   - DevEPort STM32H7xx_M (STM32H743, STM32H750)
   - TI TMS320F28379D (C2000/c28x)
+  - Arduino Mega2560 (AVR)
 
 ## How to build
 
-Just run make -f /platform/.make, where /platform/ is the board you're interested in.
+Just run make -f Makefile./platform/, where /platform/ is the board you're interested in.
+
+If you want to switch platforms, try make -f Makefile./platform/ config first.
 
 ## How to run
 
@@ -30,7 +33,7 @@ You can use a SWD probe like PicoProbe and directly run the .elf files. OpenOCD 
 The Longan Nano demo can only run from ROM (XIP) due to its lack of RAM space.   
 Irequires a probe or dfu_utils. You can try typing
 
-    # make -f sipeed-longan-nano.make upload
+    # make -f Makefile.sipeed-longan-nano upload
 
 after switching the board to bootloader mode.
 
@@ -39,7 +42,7 @@ after switching the board to bootloader mode.
 Just like the RPi Pico, the Adafruit build generates 2 files, 1 XIP and one that runs from RAM.
 If you have arduino-cli & the necessary extensions, after the build, just type:
 
-    # make -f adafruit-itsybitsy-m4.make upload
+    # make -f Makefile.adafruit-itsybitsy-m4 upload
 
 You can use a SWD probe like PicoProbe and directly run the .elf files, too. OpenOCD config file is in openocd/
 
@@ -50,6 +53,13 @@ Only tested with a regular ARM CMSIS DAP & openOCD so far.
 ### TI LAUNCHXL-F28379D
 
 Use Code Composer Studio & the integrated probe
+
+### Arduino Mega2560
+
+This one is a little tricky, it can be flashed using avrdude or debugged using MPLab X, by creating a new project
+from the arduino-mega2560.debug directory.
+
+CFLAGS will have to be re-defined in the MPLab X project, though
 
 ## Wiring
 
@@ -99,7 +109,20 @@ LAUNCHXL | 0.96" LCD
   P22    -   RST
   P105   -   DC
   P104   -   CS
+```
 
+### Arduino Mega2560
+
+```
+ARDUINO | 0.96" LCD
+  3.3V  -   VCC
+  GND   -   GND
+  43    -   BLK
+  45    -   DC
+  47    -   RES
+  51    -   SDA
+  52    -   SCL
+  53    -   CS
 ```
 
 ## Remarks
