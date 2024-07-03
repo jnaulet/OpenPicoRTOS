@@ -8,4 +8,8 @@ config ADC_NXP_EQADC
        depends on POWERPC
        bool "NXP eQADC"
 
+config ADC_MC9S08PTXX
+       depends on HCS08
+       bool "NXP MC9S08PTxx series ADC"
+
 endmenu
