@@ -22,8 +22,8 @@ $(hex): $(target)
 	avr-objcopy -O ihex -R .eeprom $< $@
 
 upload: $(hex)
-	avrdude -v -patmega328p -cwiring -P$(TTY) \
-	-b115200 -D -Uflash:w:$<:i
+	avrdude -v -patmega328p -carduino -P$(TTY) \
+	-b57600 -D -Uflash:w:$<:i
 
 clean: FORCE
 	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) $@

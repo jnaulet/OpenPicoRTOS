@@ -92,7 +92,7 @@ static void arduino_uno_init_digital(/*@partial@*/ struct arduino_uno *ctx)
 static void arduino_uno_init_spi(/*@partial@*/ struct arduino_uno *ctx)
 {
     struct spi_settings SPI_settings = {
-        0ul, /* bitrate: useless */
+        10000000ul, /* bitrate */
         SPI_MODE_MASTER,
         SPI_CLOCK_MODE_0,
         (size_t)8,  /* frame size */
@@ -100,7 +100,7 @@ static void arduino_uno_init_spi(/*@partial@*/ struct arduino_uno *ctx)
         (size_t)0   /* CS */
     };
 
-    (void)spi_avr_init(&ctx->SPI, ADDR_SPI, SPI_AVR_SPEED_SPI1X);
+    (void)spi_avr_init(&ctx->SPI, ADDR_SPI, CLOCK_ATMEGA328P_CLKIO);
     (void)spi_setup(&ctx->SPI, &SPI_settings);
 }
 
