@@ -135,6 +135,7 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - Atmel TinyAVR Series
  - Intel 8051 / MCS51
  - MIPS M51xx / PIC32Mx
+ - NXP/Freescale HC08/S08
  - RISC-V RV32IMAC
  - RISC-V RV32EC
  - PowerPC e200z4
@@ -166,6 +167,7 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - LogicGreen LGT8F328P
  - Microchip PIC32MZ-EF
  - Nuvoton N76E003
+ - NXP MC9S08PTxx series
  - NXP MPC574x series
  - NXP MPC577x series
  - Raspberry Pico RP2040
@@ -263,6 +265,7 @@ Basic demo code is provided for the following boards:
   - Nuvoton N76E003 / MCU-E003
   - NXP Devkit MPC5748G (dual-core SMP)
   - NXP MPC5775E-EVB (dual-core SMP) (staging)
+  - NXP S08PT60-EVK (staging)
   - Sipeed Longan Nano
   - STMicro STM32F103C8T6 development board (staging)
   - STMicro STM32F401RCT6 development board (staging)
@@ -277,3 +280,8 @@ follwing boards (+0.96" LCD):
   - Texas Instruments Launchxl-f28379d
   - Raspberry Pi Pico SMP
   - DevEBox STM32H7xx_M / STM32H743VIT6
+  - Arduino Mega2560
+
+Links:
+  - https://www.youtube.com/watch?v=XeARSjY81Tk
+  - https://www.youtube.com/watch?v=Bh-oae4uF4Y

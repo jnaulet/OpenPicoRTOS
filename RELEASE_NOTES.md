@@ -1,5 +1,15 @@
 # Release notes
 
+## picoRTOS v1.9.8
+### What's new ?
+
+Major update, experimental support for NXP HC(S)08 architecture.
+
+Added a perl preprocessor to generate the .S files from C header file on SDCC-related builds.   
+Which leads to minor updates to 8051 port, as .inc files were not needed anymore.
+
+A few drivers have been developped for the S08PTxx series to allow tests in staging directory.
+
 ## picoRTOS v1.9.7
 ### What's new ?
 
