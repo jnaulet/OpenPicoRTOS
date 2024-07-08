@@ -7,3 +7,4 @@ c_src-$(CONFIG_TWI_GD32VF103) += $(staging-drivers-twi)/twi-gd32vf103.c
 c_src-$(CONFIG_TWI_NXP_I2C) += $(staging-drivers-twi)/twi-nxp_i2c.c
 c_src-$(CONFIG_TWI_STM32H7XX) += $(staging-drivers-twi)/twi-stm32h7xx.c
 c_src-$(CONFIG_TWI_RENESAS_RA4) += $(staging-drivers-twi)/twi-renesas_ra4.c
+c_src-$(CONFIG_TWI_MC9S08PTXX) += $(staging-drivers-twi)/twi-mc9s08ptxx.c
