@@ -59,7 +59,7 @@ static int lcd_xfer16(struct lcd *ctx, uint16_t x)
     uint16_t dummy = 0;
     int timeout = (int)PICORTOS_DELAY_SEC(1);
 
-    uint8_t *x8 = (uint8_t*)&x;
+    uint_least8_t *x8 = (uint_least8_t*)&x;
 
     /* word mode */
     (void)lcd_16bit(ctx);
