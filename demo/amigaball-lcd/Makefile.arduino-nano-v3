@@ -1,0 +1,23 @@
+# 1st: sources & targets
+board := arduino-nano-v3
+target := $(board).elf
+debug  := $(board).debug/$(target)
+hex    := $(target:%.elf=%.hex)
+
+include Makefile.common
+
+# avoid double-inclusion
+ifneq ($(skip-makefile),1)
+TTY ?= /dev/ttyUSB0
+
+all: $(hex)
+	@
+
+$(hex): $(target)
+	avr-objcopy -O ihex -R .eeprom $< $@
+
+upload: $(hex)
+	avrdude -v -pm328p -carduino -P$(TTY) \
+	-b57600 -D -Uflash:w:$<:i
+
+endif
