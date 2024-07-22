@@ -325,10 +325,38 @@ check: FORCE
 	cd test && ./run_tests.sh
 
 distcheck: FORCE
-	@for demo in $(shell ls demo | xargs); do \
-	  echo $$demo " : "; \
-	  $(MAKE) -C demo/$$demo || exit 1; \
-	done
+	$(MAKE) -C demo/adafruit-itsybitsy-m4
+	$(MAKE) -C demo/arduino-due
+	$(MAKE) -C demo/arduino-mega2560
+	$(MAKE) -C demo/arduino-uno
+	$(MAKE) -C demo/arduino-uno_r4
+	$(MAKE) -C demo/attiny1607-cnano
+	$(MAKE) -C demo/attiny817-xplained
+	$(MAKE) -C demo/curiosity-2.0-pic32mz-ef
+	$(MAKE) -C demo/devebox-stm32h7xx_m
+	$(MAKE) -C demo/devkit-mpc5748g
+	$(MAKE) -C demo/launchxl-f28379d
+	$(MAKE) -C demo/pthread-linux
+	$(MAKE) -C demo/raspberry-pico
+	$(MAKE) -C demo/sipeed-longan-nano
+	$(MAKE) -C demo/win32
+#	AmigaBall demos
+	$(MAKE) -C demo/amigaball-lcd -f Makefile.adafruit-itsybitsy-m4 config
+	$(MAKE) -C demo/amigaball-lcd -f Makefile.adafruit-itsybitsy-m4
+	$(MAKE) -C demo/amigaball-lcd -f Makefile.arduino-mega2560 config
+	$(MAKE) -C demo/amigaball-lcd -f Makefile.arduino-mega2560
+	$(MAKE) -C demo/amigaball-lcd -f Makefile.arduino-nano-v3-clone config
+	$(MAKE) -C demo/amigaball-lcd -f Makefile.arduino-nano-v3-clone
+	$(MAKE) -C demo/amigaball-lcd -f Makefile.arduino-nano-v3 config
+	$(MAKE) -C demo/amigaball-lcd -f Makefile.arduino-nano-v3
+	$(MAKE) -C demo/amigaball-lcd -f Makefile.devebox-stm32h7xx_m config
+	$(MAKE) -C demo/amigaball-lcd -f Makefile.devebox-stm32h7xx_m
+	$(MAKE) -C demo/amigaball-lcd -f Makefile.launchxl-f28379d config
+	$(MAKE) -C demo/amigaball-lcd -f Makefile.launchxl-f28379d
+	$(MAKE) -C demo/amigaball-lcd -f Makefile.raspberry-pico config
+	$(MAKE) -C demo/amigaball-lcd -f Makefile.raspberry-pico
+	$(MAKE) -C demo/amigaball-lcd -f Makefile.sipeed-longan-nano config
+	$(MAKE) -C demo/amigaball-lcd -f Makefile.sipeed-longan-nano
 	@echo ""
 	@echo "Demo Test Complete"
 
