@@ -263,7 +263,7 @@ static void arduino_mega2560_init_pwm(/*@partial@*/ struct arduino_mega2560 *ctx
 static void arduino_mega2560_init_icsp(/*@partial@*/ struct arduino_mega2560 *ctx)
 {
     struct spi_settings SPI_settings = {
-        0ul, /* bitrate: useless */
+        10000000ul, /* bitrate */
         SPI_MODE_MASTER,
         SPI_CLOCK_MODE_0,
         (size_t)8,  /* frame size */
@@ -271,7 +271,7 @@ static void arduino_mega2560_init_icsp(/*@partial@*/ struct arduino_mega2560 *ct
         (size_t)0   /* CS */
     };
 
-    (void)spi_avr_init(&ctx->SPI, ADDR_SPI, SPI_AVR_SPEED_SPI1X);
+    (void)spi_avr_init(&ctx->SPI, ADDR_SPI, CLOCK_ATMEGA2560_CLKIO);
     (void)spi_setup(&ctx->SPI, &SPI_settings);
 }
 
