@@ -15,10 +15,10 @@ c_src-$(CONFIG_SYSTICK_MC9S08PTXX_MTIM1) += $(arch-hcs08)/mach-mc9s08ptxx/timer-
 c_src-$(CONFIG_SYSTICK_MC9S08PTXX_RTC) += $(arch-hcs08)/mach-mc9s08ptxx/timer-rtc.c
 
 # MC9S08PT60 memory map
-mcu-$(CONFIG_MACH_MC9S08PT60) += --xram-loc 0x40 --xram-size 4096
+mcu-$(CONFIG_MACH_MC9S08PT60) += --xram-loc 0x40 --xram-size 4096 --data-loc 0x40
 mcu-$(CONFIG_MACH_MC9S08PT60) += -Wl-bGSINIT=0x1040 -Wl-bCSEG=0x3200
 # MC9S08PT32 memory map
-mcu-$(CONFIG_MACH_MC9S08PT32) += --xram-loc 0x40 --xram-size 4096
+mcu-$(CONFIG_MACH_MC9S08PT32) += --xram-loc 0x40 --xram-size 4096 --data-loc 0x40
 mcu-$(CONFIG_MACH_MC9S08PT32) += -Wl-bGSINIT=0x8000
 
 c_src-$(CONFIG_HCS08) += $(arch-hcs08)/picoRTOS_port.c

@@ -149,6 +149,9 @@ _arch_syscall:
 	swi
 	rts
 
+	.area DSEG
+	;; leave room for  ___SDCC_hc08_retn
+	.area XISEG
 	.area XSEG
 
 	.globl _bhx

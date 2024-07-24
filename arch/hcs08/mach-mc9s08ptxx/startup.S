@@ -18,7 +18,6 @@
 	.area GSINIT (CODE)
 	.globl __mc9s08pt60_startup
 __mc9s08pt60_startup:
-	cli
 	INIT_STACK #0x103f
 	ZERO_RAM s_XSEG, #l_XSEG
 	COPY_TO_RAM s_XINIT, s_XISEG, #l_XINIT
