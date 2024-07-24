@@ -2,7 +2,7 @@ AS := sdas6808 -j -y -los
 CC := sdcc
 BASENAME := s08pt60-evk
 
-CFLAGS := --std-c99 --fomit-frame-pointer -I. -ms08 --stack-auto --out-fmt-elf --xram-loc 0x40 --xram-size 4096 -Wl-bGSINIT=0x1040 -Wl-bCSEG=0x3200 --debug  -D"__ATTRIBUTE_ALIGNED__(x)=" -D"__ATTRIBUTE_UNUSED__=" -D"__ATTRIBUTE_NAKED__=__naked" -D"__ATTRIBUTE_PACKED__="
+CFLAGS := --std-c99 --fomit-frame-pointer -I. -ms08 --stack-auto --out-fmt-elf --xram-loc 0x40 --xram-size 4096 --data-loc 0x40 -Wl-bGSINIT=0x1040 -Wl-bCSEG=0x3200 --debug  -D"__ATTRIBUTE_ALIGNED__(x)=" -D"__ATTRIBUTE_UNUSED__=" -D"__ATTRIBUTE_NAKED__=__naked" -D"__ATTRIBUTE_PACKED__="
 
 a_files := startup.S picoRTOS_portasm.S
 c_files := $(wildcard *.c)
