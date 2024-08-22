@@ -40,7 +40,7 @@ trap "rm -f $tmp" 0 1 2 3 15
 check() {
         $cc -xc - -o $tmp 2>/dev/null <<'EOF'
 #include CURSES_LOC
-main() {}
+int main() {}
 EOF
 	if [ $? != 0 ]; then
 	    echo " *** Unable to find the ncurses libraries or the"       1>&2
