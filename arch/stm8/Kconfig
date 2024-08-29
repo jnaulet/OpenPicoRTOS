@@ -1,0 +1,13 @@
+menu "STM8 architecture"
+     depends on STM8
+
+choice
+        prompt "MCU series"
+        default MACH_STM8S
+
+config MACH_STM8S
+       bool "STMicro STM8S/AF Series"
+
+endchoice
+
+endmenu

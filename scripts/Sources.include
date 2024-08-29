@@ -12,6 +12,7 @@ include arch/mips/Makefile
 include arch/powerpc/Makefile
 include arch/pthread/Makefile
 include arch/riscv/Makefile
+include arch/stm8/Makefile
 include arch/win32/Makefile
 
 # scheduler/ipcs

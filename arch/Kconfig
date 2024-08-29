@@ -26,6 +26,9 @@ config POWERPC
 config RISCV
 	bool "RISC-V architecture"
 
+config STM8
+        bool "STM8 architecture"
+
 config PTHREAD
 	bool "PTHREAD simulation"
 
@@ -37,7 +40,7 @@ endchoice
 config CC
        string
        default "gcc" if ARM || AVR || MIPS || POWERPC || RISCV || PTHREAD || WIN32
-       default "sdcc" if 8051 || HCS08
+       default "sdcc" if 8051 || HCS08 || STM8
        default "cl2000" if C2000
 
 source "arch/8051/Kconfig"
@@ -48,4 +51,5 @@ source "arch/hcs08/Kconfig"
 source "arch/mips/Kconfig"
 source "arch/powerpc/Kconfig"
 source "arch/riscv/Kconfig"
+source "arch/stm8/Kconfig"
 source "arch/pthread/Kconfig"
