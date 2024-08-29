@@ -7,8 +7,8 @@
 #include "clock-cy7c6801xa.h"
 
 /* IPCs */
-static struct picoRTOS_mutex mutex;
-static struct picoRTOS_cond cond;
+static struct picoRTOS_mutex mutex = PICORTOS_MUTEX_INITIALIZER;
+static struct picoRTOS_cond cond = PICORTOS_COND_INITIALIZER;
 
 #ifndef S_SPLINT_S
 __sfr __at(ADDR_IOA) IOA;
@@ -100,10 +100,7 @@ int main(void)
     OEB = (unsigned char)0x1;
 
     /* SYSTEM */
-
     picoRTOS_init();
-    picoRTOS_mutex_init(&mutex);
-    picoRTOS_cond_init(&cond);
 
     /* tick */
     picoRTOS_task_init(&task, tick_main, NULL, stack0, PICORTOS_STACK_COUNT(stack0));
