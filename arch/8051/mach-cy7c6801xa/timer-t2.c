@@ -38,18 +38,14 @@ static unsigned char IE;
 #define IE_ET2 (1 << 5)
 
 /* CLOCK */
-static unsigned long sysclk_hz;
+static unsigned long sysclk_hz = DEVICE_DEFAULT_SYSCLK_HZ;
 
 void arch_timer_init(void)
 {
     /* compute period */
-    unsigned long period;
     unsigned int value;
+    unsigned long period = sysclk_hz / (unsigned long)CONFIG_TICK_HZ;
 
-    if (sysclk_hz == 0)
-        sysclk_hz = DEVICE_DEFAULT_SYSCLK_HZ;
-
-    period = sysclk_hz / (unsigned long)CONFIG_TICK_HZ;
     if (period > 0xfffful) {
         value = 0xffffu - (unsigned int)(period / 12ul) + 1u;
         CKCON &= ~(unsigned char)CKCON_T2M;

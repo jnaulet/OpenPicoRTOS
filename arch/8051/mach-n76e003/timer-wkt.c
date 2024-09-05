@@ -31,16 +31,11 @@ static unsigned char C99_EIE1;
 
 #define C99_EIE1_EWKT (1 << 2)
 
-/* CLOCK
- * Can't init statically due to a bug in SDCC v4.2.6 by Nuvoton
- */
-static unsigned long sysclk_hz;
+/* CLOCK */
+static unsigned long sysclk_hz = DEVICE_DEFAULT_SYSCLK_HZ;
 
 void arch_timer_init(void)
 {
-    if (sysclk_hz == 0)
-        sysclk_hz = DEVICE_DEFAULT_SYSCLK_HZ;
-
     /* set pre-scaler */
     WKCON &= ~WKCON_WKPS(WKCON_WKPS_M);
 #if PERIOD > 4095

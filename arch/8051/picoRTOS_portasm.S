@@ -297,13 +297,21 @@ _arch_compare_and_swap_exit:
 	setb ea
 	ret
 
+	;; r0-7
+	.area REG_BANK_0 (REL,OVR,DATA)
+	.ds 8
+	
 	.area DSEG (DATA)
-
 	.globl _vn
-_vn:	.ds 1			; vector number
+_vn:
+	.ds 1 ; vector number
 
+	.area SSEG
+	.globl __start__stack
+__start__stack:
+	.ds	1
+	
 	.area XSEG (XDATA)
-
 	.globl _ISR_TABLE
 _ISR_TABLE:
 	.rept DEVICE_INTERRUPT_VECTOR_COUNT

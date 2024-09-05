@@ -9,7 +9,6 @@ include-$(CONFIG_8051) += -I$(arch-8051)/include
 
 # machines
 a_src-$(CONFIG_MACH_N76E003) += $(arch-8051)/mach-n76e003/startup.S
-c_src-$(CONFIG_MACH_N76E003) += $(arch-8051)/mach-n76e003/timer-wkt.c
 c_src-$(CONFIG_MACH_N76E003) += $(arch-8051)/mach-n76e003/interrupt.c
 a_src-$(CONFIG_MACH_UCSIM51) += $(arch-8051)/mach-ucsim_51/startup.S
 c_src-$(CONFIG_MACH_UCSIM51) += $(arch-8051)/mach-mcs51/timer-t2.c
@@ -20,6 +19,10 @@ c_src-$(CONFIG_MACH_CY7C6801xA) += $(arch-8051)/mach-cy7c6801xa/interrupt.c
 a_src-$(CONFIG_MACH_STC12C5AXX) += $(arch-8051)/mach-stc12c5axx/startup.S
 c_src-$(CONFIG_MACH_STC12C5AXX) += $(arch-8051)/mach-stc12c5axx/timer-t0.c
 c_src-$(CONFIG_MACH_STC12C5AXX) += $(arch-8051)/mach-stc12c5axx/interrupt.c
+
+# N76E003 timers
+c_src-$(CONFIG_N76E003_TIMER_T2) += $(arch-8051)/mach-n76e003/timer-t2.c
+c_src-$(CONFIG_N76E003_TIMER_WKT) += $(arch-8051)/mach-n76e003/timer-wkt.c
 
 # N76E003 memory map
 mcu-$(CONFIG_MACH_N76E003) += --xram-size 768

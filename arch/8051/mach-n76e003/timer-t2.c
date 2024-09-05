@@ -48,21 +48,13 @@ static unsigned char C99_EIPH;
 
 #define C99_EIPH_PT2H (1 << 7)
 
-/* CLOCK
- * Can't init statically due to a bug in SDCC v4.2.6 by Nuvoton
- */
-static unsigned long sysclk_hz;
+/* CLOCK */
+static unsigned long sysclk_hz = DEVICE_DEFAULT_SYSCLK_HZ;
 
 void arch_timer_init(void)
 {
-    unsigned long period;
-    unsigned int value;
-
-    if (sysclk_hz == 0)
-        sysclk_hz = DEVICE_DEFAULT_SYSCLK_HZ;
-
-    period = sysclk_hz / (unsigned long)CONFIG_TICK_HZ;
-    value = (unsigned int)(period / 16ul);
+    unsigned long period = sysclk_hz / (unsigned long)CONFIG_TICK_HZ;
+    unsigned int value = (unsigned int)(period / 16ul);
 
     /* init counters */
     TL2 = (unsigned char)0;

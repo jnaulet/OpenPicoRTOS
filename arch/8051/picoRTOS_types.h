@@ -26,6 +26,12 @@ typedef int picoRTOS_intptr_t;
 #else
 # define ASM(x) { __asm__ (x); }
 # define arch_break() ASM(" sjmp .") /* branch to self */
+
+/*
+ * Ugly hack to prevent SDCC from generating
+ * the startup sequence for the main
+ */
+# define main main_no_sdcc_init
 #endif
 
 /* very-specific */
