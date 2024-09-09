@@ -22,7 +22,9 @@ sub main {
         my ( $name, $value, $comment ) =
           $line =~ m/^[#][\s]*define[\s]([\S]*)[\s]+([\S]*)(.*)$/sxm;
 
-        if ( !$name eq '' && !$value eq ''  && !($comment =~ m/HDR2ASM_SKIP/sxm)) {
+        if ( !$name eq '' &&
+             ($value =~ m/[0-9]+/sxm) &&
+             !($comment =~ m/HDR2ASM_SKIP/sxm)) {
 
             # remove any kind of static typing
             $value =~ s/[uU]+[lL]*$//sxm;
