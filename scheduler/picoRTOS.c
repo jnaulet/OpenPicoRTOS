@@ -93,7 +93,7 @@ static void task_core_init(/*@out@*/ struct picoRTOS_task_core *task)
     task->deadline_miss_count = 0;
 }
 
-static bool task_core_is_available(struct picoRTOS_task_core *task)
+static bool task_core_is_available(const struct picoRTOS_task_core *task)
 {
     /* task is ready and it's its turn */
     return task->state == PICORTOS_TASK_STATE_READY &&
@@ -506,7 +506,8 @@ picoRTOS_tick_t picoRTOS_get_tick(void)
 
 /* SYSCALLS */
 
-static void syscall_sleep(struct picoRTOS_task_core *task, struct syscall_sleep *sc)
+static void syscall_sleep(struct picoRTOS_task_core *task,
+                          const struct syscall_sleep *sc)
 {
     if (sc->delay > 0) {
         task->tick = picoRTOS.tick + sc->delay;
@@ -514,7 +515,8 @@ static void syscall_sleep(struct picoRTOS_task_core *task, struct syscall_sleep 
     }
 }
 
-static void syscall_sleep_until(struct picoRTOS_task_core *task, struct syscall_sleep_until *sc)
+static void syscall_sleep_until(struct picoRTOS_task_core *task,
+                                struct syscall_sleep_until *sc)
 {
     picoRTOS_tick_t elapsed = picoRTOS.tick - sc->ref;
 
