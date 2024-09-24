@@ -31,8 +31,7 @@ struct STM {
 static struct STM *STM0 = (struct STM*)ADDR_STM0;
 static uint32_t timer_stm_period = 0;
 
-/* cppcheck-suppress constParameter */
-static void Timer_Handler(void *priv)
+static void Timer_Handler(const void *priv)
 {
     ASM("e_add16i 1, 1, -4");
     ASM("se_mflr 0");
@@ -67,7 +66,7 @@ void arch_timer_init(int period)
     STM0->CH[3].CCRn = (uint32_t)CCRn_CEN;
 
     /* register interrupt */
-    arch_register_interrupt((picoRTOS_irq_t)IRQ_STM0_CIR3, Timer_Handler, NULL);
+    arch_register_interrupt((picoRTOS_irq_t)IRQ_STM0_CIR3, (arch_isr_fn)Timer_Handler, NULL);
     arch_enable_interrupt((picoRTOS_irq_t)IRQ_STM0_CIR3);
 }
 

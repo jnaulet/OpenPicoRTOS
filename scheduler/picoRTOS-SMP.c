@@ -187,7 +187,8 @@ static void task_idle_init(void)
         picoRTOS_pid_t pid = (picoRTOS_pid_t)(TASK_IDLE_PID + (int)i);
 
         /* ensure proper stack alignment */
-        picoRTOS_task_init(&idle, arch_idle, NULL, picoRTOS_SMP_stack[i].idle,
+        picoRTOS_task_init(&idle, (picoRTOS_task_fn)arch_idle,
+                           NULL, picoRTOS_SMP_stack[i].idle,
                            (size_t)ARCH_MIN_STACK_COUNT);
 
         /* similar to picoRTOS_add_task, but without count limit */

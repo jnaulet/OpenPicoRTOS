@@ -156,8 +156,7 @@ void arch_core_init(picoRTOS_core_t core,
     arch_spin_unlock();
 }
 
-/* cppcheck-suppress constParameter */
-void arch_idle(void *null)
+void arch_idle(const void *null)
 {
     arch_assert_void(null == NULL);
 

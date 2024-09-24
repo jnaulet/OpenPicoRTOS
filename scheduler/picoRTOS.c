@@ -161,7 +161,8 @@ static void task_idle_init(void)
     static struct picoRTOS_task idle;
 
     /* ensure proper stack alignment */
-    picoRTOS_task_init(&idle, arch_idle, NULL, picoRTOS.idle_stack,
+    picoRTOS_task_init(&idle, (picoRTOS_task_fn)arch_idle,
+                       NULL, picoRTOS.idle_stack,
                        (size_t)ARCH_MIN_STACK_COUNT);
 
     /* similar to picoRTOS_add_task, but without count limit */

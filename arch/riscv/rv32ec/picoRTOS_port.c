@@ -38,8 +38,7 @@ picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
     return arch_save_first_context(stack + stack_count, fn, priv);
 }
 
-/* cppcheck-suppress constParameter */
-void __attribute__((weak)) arch_idle(void *null)
+void __attribute__((weak)) arch_idle(const void *null)
 {
     arch_assert_void(null == NULL);
 

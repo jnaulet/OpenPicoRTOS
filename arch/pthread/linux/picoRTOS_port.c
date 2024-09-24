@@ -174,8 +174,7 @@ void arch_syscall(syscall_t syscall, void *priv)
     wait_for_sigusr1(t);
 }
 
-/* cppcheck-suppress constParameter */
-void __attribute__((weak)) arch_idle(void *null)
+void __attribute__((weak)) arch_idle(const void *null)
 {
     arch_assert_void(null == NULL);
 

@@ -171,7 +171,7 @@ extern void arch_syscall(syscall_t syscall, /*@null@*/ void *priv);
  * Parameters:
  *  null - SHOULD always be NULL
  */
-extern /*@noreturn@*/ void arch_idle(/*@null@*/ void *null);
+extern /*@noreturn@*/ void arch_idle(/*@null@*/ const void *null);
 
 /* ARCH: ATOMIC OPS */
 

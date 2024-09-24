@@ -90,8 +90,7 @@ void arch_syscall(syscall_t syscall, void *priv)
     SuspendThread(t->wthread);
 }
 
-/* cppcheck-suppress constParameter */
-void arch_idle(void *null)
+void arch_idle(const void *null)
 {
     arch_assert_void(null == NULL);
 
