@@ -40,3 +40,6 @@ asflags-$(CONFIG_AVR)    += $(include-y) -x assembler-with-cpp $(mcu-y)
 asflags-$(CONFIG_ATMEGA) += -flto
 ldflags-$(CONFIG_AVR)    += -fuse-linker-plugin -Wl,--gc-sections $(mcu-y) -lm
 ldflags-$(CONFIG_ATMEGA) += -flto
+
+# static analysis improvements
+cppcheckflags-$(CONFIG_AVR) += --platform=avr8

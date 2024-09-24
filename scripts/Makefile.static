@@ -38,12 +38,13 @@ c_flags        = $(RTOSINCLUDE) \
                  $(filter -I%,$(ccflags-y)) $(filter -D%,$(ccflags-y)) \
                  $(subst ",,$(CONFIG_EXTRA_CFLAGS)) $(ccattributes)
 
-SPLINTFLAGS := -checks +unixlib $(c_flags)
+SPLINTFLAGS := -checks +unixlib $(c_flags) $(splintflags-y)
 CPPCHECKFLAGS := --enable=all --inline-suppr --std=c99 $(c_flags)
 CPPCHECKFLAGS += --suppress=missingIncludeSystem --suppress=unusedFunction
 # drivers will spit a shit ton of errors without that option (reserved fields)
 CPPCHECKFLAGS += --suppress=unusedStructMember
 CPPCHECKFLAGS += --suppress=unmatchedSuppression
+CPPCHECKFLAGS += $(cppcheckflags-y)
 
 __splint: $(c_src-y) $(extra-y) $(subdir-ym) $(always)
 	  $(Q)splint $(SPLINTFLAGS) $(c_src-y)

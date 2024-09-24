@@ -15,3 +15,6 @@ include-$(CONFIG_MACH_PIC32MZ) += -I$(arch-mips)/m51xx/mach-pic32mz
 ccflags-$(CONFIG_MIPS) += $(include-y)
 asflags-$(CONFIG_MIPS) += $(include-y)
 ldflags-$(CONFIG_MIPS) += -nostartfiles -nostdlib
+
+# static analysis improvements
+cppcheckflags-$(CONFIG_MIPS) += --platform=mips32
