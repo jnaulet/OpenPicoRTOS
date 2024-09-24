@@ -38,3 +38,6 @@ a_src-$(CONFIG_MACH_STM32L4X) += $(arch-arm)/armv7e-m/mach-stm32l4x/startup.S
 ccflags-$(CONFIG_ARM) += -mthumb $(arch-y) $(fpu-y)
 asflags-$(CONFIG_ARM) += -mthumb $(arch-y) $(fpu-y)
 ldflags-$(CONFIG_ARM) += $(arch-y) $(fpu-y)
+
+# newlib-4.4.0
+a_src-$(CONFIG_STUB_NEWLIB_4_4_0) += $(arch-arm)/stub-newlib-4.4.0.S

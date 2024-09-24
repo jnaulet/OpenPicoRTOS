@@ -32,5 +32,15 @@ config CACHE_MAINTENANCE
        depends on ARMV7EM
        default y if (MACH_STM32H7XX || MACH_STM32L4X)
        default n if (MACH_ATSAME5X || MACH_RENESAS_RA4)
-       
+
+config STUB_NEWLIB_4_4_0
+       bool "Stub newlib-4.4.0 I/O calls (recommended)"
+       default y
+       depends on ARM
+       help
+         newlib-4-4.0 requires functions for _read, _write, _sbrk,
+         _close & _lseek, which picoRTOS doesn't provide.
+         Stubbing these calls is the quick and easy way to get out
+         of this mess
+
 endmenu
