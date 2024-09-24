@@ -4,8 +4,8 @@
 DIR=static_analysis
 
 # Scheduler
-make -C $DIR/picoRTOS || exit 1
-make -C $DIR/picoRTOS-SMP || exit 1
+make -C $DIR/picoRTOS V=1 || exit 1
+make -C $DIR/picoRTOS-SMP V=1 || exit 1
 
 # UNIT TESTS
 DIR=unit_tests

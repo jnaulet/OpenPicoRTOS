@@ -61,10 +61,10 @@ void arch_enable_interrupt(picoRTOS_irq_t irq)
 
     if (irq < (picoRTOS_irq_t)16) {
         unsigned shift = (unsigned)irq + 16u;
-        PFIC->IENR1 |= (1 << shift);
+        PFIC->IENR1 |= (1u << shift);
     }else{
         unsigned shift = (unsigned)irq - 16u;
-        PFIC->IENR2 |= (1 << shift);
+        PFIC->IENR2 |= (1u << shift);
     }
 }
 
@@ -74,9 +74,9 @@ void arch_disable_interrupt(picoRTOS_irq_t irq)
 
     if (irq < (picoRTOS_irq_t)16) {
         unsigned shift = (unsigned)irq + 16u;
-        PFIC->IENR1 &= ~(1 << shift);
+        PFIC->IENR1 &= ~(1u << shift);
     }else{
         unsigned shift = (unsigned)irq - 16u;
-        PFIC->IENR2 &= ~(1 << shift);
+        PFIC->IENR2 &= ~(1u << shift);
     }
 }

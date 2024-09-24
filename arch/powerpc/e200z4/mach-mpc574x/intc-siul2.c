@@ -1,5 +1,5 @@
 #include "picoRTOS_device.h"
-#include "picoRTOS-SMP_port.h"
+#include "picoRTOS_port.h"
 
 #include <stdint.h>
 #include <generated/autoconf.h>
@@ -103,6 +103,8 @@ void arch_ack_interrupt(void)
 /* SMP */
 
 #ifdef CONFIG_SMP
+#include "picoRTOS-SMP_port.h"
+
 void arch_propagate_tick(void)
 {
     INTC->SSCIR[0] = (uint8_t)SSCIR_SET;

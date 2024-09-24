@@ -39,7 +39,7 @@ c_flags        = $(RTOSINCLUDE) \
                  $(subst ",,$(CONFIG_EXTRA_CFLAGS)) $(ccattributes)
 
 SPLINTFLAGS := -checks +unixlib $(c_flags)
-CPPCHECKFLAGS := --enable=all --inline-suppr $(c_flags)
+CPPCHECKFLAGS := --enable=all --inline-suppr --std=c99 $(c_flags)
 CPPCHECKFLAGS += --suppress=missingIncludeSystem --suppress=unusedFunction
 # drivers will spit a shit ton of errors without that option (reserved fields)
 CPPCHECKFLAGS += --suppress=unusedStructMember
