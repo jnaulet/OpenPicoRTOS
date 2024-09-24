@@ -9,11 +9,11 @@ c_src-$(CONFIG_RV32EC)   += $(arch-riscv)/rv32ec/picoRTOS_port.c
 a_src-$(CONFIG_RV32EC)   += $(arch-riscv)/rv32ec/picoRTOS_portasm.S
 
 # march
-arch-$(CONFIG_RV32IMAC) := -march=rv32imac
+arch-$(CONFIG_RV32IMAC) := -march=rv32imaczicsr
 abi-$(CONFIG_RV32IMAC) := -mabi=ilp32
 cmodel-$(CONFIG_RV32IMAC) := -mcmodel=medlow
 
-arch-$(CONFIG_RV32EC) := -march=rv32ec
+arch-$(CONFIG_RV32EC) := -march=rv32eczicsr
 abi-$(CONFIG_RV32EC) := -mabi=ilp32e
 cmodel-$(CONFIG_RV32EC) := -mcmodel=medlow
 
