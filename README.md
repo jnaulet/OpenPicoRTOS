@@ -160,6 +160,7 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - Atmel ATSAM3X8E
  - Atmel ATSAMD5x/E5x
  - Atmel ATtiny817
+ - Atmel ATtiny414
  - Atmel ATtiny88
  - Atmel ATtiny1607
  - Cypress CY7C6801xA / EZ-USB FX2
