@@ -26,6 +26,10 @@ config MACH_ATTINY88
        bool "Atmel ATTiny88"
        select ATTINY
        
+config MACH_ATTINY414
+       bool "Atmel ATTiny414"
+       select ATTINY
+       
 config MACH_ATTINY817
        bool "Atmel ATTiny817"
        select ATTINY
