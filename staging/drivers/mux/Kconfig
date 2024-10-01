@@ -20,4 +20,8 @@ config MUX_MC9S08PTXX
        depends on HCS08
        bool "NXP MC9S08PTxx series MUX"
 
+config MUX_STM8
+       depends on STM8
+       bool "STMicro STM8 series MUX"
+
 endmenu
