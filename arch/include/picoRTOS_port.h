@@ -132,7 +132,7 @@ extern void arch_resume(void);
  * A pointer to the first element of the newly prepared stack
  */
 extern /*@temp@*/
-picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
+picoRTOS_stack_t *arch_prepare_stack(/*@returned@*/ picoRTOS_stack_t *stack,
                                      size_t stack_count,
                                      arch_entry_point_fn fn,
                                      /*@null@*/ void *priv);
