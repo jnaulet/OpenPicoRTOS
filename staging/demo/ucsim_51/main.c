@@ -11,7 +11,8 @@ static unsigned char P1M1;
 static unsigned char P1M2;
 #endif
 
-void tick_main(void *priv)
+/* cppcheck-suppress [constParameter] */
+static void tick_main(void *priv)
 {
     picoRTOS_assert_fatal(priv == (void*)0xf00d, return );
 
@@ -21,7 +22,8 @@ void tick_main(void *priv)
     }
 }
 
-void led_main(void *priv)
+/* cppcheck-suppress [constParameter] */
+static void led_main(void *priv)
 {
     picoRTOS_assert_fatal(priv == (void*)0xcafe, return );
 
