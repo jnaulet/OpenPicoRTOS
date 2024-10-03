@@ -9,7 +9,7 @@
  */
 static void led_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert(priv != NULL, return );
 
     picoRTOS_tick_t ref = picoRTOS_get_tick();
     struct gpio *USER_LED = (struct gpio*)priv;
@@ -35,7 +35,7 @@ static void led_main(void *priv)
  */
 static void console_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert(priv != NULL, return );
 
     struct uart *UART = (struct uart*)priv;
 
@@ -61,7 +61,7 @@ static void console_main(void *priv)
  */
 static void spi_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert(priv != NULL, return );
 
     size_t xfered = 0;
     struct spi *SPI = (struct spi*)priv;
@@ -98,7 +98,7 @@ static void spi_main(void *priv)
  */
 static void adc_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert(priv != NULL, return );
 
     struct adc *ADC = (struct adc*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -128,7 +128,7 @@ static void adc_main(void *priv)
  */
 static void pwm_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert(priv != NULL, return );
 
     picoRTOS_tick_t ref = picoRTOS_get_tick();
     struct attiny817_xplained_PWM *PWM = (struct attiny817_xplained_PWM*)priv;
@@ -161,7 +161,7 @@ static void pwm_main(void *priv)
  */
 static void wd_main(void *priv)
 {
-    picoRTOS_assert_void(priv != NULL);
+    picoRTOS_assert(priv != NULL, return );
 
     struct wd *WDT = (struct wd*)priv;
 

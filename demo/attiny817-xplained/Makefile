@@ -4,6 +4,9 @@ target := $(TARGET)
 c_src-y += main.c
 c_src-y += attiny817-xplained.c
 
+splintflags-y += -DDEMO_LED -DDEMO_CONSOLE -DDEMO_SPI -DDEMO_ADC -DDEMO_PWM -DDEMO_WDT
+cppcheckflags-y += $(splintflags-y)
+
 # avoid double-inclusion
 ifeq ($(skip-makefile),)
 PWD := $(shell pwd)
