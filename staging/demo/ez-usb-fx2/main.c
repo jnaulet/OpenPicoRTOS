@@ -22,6 +22,7 @@ static unsigned char IOB;
 static unsigned char OEB;
 #endif
 
+/* cppcheck-suppress [constParameter] */
 static void tick_main(void *priv)
 {
     picoRTOS_assert_fatal(priv == NULL, return );
@@ -33,6 +34,7 @@ static void tick_main(void *priv)
     }
 }
 
+/* cppcheck-suppress [constParameter] */
 static void d1_main(void *priv)
 {
     picoRTOS_assert_fatal(priv == NULL, return );
@@ -60,6 +62,7 @@ static void d1_main(void *priv)
     }
 }
 
+/* cppcheck-suppress [constParameter] */
 static void d2_main(void *priv)
 {
     picoRTOS_assert_fatal(priv == NULL, return );
