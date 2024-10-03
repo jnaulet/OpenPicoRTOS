@@ -548,13 +548,9 @@ static int twi_read_as_slave_xfer(struct twi *ctx, void *buf, size_t n)
     if (nread == 0)
         return -EAGAIN;
 
-    if (nread == (int)n) {
-        ctx->last = nread;
-        ctx->state = TWI_RENESAS_RA4_STATE_STOP;
-        return twi_read_as_slave_stop(ctx);
-    }
-
-    return nread;
+    ctx->last = nread;
+    ctx->state = TWI_RENESAS_RA4_STATE_STOP;
+    return twi_read_as_slave_stop(ctx);
 }
 
 static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
