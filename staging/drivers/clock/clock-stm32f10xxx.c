@@ -535,9 +535,9 @@ clock_freq_t clock_get_freq(clock_id_t clkid)
     case CLOCK_STM32F10XXX_HCLK:    /*@fallthrough@*/
     case CLOCK_STM32F10XXX_FCLK: return clocks.ahb;
     case CLOCK_STM32F10XXX_PCLK1: return clocks.apb1;
-    case CLOCK_STM32F10XXX_TIMXCLK: return clocks.apb1 / 2;         /* FIXME */
     case CLOCK_STM32F10XXX_PCLK2:  return clocks.apb2;
-    case CLOCK_STM32F10XXX_TIMxCLK: return clocks.apb1 / 2;         /* FIXME */
+    case CLOCK_STM32F10XXX_TIM2CLK: return clocks.apb1 / 2;         /* FIXME */
+    case CLOCK_STM32F10XXX_TIM1CLK: return clocks.apb1 / 2;         /* FIXME */
     case CLOCK_STM32F10XXX_ADCCLK: return clocks.adc;
     case CLOCK_STM32F10XXX_RTCCLK: return (clock_freq_t)LSE_FREQ;   /* FIXME */
     case CLOCK_STM32F10XXX_IWDGCLK: return (clock_freq_t)LSI_FREQ;
