@@ -8,7 +8,7 @@ static long w_approx(long x)
     // for i in range(32):
     //     print(int(8192 / ((1 - (i/32.0)**2)**0.5)))
     // print(65535)
-    static long s_lut[33] = {
+    static const long s_lut[33] = {
         8192l,  8196l,  8208l,  8228l,  8256l,  8293l,  8339l,  8395l,  8460l,  8536l,
         8623l,  8723l,  8836l,  8965l,  9110l,  9273l,  9459l,  9669l,  9908l,  10180l,
         10494l, 10856l, 11280l, 11782l, 12385l, 13123l, 14052l, 15262l, 16921l, 19378l,
