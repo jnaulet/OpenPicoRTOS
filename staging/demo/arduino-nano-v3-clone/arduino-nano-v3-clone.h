@@ -6,9 +6,9 @@
 #include "clock-lgt8fx8p.h"
 #include "gpio-avr.h"
 #include "mux-avr.h"
-#include "uart-avr.h"
 #include "pwm-avr.h"
-#include "spi-avr+irqdriven.h"
+#include "spi-avr_irqdriven.h"
+#include "uart-avr_irqdriven.h"
 #include "wd-avr.h"
 
 struct arduino_nano_v3_clone {

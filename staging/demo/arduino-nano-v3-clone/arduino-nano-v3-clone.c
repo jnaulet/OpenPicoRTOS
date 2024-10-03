@@ -61,6 +61,7 @@ static void init_digital(/*@partial@*/ struct arduino_nano_v3_clone *ctx)
     (void)gpio_avr_init(&ctx->TICK, ADDR_PORTB, (size_t)4);
 }
 
+#if 0
 static void init_spi(/*@partial@*/ struct arduino_nano_v3_clone *ctx)
 {
     struct spi_settings SPI_settings = {
@@ -102,6 +103,7 @@ static void init_pwm(/*@partial@*/ struct arduino_nano_v3_clone *ctx)
     (void)pwm_avr_pwm_init(&ctx->PWM9, &TC1, PWM_AVR_OCnA);
     (void)pwm_avr_pwm_setup(&ctx->PWM9, &PWM_settings);
 }
+#endif
 
 static void init_wdt(/*@partial@*/ struct arduino_nano_v3_clone *ctx)
 {
