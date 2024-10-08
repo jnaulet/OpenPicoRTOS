@@ -214,7 +214,7 @@ static int twi_write_as_slave_xfer(struct twi *ctx, const void *buf, size_t n)
     picoRTOS_assert(n > 0, return -EINVAL);
 
     int sent = 0;
-    uint16_t *buf16 = (uint16_t*)buf;
+    const uint16_t *buf16 = (uint16_t*)buf;
 
     while ((size_t)sent != n) {
         if ((ctx->base->I2CFFTX & I2CFFTX_TXFFINT) == 0)
@@ -277,7 +277,7 @@ static int twi_write_as_master_xfer(struct twi *ctx, const void *buf, size_t n)
     picoRTOS_assert(n > 0, return -EINVAL);
 
     int sent = 0;
-    uint16_t *buf16 = (uint16_t*)buf;
+    const uint16_t *buf16 = (uint16_t*)buf;
 
     while ((size_t)sent != n) {
 
