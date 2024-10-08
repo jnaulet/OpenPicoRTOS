@@ -110,10 +110,10 @@ int clock_lgt8fx8p_init(struct clock_settings *settings)
         clocks.wdt = (clock_freq_t)LFRC_FREQ;
     }
 
-    if ((res = set_clkps(settings->ps)) < 0 ||
-        (res = set_pmcr(pmcr)) < 0)
+    if ((res = set_clkps(settings->ps)) < 0)
         return res;
 
+    (void)set_pmcr(pmcr);
     arch_set_clock_frequency((unsigned long)clocks.mclk);
     return 0;
 }
