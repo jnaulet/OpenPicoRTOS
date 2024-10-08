@@ -374,34 +374,28 @@ static int gpout_config(size_t index, unsigned long gpout_div)
     return 0;
 }
 
-static int peri_config(void)
+static void peri_config(void)
 {
     /* force clk_sys as auxsrc */
     CLK->CLK_PERI_CTRL = (uint32_t)CLK_PERI_CTRL_AUXSRC(0x0);
-
     clocks.peri = clocks.sys;
-    return 0;
 }
 
-static int usb_config(void)
+static void usb_config(void)
 {
     /* force pll_usb as auxsrc */
     CLK->CLK_USB_CTRL = (uint32_t)CLK_USB_CTRL_AUXSRC(0);
-
     clocks.usb = clocks.pll_usb;
-    return 0;
 }
 
-static int adc_config(void)
+static void adc_config(void)
 {
     /* force adc to pll_usb (48Mhz) */
     CLK->CLK_ADC_CTRL = (uint32_t)CLK_ADC_CTRL_AUXSRC(0);
-
     clocks.adc = clocks.pll_usb;
-    return 0;
 }
 
-static int rtc_config(void)
+static void rtc_config(void)
 {
 #define RTC_FREQ 46875
 
@@ -411,9 +405,7 @@ static int rtc_config(void)
     /* force rtc to xosc */
     CLK->CLK_RTC_CTRL = (uint32_t)CLK_RTC_CTRL_AUXSRC(0x3); /* xosc */
     CLK->CLK_RTC_DIV = (uint32_t)(CLK_RTC_DIV_INT(div_int) | CLK_RTC_DIV_FRAC(div_frac));
-
     clocks.rtc = (clock_freq_t)RTC_FREQ;
-    return 0;
 }
 
 /* Function: clock_rp2040_init
@@ -460,11 +452,10 @@ int clock_rp2040_init(struct clock_settings *settings)
         return res;
 
     /* CLK_PERI, CLK_USB, CLK_ADC, CLK_RTC */
-    if ((res = peri_config()) < 0 ||
-        (res = usb_config()) < 0 ||
-        (res = adc_config()) < 0 ||
-        (res = rtc_config()) < 0)
-        return res;
+    peri_config();
+    usb_config();
+    adc_config();
+    rtc_config();
 
     return 0;
 }
