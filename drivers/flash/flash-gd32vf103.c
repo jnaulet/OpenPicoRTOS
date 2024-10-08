@@ -155,7 +155,7 @@ int flash_blankcheck(struct flash *ctx, size_t block)
 {
     picoRTOS_assert(block < ctx->block_count, return -EINVAL);
 
-    uint32_t *addr = (uint32_t*)flash_get_block_addr(ctx, block);
+    const uint32_t *addr = (uint32_t*)flash_get_block_addr(ctx, block);
     size_t n = (size_t)FLASH_GD32VF103_BLOCK_SIZE / sizeof(uint32_t);
 
     if ((ctx->base->FMC_STAT & FMC_STAT_BUSY) != 0)
