@@ -195,13 +195,12 @@ static int set_mode(struct twi *ctx, twi_mode_t mode)
     return 0;
 }
 
-static int set_addr(struct twi *ctx, twi_addr_t addr)
+static void set_addr(struct twi *ctx, twi_addr_t addr)
 {
     if (ctx->mode == TWI_MODE_SLAVE)
         ctx->base->IC_SAR = (uint32_t)addr;
 
     ctx->slave_addr = addr;
-    return 0;
 }
 
 int twi_setup(struct twi *ctx, struct twi_settings *settings)
@@ -218,9 +217,7 @@ int twi_setup(struct twi *ctx, struct twi_settings *settings)
         (res = set_mode(ctx, settings->mode)) < 0)
         return res;
 
-    if ((res = set_addr(ctx, settings->slave_addr)) < 0)
-        return res;
-
+    set_addr(ctx, settings->slave_addr);
     ctx->base->IC_ENABLE |= IC_ENABLE_ENABLE;
     return 0;
 }
@@ -368,12 +365,10 @@ static int twi_write_as_slave_xfer(struct twi *ctx, const void *buf, size_t n)
 
     while (n-- != 0) {
 
-        int res;
-
         if ((ctx->base->IC_STATUS & IC_STATUS_TFNF) == 0)
             break;
 
-        if ((res = twi_write_as_slave_check_abort(ctx)) < 0 ||
+        if (twi_write_as_slave_check_abort(ctx) < 0 ||
             (ctx->base->IC_RAW_INTR_STAT & IC_INTR_STAT_R_STOP_DET) != 0) {
             ctx->state = TWI_DW_APB_I2C_STATE_STOP;
             ctx->last = sent;
