@@ -274,7 +274,7 @@ static int setup_pll(struct clock_settings *settings)
 
     /* turn on PWR & set scale1 mode */
     (void)clock_stm32l4x_enable(CLOCK_STM32L4X_CLK_PWR);
-    PWR->PWR_CR1 = (uint32_t)(PWR->PWR_CR1 & PWR_CR1_VOS(PWR_CR1_VOS_M) |
+    PWR->PWR_CR1 = (uint32_t)((PWR->PWR_CR1 & PWR_CR1_VOS(PWR_CR1_VOS_M)) |
                               PWR_CR1_VOS(1));
 
     /* input clk frequency */
