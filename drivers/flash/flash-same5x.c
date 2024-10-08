@@ -231,7 +231,7 @@ static int flash_write_idle(struct flash *ctx, int cmd, size_t addr,
                             const void *data, size_t n)
 {
     uint32_t *addr32 = (uint32_t*)addr;
-    uint32_t *data32 = (uint32_t*)data;
+    const uint32_t *data32 = (uint32_t*)data;
     size_t count = n / sizeof(uint32_t);
 
     while (count-- != 0)
