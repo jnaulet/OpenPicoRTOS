@@ -293,7 +293,7 @@ static int nxp_flexcan_set_tx_mailboxes(/*@partial@*/ struct can *ctx, size_t n)
 }
 
 #ifdef CAN_NXP_FLEXCAN_DISABLE_MEM_ERR_DETECTION
-static int nxp_flexcan_disable_mem_err_detection(struct can *ctx)
+static void nxp_flexcan_disable_mem_err_detection(struct can *ctx)
 {
     /* unlock MECR */
     ctx->base->CTRL2 |= CTRL2_ECRWRE;
@@ -304,7 +304,6 @@ static int nxp_flexcan_disable_mem_err_detection(struct can *ctx)
 
     /* lock MECR */
     ctx->base->CTRL2 &= ~CTRL2_ECRWRE;
-    return 0;
 }
 #endif
 
@@ -401,8 +400,7 @@ int can_nxp_flexcan_init(struct can *ctx, int base, clock_id_t clkid,
         return res;
 
 #ifdef CAN_NXP_FLEXCAN_DISABLE_MEM_ERR_DETECTION
-    if ((res = nxp_flexcan_disable_mem_err_detection(ctx)) < 0)
-        return res;
+    nxp_flexcan_disable_mem_err_detection(ctx);
 #endif
 
     /* set maxmb */
