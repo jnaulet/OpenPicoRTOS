@@ -370,7 +370,7 @@ static int transfer_rx_mailbox(struct can *ctx, size_t index,
     picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT, return -EINVAL);
 
     uint8_t *buf8 = (uint8_t*)buf;
-    struct CAN_GD32VF103_RFIFO *rfifo = &ctx->base->RFIFO[index];
+    const struct CAN_GD32VF103_RFIFO *rfifo = &ctx->base->RFIFO[index];
 
     switch (n) {
     case 8: buf8[7] = (uint8_t)(rfifo->CAN_RFIFOMDATA1x >> 24);     /*@fallthrough@*/
