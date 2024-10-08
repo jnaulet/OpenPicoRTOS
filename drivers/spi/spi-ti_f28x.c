@@ -59,7 +59,7 @@ struct SPI_REGS {
 
 #define SPIPRI_FREE (1 << 4)
 
-static int init_fifos(struct spi *ctx)
+static void init_fifos(struct spi *ctx)
 {
     /* reset fifos */
     ctx->base->SPIFFTX = (uint16_t)0;
@@ -75,8 +75,6 @@ static int init_fifos(struct spi *ctx)
 
     /* no delay */
     ctx->base->SPIFFCT = 0u;
-
-    return 0;
 }
 
 /* Function: spi_ti_f28x_init
@@ -92,8 +90,6 @@ static int init_fifos(struct spi *ctx)
  */
 int spi_ti_f28x_init(struct spi *ctx, int base, clock_id_t clkid)
 {
-    int res;
-
     ctx->base = (struct SPI_REGS*)base;
     ctx->clkid = clkid;
     ctx->balance = 0;
@@ -107,8 +103,7 @@ int spi_ti_f28x_init(struct spi *ctx, int base, clock_id_t clkid)
     ctx->threshold = (size_t)0;
 
     /* fifos */
-    if ((res = init_fifos(ctx)) < 0)
-        return res;
+    init_fifos(ctx);
 
     /* hold reset low for programming */
     ctx->base->SPICCR = (uint16_t)0;
