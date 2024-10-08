@@ -1,5 +1,21 @@
 # Release notes
 
+## picoRTOS v1.9.9
+### What's new ?
+
+Minor update, support for new architecture:
+
+    - STM8: support for STM8Sx003
+    - STM8S minimal drivers (clock, mux, gpio) + demo, staging
+
+A few fixes have been made to the build system, mainly to accomodate for newer versions of
+the gcc compiler, thanks to David J. Fiddes
+
+ATTiny414 machine has been added, courtesy of Platima.
+
+More tests & static analysis have been added in the corresponding directory & code has been
+made more compliant with the newer versions of the tools in the meantime.
+
 ## picoRTOS v1.9.8
 ### What's new ?
 
