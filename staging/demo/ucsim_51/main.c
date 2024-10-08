@@ -11,8 +11,7 @@ static unsigned char P1M1;
 static unsigned char P1M2;
 #endif
 
-/* cppcheck-suppress [constParameter] */
-static void tick_main(void *priv)
+static void tick_main(const void *priv)
 {
     picoRTOS_assert_fatal(priv == (void*)0xf00d, return );
 
@@ -22,8 +21,7 @@ static void tick_main(void *priv)
     }
 }
 
-/* cppcheck-suppress [constParameter] */
-static void led_main(void *priv)
+static void led_main(const void *priv)
 {
     picoRTOS_assert_fatal(priv == (void*)0xcafe, return );
 
@@ -56,10 +54,10 @@ int main(void)
     picoRTOS_init();
 
     /* tick */
-    picoRTOS_task_init(&task, tick_main, (void*)0xf00d, stack0, PICORTOS_STACK_COUNT(stack0));
+    picoRTOS_task_init(&task, (picoRTOS_task_fn)tick_main, (void*)0xf00d, stack0, PICORTOS_STACK_COUNT(stack0));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
     /* led */
-    picoRTOS_task_init(&task, led_main, (void*)0xcafe, stack1, PICORTOS_STACK_COUNT(stack1));
+    picoRTOS_task_init(&task, (picoRTOS_task_fn)led_main, (void*)0xcafe, stack1, PICORTOS_STACK_COUNT(stack1));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
 
     picoRTOS_start();
