@@ -320,7 +320,7 @@ static int set_duty_cycle32(struct pwm *ctx, size_t ccx)
 
 int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle)
 {
-    struct pwm_same5x_tc *parent = ctx->parent;
+    const struct pwm_same5x_tc *parent = ctx->parent;
     size_t ccx = ((size_t)duty_cycle * parent->ncycles) >> 16;
 
     switch (parent->mode) {
