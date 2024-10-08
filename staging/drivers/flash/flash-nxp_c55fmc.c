@@ -220,7 +220,7 @@ static int flash_write_idle(struct flash *ctx, size_t addr, const void *data, si
 
     int nwritten = 0;
     uint32_t *dst32 = (uint32_t*)addr;
-    uint32_t *src32 = (uint32_t*)data;
+    const uint32_t *src32 = (uint32_t*)data;
     size_t count = MIN(n, (size_t)PGM_SIZE) / sizeof(uint32_t);
 
     /* set to program mode */
