@@ -82,7 +82,7 @@ void arch_delay_us(unsigned long n)
 }
 
 /* cppcheck-suppress constParameter */
-void arch_idle(void *null)
+void arch_idle(const void *null)
 {
     arch_assert_void(null == NULL);
 
