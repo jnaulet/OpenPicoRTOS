@@ -189,7 +189,7 @@ static int adc_read_acq(struct adc *ctx, int *data)
 
 int adc_read(struct adc *ctx, int *data)
 {
-    struct adc_tinyavr *parent = ctx->parent;
+    const struct adc_tinyavr *parent = ctx->parent;
 
     switch (parent->state) {
     case ADC_TINYAVR_STATE_IDLE: return adc_read_idle(ctx);
