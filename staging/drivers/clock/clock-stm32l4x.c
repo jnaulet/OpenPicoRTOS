@@ -352,7 +352,7 @@ static int setup_pll(struct clock_settings *settings)
     /*@notreached@*/ return -EIO;
 }
 
-static int setup_flash(void)
+static void setup_flash(void)
 {
     /* latency computation */
     FLASH->FLASH_ACR &= ~FLASH_ACR_LATENCY(FLASH_ACR_LATENCY_M);
@@ -367,8 +367,6 @@ static int setup_flash(void)
         FLASH->FLASH_ACR |= FLASH_ACR_LATENCY(3);
     else
         FLASH->FLASH_ACR |= FLASH_ACR_LATENCY(4);
-
-    return 0;
 }
 
 static int set_hpre(unsigned int prescaler)
@@ -492,8 +490,8 @@ int clock_stm32l4x_init(struct clock_settings *settings)
     }
 
     /* flash & prescalers */
-    if ((res = setup_flash()) < 0 ||
-        (res = set_hpre(settings->ahb_prescaler)) < 0 ||
+    setup_flash();
+    if ((res = set_hpre(settings->ahb_prescaler)) < 0 ||
         (res = set_ppre1(settings->apb1_prescaler)) < 0 ||
         (res = set_ppre2(settings->apb2_prescaler)) < 0)
         return res;
