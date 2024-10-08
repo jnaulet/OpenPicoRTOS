@@ -177,7 +177,7 @@ static void flash_main(void *priv)
     /* test on last block of flash */
     size_t block = (size_t)flash_get_nblocks(FLASH) - 1;
     size_t addr = (size_t)flash_get_block_addr(FLASH, block);
-    uint32_t *mem = (uint32_t*)addr;
+    const uint32_t *mem = (uint32_t*)addr;
 
     /* init buffer */
     for (n = 0; n < (size_t)BUF_COUNT; n++)
