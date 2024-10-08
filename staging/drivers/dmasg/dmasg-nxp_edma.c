@@ -191,7 +191,7 @@ int dmasg_xfer(struct dmasg *ctx, struct dmasg_xfer *xfer)
 
 int dmasg_xfer_done(struct dmasg *ctx)
 {
-    struct DMASG_NXP_EDMA *base = ctx->parent->base;
+    const struct DMASG_NXP_EDMA *base = ctx->parent->base;
 
     if ((base->TCD[ctx->channel].CSR & TCD_CSR_ACTIVE) != 0)
         return -EAGAIN;
