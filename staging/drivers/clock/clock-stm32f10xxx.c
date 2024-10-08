@@ -310,12 +310,10 @@ static int setup_pll(struct clock_settings *settings)
     /*@notreached@*/ return -EIO;
 }
 
-static int setup_usb(void)
+static void setup_usb(void)
 {
     if (clocks.pll > (clock_freq_t)USB_FREQ)
         RCC->RCC_CFGR |= RCC_CFGR_USBPRE;
-
-    return 0;
 }
 
 static int set_hpre(unsigned int prescaler)
@@ -430,9 +428,11 @@ int clock_stm32f10xxx_init(struct clock_settings *settings)
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
     if ((res = setup_hse(settings->hse)) < 0 ||
-        (res = setup_pll(settings)) < 0 ||
-        (res = setup_usb()) < 0)
+        (res = setup_pll(settings)) < 0)
         return res;
+
+    /* usb */
+    setup_usb();
 
     /* prepare sysclk future values */
     switch (settings->sysclk) {
