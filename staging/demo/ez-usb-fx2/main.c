@@ -22,8 +22,7 @@ static unsigned char IOB;
 static unsigned char OEB;
 #endif
 
-/* cppcheck-suppress [constParameter] */
-static void tick_main(void *priv)
+static void tick_main(const void *priv)
 {
     picoRTOS_assert_fatal(priv == NULL, return );
 
@@ -34,8 +33,7 @@ static void tick_main(void *priv)
     }
 }
 
-/* cppcheck-suppress [constParameter] */
-static void d1_main(void *priv)
+static void d1_main(const void *priv)
 {
     picoRTOS_assert_fatal(priv == NULL, return );
 
@@ -62,8 +60,7 @@ static void d1_main(void *priv)
     }
 }
 
-/* cppcheck-suppress [constParameter] */
-static void d2_main(void *priv)
+static void d2_main(const void *priv)
 {
     picoRTOS_assert_fatal(priv == NULL, return );
 
@@ -106,13 +103,13 @@ int main(void)
     picoRTOS_init();
 
     /* tick */
-    picoRTOS_task_init(&task, tick_main, NULL, stack0, PICORTOS_STACK_COUNT(stack0));
+    picoRTOS_task_init(&task, (picoRTOS_task_fn)tick_main, NULL, stack0, PICORTOS_STACK_COUNT(stack0));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
     /* d1 */
-    picoRTOS_task_init(&task, d1_main, NULL, stack1, PICORTOS_STACK_COUNT(stack1));
+    picoRTOS_task_init(&task, (picoRTOS_task_fn)d1_main, NULL, stack1, PICORTOS_STACK_COUNT(stack1));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
     /* d2 */
-    picoRTOS_task_init(&task, d2_main, NULL, stack2, PICORTOS_STACK_COUNT(stack2));
+    picoRTOS_task_init(&task, (picoRTOS_task_fn)d2_main, NULL, stack2, PICORTOS_STACK_COUNT(stack2));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
 
     picoRTOS_start();
