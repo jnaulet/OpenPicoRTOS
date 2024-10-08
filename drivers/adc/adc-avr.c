@@ -173,7 +173,7 @@ int adc_setup(struct adc *ctx, struct adc_settings *settings)
 
 int adc_read(struct adc *ctx, int *data)
 {
-    struct adc_avr *parent = ctx->parent;
+    const struct adc_avr *parent = ctx->parent;
 
     switch (parent->state) {
     case ADC_AVR_STATE_IDLE: return adc_read_idle(ctx);
