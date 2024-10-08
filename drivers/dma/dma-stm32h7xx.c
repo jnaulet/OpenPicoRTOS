@@ -165,8 +165,8 @@ int dma_xfer(struct dma *ctx, struct dma_xfer *xfer)
 int dma_xfer_done(struct dma *ctx)
 {
     uint32_t xISR_TCIFn = 0;
-    volatile uint32_t *xISR;
     volatile uint32_t *xIFCR;
+    const volatile uint32_t *xISR;
 
     if (ctx->channel > (size_t)3) {
         xISR = &ctx->base->HISR;
