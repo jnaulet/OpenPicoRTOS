@@ -461,7 +461,7 @@ static int twi_write_as_slave_xfer(struct twi *ctx, const void *buf, size_t n)
     picoRTOS_assert(n > 0, return -EINVAL);
 
     int nwritten = 0;
-    uint8_t *buf8 = (uint8_t*)buf;
+    const uint8_t *buf8 = (uint8_t*)buf;
 
     while (nwritten != (int)n) {
         if ((ctx->base->ICSR2 & ICSR2_NACKF) != 0) {
