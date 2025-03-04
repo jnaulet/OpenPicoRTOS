@@ -99,7 +99,7 @@
 #define IRQ_TIMER3_COMPC 34
 #define IRQ_TIMR3_OVF    35
 #define IRQ_USART1_RX    36
-#define IRQ_USART1_UDE   37
+#define IRQ_USART1_UDRE  37
 #define IRQ_USART1_TX    38
 #define IRQ_TWI          39
 #define IRQ_SPM_READY    40
