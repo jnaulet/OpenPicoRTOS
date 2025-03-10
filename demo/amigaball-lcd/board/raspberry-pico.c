@@ -70,24 +70,25 @@ static void init_spi(/*@partial@*/ struct board *ctx)
         (size_t)0,
     };
 
+    (void)rp2040_unreset(&RESET, RP2040_RESET_SPI1);
+    (void)spi_arm_pl022_init(&SPI, ADDR_SPI1, CLOCK_RP2040_PERI);
+    (void)spi_setup(&SPI, &SPI_settings);
+
+#ifndef REMOVE_DMA_FOR_POSTPONE_TEST
+    /* DMA config */
     static struct dma DMA_SPI1_TX;
     static struct dma DMA_SPI1_RX;
     struct spi_arm_pl022_dma_settings DMA_settings;
 
     (void)rp2040_unreset(&RESET, RP2040_RESET_DMA);
-    (void)rp2040_unreset(&RESET, RP2040_RESET_SPI1);
-
     (void)dma_r2040_init(&DMA_SPI1_TX, ADDR_DMA, (size_t)0, DMA_RP2040_TREQ_SEL_DREQ_SPI1_TX);
     (void)dma_r2040_init(&DMA_SPI1_RX, ADDR_DMA, (size_t)1, DMA_RP2040_TREQ_SEL_DREQ_SPI1_RX);
 
-    (void)spi_arm_pl022_init(&SPI, ADDR_SPI1, CLOCK_RP2040_PERI);
-    (void)spi_setup(&SPI, &SPI_settings);
-
-    /* DMA config */
     DMA_settings.fill = &DMA_SPI1_TX;
     DMA_settings.drain = &DMA_SPI1_RX;
     DMA_settings.threshold = (size_t)16;
     (void)spi_arm_pl022_setup_dma(&SPI, &DMA_settings);
+#endif
 
     /* physical layer */
     ctx->lcd_phys.spi = &SPI;

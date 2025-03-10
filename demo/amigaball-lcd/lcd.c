@@ -38,17 +38,20 @@ static int lcd_xfer8(struct lcd *ctx, uint_least8_t x)
 {
     int res = 0;
     uint_least8_t dummy = 0;
-    int timeout = (int)PICORTOS_DELAY_SEC(1);
+    picoRTOS_tick_t ref = picoRTOS_get_tick();
 
     /* byte mode */
     (void)lcd_8bit(ctx);
 
-    /* xfer byte */
-    while (timeout-- != 0)
+    /* xfer byte, should take less than 1 tick */
+    while (!PICORTOS_DELAY_ELAPSED(ref, (picoRTOS_tick_t)2)) {
         if ((res = spi_xfer(ctx->spi, &dummy, &x, sizeof(x))) != -EAGAIN)
             break;
+        /* give it some air */
+        picoRTOS_postpone();
+    }
 
-    picoRTOS_assert(timeout != -1, return -EBUSY);
+    picoRTOS_assert(!PICORTOS_DELAY_ELAPSED(ref, (picoRTOS_tick_t)2), return -EBUSY);
     return res;
 }
 
@@ -57,7 +60,7 @@ static int lcd_xfer16(struct lcd *ctx, uint16_t x)
     int res = 0;
     size_t xfered = 0;
     uint16_t dummy = 0;
-    int timeout = (int)PICORTOS_DELAY_SEC(1);
+    picoRTOS_tick_t ref = picoRTOS_get_tick();
 
     uint_least8_t *x8 = (uint_least8_t*)&x;
 
@@ -69,17 +72,19 @@ static int lcd_xfer16(struct lcd *ctx, uint16_t x)
     x = __builtin_bswap16(x);
 #endif
 
-    /* xfer word */
-    while (xfered != sizeof(x) && timeout-- != 0) {
+    /* xfer word, should be almost immediate */
+    while (xfered != sizeof(x) &&
+           !PICORTOS_DELAY_ELAPSED(ref, (picoRTOS_tick_t)2)) {
+        /* xfer */
         if ((res = spi_xfer(ctx->spi, &dummy, &x8[xfered], sizeof(x) - xfered)) == -EAGAIN) {
-            picoRTOS_schedule();
+            picoRTOS_postpone();
             continue;
         }
 
         xfered += (size_t)res;
     }
 
-    picoRTOS_assert(timeout != -1, return -EBUSY);
+    picoRTOS_assert(!PICORTOS_DELAY_ELAPSED(ref, (picoRTOS_tick_t)2), return -EBUSY);
     return res;
 }
 
@@ -217,18 +222,23 @@ void lcd_zero(struct lcd *ctx)
 
 int lcd_refresh(struct lcd *ctx)
 {
+    /* max 30 fps */
+#define LCD_REFRESH_TIMEOUT PICORTOS_DELAY_MSEC(34)
+
     size_t xfered = 0;
-    int timeout = (int)PICORTOS_DELAY_MSEC(2000l / (long)LCD_FPS);
+    picoRTOS_tick_t ref = picoRTOS_get_tick();
     uint_least8_t *fb8 = (uint_least8_t*)ctx->fb;
 
     LCD_CS_ENABLE(ctx);
 
-    while (xfered < sizeof(ctx->fb) && timeout-- != 0) {
+    while (xfered < sizeof(ctx->fb) &&
+           !PICORTOS_DELAY_ELAPSED(ref, LCD_REFRESH_TIMEOUT)) {
+
         int res;
         if ((res = spi_xfer(ctx->spi, fb8, &fb8[xfered],
                             sizeof(ctx->fb) - xfered)) == -EAGAIN) {
             /* wait */
-            picoRTOS_schedule();
+            picoRTOS_postpone();
             continue;
         }
 
@@ -236,6 +246,6 @@ int lcd_refresh(struct lcd *ctx)
     }
 
     LCD_CS_DISABLE(ctx);
-    picoRTOS_assert(timeout != -1, return -EBUSY);
+    picoRTOS_assert(!PICORTOS_DELAY_ELAPSED(ref, LCD_REFRESH_TIMEOUT), return -EBUSY);
     return 0;
 }
