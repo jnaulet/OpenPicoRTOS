@@ -43,7 +43,7 @@ picoRTOS_priority_t picoRTOS_get_last_available_priority(void);         /* get l
 void picoRTOS_suspend(void);                                            /* suspends the scheduling */
 void picoRTOS_resume(void);                                             /* resumes the scheduling */
 
-void picoRTOS_schedule(void);                                           /* move to next task */
+void picoRTOS_postpone(void);                                           /* move to next task, put back in FIFO */
 void picoRTOS_sleep(picoRTOS_tick_t delay);                             /* put current task to sleep */
 void picoRTOS_sleep_until(picoRTOS_tick_t *ref,                         /* put current task to sleep until */
                           picoRTOS_tick_t period);
@@ -52,6 +52,11 @@ void picoRTOS_sleep_until(picoRTOS_tick_t *ref,                         /* put c
 
 picoRTOS_pid_t picoRTOS_self(void);                                 /* gets the current thread priority */
 /*@unused@*/ picoRTOS_tick_t picoRTOS_get_tick(void);               /* get current tick */
+
+/* Macro: picoRTOS_schedule()
+ * Puts the current task to sleep until next tick
+ */
+#define picoRTOS_schedule() picoRTOS_sleep((picoRTOS_tick_t)1)
 
 /* TIME MANAGEMENT */
 

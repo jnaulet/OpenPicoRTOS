@@ -67,8 +67,11 @@ struct picoRTOS_task_sub {
 #define L1_CACHE_ALIGN(x, a)         L1_CACHE_ALIGN_MASK((x), ((a) - 1))
 #define L1_CACHE_ALIGN_MASK(x, mask) (((x) + (mask)) & ~(mask))
 
+#define F_RUNNING   (1 << 0)
+#define F_POSTPONED (1 << 1)
+
 struct picoRTOS_SMP_core {
-    bool is_running;
+    int flags;
     picoRTOS_pid_t index[CONFIG_SMP_CORES];
     picoRTOS_tick_t tick;
     picoRTOS_pid_t pid_count;
@@ -243,7 +246,7 @@ void picoRTOS_init(void)
     picoRTOS.main_core = arch_core();
 
     /* RTOS status */
-    picoRTOS.is_running = false;
+    picoRTOS.flags = 0;
 }
 
 void picoRTOS_add_task(struct picoRTOS_task *task, picoRTOS_priority_t prio)
@@ -382,7 +385,7 @@ void picoRTOS_start(void)
     core_arrange_shared_priorities();
 
     arch_smp_init();
-    picoRTOS.is_running = true;
+    picoRTOS.flags |= F_RUNNING;
 
     /* start auxiliary cores first */
     picoRTOS_core_t i;
@@ -401,7 +404,7 @@ void picoRTOS_start(void)
 
 void picoRTOS_suspend(void)
 {
-    picoRTOS_assert_fatal(picoRTOS.is_running, return );
+    picoRTOS_assert_fatal((picoRTOS.flags & F_RUNNING) != 0, return );
 
     arch_suspend();
     arch_spin_lock();
@@ -409,18 +412,16 @@ void picoRTOS_suspend(void)
 
 void picoRTOS_resume(void)
 {
-    picoRTOS_assert_fatal(picoRTOS.is_running, return );
+    picoRTOS_assert_fatal((picoRTOS.flags & F_RUNNING) != 0, return );
 
     arch_spin_unlock();
     arch_resume();
 }
 
-void picoRTOS_schedule(void)
+void picoRTOS_postpone(void)
 {
-    static const struct syscall_sleep delay = { (picoRTOS_tick_t)1 };
-
     picoRTOS_assert_fatal(TASK_CURRENT().state == PICORTOS_TASK_STATE_BUSY, return );
-    arch_syscall(SYSCALL_SLEEP, (struct syscall_sleep*)&delay);
+    arch_syscall(SYSCALL_SWITCH_CONTEXT, NULL);
 }
 
 void picoRTOS_sleep(picoRTOS_tick_t delay)
@@ -506,6 +507,7 @@ static void syscall_kill(struct picoRTOS_task_core *task)
 static struct picoRTOS_task_core *
 syscall_switch_context(struct picoRTOS_task_core *task)
 {
+    int count = 2;
     picoRTOS_core_t core = arch_core();
     picoRTOS_mask_t mask = (picoRTOS_mask_t)(1u << core);
 
@@ -516,18 +518,32 @@ syscall_switch_context(struct picoRTOS_task_core *task)
     if (task->state == PICORTOS_TASK_STATE_BUSY)
         task->state = PICORTOS_TASK_STATE_DONE;
 
-    do {
-        picoRTOS.index[core]++;
-        picoRTOS_assert_void_fatal(picoRTOS.index[core] < (picoRTOS_pid_t)TASK_COUNT);
-        /* ignore sleeping, empty tasks & out-of-round sub-tasks */
-    } while (!task_core_is_available(&TASK_CURRENT_CORE(core), mask));
+    while (count-- != 0) {
+        /* choose next task to run */
+        do {
+            picoRTOS.index[core]++;
+            picoRTOS_assert_void_fatal(picoRTOS.index[core] < (picoRTOS_pid_t)TASK_COUNT);
+            /* ignore sleeping, empty tasks & out-of-round sub-tasks */
+        } while (!task_core_is_available(&TASK_CURRENT_CORE(core), mask));
 
-    /* refresh current task pointer & state */
-    task = &TASK_CURRENT_CORE(core);
-    task->state = PICORTOS_TASK_STATE_BUSY;
+        /* refresh current task pointer & state */
+        task = &TASK_CURRENT_CORE(core);
 
-    /* stats */
-    task_core_stat_start(task);
+        /* postponed tasks management */
+        if (picoRTOS.index[core] >= (picoRTOS_pid_t)TASK_IDLE_PID &&
+            (picoRTOS.flags & F_POSTPONED) != 0) {
+            /* reset flags & index */
+            picoRTOS.flags &= ~F_POSTPONED;
+            picoRTOS.index[core] = (picoRTOS_pid_t)-1;
+        }else{
+            /* next task or idle */
+            task->state = PICORTOS_TASK_STATE_BUSY;
+            break;
+        }
+    }
+
+    picoRTOS_assert_void_fatal(count != -1);    /* check */
+    task_core_stat_start(task);                 /* stats */
 
     return task;
 }
@@ -565,6 +581,8 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, syscall_t syscall, void
 
     default:
         /* SYSCALL_SWITCH_CONTEXT */
+        picoRTOS.flags |= F_POSTPONED;
+        task->state = PICORTOS_TASK_STATE_READY;
         break;
     }
 

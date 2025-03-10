@@ -21,8 +21,10 @@ static inline picoRTOS_core_t arch_core(void)
 
 #ifndef TEST_PICORTOS_SMP
 # include "../../scheduler/picoRTOS.c"
+# define PICORTOS_DOT_INDEX picoRTOS.index
 #else
 # include "../../scheduler/picoRTOS-SMP.c"
+# define PICORTOS_DOT_INDEX picoRTOS.index[0]
 #endif
 
 /* Dummy functions */
@@ -85,14 +87,12 @@ UNIT_TEST(picoRTOS_init){
     /* no way this will fail, but this is test-driven framework */
     picoRTOS_init();
     u_assert_var_equals(picoRTOS.pid_count, 0);
-#ifndef TEST_PICORTOS_SMP
-    u_assert_var_equals(picoRTOS.index, TASK_IDLE_PID);
-#else
-    u_assert_var_equals(picoRTOS.index[0], TASK_IDLE_PID);
+    u_assert_var_equals(PICORTOS_DOT_INDEX, TASK_IDLE_PID);
+#ifdef TEST_PICORTOS_SMP
     u_assert_var_equals(picoRTOS.index[1], TASK_IDLE_PID + 1);
 #endif
     u_assert_var_equals(picoRTOS.tick, (picoRTOS_tick_t)-1);
-    u_assert_var_equals(picoRTOS.is_running, false);
+    u_assert_var_equals(picoRTOS.flags, 0);
 }
 
 UNIT_TEST(task_core_is_available)
@@ -391,7 +391,7 @@ UNIT_TEST(picoRTOS_start)
     picoRTOS_init();
 
     picoRTOS_start();
-    u_assert(picoRTOS.is_running == true);
+    u_assert((picoRTOS.flags & F_RUNNING) != 0);
 
     /* reset for next test */
     picoRTOS_init();
@@ -414,6 +414,16 @@ UNIT_TEST(picoRTOS_resume)
 
     RESET_STATE_MACHINE();
     picoRTOS_resume();
+    u_assert(halted);
+}
+
+UNIT_TEST(picoRTOS_postpone)
+{
+    /* reset */
+    picoRTOS_init();
+
+    RESET_STATE_MACHINE();
+    picoRTOS_postpone();
     u_assert(halted);
 }
 
@@ -489,11 +499,9 @@ UNIT_TEST(picoRTOS_sleep_until)
     /* test #3 */
     RESET_STATE_MACHINE();
     picoRTOS.tick = 0; /* simulate 1st tick */
-#ifndef TEST_PICORTOS_SMP
-    picoRTOS.index = 0;
-#else
+    PICORTOS_DOT_INDEX = 0;
+#ifdef TEST_PICORTOS_SMP
     core = 0;
-    picoRTOS.index[core] = 0;
     TASK_CURRENT().state = PICORTOS_TASK_STATE_BUSY;
 #endif
     picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
@@ -538,14 +546,12 @@ UNIT_TEST(syscall_sleep)
     picoRTOS_task_init(&task, dummy_fn0, NULL, stack, PICORTOS_STACK_COUNT(stack));
     picoRTOS_add_task(&task, 0);
 
-#ifndef TEST_PICORTOS_SMP
-    picoRTOS.index = 0;
-#else
+#ifdef TEST_PICORTOS_SMP
     core = 0;
-    picoRTOS.index[core] = 0;
 #endif
 
     /* simulate 1st tick */
+    PICORTOS_DOT_INDEX = 0;
     picoRTOS.tick = 0;
 
     /* test #1 */
@@ -572,13 +578,12 @@ UNIT_TEST(syscall_kill)
     picoRTOS_task_init(&task, dummy_fn0, NULL, stack, PICORTOS_STACK_COUNT(stack));
     picoRTOS_add_task(&task, 0);
 
-#ifndef TEST_PICORTOS_SMP
-    picoRTOS.index = 0;
-#else
+#ifdef TEST_PICORTOS_SMP
     core = 0;
-    picoRTOS.index[core] = 0;
 #endif
 
+    PICORTOS_DOT_INDEX = 0;
+    
     /* test #1 */
     syscall_kill(&TASK_CURRENT());
     u_assert_var_equals(TASK_CURRENT().state, PICORTOS_TASK_STATE_EMPTY);
@@ -597,14 +602,12 @@ UNIT_TEST(syscall_sleep_until)
       picoRTOS_task_init(&task, dummy_fn0, NULL, stack, PICORTOS_STACK_COUNT(stack));
       picoRTOS_add_task(&task, 0);
 
-#ifndef TEST_PICORTOS_SMP
-      picoRTOS.index = 0;
-#else
+#ifdef TEST_PICORTOS_SMP
       core = 0;
-      picoRTOS.index[core] = 0;
 #endif
 
       /* simulate 1st tick */
+      PICORTOS_DOT_INDEX = 0;
       picoRTOS.tick = 0;
       
       /* test #1 */
@@ -642,18 +645,10 @@ UNIT_TEST(picoRTOS_tick)
 
     /* simulate tick */
     (void)picoRTOS_tick(TASK_CURRENT().sp);
-#ifndef TEST_PICORTOS_SMP
-    u_assert_var_equals(picoRTOS.index, 0);
-#else
-    u_assert_var_equals(picoRTOS.index[0], 0);
-#endif
+    u_assert_var_equals(PICORTOS_DOT_INDEX, 0);
 
     (void)picoRTOS_tick(TASK_CURRENT().sp);
-#ifndef TEST_PICORTOS_SMP
-    u_assert_var_equals(picoRTOS.index, 1);
-#else
-    u_assert_var_equals(picoRTOS.index[0], 1);
-#endif
+    u_assert_var_equals(PICORTOS_DOT_INDEX, 1);
 
     /* simulate sleep */
     picoRTOS_syscall(TASK_CURRENT().sp,
@@ -661,18 +656,10 @@ UNIT_TEST(picoRTOS_tick)
                      (void*)&sleep);
 
     (void)picoRTOS_tick(TASK_CURRENT().sp);
-#ifndef TEST_PICORTOS_SMP
-    u_assert_var_equals(picoRTOS.index, 0);
-#else
-    u_assert_var_equals(picoRTOS.index[0], 0);
-#endif
+    u_assert_var_equals(PICORTOS_DOT_INDEX, 0);
 
     (void)picoRTOS_tick(TASK_CURRENT().sp);
-#ifndef TEST_PICORTOS_SMP
-    u_assert_var_equals(picoRTOS.index, 2);
-#else
-    u_assert_var_equals(picoRTOS.index[0], 2);
-#endif
+    u_assert_var_equals(PICORTOS_DOT_INDEX, 2);
 }
 
 UNIT_TEST(syscall_switch_context)
@@ -696,34 +683,30 @@ UNIT_TEST(syscall_switch_context)
 
     /* simulate context switch */
     (void)syscall_switch_context(&TASK_CURRENT());
-#ifndef TEST_PICORTOS_SMP
-    u_assert_var_equals(picoRTOS.index, 2);
-#else
-    u_assert_var_equals(picoRTOS.index[0], 2);
-#endif
+    u_assert_var_equals(PICORTOS_DOT_INDEX, 2);
 
     (void)syscall_switch_context(&TASK_CURRENT());
-#ifndef TEST_PICORTOS_SMP
-    u_assert_var_equals(picoRTOS.index, TASK_IDLE_PID);
-#else
-    u_assert_var_equals(picoRTOS.index[0], TASK_IDLE_PID);
-#endif
+    u_assert_var_equals(PICORTOS_DOT_INDEX, TASK_IDLE_PID);
 
+    /* simulate 2nd tick */
     (void)picoRTOS_tick(TASK_CURRENT().sp);
 
     (void)syscall_switch_context(&TASK_CURRENT());
-#ifndef TEST_PICORTOS_SMP
-    u_assert_var_equals(picoRTOS.index, 3);
-#else
-    u_assert_var_equals(picoRTOS.index[0], 3);
-#endif
+    u_assert_var_equals(PICORTOS_DOT_INDEX, 3);
 
     (void)syscall_switch_context(&TASK_CURRENT());
-#ifndef TEST_PICORTOS_SMP
-    u_assert_var_equals(picoRTOS.index, TASK_IDLE_PID);
-#else
-    u_assert_var_equals(picoRTOS.index[0], TASK_IDLE_PID);
-#endif
+    u_assert_var_equals(PICORTOS_DOT_INDEX, TASK_IDLE_PID);
+
+    /* simulate 3rd tick */
+    (void)picoRTOS_tick(TASK_CURRENT().sp);
+    
+    /* test for postoned tasks */
+    picoRTOS_syscall(TASK_CURRENT().sp, SYSCALL_SWITCH_CONTEXT, NULL);
+    u_assert_var_equals(PICORTOS_DOT_INDEX, 2);
+
+    picoRTOS_syscall(TASK_CURRENT().sp, SYSCALL_SWITCH_CONTEXT, NULL);
+    u_assert_var_equals(PICORTOS_DOT_INDEX, 0);
+    u_assert_var_equals(picoRTOS.flags, F_RUNNING);
 }
 
 #ifdef TEST_PICORTOS_SMP
@@ -773,6 +756,7 @@ int main(void)
     RUN_TEST(picoRTOS_start);
     RUN_TEST(picoRTOS_suspend);
     RUN_TEST(picoRTOS_resume);
+    RUN_TEST(picoRTOS_postpone);
     RUN_TEST(picoRTOS_schedule);
     RUN_TEST(picoRTOS_sleep);
     RUN_TEST(picoRTOS_get_tick);
