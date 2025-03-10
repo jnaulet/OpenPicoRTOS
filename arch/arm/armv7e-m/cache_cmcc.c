@@ -13,7 +13,7 @@
 #define CMCC_WAY_M       0x3u
 #define CMCC_WAY(addr)   (CMCC_WAY_M & ((addr) >> 10))
 #define CMCC_INDEX_M     0x3fu
-#define CMCC_INDEX(addr) (CMCC_INDEX_M & ((addr) >> (CONFIG_L1_CACHE_LINESIZE / 4)))
+#define CMCC_INDEX(addr) (CMCC_INDEX_M & ((addr) >> (ARCH_L1_CACHE_LINESIZE / 4)))
 
 void arch_invalidate_dcache(void *addr, size_t n)
 {

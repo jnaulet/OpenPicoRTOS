@@ -1,6 +1,8 @@
 #include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
+#include <generated/autoconf.h>
+
 /* CACHES */
 #define DCIMVAC ((volatile unsigned long*)0xe000ef5c)
 #define DCCMVAC ((volatile unsigned long*)0xe000ef68)

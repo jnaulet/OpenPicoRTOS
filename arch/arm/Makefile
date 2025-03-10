@@ -14,13 +14,15 @@ endif
 c_src-$(CONFIG_ARMV7M) += $(arch-arm)/armv7-m/picoRTOS_port.c
 a_src-$(CONFIG_ARMV7M) += $(arch-arm)/armv7-m/picoRTOS_portasm.S
 
-c_src-$(CONFIG_ARMV7EM) += $(arch-arm)/armv7e-m/picoRTOS_port.c
-a_src-$(CONFIG_ARMV7EM) += $(arch-arm)/armv7e-m/picoRTOS_portasm.S
 ifeq ($(CONFIG_MACH_ATSAME5X),y)
-c_src-$(CONFIG_CACHE_MAINTENANCE) += $(arch-arm)/armv7e-m/cache_cmcc.c
+armv7em-cache-c_src-$(CONFIG_CACHE_MAINTENANCE) += $(arch-arm)/armv7e-m/cache_cmcc.c
 else
-c_src-$(CONFIG_CACHE_MAINTENANCE) += $(arch-arm)/armv7e-m/cache_mvsa.c
+armv7em-cache-c_src-$(CONFIG_CACHE_MAINTENANCE) += $(arch-arm)/armv7e-m/cache_mvsa.c
 endif
+
+c_src-$(CONFIG_ARMV7EM) += $(arch-arm)/armv7e-m/picoRTOS_port.c
+c_src-$(CONFIG_ARMV7EM) += $(armv7em-cache-c_src-y)
+a_src-$(CONFIG_ARMV7EM) += $(arch-arm)/armv7e-m/picoRTOS_portasm.S
 
 # march
 arch-$(CONFIG_ARMV6M) := -march=armv6-m -mfloat-abi=soft
