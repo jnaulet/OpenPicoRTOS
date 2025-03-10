@@ -49,7 +49,6 @@ struct picoRTOS_task_core {
 
 /* round-robin support */
 struct picoRTOS_task_sub {
-    picoRTOS_priority_t tick;
     picoRTOS_priority_t count;
 };
 
@@ -118,7 +117,8 @@ static bool task_core_is_available(const struct picoRTOS_task_core *task,
     /* task is ready and it's its turn */
     return (task->core_mask & core_mask) != 0 &&
            task->state == PICORTOS_TASK_STATE_READY &&
-           SUB_BY_PRIO(task->prio).tick == task->sub_prio;
+           ((picoRTOS_priority_t)picoRTOS.tick %
+            SUB_BY_PRIO(task->prio).count) == task->sub_prio;
 }
 
 static void task_core_quickcpy(/*@out@*/ struct picoRTOS_task_core *dst,
@@ -165,14 +165,7 @@ static void task_core_stat_finish(struct picoRTOS_task_core *task)
 
 static void task_sub_init(/*@out@*/ struct picoRTOS_task_sub *sub)
 {
-    sub->tick = 0;
     sub->count = (picoRTOS_priority_t)1;
-}
-
-static void task_sub_inc(struct picoRTOS_task_sub *sub)
-{
-    if (++sub->tick == sub->count)
-        sub->tick = 0;
 }
 
 /* SCHEDULER functions */
@@ -424,8 +417,10 @@ void picoRTOS_resume(void)
 
 void picoRTOS_schedule(void)
 {
+    static const struct syscall_sleep delay = { (picoRTOS_tick_t)1 };
+
     picoRTOS_assert_fatal(TASK_CURRENT().state == PICORTOS_TASK_STATE_BUSY, return );
-    arch_syscall(SYSCALL_SWITCH_CONTEXT, NULL);
+    arch_syscall(SYSCALL_SLEEP, (struct syscall_sleep*)&delay);
 }
 
 void picoRTOS_sleep(picoRTOS_tick_t delay)
@@ -527,8 +522,6 @@ syscall_switch_context(struct picoRTOS_task_core *task)
         /* ignore sleeping, empty tasks & out-of-round sub-tasks */
     } while (!task_core_is_available(&TASK_CURRENT_CORE(core), mask));
 
-    /* round-robin management */
-    task_sub_inc(&SUB_BY_PRIO(task->prio));
     /* refresh current task pointer & state */
     task = &TASK_CURRENT_CORE(core);
     task->state = PICORTOS_TASK_STATE_BUSY;
@@ -658,9 +651,6 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
     /* mask task as immediately ready */
     task->state = PICORTOS_TASK_STATE_READY;
     task_core_stat_finish(task);
-
-    /* round-robin management */
-    task_sub_inc(&SUB_BY_PRIO(task->prio));
 
     /* advance tick & propagate to auxiliary cores */
     if (core == picoRTOS.main_core) {
