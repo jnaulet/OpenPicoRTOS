@@ -84,6 +84,15 @@ picoRTOS_pid_t picoRTOS_self(void);                                 /* gets the 
  */
 #define PICORTOS_DELAY_USEC(x) (picoRTOS_tick_t)(((x) * CONFIG_TICK_HZ) / 1000000)
 
+/* Macro: PICORTOS_DELAY_ELAPSED(ref, x)
+ * Checks if a specific delay has passed since ref
+ *
+ * Parameters:
+ *  ref - the reference time/tick
+ *  x - a delay in ticks
+ */
+#define PICORTOS_DELAY_ELAPSED(ref, x) !((picoRTOS_get_tick() - (ref)) < (x))
+
 /* INTERRUPT MANAGEMENT */
 
 typedef void (*picoRTOS_isr_fn)(/*@null@*/ void*);
