@@ -1,0 +1,6 @@
+menu "RNG drivers"
+
+config RNG_XORSHIFT32
+       bool "xorshift32 pseudo-random RNG"
+
+endmenu

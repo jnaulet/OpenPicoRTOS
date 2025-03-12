@@ -51,6 +51,7 @@ config CROSS_COMPILE
         default xc8- if AVR && ATTINY
         default x32- if MIPS
         default riscv64-unknown-elf- if RISCV
+	default powerpc-eabivle- if POWERPC
         default '' if PTHREAD
         default i686-w64-mingw32- if WIN32
         help

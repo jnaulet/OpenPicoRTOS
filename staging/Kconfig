@@ -15,6 +15,7 @@ source staging/drivers/lin/Kconfig
 source staging/drivers/misc/Kconfig
 source staging/drivers/mux/Kconfig
 source staging/drivers/pwm/Kconfig
+source staging/drivers/rng/Kconfig
 source staging/drivers/spi/Kconfig
 source staging/drivers/twi/Kconfig
 source staging/drivers/uart/Kconfig
