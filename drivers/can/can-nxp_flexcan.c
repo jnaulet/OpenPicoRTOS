@@ -664,14 +664,18 @@ static int nxp_flexcan_read_mailbox(struct can *ctx, size_t index,
     if (!nxp_flexcan_read_mb_flag(ctx, index))
         return -EAGAIN;
 
-    /* CS read is destructive */
+    /* CS read & check */
     uint32_t CS = mb->CS;
 
-    if ((CS_CODE_t)CS_CODE_GET(CS) == CS_CODE_RX_EMPTY) {
-        /* undocumented error */
-        (void)nxp_flexcan_clear_mb_flag(ctx, index);
+    if ((CS_CODE_GET(CS) & CS_CODE_RX_BUSY) != 0)
         return -EAGAIN;
-    }
+
+    /* ack IFLAG register */
+    (void)nxp_flexcan_clear_mb_flag(ctx, index);
+
+    if ((CS_CODE_t)CS_CODE_GET(CS) == CS_CODE_RX_EMPTY)
+        /* undocumented error */
+        return -EAGAIN;
 
     if ((CS_CODE_t)CS_CODE_GET(CS) == CS_CODE_RX_FULL ||
         (CS_CODE_t)CS_CODE_GET(CS) == CS_CODE_RX_OVERRUN) {
