@@ -31,7 +31,7 @@ include drivers/gpio/Makefile
 include drivers/misc/Makefile
 include drivers/mux/Makefile
 include drivers/pwm/Makefile
-# include drivers/rng/Makefile
+include drivers/rng/Makefile
 include drivers/spi/Makefile
 include drivers/twi/Makefile
 include drivers/uart/Makefile

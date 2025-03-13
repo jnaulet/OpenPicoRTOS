@@ -11,6 +11,7 @@ source drivers/gpio/Kconfig
 source drivers/misc/Kconfig
 source drivers/mux/Kconfig
 source drivers/pwm/Kconfig
+source drivers/rng/Kconfig
 source drivers/spi/Kconfig
 source drivers/twi/Kconfig
 source drivers/uart/Kconfig
