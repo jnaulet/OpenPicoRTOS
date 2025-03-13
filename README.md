@@ -18,6 +18,7 @@ picoRTOS is a small hard RTOS with as little overhead as humanly possible.
   1. [Working principle](#working-principle)
   1. [Inter-processus communication](#inter-processus-communication)
   1. [Shared priorities](#shared-priorities)
+  1. [FIFO scheduling](#fifo-scheduling)
   1. [Interrupt management](#interrupt-management)
   1. [Staging tree](#staging-tree)
   1. [Featured demos](#featured-demos)
@@ -229,6 +230,21 @@ Example with 2 tasks (B & C) sharing a priority of 1:
     tick 1: taskA (prio 0) -> taskC (prio 1) -> taskD (prio 2) -> ...  
     tick 2: taskA (prio 0) -> taskB (prio 1) -> taskD (prio 2) -> ...  
     tick 3: taskA (prio 0) -> taskC (prio 1) -> taskD (prio 2) -> ...  
+    ...
+
+## FIFO scheduling
+
+Version 1.10 introduces FIFO scheduling via a new API call, picoRTOS_postpone().
+
+This will instruct the scheduler to move to the next task by order of priority & put
+the current task back in the scheduling FIFO, to be executed before idle().
+
+For the sake of readability, schedule will get the symbol '->' & postpone will get the   
+symbol '>>' in the following example (2 tasks, A & B):
+
+    tick 0: taskA (prio 0) -> taskB (prio 1) -> idle
+    tick 1: taskA (prio 0) >> taskB (prio 1) -> taskA (prio 0) -> idle
+    tick 2: taskA (prio 0) >> taskB (prio 1) >> taskA (prio 0) -> taskB (prio 1) -> idle
     ...
 
 ## Interrupt management
