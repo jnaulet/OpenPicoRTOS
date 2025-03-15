@@ -104,7 +104,7 @@ struct UART_ATMEL_SERCOM {
 
 #define DBGCTRL_DBGSTOP (1 << 0)
 
-static int sync_busywait(struct uart *ctx, uint32_t mask)
+static int sync_busywait(const struct uart *ctx, uint32_t mask)
 {
     int deadlock = CONFIG_DEADLOCK_COUNT;
 

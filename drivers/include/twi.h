@@ -68,7 +68,7 @@ struct twi_settings {
  * Returns:
  * 0 in case of success, -errno otherwise
  */
-int twi_setup(struct twi *ctx, struct twi_settings *settings);
+int twi_setup(struct twi *ctx, const struct twi_settings *settings);
 
 /* Function: twi_poll
  * Polls TWI interface for transfer (slave mode)

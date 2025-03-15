@@ -138,7 +138,7 @@ static int set_waveform(struct pwm_avr *ctx, pwm_avr_waveform_t wf)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_avr_setup(struct pwm_avr *ctx, struct pwm_avr_settings *settings)
+int pwm_avr_setup(struct pwm_avr *ctx, const struct pwm_avr_settings *settings)
 {
     int res;
 
@@ -257,7 +257,7 @@ int pwm_avr_pwm_init(struct pwm *ctx, struct pwm_avr *parent, pwm_avr_oc_t oc)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_avr_pwm_setup(struct pwm *ctx, struct pwm_settings *settings)
+int pwm_avr_pwm_setup(struct pwm *ctx, const struct pwm_settings *settings)
 {
     int res;
 

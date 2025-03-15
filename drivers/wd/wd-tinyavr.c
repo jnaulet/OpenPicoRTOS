@@ -47,7 +47,7 @@ int wd_tinyavr_init(struct wd *ctx, int base)
  * Return:
  * 0 if success, -errno otherwise
  */
-int wd_tinyavr_setup(struct wd *ctx, struct wd_tinyavr_settings *settings)
+int wd_tinyavr_setup(struct wd *ctx, const struct wd_tinyavr_settings *settings)
 {
     picoRTOS_assert(settings->window < WD_TINYAVR_PERIOD_COUNT, return -EINVAL);
     picoRTOS_assert(settings->period < WD_TINYAVR_PERIOD_COUNT, return -EINVAL);

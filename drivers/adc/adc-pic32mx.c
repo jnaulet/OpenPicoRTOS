@@ -266,7 +266,7 @@ int adc_pic32mx_init(struct adc_pic32mx *ctx, int base)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int adc_pic32mx_setup(struct adc_pic32mx *ctx, struct adc_pic32mx_settings *settings)
+int adc_pic32mx_setup(struct adc_pic32mx *ctx, const struct adc_pic32mx_settings *settings)
 {
     picoRTOS_assert(settings->wkupclkcnt <= (unsigned long)ADCANCON_WKUPCLKCNT_M, return -EINVAL);
     picoRTOS_assert(settings->adcsel < ADC_PIC32MX_ADCSEL_COUNT, return -EINVAL);
@@ -431,7 +431,7 @@ static int set_trgsrc_and_lvl(struct adc *ctx,
 }
 
 static int adc_pic32mx_shared_setup(struct adc *ctx,
-                                    struct adc_pic32mx_adc_settings *settings)
+                                    const struct adc_pic32mx_adc_settings *settings)
 {
     picoRTOS_assert(settings->selres < ADC_PIC32MX_ADC_SELRES_COUNT, return -EINVAL);
     picoRTOS_assert(settings->samc >= 2ul, return -EINVAL);
@@ -475,7 +475,7 @@ static int adc_pic32mx_shared_setup(struct adc *ctx,
  * Returns:
  * 0 if success, -errno otherwise
  */
-int adc_pic32mx_adc_setup(struct adc *ctx, struct adc_pic32mx_adc_settings *settings)
+int adc_pic32mx_adc_setup(struct adc *ctx, const struct adc_pic32mx_adc_settings *settings)
 {
     picoRTOS_assert(settings->adcdiv >= 2ul, return -EINVAL);
     picoRTOS_assert(settings->adcdiv <= (unsigned long)ADCxTIME_ADCDIV_M + 1ul, return -EINVAL);
@@ -517,7 +517,7 @@ int adc_pic32mx_adc_setup(struct adc *ctx, struct adc_pic32mx_adc_settings *sett
 
 /* hooks */
 
-int adc_setup(struct adc *ctx, struct adc_settings *settings)
+int adc_setup(struct adc *ctx, const struct adc_settings *settings)
 {
     ctx->multiplier = settings->multiplier;
     ctx->divider = settings->divider;

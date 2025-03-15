@@ -22,7 +22,7 @@ struct clock_settings {
     unsigned long freq; /* requested freq */
 };
 
-int clock_mc9s08ptxx_init(struct clock_settings *settings);
+int clock_mc9s08ptxx_init(const struct clock_settings *settings);
 
 /* Implements:
  * clock_freq_t clock_get_freq(clock_id_t clkid);

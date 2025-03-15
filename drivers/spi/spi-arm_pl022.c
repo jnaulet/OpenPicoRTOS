@@ -102,7 +102,7 @@ static int set_loopback(struct spi *ctx, bool loopback)
  * Returns:
  * Always 0
  */
-int spi_arm_pl022_setup(struct spi *ctx, struct spi_arm_pl022_settings *settings)
+int spi_arm_pl022_setup(struct spi *ctx, const struct spi_arm_pl022_settings *settings)
 {
     return set_loopback(ctx, settings->loopback);
 }
@@ -117,7 +117,7 @@ int spi_arm_pl022_setup(struct spi *ctx, struct spi_arm_pl022_settings *settings
  * Returns:
  * Always 0
  */
-int spi_arm_pl022_setup_dma(struct spi *ctx, struct spi_arm_pl022_dma_settings *settings)
+int spi_arm_pl022_setup_dma(struct spi *ctx, const struct spi_arm_pl022_dma_settings *settings)
 {
     ctx->fill = settings->fill;
     ctx->drain = settings->drain;

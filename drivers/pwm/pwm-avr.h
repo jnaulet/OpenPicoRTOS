@@ -68,7 +68,7 @@ struct pwm_avr_settings {
 };
 
 int pwm_avr_init(/*@out@*/ struct pwm_avr *ctx, int base, clock_id_t clkid);
-int pwm_avr_setup(struct pwm_avr *ctx, struct pwm_avr_settings *settings);
+int pwm_avr_setup(struct pwm_avr *ctx, const struct pwm_avr_settings *settings);
 
 struct pwm_settings {
     pwm_avr_mode_t mode;
@@ -80,7 +80,7 @@ struct pwm {
 };
 
 int pwm_avr_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_avr *parent, pwm_avr_oc_t oc);
-int pwm_avr_pwm_setup(struct pwm *ctx, struct pwm_settings *settings);
+int pwm_avr_pwm_setup(struct pwm *ctx, const struct pwm_settings *settings);
 
 /* Runtime calls:
  * int pwm_set_period(struct pwm *ctx, pwm_period_us_t period);

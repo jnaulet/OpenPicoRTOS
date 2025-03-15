@@ -175,7 +175,7 @@ int pwm_rp2040_ipwm_init(struct ipwm *ctx, struct pwm_rp2040 *parent, size_t cha
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_rp2040_ipwm_setup(struct ipwm *ctx, struct pwm_rp2040_ipwm_settings *settings)
+int pwm_rp2040_ipwm_setup(struct ipwm *ctx, const struct pwm_rp2040_ipwm_settings *settings)
 {
     picoRTOS_assert(settings->div > 0, return -EINVAL);
 

@@ -51,7 +51,7 @@ struct pwm_same5x_tc_settings {
 };
 
 int pwm_same5x_tc_init(/*@out@*/ struct pwm_same5x_tc *ctx, int base, clock_id_t clkid);
-int pwm_same5x_tc_setup(struct pwm_same5x_tc *ctx, struct pwm_same5x_tc_settings *settings);
+int pwm_same5x_tc_setup(struct pwm_same5x_tc *ctx, const struct pwm_same5x_tc_settings *settings);
 
 /* channel */
 
@@ -67,7 +67,7 @@ struct pwm_same5x_tc_pwm_settings {
 };
 
 int pwm_same5x_tc_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_same5x_tc *parent, size_t channel);
-int pwm_same5x_tc_pwm_setup(struct pwm *ctx, struct pwm_same5x_tc_pwm_settings *settings);
+int pwm_same5x_tc_pwm_setup(struct pwm *ctx, const struct pwm_same5x_tc_pwm_settings *settings);
 
 /* Runtime calls:
  * int pwm_set_period(struct pwm *ctx, pwm_period_us_t period);

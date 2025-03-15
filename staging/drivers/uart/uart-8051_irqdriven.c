@@ -122,7 +122,7 @@ int uart_8051_setup_irqdriven(struct uart *ctx, struct uart_8051_irqdriven_setti
     return 0;
 }
 
-static int set_baudrate(struct uart *ctx, unsigned long baudrate)
+static int set_baudrate(const struct uart *ctx, unsigned long baudrate)
 {
 #define div_round_closest(a, b) (((a) + ((b) >> 1)) / (b))
 

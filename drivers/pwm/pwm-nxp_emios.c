@@ -73,7 +73,7 @@ int pwm_nxp_emios_init(struct pwm_nxp_emios *ctx, int base, clock_id_t clkid)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_nxp_emios_setup(struct pwm_nxp_emios *ctx, struct pwm_nxp_emios_settings *settings)
+int pwm_nxp_emios_setup(struct pwm_nxp_emios *ctx, const struct pwm_nxp_emios_settings *settings)
 {
     picoRTOS_assert(settings->gpre >= (size_t)PWM_NXP_EMIOS_GPRE_MIN, return -EINVAL);
     picoRTOS_assert(settings->gpre <= (size_t)PWM_NXP_EMIOS_GPRE_MAX, return -EINVAL);
@@ -142,7 +142,7 @@ int pwm_nxp_emios_pwm_init(struct pwm *ctx, struct pwm_nxp_emios *parent, size_t
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_nxp_emios_pwm_setup(struct pwm *ctx, struct pwm_nxp_emios_pwm_settings *settings)
+int pwm_nxp_emios_pwm_setup(struct pwm *ctx, const struct pwm_nxp_emios_pwm_settings *settings)
 {
     picoRTOS_assert(settings->ucpre < PWM_NXP_EMIOS_UCPRE_COUNT, return -EINVAL);
 
@@ -217,7 +217,7 @@ int pwm_nxp_emios_ipwm_init(/*@out@*/ struct ipwm *ctx, struct pwm_nxp_emios *pa
     return 0;
 }
 
-int pwm_nxp_emios_ipwm_setup(struct ipwm *ctx, struct pwm_nxp_emios_ipwm_settings *settings)
+int pwm_nxp_emios_ipwm_setup(struct ipwm *ctx, const struct pwm_nxp_emios_ipwm_settings *settings)
 {
     picoRTOS_assert(settings->ucpre < PWM_NXP_EMIOS_UCPRE_COUNT, return -EINVAL);
     picoRTOS_assert(settings->filter < IPWM_NXP_EMIOS_IF_COUNT, return -EINVAL);

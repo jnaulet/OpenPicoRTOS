@@ -102,7 +102,7 @@ static int setup_dma(struct adc_gd32vf103 *ctx, /*@null@*/ struct dma *dma)
     return 0;
 }
 
-int adc_gd32vf103_setup(struct adc_gd32vf103 *ctx, struct adc_gd32vf103_settings *settings)
+int adc_gd32vf103_setup(struct adc_gd32vf103 *ctx, const struct adc_gd32vf103_settings *settings)
 {
     picoRTOS_assert(settings->mode < ADC_GD32VF103_MODE_COUNT, return -EINVAL);
 
@@ -228,7 +228,7 @@ int adc_gd32vf103_adc_init(struct adc *ctx, struct adc_gd32vf103 *parent, size_t
     return 0;
 }
 
-int adc_setup(struct adc *ctx, struct adc_settings *settings)
+int adc_setup(struct adc *ctx, const struct adc_settings *settings)
 {
     ctx->multiplier = settings->multiplier;
     ctx->divider = settings->divider;

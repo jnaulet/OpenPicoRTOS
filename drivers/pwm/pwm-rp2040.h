@@ -66,7 +66,7 @@ struct pwm_rp2040_ipwm_settings {
 };
 
 int pwm_rp2040_ipwm_init(/*@out@*/ struct ipwm *ctx, struct pwm_rp2040 *parent, size_t channel);
-int pwm_rp2040_ipwm_setup(struct ipwm *ctx, struct pwm_rp2040_ipwm_settings *settings);
+int pwm_rp2040_ipwm_setup(struct ipwm *ctx, const struct pwm_rp2040_ipwm_settings *settings);
 
 /* Runtime calls:
  * int ipwm_get_period(struct ipwm *ctx, pwm_period_us_t *period);

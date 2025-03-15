@@ -172,7 +172,7 @@ static int adc_nxp_eqadc_register_cc(struct adc_nxp_eqadc *ctx, size_t channel)
     return (int)ctx->channel_count++;
 }
 
-int adc_nxp_eqadc_setup(struct adc_nxp_eqadc *ctx, struct adc_nxp_eqadc_settings *settings)
+int adc_nxp_eqadc_setup(struct adc_nxp_eqadc *ctx, const struct adc_nxp_eqadc_settings *settings)
 {
     picoRTOS_assert(settings->mode0 < ADC_NXP_EQADC_MODE0_COUNT, return -EINVAL);
 
@@ -245,13 +245,13 @@ static int channel_set_lst(struct adc *ctx, adc_nxp_eqadc_lst_t lst)
     return 0;
 }
 
-int adc_nxp_eqadc_adc_setup(struct adc *ctx, struct adc_nxp_eqadc_adc_settings *settings)
+int adc_nxp_eqadc_adc_setup(struct adc *ctx, const struct adc_nxp_eqadc_adc_settings *settings)
 {
     channel_set_cal(ctx, settings->cal);
     return channel_set_lst(ctx, settings->lst);
 }
 
-int adc_setup(struct adc *ctx, struct adc_settings *settings)
+int adc_setup(struct adc *ctx, const struct adc_settings *settings)
 {
     ctx->multiplier = settings->multiplier;
     ctx->divider = settings->divider;

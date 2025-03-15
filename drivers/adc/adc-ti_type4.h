@@ -83,7 +83,7 @@ int adc_ti_type4_init(/*@out@*/ struct adc_ti_type4 *ctx,
                       int base, int result_base,
                       unsigned long cal_inl_addr);
 
-int adc_ti_type4_setup(struct adc_ti_type4 *ctx, struct adc_ti_type4_settings *settings);
+int adc_ti_type4_setup(struct adc_ti_type4 *ctx, const struct adc_ti_type4_settings *settings);
 
 /* channels */
 
@@ -164,7 +164,7 @@ int adc_ti_type4_adc_init(/*@out@*/ struct adc *ctx,
                           adc_ti_type4_intflg_t intflg);
 
 int adc_ti_type4_adc_setup(struct adc *ctx,
-                           struct adc_ti_type4_adc_settings *settings);
+                           const struct adc_ti_type4_adc_settings *settings);
 
 /* Runtime calls:
  * int adc_read(struct adc *ctx, int *data);

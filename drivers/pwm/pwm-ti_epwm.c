@@ -351,7 +351,7 @@ static int set_output_b(struct pwm_ti_epwm *ctx, aqctl_action_t act, pwm_ti_epwm
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_ti_epwm_setup(struct pwm_ti_epwm *ctx, struct pwm_ti_epwm_settings *settings)
+int pwm_ti_epwm_setup(struct pwm_ti_epwm *ctx, const struct pwm_ti_epwm_settings *settings)
 {
     int res;
 
@@ -385,7 +385,7 @@ int pwm_ti_epwm_pwm_init(struct pwm *ctx, struct pwm_ti_epwm *parent, pwm_ti_epw
     return 0;
 }
 
-static int setup_output_a(struct pwm *ctx, struct pwm_ti_epwm_pwm_settings *settings)
+static int setup_output_a(struct pwm *ctx, const struct pwm_ti_epwm_pwm_settings *settings)
 {
     int res;
 
@@ -400,7 +400,7 @@ static int setup_output_a(struct pwm *ctx, struct pwm_ti_epwm_pwm_settings *sett
     return 0;
 }
 
-static int setup_output_b(struct pwm *ctx, struct pwm_ti_epwm_pwm_settings *settings)
+static int setup_output_b(struct pwm *ctx, const struct pwm_ti_epwm_pwm_settings *settings)
 {
     int res;
 
@@ -425,7 +425,7 @@ static int setup_output_b(struct pwm *ctx, struct pwm_ti_epwm_pwm_settings *sett
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_ti_epwm_pwm_setup(struct pwm *ctx, struct pwm_ti_epwm_pwm_settings *settings)
+int pwm_ti_epwm_pwm_setup(struct pwm *ctx, const struct pwm_ti_epwm_pwm_settings *settings)
 {
     switch (ctx->cmp) {
     case PWM_TI_EPWM_CMPA: return setup_output_a(ctx, settings);

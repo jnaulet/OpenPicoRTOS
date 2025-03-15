@@ -49,7 +49,7 @@ int wd_gd32vf103_fwdgt_init(struct wd *ctx, int base, clock_id_t clkid)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int wd_gd32vf103_fwdgt_setup(struct wd *ctx, struct wd_gd32vf103_fwdgt_settings *settings)
+int wd_gd32vf103_fwdgt_setup(struct wd *ctx, const struct wd_gd32vf103_fwdgt_settings *settings)
 {
     unsigned long psc_p2;
     clock_freq_t freq = clock_get_freq(ctx->clkid);

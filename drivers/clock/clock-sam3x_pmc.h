@@ -24,7 +24,7 @@ struct clock_settings {
     unsigned long usb_div;
 };
 
-int clock_sam3x_pmc_init(struct clock_settings *settings);
+int clock_sam3x_pmc_init(const struct clock_settings *settings);
 
 typedef enum {
     CLOCK_SAM3X_PMC_PERIPH_DIV_1    = 0,

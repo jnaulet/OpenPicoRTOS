@@ -48,7 +48,7 @@ struct clock_settings {
     bool lock_enable;
 };
 
-int clock_tinyavr_init(struct clock_settings *settings);
+int clock_tinyavr_init(const struct clock_settings *settings);
 
 /* Implements:
  *

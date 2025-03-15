@@ -41,7 +41,7 @@ struct adc_nxp_eqadc_settings {
 };
 
 int adc_nxp_eqadc_init(/*@out@*/ struct adc_nxp_eqadc *ctx, int base);
-int adc_nxp_eqadc_setup(struct adc_nxp_eqadc *ctx, struct adc_nxp_eqadc_settings *settings);
+int adc_nxp_eqadc_setup(struct adc_nxp_eqadc *ctx, const struct adc_nxp_eqadc_settings *settings);
 
 struct adc {
     /*@temp@*/ struct adc_nxp_eqadc *parent;
@@ -67,7 +67,7 @@ struct adc_nxp_eqadc_adc_settings {
 };
 
 int adc_nxp_eqadc_adc_init(struct adc *ctx, struct adc_nxp_eqadc *parent, size_t channel);
-int adc_nxp_eqadc_adc_setup(struct adc *ctx, struct adc_nxp_eqadc_adc_settings *settings);
+int adc_nxp_eqadc_adc_setup(struct adc *ctx, const struct adc_nxp_eqadc_adc_settings *settings);
 
 /* Runtime calls:
  * int adc_read(struct adc *ctx, int *data);

@@ -20,7 +20,7 @@ static struct {
 
 #define SYSCLK_HZ (CONFIG_SYSCLK_HZ / CONFIG_SYSCLK_DIV)
 
-int clock_stc12c5axx_init(struct clock_settings *settings)
+int clock_stc12c5axx_init(const struct clock_settings *settings)
 {
     picoRTOS_assert(settings->t1 < CLOCK_STC12C5AXX_XCOUNT, return -EINVAL);
     picoRTOS_assert(settings->brt < CLOCK_STC12C5AXX_XCOUNT, return -EINVAL);

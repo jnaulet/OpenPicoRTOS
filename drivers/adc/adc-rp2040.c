@@ -95,7 +95,7 @@ int adc_rp2040_adc_init(struct adc *ctx, struct adc_rp2040 *parent, size_t chann
     return 0;
 }
 
-int adc_setup(struct adc *ctx, struct adc_settings *settings)
+int adc_setup(struct adc *ctx, const struct adc_settings *settings)
 {
     ctx->multiplier = settings->multiplier;
     ctx->divider = settings->divider;

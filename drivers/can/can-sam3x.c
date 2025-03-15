@@ -212,7 +212,7 @@ static int set_bitrate(struct can *ctx, unsigned long bitrate)
     return -EINVAL;
 }
 
-int can_setup(struct can *ctx, struct can_settings *settings)
+int can_setup(struct can *ctx, const struct can_settings *settings)
 {
     int res;
 
@@ -364,7 +364,7 @@ int can_write(struct can *ctx, can_id_t id, const void *buf, size_t n)
     return transfer_tx_mailbox(ctx, index, id, buf, n);
 }
 
-static can_id_t mailbox_read_mid(struct CAN_SAM3X_MB *mb)
+static can_id_t mailbox_read_mid(const struct CAN_SAM3X_MB *mb)
 {
     uint32_t mid = mb->CAN_MID;
 

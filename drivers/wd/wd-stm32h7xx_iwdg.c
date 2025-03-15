@@ -52,7 +52,7 @@ int wd_stm32h7xx_iwdg_init(/*@out@*/ struct wd *ctx, int base, clock_id_t clkid)
     return 0;
 }
 
-static int reg_update_busywait(struct wd *ctx)
+static int reg_update_busywait(const struct wd *ctx)
 {
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
@@ -73,7 +73,7 @@ static int reg_update_busywait(struct wd *ctx)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int wd_stm32h7xx_iwdg_setup(struct wd *ctx, struct wd_stm32h7xx_iwdg_settings *settings)
+int wd_stm32h7xx_iwdg_setup(struct wd *ctx, const struct wd_stm32h7xx_iwdg_settings *settings)
 {
     picoRTOS_assert(settings->timeout_ms > 0, return -EINVAL);
     picoRTOS_assert(settings->window_ms > 0, return -EINVAL);

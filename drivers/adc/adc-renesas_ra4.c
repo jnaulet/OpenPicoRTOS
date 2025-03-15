@@ -169,7 +169,7 @@ int adc_renesas_ra4_init(struct adc_renesas_ra4 *ctx, int base)
  * 0 in case of success, -errno otherwise
  */
 int adc_renesas_ra4_setup(struct adc_renesas_ra4 *ctx,
-                          struct adc_renesas_ra4_settings *settings)
+                          const struct adc_renesas_ra4_settings *settings)
 {
     picoRTOS_assert(settings->adprc < ADC_RENESAS_RA4_ADPRC_COUNT, return -EINVAL);
     picoRTOS_assert(settings->adcs < ADC_RENESAS_RA4_ADCS_COUNT, return -EINVAL);
@@ -222,7 +222,7 @@ int adc_renesas_ra4_adc_init(struct adc *ctx,
     return 0;
 }
 
-int adc_setup(struct adc *ctx, struct adc_settings *settings)
+int adc_setup(struct adc *ctx, const struct adc_settings *settings)
 {
     ctx->multiplier = settings->multiplier;
     ctx->divider = settings->divider;

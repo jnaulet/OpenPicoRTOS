@@ -34,7 +34,7 @@ typedef enum {
 } pwm_ti_epwm_aq_t;
 
 int pwm_ti_epwm_init(/*@out@*/ struct pwm_ti_epwm *ctx, int base, clock_id_t clkid);
-int pwm_ti_epwm_setup(struct pwm_ti_epwm *ctx, struct pwm_ti_epwm_settings *settings);
+int pwm_ti_epwm_setup(struct pwm_ti_epwm *ctx, const struct pwm_ti_epwm_settings *settings);
 
 typedef enum {
     PWM_TI_EPWM_CMPA,
@@ -58,7 +58,7 @@ struct pwm_ti_epwm_pwm_settings {
 };
 
 int pwm_ti_epwm_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_ti_epwm *parent, pwm_ti_epwm_cmp_t cmp);
-int pwm_ti_epwm_pwm_setup(struct pwm *ctx, struct pwm_ti_epwm_pwm_settings *settings);
+int pwm_ti_epwm_pwm_setup(struct pwm *ctx, const struct pwm_ti_epwm_pwm_settings *settings);
 
 /* Runtime calls:
  * int pwm_set_period(struct pwm *ctx, pwm_period_us_t period);

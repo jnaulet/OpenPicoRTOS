@@ -58,7 +58,7 @@ int wd_ti_f28x_init(struct wd *ctx, int base, clock_id_t clkid)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int wd_ti_f28x_setup(struct wd *ctx, struct wd_ti_f28x_settings *settings)
+int wd_ti_f28x_setup(struct wd *ctx, const struct wd_ti_f28x_settings *settings)
 {
     picoRTOS_assert(settings->wdps < WD_TI_F28X_WDPS_COUNT, return -EINVAL);
     picoRTOS_assert(settings->wdwcr_min <= WDWCR_MIN_M, return -EINVAL);

@@ -100,7 +100,7 @@ struct ADC_SAME5X {
 #define SYNCBUSY_ENABLE     (1 << 1)
 #define SYNCBUSY_SWRST      (1 << 0)
 
-static int sync_busywait(struct adc *ctx, uint32_t mask)
+static int sync_busywait(const struct adc *ctx, uint32_t mask)
 {
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
@@ -138,7 +138,7 @@ int adc_same5x_init(struct adc *ctx, int base, adc_same5x_channel_t channel)
     return sync_busywait(ctx, (uint32_t)SYNCBUSY_ENABLE);
 }
 
-int adc_setup(struct adc *ctx, struct adc_settings *settings)
+int adc_setup(struct adc *ctx, const struct adc_settings *settings)
 {
     ctx->multiplier = settings->multiplier;
     ctx->divider = settings->divider;

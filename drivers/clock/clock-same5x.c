@@ -247,7 +247,7 @@ int clock_same5x_gclk_reset(void)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int clock_same5x_gclk_generator_setup(size_t index, struct clock_same5x_gclk_settings *settings)
+int clock_same5x_gclk_generator_setup(size_t index, const struct clock_same5x_gclk_settings *settings)
 {
     picoRTOS_assert(index < (size_t)CLOCK_SAME5X_GCLK_COUNT, return -EINVAL);
     picoRTOS_assert(settings->src < CLOCK_SAME5X_GCLK_SRC_COUNT, return -EINVAL);
@@ -346,7 +346,7 @@ static int dfll_sync_busywait(uint32_t mask)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int clock_same5x_dfll_setup(struct clock_same5x_dfll_settings *settings)
+int clock_same5x_dfll_setup(const struct clock_same5x_dfll_settings *settings)
 {
     /* TODO: check param boundaries */
 
@@ -459,7 +459,7 @@ static int dpll_lock_busywait(size_t index)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int clock_same5x_dpll_setup(size_t index, struct clock_same5x_dpll_settings *settings)
+int clock_same5x_dpll_setup(size_t index, const struct clock_same5x_dpll_settings *settings)
 {
     picoRTOS_assert(index < (size_t)CLOCK_SAME5X_DPLL_COUNT, return -EINVAL);
     picoRTOS_assert(settings->refclk < CLOCK_SAME5X_DPLL_REFCLK_COUNT, return -EINVAL);

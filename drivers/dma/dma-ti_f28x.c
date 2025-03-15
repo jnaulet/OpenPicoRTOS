@@ -145,7 +145,7 @@ int dma_ti_f28x_init(struct dma *ctx, int base, size_t channel, dma_ti_f28x_chsr
     return 0;
 }
 
-int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
+int dma_setup(struct dma *ctx, const struct dma_xfer *xfer)
 {
     picoRTOS_assert(xfer->size >= sizeof(uint16_t), return -EINVAL);
     picoRTOS_assert(xfer->size <= sizeof(uint32_t), return -EINVAL);
@@ -178,7 +178,7 @@ int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
     return 0;
 }
 
-int dma_xfer(struct dma *ctx, struct dma_xfer *xfer)
+int dma_xfer(struct dma *ctx, const struct dma_xfer *xfer)
 {
     int res;
 

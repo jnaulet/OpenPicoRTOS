@@ -44,8 +44,8 @@ struct spi {
 };
 
 int spi_ti_f28x_init(/*@out@*/ struct spi *ctx, int base, clock_id_t clkid);
-int spi_ti_f28x_setup(struct spi *ctx, struct spi_ti_f28x_settings *settings);
-int spi_ti_f28x_setup_dma(struct spi *ctx, struct spi_ti_f28x_dma_settings *settings);
+int spi_ti_f28x_setup(struct spi *ctx, const struct spi_ti_f28x_settings *settings);
+int spi_ti_f28x_setup_dma(struct spi *ctx, const struct spi_ti_f28x_dma_settings *settings);
 
 /*
  * Runtime calls:

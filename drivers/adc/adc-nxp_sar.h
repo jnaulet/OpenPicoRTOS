@@ -38,7 +38,7 @@ struct adc_nxp_sar_settings {
 };
 
 int adc_nxp_sar_init(/*@out@*/ struct adc_nxp_sar *ctx, int base);
-int adc_nxp_sar_setup(struct adc_nxp_sar *ctx, struct adc_nxp_sar_settings *settings);
+int adc_nxp_sar_setup(struct adc_nxp_sar *ctx, const struct adc_nxp_sar_settings *settings);
 
 /* channel */
 

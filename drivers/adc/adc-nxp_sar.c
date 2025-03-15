@@ -85,7 +85,7 @@ int adc_nxp_sar_init(struct adc_nxp_sar *ctx, int base)
  * Returns:
  * Always 0
  */
-int adc_nxp_sar_setup(struct adc_nxp_sar *ctx, struct adc_nxp_sar_settings *settings)
+int adc_nxp_sar_setup(struct adc_nxp_sar *ctx, const struct adc_nxp_sar_settings *settings)
 {
     if (settings->overwrite) ctx->base->MCR |= MCR_OWREN;
     else ctx->base->MCR &= ~MCR_OWREN;
@@ -125,7 +125,7 @@ int adc_nxp_sar_adc_init(struct adc *ctx, struct adc_nxp_sar *parent, size_t cha
     return 0;
 }
 
-int adc_setup(struct adc *ctx, struct adc_settings *settings)
+int adc_setup(struct adc *ctx, const struct adc_settings *settings)
 {
     ctx->multiplier = settings->multiplier;
     ctx->divider = settings->divider;

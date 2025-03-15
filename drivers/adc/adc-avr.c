@@ -60,7 +60,7 @@ int adc_avr_init(struct adc_avr *ctx, int base)
  * Returns:
  * 0 in case of success, -errno otherwise
  */
-int adc_avr_setup(struct adc_avr *ctx, struct adc_avr_settings *settings)
+int adc_avr_setup(struct adc_avr *ctx, const struct adc_avr_settings *settings)
 {
     picoRTOS_assert(settings->prescaler < ADC_AVR_PRESCALER_COUNT, return -EINVAL);
     picoRTOS_assert(settings->refs < ADC_AVR_REFS_COUNT, return -EINVAL);
@@ -162,7 +162,7 @@ static int adc_read_acq(struct adc *ctx, int *data)
     return 1;
 }
 
-int adc_setup(struct adc *ctx, struct adc_settings *settings)
+int adc_setup(struct adc *ctx, const struct adc_settings *settings)
 {
     ctx->multiplier = settings->multiplier;
     ctx->divider = settings->divider;

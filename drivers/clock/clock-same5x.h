@@ -29,7 +29,7 @@ struct clock_same5x_gclk_settings {
     unsigned long div;
 };
 
-int clock_same5x_gclk_generator_setup(size_t index, struct clock_same5x_gclk_settings *settings);
+int clock_same5x_gclk_generator_setup(size_t index, const struct clock_same5x_gclk_settings *settings);
 int clock_same5x_gclk_generator_enable(size_t index);
 int clock_same5x_gclk_generator_disable(size_t index);
 
@@ -41,7 +41,7 @@ struct clock_same5x_dfll_settings {
     unsigned long mul;
 };
 
-int clock_same5x_dfll_setup(struct clock_same5x_dfll_settings *settings);
+int clock_same5x_dfll_setup(const struct clock_same5x_dfll_settings *settings);
 int clock_same5x_dfll_enable(void);
 int clock_same5x_dfll_disable(void);
 
@@ -61,7 +61,7 @@ struct clock_same5x_dpll_settings {
     unsigned long freq;
 };
 
-int clock_same5x_dpll_setup(size_t index, struct clock_same5x_dpll_settings *settings);
+int clock_same5x_dpll_setup(size_t index, const struct clock_same5x_dpll_settings *settings);
 int clock_same5x_dpll_enable(size_t index);
 int clock_same5x_dpll_disable(size_t index);
 

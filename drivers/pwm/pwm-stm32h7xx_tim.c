@@ -244,7 +244,7 @@ int pwm_stm32h7xx_tim_init(struct pwm_stm32h7xx_tim *ctx, int base, clock_id_t c
  * 0 if success, -errno otherwise
  */
 int pwm_stm32h7xx_tim_setup(struct pwm_stm32h7xx_tim *ctx,
-                            struct pwm_stm32h7xx_tim_settings *settings)
+                            const struct pwm_stm32h7xx_tim_settings *settings)
 {
 
     picoRTOS_assert(settings->align < PWM_STM32H7XX_TIM_ALIGN_COUNT,
@@ -368,7 +368,7 @@ static int set_oc(struct pwm *ctx, pwm_stm32h7xx_tim_oc_t oc)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_stm32h7xx_tim_pwm_setup(struct pwm *ctx, struct pwm_stm32h7xx_tim_pwm_settings *settings)
+int pwm_stm32h7xx_tim_pwm_setup(struct pwm *ctx, const struct pwm_stm32h7xx_tim_pwm_settings *settings)
 {
     int res;
 

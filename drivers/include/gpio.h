@@ -33,7 +33,7 @@ struct gpio_settings {
  * Returns:
  * Always 0
  */
-int gpio_setup(struct gpio *ctx, struct gpio_settings *settings);
+int gpio_setup(struct gpio *ctx, const struct gpio_settings *settings);
 
 /* Function: gpio_write
  * Sets a gpio to a value

@@ -33,7 +33,7 @@ struct lin_settings {
  * Returns:
  *  if success, -errno otherwise
  */
-int lin_setup(struct lin *ctx, struct lin_settings *settings);
+int lin_setup(struct lin *ctx, const struct lin_settings *settings);
 
 /* Function: lin_write
  * Writes data to the LIN interface

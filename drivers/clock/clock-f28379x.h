@@ -21,7 +21,7 @@ struct clock_settings {
     unsigned long pll;              /* pll requested freq */
 };
 
-int clock_f28379x_init(struct clock_settings *settings);
+int clock_f28379x_init(const struct clock_settings *settings);
 
 /* f28379x peripheral clocks */
 typedef enum {

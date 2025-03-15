@@ -123,7 +123,7 @@ struct adc_avr_settings {
 };
 
 int adc_avr_init(/*@out@*/ struct adc_avr *ctx, int base);
-int adc_avr_setup(struct adc_avr *ctx, struct adc_avr_settings *settings);
+int adc_avr_setup(struct adc_avr *ctx, const struct adc_avr_settings *settings);
 
 /* channels */
 

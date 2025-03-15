@@ -18,7 +18,7 @@ struct clock_settings {
     clock_stc12c5axx_x_t brt;
 };
 
-int clock_stc12c5axx_init(struct clock_settings *settings);
+int clock_stc12c5axx_init(const struct clock_settings *settings);
 
 /* Implements:
  *

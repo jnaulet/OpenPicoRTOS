@@ -110,7 +110,7 @@ static uint32_t nxp_edma_data_size(size_t size)
     return (uint32_t)0;
 }
 
-static int setup_tcd_attr(struct dmasg *ctx, struct dmasg_xfer *xfer)
+static int setup_tcd_attr(struct dmasg *ctx, const struct dmasg_xfer *xfer)
 {
     picoRTOS_assert(xfer->smod <= (size_t)TCD_ATTR_SMOD_M, return -EINVAL);
     picoRTOS_assert(xfer->dmod <= (size_t)TCD_ATTR_DMOD_M, return -EINVAL);
@@ -127,7 +127,7 @@ static int setup_tcd_attr(struct dmasg *ctx, struct dmasg_xfer *xfer)
     return 0;
 }
 
-static int setup_tcd(struct dmasg *ctx, struct dmasg_xfer *xfer)
+static int setup_tcd(struct dmasg *ctx, const struct dmasg_xfer *xfer)
 {
     int res;
     struct DMASG_NXP_EDMA *base = ctx->parent->base;
@@ -155,7 +155,7 @@ static int setup_tcd(struct dmasg *ctx, struct dmasg_xfer *xfer)
     return 0;
 }
 
-int dmasg_nxp_edma_dmasg_setup(struct dmasg *ctx, struct dmasg_xfer *xfer)
+int dmasg_nxp_edma_dmasg_setup(struct dmasg *ctx, const struct dmasg_xfer *xfer)
 {
     int res;
     struct DMASG_NXP_EDMA *base = ctx->parent->base;
@@ -169,7 +169,7 @@ int dmasg_nxp_edma_dmasg_setup(struct dmasg *ctx, struct dmasg_xfer *xfer)
 
 /* hooks */
 
-int dmasg_xfer(struct dmasg *ctx, struct dmasg_xfer *xfer)
+int dmasg_xfer(struct dmasg *ctx, const struct dmasg_xfer *xfer)
 {
     int res;
     struct DMASG_NXP_EDMA *base = ctx->parent->base;

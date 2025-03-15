@@ -23,7 +23,7 @@ struct dma_sg_channel_xfer {
     int dlastsga;       /* last destination adjustment scatter-gather */
 };
 
-int dma_sg_channel_xfer(struct dma_sg_channel *ctx, struct dma_sg_channel_xfer *xfer);
+int dma_sg_channel_xfer(struct dma_sg_channel *ctx, const struct dma_sg_channel_xfer *xfer);
 int dma_sg_channel_xfer_done(struct dma_sg_channel *ctx);
 
 #endif

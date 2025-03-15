@@ -26,7 +26,7 @@ static struct {
  * Returns:
  * 0 if success, -errno otherwise
  */
-int clock_cy7c6801xa_init(struct clock_settings *settings)
+int clock_cy7c6801xa_init(const struct clock_settings *settings)
 {
     picoRTOS_assert(settings->clkspd < CLOCK_CY7C6801XA_CLKSPD_COUNT, return -EINVAL);
 

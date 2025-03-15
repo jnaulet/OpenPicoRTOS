@@ -33,7 +33,7 @@ struct dmasg_xfer {
  * Returns:
  * 0 in case of success, -errno otherwise
  */
-int dmasg_xfer(struct dmasg *ctx, struct dmasg_xfer *xfer);
+int dmasg_xfer(struct dmasg *ctx, const struct dmasg_xfer *xfer);
 
 /* Function: dma_xfer_done
  * Polls a DMA-SG for end of transfer

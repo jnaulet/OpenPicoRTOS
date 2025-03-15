@@ -36,7 +36,7 @@ struct can_nxp_flexcan_settings {
 };
 
 int can_nxp_flexcan_init(/*@out@*/ struct can *ctx, int base, clock_id_t clkid, size_t mailbox_count);
-int can_nxp_flexcan_setup(struct can *ctx, struct can_nxp_flexcan_settings *settings);
+int can_nxp_flexcan_setup(struct can *ctx, const struct can_nxp_flexcan_settings *settings);
 
 /* Runtime calls:
  * int can_register(struct can *ctx, can_id_t id, can_f_t f, unsigned long flags);

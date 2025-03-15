@@ -230,7 +230,7 @@ static int clock_sam3x_pmc_init_mck(unsigned long mck_div)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int clock_sam3x_pmc_init(struct clock_settings *settings)
+int clock_sam3x_pmc_init(const struct clock_settings *settings)
 {
     picoRTOS_assert(settings->moscx > 0, return -EINVAL);
 

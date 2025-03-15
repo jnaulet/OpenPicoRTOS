@@ -146,7 +146,7 @@ int pwm_sam3x_tc_init(struct pwm *ctx, int base, clock_id_t clkid)
     return 0;
 }
 
-int pwm_sam3x_tc_setup(struct pwm *ctx, struct pwm_sam3x_tc_settings *settings)
+int pwm_sam3x_tc_setup(struct pwm *ctx, const struct pwm_sam3x_tc_settings *settings)
 {
     picoRTOS_assert(settings->tio < PWM_SAM3X_TC_TIO_COUNT, return -EINVAL);
     picoRTOS_assert(settings->wavsel < PWM_SAM3X_TC_WAVSEL_COUNT, return -EINVAL);
@@ -227,7 +227,7 @@ int ipwm_sam3x_tc_init(struct ipwm *ctx, int base, clock_id_t clkid)
     return 0;
 }
 
-int ipwm_sam3x_tc_setup(struct ipwm *ctx, struct ipwm_sam3x_tc_settings *settings)
+int ipwm_sam3x_tc_setup(struct ipwm *ctx, const struct ipwm_sam3x_tc_settings *settings)
 {
     picoRTOS_assert(settings->tcclks < PWM_SAM3X_TC_TCCLKS_COUNT, return -EINVAL);
     picoRTOS_assert(settings->ldr < IPWM_SAM3X_TC_LDR_COUNT, return -EINVAL);

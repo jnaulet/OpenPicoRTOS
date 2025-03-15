@@ -61,7 +61,7 @@ struct can_settings {
  * Returns:
  * 0 in case of success, -errno otherwise
  */
-int can_setup(struct can *ctx, struct can_settings *settings);
+int can_setup(struct can *ctx, const struct can_settings *settings);
 
 /* Function: can_accept
  * Registers a message for rx on a CAN interface

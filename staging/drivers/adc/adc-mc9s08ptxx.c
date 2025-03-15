@@ -52,7 +52,7 @@ int adc_mc9s08ptxx_init(struct adc_mc9s08ptxx *ctx, int base)
     return 0;
 }
 
-int adc_mc9s08ptxx_setup(struct adc_mc9s08ptxx *ctx, struct adc_mc9s08ptxx_settings *settings)
+int adc_mc9s08ptxx_setup(struct adc_mc9s08ptxx *ctx, const struct adc_mc9s08ptxx_settings *settings)
 {
     picoRTOS_assert(settings->mode < ADC_MC9S08PTXX_MODE_COUNT, return -EINVAL);
 
@@ -88,7 +88,7 @@ int adc_mc9s08ptxx_adc_init(struct adc *ctx, struct adc_mc9s08ptxx *parent, size
     return 0;
 }
 
-int adc_setup(struct adc *ctx, struct adc_settings *settings)
+int adc_setup(struct adc *ctx, const struct adc_settings *settings)
 {
     ctx->multiplier = settings->multiplier;
     ctx->divider = settings->divider;

@@ -189,7 +189,7 @@ int dma_same5x_dma_init(/*@out@*/ struct dma *ctx, struct dma_same5x *parent,
     return 0;
 }
 
-int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
+int dma_setup(struct dma *ctx, const struct dma_xfer *xfer)
 {
     picoRTOS_assert(xfer->size > 0, return -EINVAL);
     picoRTOS_assert(xfer->size <= sizeof(uint32_t), return -EINVAL);
@@ -223,7 +223,7 @@ int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
     return 0;
 }
 
-int dma_xfer(struct dma *ctx, struct dma_xfer *xfer)
+int dma_xfer(struct dma *ctx, const struct dma_xfer *xfer)
 {
     int res;
     struct DMA_SAME5X *base = ctx->parent->base;

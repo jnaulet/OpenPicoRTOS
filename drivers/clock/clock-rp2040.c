@@ -417,7 +417,7 @@ static void rtc_config(void)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int clock_rp2040_init(struct clock_settings *settings)
+int clock_rp2040_init(const struct clock_settings *settings)
 {
     picoRTOS_assert(settings->xosc > 0, return -EINVAL);
 

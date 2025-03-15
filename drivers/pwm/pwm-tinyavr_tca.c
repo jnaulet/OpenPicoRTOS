@@ -107,7 +107,7 @@ static int set_clksel(struct pwm_tinyavr_tca *ctx, pwm_tinyavr_tca_clksel_t clks
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_tinyavr_tca_setup(struct pwm_tinyavr_tca *ctx, struct pwm_tinyavr_tca_settings *settings)
+int pwm_tinyavr_tca_setup(struct pwm_tinyavr_tca *ctx, const struct pwm_tinyavr_tca_settings *settings)
 {
     picoRTOS_assert(settings->wgmode < PWM_TINYAVR_TCA_WGMODE_COUNT, return -EINVAL);
 

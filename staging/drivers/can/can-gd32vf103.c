@@ -252,7 +252,7 @@ static int sleep_to_initial_working_mode(struct can *ctx)
     return 0;
 }
 
-int can_setup(struct can *ctx, struct can_settings *settings)
+int can_setup(struct can *ctx, const struct can_settings *settings)
 {
     int res;
 

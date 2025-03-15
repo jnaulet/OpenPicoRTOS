@@ -78,7 +78,7 @@ struct SPI_ATMEL_SERCOM {
 
 #define DBGCTRL_DBGSTOP (1 << 0)
 
-static int sync_busywait(struct spi *ctx, uint32_t mask)
+static int sync_busywait(const struct spi *ctx, uint32_t mask)
 {
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
@@ -132,7 +132,7 @@ int spi_atmel_sercom_init(struct spi *ctx, int base, clock_id_t clkid)
  * Returns:
  * Always 0
  */
-int spi_atmel_sercom_setup_dma(struct spi *ctx, struct spi_atmel_sercom_dma_settings *settings)
+int spi_atmel_sercom_setup_dma(struct spi *ctx, const struct spi_atmel_sercom_dma_settings *settings)
 {
     ctx->fill = settings->fill;
     ctx->drain = settings->drain;

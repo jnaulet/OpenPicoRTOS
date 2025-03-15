@@ -146,7 +146,7 @@ static int set_mode(struct lin *ctx, lin_mode_t mode)
     return 0;
 }
 
-int lin_setup(struct lin *ctx, struct lin_settings *settings)
+int lin_setup(struct lin *ctx, const struct lin_settings *settings)
 {
     int res;
 

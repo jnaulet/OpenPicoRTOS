@@ -297,7 +297,7 @@ static int set_bitrate(struct can *ctx, unsigned long bitrate)
     return -EIO;
 }
 
-int can_setup(struct can *ctx, struct can_settings *settings)
+int can_setup(struct can *ctx, const struct can_settings *settings)
 {
     int res;
 

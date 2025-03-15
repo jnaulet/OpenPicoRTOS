@@ -28,7 +28,7 @@ struct spi {
 };
 
 int spi_renesas_ra4_init(/*@out@*/ struct spi *ctx, int base, clock_id_t clkid);
-int spi_renesas_ra4_setup(struct spi *ctx, struct spi_renesas_ra4_settings *settings);
+int spi_renesas_ra4_setup(struct spi *ctx, const struct spi_renesas_ra4_settings *settings);
 
 /* Runtime calls:
  * int spi_setup(struct spi *ctx, const struct spi_settings *settings);

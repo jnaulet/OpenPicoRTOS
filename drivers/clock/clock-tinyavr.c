@@ -117,7 +117,7 @@ static int setup_prescaler(clock_tinyavr_pdiv_t pdiv)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int clock_tinyavr_init(struct clock_settings *settings)
+int clock_tinyavr_init(const struct clock_settings *settings)
 {
     int res;
 

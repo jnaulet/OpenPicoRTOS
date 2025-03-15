@@ -329,7 +329,7 @@ static int setup_adc_div(unsigned long adc_div)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int clock_gd32vf103_init(struct clock_settings *settings)
+int clock_gd32vf103_init(const struct clock_settings *settings)
 {
     picoRTOS_assert(settings->ck_sys < CLOCK_GD32VF103_CK_SYS_COUNT,
                     return -EINVAL);

@@ -26,7 +26,7 @@ struct pwm_nxp_emios_settings {
 };
 
 int pwm_nxp_emios_init(/*@out@*/ struct pwm_nxp_emios *ctx, int base, clock_id_t clkid);
-int pwm_nxp_emios_setup(struct pwm_nxp_emios *ctx, struct pwm_nxp_emios_settings *settings);
+int pwm_nxp_emios_setup(struct pwm_nxp_emios *ctx, const struct pwm_nxp_emios_settings *settings);
 
 struct pwm {
     /*@temp@*/ struct pwm_nxp_emios *parent;
@@ -49,7 +49,7 @@ struct pwm_nxp_emios_pwm_settings {
 };
 
 int pwm_nxp_emios_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_nxp_emios *parent, size_t channel);
-int pwm_nxp_emios_pwm_setup(struct pwm *ctx, struct pwm_nxp_emios_pwm_settings *settings);
+int pwm_nxp_emios_pwm_setup(struct pwm *ctx, const struct pwm_nxp_emios_pwm_settings *settings);
 
 /* Runtime calls:
  * int pwm_set_period(struct pwm *ctx, pwm_period_us_t period);
@@ -89,7 +89,7 @@ struct pwm_nxp_emios_ipwm_settings {
 };
 
 int pwm_nxp_emios_ipwm_init(/*@out@*/ struct ipwm *ctx, struct pwm_nxp_emios *parent, size_t channel);
-int pwm_nxp_emios_ipwm_setup(struct ipwm *ctx, struct pwm_nxp_emios_ipwm_settings *settings);
+int pwm_nxp_emios_ipwm_setup(struct ipwm *ctx, const struct pwm_nxp_emios_ipwm_settings *settings);
 
 /* Runtime calls:
  * int ipwm_get_period(struct ipwm *ctx, pwm_period_us_t *period);

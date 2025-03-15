@@ -42,7 +42,7 @@ struct clock_settings {
     unsigned long s40_div;  /* s40 divider (1-16, 0: disable) */
 };
 
-int clock_mpc574xx_init(struct clock_settings *settings);
+int clock_mpc574xx_init(const struct clock_settings *settings);
 
 /* Peripheral Clocks */
 

@@ -23,7 +23,7 @@ struct adc_settings {
  * Returns:
  * 0 in case of success, -errno otherwise
  */
-int adc_setup(struct adc *ctx, struct adc_settings *settings);
+int adc_setup(struct adc *ctx, const struct adc_settings *settings);
 
 /* Function: adc_read
  * Reads a value from the adc

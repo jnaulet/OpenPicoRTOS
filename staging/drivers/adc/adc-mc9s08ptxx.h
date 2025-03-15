@@ -23,7 +23,7 @@ struct adc_mc9s08ptxx_settings {
 };
 
 int adc_mc9s08ptxx_init(/*@out@*/ struct adc_mc9s08ptxx *ctx, int base);
-int adc_mc9s08ptxx_setup(struct adc_mc9s08ptxx *ctx, struct adc_mc9s08ptxx_settings *settings);
+int adc_mc9s08ptxx_setup(struct adc_mc9s08ptxx *ctx, const struct adc_mc9s08ptxx_settings *settings);
 
 /* channels */
 

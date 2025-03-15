@@ -64,7 +64,7 @@ struct clock_settings {
     clock_renesas_ra4_sckdiv_t pckd;
 };
 
-int clock_renesas_ra4_init(struct clock_settings *settings);
+int clock_renesas_ra4_init(const struct clock_settings *settings);
 
 /*
  * FIXME: this is not the right place to put that, but it's more convenient

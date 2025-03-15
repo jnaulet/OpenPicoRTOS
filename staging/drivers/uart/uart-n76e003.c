@@ -176,7 +176,7 @@ int uart_n76e003_init(/*@out@*/ struct uart *ctx, uart_n76e003_t uart)
     return 0;
 }
 
-static int set_baudrate(struct uart *ctx, unsigned long baudrate)
+static int set_baudrate(const struct uart *ctx, unsigned long baudrate)
 {
     picoRTOS_assert(baudrate > 0, return -EINVAL);
 

@@ -203,7 +203,7 @@ static void set_addr(struct twi *ctx, twi_addr_t addr)
     ctx->slave_addr = addr;
 }
 
-int twi_setup(struct twi *ctx, struct twi_settings *settings)
+int twi_setup(struct twi *ctx, const struct twi_settings *settings)
 {
     int res;
 

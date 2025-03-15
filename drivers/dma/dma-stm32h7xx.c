@@ -117,7 +117,7 @@ int dma_stm32h7xx_init(struct dma *ctx, int base, size_t channel)
     return 0;
 }
 
-int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
+int dma_setup(struct dma *ctx, const struct dma_xfer *xfer)
 {
     picoRTOS_assert(xfer->incr_read <= DMA_XFER_INCREMENT_COUNT, return -EINVAL);
     picoRTOS_assert(xfer->incr_write <= DMA_XFER_INCREMENT_COUNT, return -EINVAL);
@@ -157,7 +157,7 @@ int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
     return 0;
 }
 
-int dma_xfer(struct dma *ctx, struct dma_xfer *xfer)
+int dma_xfer(struct dma *ctx, const struct dma_xfer *xfer)
 {
     return dma_setup(ctx, xfer);
 }

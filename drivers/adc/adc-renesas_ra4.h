@@ -33,7 +33,7 @@ struct adc_renesas_ra4 {
 };
 
 int adc_renesas_ra4_init(/*@out@*/ struct adc_renesas_ra4 *ctx, int base);
-int adc_renesas_ra4_setup(struct adc_renesas_ra4 *ctx, struct adc_renesas_ra4_settings *settings);
+int adc_renesas_ra4_setup(struct adc_renesas_ra4 *ctx, const struct adc_renesas_ra4_settings *settings);
 
 struct adc {
     /*@temp@*/ struct adc_renesas_ra4 *parent;
@@ -49,7 +49,7 @@ int adc_renesas_ra4_adc_init(/*@out@*/ struct adc *ctx,
                              size_t channel);
 
 /* Implements:
- * int adc_setup(struct adc *ctx, struct adc_settings *settings);
+ * int adc_setup(struct adc *ctx, const struct adc_settings *settings);
  * int adc_read(struct adc *ctx, int *data);
  * int adc_read_multiple(struct adc *ctx, int *data, size_t n);
  */

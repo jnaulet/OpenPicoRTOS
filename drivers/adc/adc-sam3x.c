@@ -103,7 +103,7 @@ int adc_sam3x_adc_init(struct adc *ctx, struct adc_sam3x *parent, size_t channel
     return 0;
 }
 
-int adc_setup(struct adc *ctx, struct adc_settings *settings)
+int adc_setup(struct adc *ctx, const struct adc_settings *settings)
 {
     ctx->multiplier = settings->multiplier;
     ctx->divider = settings->divider;

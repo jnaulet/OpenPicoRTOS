@@ -212,7 +212,7 @@ static int hoco_get_freq(/*@out@*/ unsigned long *freq)
     return 0;
 }
 
-static int setup_main_oscillator(struct clock_settings *settings)
+static int setup_main_oscillator(const struct clock_settings *settings)
 {
     picoRTOS_assert(settings->mosel < CLOCK_RENESAS_RA4_MOSEL_COUNT, return -EINVAL);
     picoRTOS_assert(settings->mosc <= 20000000ul, return -EINVAL);
@@ -251,7 +251,7 @@ static int setup_hoco(void)
     return 0;
 }
 
-static int setup_clock_source(struct clock_settings *settings)
+static int setup_clock_source(const struct clock_settings *settings)
 {
     picoRTOS_assert(settings->cksel < CLOCK_RENESAS_RA4_CKSEL_COUNT, return -EINVAL);
 
@@ -284,7 +284,7 @@ static int setup_clock_source(struct clock_settings *settings)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int clock_renesas_ra4_init(struct clock_settings *settings)
+int clock_renesas_ra4_init(const struct clock_settings *settings)
 {
     picoRTOS_assert(settings->fck < CLOCK_RENESAS_RA4_SCKDIV_COUNT, return -EINVAL);
     picoRTOS_assert(settings->ick < CLOCK_RENESAS_RA4_SCKDIV_COUNT, return -EINVAL);

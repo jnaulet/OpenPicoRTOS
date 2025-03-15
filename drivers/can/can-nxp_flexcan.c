@@ -456,7 +456,7 @@ int can_nxp_flexcan_init(struct can *ctx, int base, clock_id_t clkid,
  * Returns:
  * 0 if success, -errno otherwise
  */
-int can_nxp_flexcan_setup(struct can *ctx, struct can_nxp_flexcan_settings *settings)
+int can_nxp_flexcan_setup(struct can *ctx, const struct can_nxp_flexcan_settings *settings)
 {
     int res;
 
@@ -469,7 +469,7 @@ int can_nxp_flexcan_setup(struct can *ctx, struct can_nxp_flexcan_settings *sett
     return nxp_flexcan_unfreeze(ctx);
 }
 
-int can_setup(struct can *ctx, struct can_settings *settings)
+int can_setup(struct can *ctx, const struct can_settings *settings)
 {
     int res;
 
@@ -525,7 +525,8 @@ int can_accept(struct can *ctx, can_id_t id, can_id_t accept_mask)
     return 0;
 }
 
-static int nxp_flexcan_prepare_tx(struct can *ctx, struct CAN_NXP_FLEXCAN_MB *mb,
+static int nxp_flexcan_prepare_tx(const struct can *ctx,
+                                  struct CAN_NXP_FLEXCAN_MB *mb,
                                   can_id_t id, size_t n, uint32_t *CS)
 {
     picoRTOS_assert(id < (can_id_t)CAN_EXTID_COUNT, return -EINVAL);
@@ -618,7 +619,8 @@ int can_write(struct can *ctx, can_id_t id, const void *buf, size_t n)
     return nxp_flexcan_write_mailbox(ctx, index, id, buf, n);
 }
 
-static int mailbox_read(struct CAN_NXP_FLEXCAN_MB *mb, void *buf, size_t n)
+static int mailbox_read(const struct CAN_NXP_FLEXCAN_MB *mb,
+                        void *buf, size_t n)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
     picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT, return -EINVAL);
@@ -643,7 +645,8 @@ static int mailbox_read(struct CAN_NXP_FLEXCAN_MB *mb, void *buf, size_t n)
     return (int)n;
 }
 
-static can_id_t mailbox_read_id(struct CAN_NXP_FLEXCAN_MB *mb, uint32_t CS)
+static can_id_t mailbox_read_id(const struct CAN_NXP_FLEXCAN_MB *mb,
+                                uint32_t CS)
 {
     if ((CS & CS_IDE) != 0)
         return (can_id_t)(mb->ID & ID_IDEXT_M);
@@ -658,7 +661,7 @@ static int nxp_flexcan_read_mailbox(struct can *ctx, size_t index,
     picoRTOS_assert(n > 0, return -EINVAL);
     picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT, return -EINVAL);
 
-    struct CAN_NXP_FLEXCAN_MB *mb = &ctx->base->MB[index];
+    const struct CAN_NXP_FLEXCAN_MB *mb = &ctx->base->MB[index];
 
     /* check mb flag */
     if (!nxp_flexcan_read_mb_flag(ctx, index))

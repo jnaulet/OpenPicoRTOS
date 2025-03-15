@@ -78,7 +78,7 @@ static int set_mode(struct twi *ctx, twi_mode_t mode)
     return 0;
 }
 
-int twi_setup(struct twi *ctx, struct twi_settings *settings)
+int twi_setup(struct twi *ctx, const struct twi_settings *settings)
 {
     int res;
 

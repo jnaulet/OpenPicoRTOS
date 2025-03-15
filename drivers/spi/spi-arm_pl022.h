@@ -43,8 +43,8 @@ struct spi {
 };
 
 int spi_arm_pl022_init(/*@out@*/ struct spi *ctx, int base, clock_id_t clkid);
-int spi_arm_pl022_setup(struct spi *ctx, struct spi_arm_pl022_settings *settings);
-int spi_arm_pl022_setup_dma(struct spi *ctx, struct spi_arm_pl022_dma_settings *settings);
+int spi_arm_pl022_setup(struct spi *ctx, const struct spi_arm_pl022_settings *settings);
+int spi_arm_pl022_setup_dma(struct spi *ctx, const struct spi_arm_pl022_dma_settings *settings);
 
 /* Runtime calls:
  * int spi_setup(struct spi *ctx, const struct spi_settings *settings);

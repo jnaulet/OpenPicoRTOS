@@ -182,7 +182,7 @@ static int set_frequency(struct pwm_gd32vf103 *ctx, unsigned long frequency)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_gd32vf103_setup(struct pwm_gd32vf103 *ctx, struct pwm_gd32vf103_settings *settings)
+int pwm_gd32vf103_setup(struct pwm_gd32vf103 *ctx, const struct pwm_gd32vf103_settings *settings)
 {
     picoRTOS_assert(settings->waveform < PWM_GD32VF103_WAVEFORM_COUNT, return -EINVAL);
 
@@ -269,7 +269,7 @@ int pwm_gd32vf103_pwm_init(struct pwm *ctx, struct pwm_gd32vf103 *parent, size_t
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_gd32vf103_pwm_setup(struct pwm *ctx, struct pwm_gd32vf103_pwm_settings *settings)
+int pwm_gd32vf103_pwm_setup(struct pwm *ctx, const struct pwm_gd32vf103_pwm_settings *settings)
 {
     picoRTOS_assert(settings->mode < PWM_GD32VF103_PWM_MODE_COUNT, return -EINVAL);
 

@@ -94,7 +94,7 @@ int dma_r2040_init(struct dma *ctx, int base, size_t channel,
 
 /* hooks */
 
-int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
+int dma_setup(struct dma *ctx, const struct dma_xfer *xfer)
 {
     picoRTOS_assert(xfer->size > 0, return -EINVAL);
     picoRTOS_assert(xfer->size != (size_t)3, return -EINVAL);
@@ -121,7 +121,7 @@ int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
     return 0;
 }
 
-int dma_xfer(struct dma *ctx, struct dma_xfer *xfer)
+int dma_xfer(struct dma *ctx, const struct dma_xfer *xfer)
 {
     picoRTOS_assert(xfer->size > 0, return -EINVAL);
     picoRTOS_assert(xfer->size != (size_t)3, return -EINVAL);

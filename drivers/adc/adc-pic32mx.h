@@ -64,7 +64,7 @@ struct adc_pic32mx_settings {
 };
 
 int adc_pic32mx_init(/*@out@*/ struct adc_pic32mx *ctx, int base);
-int adc_pic32mx_setup(struct adc_pic32mx *ctx, struct adc_pic32mx_settings *settings);
+int adc_pic32mx_setup(struct adc_pic32mx *ctx, const struct adc_pic32mx_settings *settings);
 
 typedef enum {
     ADC_PIC32MX_ADC_IM_UNSIGNED_DATA_SINGLE_ENDED   = 0,
@@ -126,7 +126,7 @@ struct adc_pic32mx_adc_settings {
 };
 
 int adc_pic32mx_adc_init(/*@out@*/ struct adc *ctx, struct adc_pic32mx *parent, size_t channel);
-int adc_pic32mx_adc_setup(struct adc *ctx, struct adc_pic32mx_adc_settings *settings);
+int adc_pic32mx_adc_setup(struct adc *ctx, const struct adc_pic32mx_adc_settings *settings);
 
 /* Runtime calls:
  * int adc_setup(struct adc *ctx, struct adc_settings *settings);

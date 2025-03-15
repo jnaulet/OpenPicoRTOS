@@ -42,7 +42,7 @@ struct adc_gd32vf103_settings {
 };
 
 int adc_gd32vf103_init(/*@out@*/ struct adc_gd32vf103 *ctx, int base);
-int adc_gd32vf103_setup(struct adc_gd32vf103 *ctx, struct adc_gd32vf103_settings *settings);
+int adc_gd32vf103_setup(struct adc_gd32vf103 *ctx, const struct adc_gd32vf103_settings *settings);
 
 /* to start coninous scan. FIXME */
 int adc_gd32vf103_start(struct adc_gd32vf103 *ctx);

@@ -73,7 +73,7 @@ int adc_tinyavr_init(struct adc_tinyavr *ctx, int base, clock_id_t clkid)
  * Returns:
  * 0 in case of success, -errno otherwise
  */
-int adc_tinyavr_setup(struct adc_tinyavr *ctx, struct adc_tinyavr_settings *settings)
+int adc_tinyavr_setup(struct adc_tinyavr *ctx, const struct adc_tinyavr_settings *settings)
 {
     picoRTOS_assert(settings->ressel < ADC_TINYAVR_RESSEL_COUNT, return -EINVAL);
     picoRTOS_assert(settings->refsel < ADC_TINYAVR_REFSEL_COUNT, return -EINVAL);
@@ -140,7 +140,7 @@ int adc_tinyavr_adc_init(struct adc *ctx, struct adc_tinyavr *parent, adc_tinyav
     return 0;
 }
 
-int adc_setup(struct adc *ctx, struct adc_settings *settings)
+int adc_setup(struct adc *ctx, const struct adc_settings *settings)
 {
     ctx->multiplier = settings->multiplier;
     ctx->divider = settings->divider;

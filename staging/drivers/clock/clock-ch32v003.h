@@ -29,7 +29,7 @@ struct clock_settings {
     unsigned long hclk_div;         /* HCLK divider (1-256) */
 };
 
-int clock_ch32v003_init(struct clock_settings *settings);
+int clock_ch32v003_init(const struct clock_settings *settings);
 
 typedef enum {
     /* AHB */

@@ -34,7 +34,7 @@ struct dma_xfer {
  * Returns:
  * 0 in case of success, -errno otherwise
  */
-int dma_setup(struct dma *ctx, struct dma_xfer *xfer);
+int dma_setup(struct dma *ctx, const struct dma_xfer *xfer);
 
 /* Function: dma_xfer
  * Starts a DMA transfer
@@ -46,7 +46,7 @@ int dma_setup(struct dma *ctx, struct dma_xfer *xfer);
  * Returns:
  * 0 in case of success, -errno otherwise
  */
-int dma_xfer(struct dma *ctx, struct dma_xfer *xfer);
+int dma_xfer(struct dma *ctx, const struct dma_xfer *xfer);
 
 /* Function: dma_xfer_done
  * Polls a DMA for end of transfer

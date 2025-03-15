@@ -167,7 +167,7 @@ static int div_hclk(unsigned long hclk_div)
     return 0;
 }
 
-int clock_ch32v003_init(struct clock_settings *settings)
+int clock_ch32v003_init(const struct clock_settings *settings)
 {
     picoRTOS_assert(settings->sysclk < CLOCK_CH32V003_SYSCLK_COUNT, return -EINVAL);
     picoRTOS_assert(settings->pllsrc < CLOCK_CH32V003_PLLSRC_COUNT, return -EINVAL);

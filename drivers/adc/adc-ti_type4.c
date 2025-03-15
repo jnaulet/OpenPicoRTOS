@@ -234,7 +234,7 @@ static int set_offset_trim_otp(struct adc_ti_type4 *ctx,
  * Returns:
  * 0 if success, -errno otherwise
  */
-int adc_ti_type4_setup(struct adc_ti_type4 *ctx, struct adc_ti_type4_settings *settings)
+int adc_ti_type4_setup(struct adc_ti_type4 *ctx, const struct adc_ti_type4_settings *settings)
 {
     picoRTOS_assert(settings->resolution < ADC_TI_TYPE4_RESOLUTION_COUNT, return -EINVAL);
     picoRTOS_assert(settings->sigmode < ADC_TI_TYPE4_SIGMODE_COUNT, return -EINVAL);
@@ -342,7 +342,7 @@ int adc_ti_type4_adc_init(struct adc *ctx, struct adc_ti_type4 *parent,
  * 0 if success, -errno otherwise
  */
 int adc_ti_type4_adc_setup(struct adc *ctx,
-                           struct adc_ti_type4_adc_settings *settings)
+                           const struct adc_ti_type4_adc_settings *settings)
 {
     picoRTOS_assert(settings->trig < ADC_TI_TYPE4_TRIG_COUNT, return -EINVAL);
     picoRTOS_assert((size_t)settings->acqps >= ctx->parent->acqps_min, return -EINVAL);
@@ -375,7 +375,7 @@ static int trig_soft(struct adc *ctx)
 
 /* hooks */
 
-int adc_setup(struct adc *ctx, struct adc_settings *settings)
+int adc_setup(struct adc *ctx, const struct adc_settings *settings)
 {
     ctx->multiplier = settings->multiplier;
     ctx->divider = settings->divider;

@@ -178,7 +178,7 @@ static int configure_pll(unsigned long freq)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int clock_f28379x_init(struct clock_settings *settings)
+int clock_f28379x_init(const struct clock_settings *settings)
 {
     picoRTOS_assert(settings->clksrc < CLOCK_F28379X_CLKSRC_COUNT, return -EINVAL);
 

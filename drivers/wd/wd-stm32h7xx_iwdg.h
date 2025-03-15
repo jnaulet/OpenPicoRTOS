@@ -17,7 +17,7 @@ struct wd_stm32h7xx_iwdg_settings {
 };
 
 int wd_stm32h7xx_iwdg_init(/*@out@*/ struct wd *ctx, int base, clock_id_t clkid);
-int wd_stm32h7xx_iwdg_setup(struct wd *ctx, struct wd_stm32h7xx_iwdg_settings *settings);
+int wd_stm32h7xx_iwdg_setup(struct wd *ctx, const struct wd_stm32h7xx_iwdg_settings *settings);
 
 /* Implements:
  *

@@ -58,7 +58,7 @@ struct pwm_sam3x_tc_settings {
 };
 
 int pwm_sam3x_tc_init(/*@out@*/ struct pwm *ctx, int base, clock_id_t clkid);
-int pwm_sam3x_tc_setup(struct pwm *ctx, struct pwm_sam3x_tc_settings *settings);
+int pwm_sam3x_tc_setup(struct pwm *ctx, const struct pwm_sam3x_tc_settings *settings);
 
 /* Runtime calls:
  * int pwm_set_period(struct pwm *ctx, pwm_period_us_t period);
@@ -97,7 +97,7 @@ struct ipwm_sam3x_tc_settings {
 };
 
 int ipwm_sam3x_tc_init(/*@out@*/ struct ipwm *ctx, int base, clock_id_t clkid);
-int ipwm_sam3x_tc_setup(struct ipwm *ctx, struct ipwm_sam3x_tc_settings *settings);
+int ipwm_sam3x_tc_setup(struct ipwm *ctx, const struct ipwm_sam3x_tc_settings *settings);
 
 /* Runtime calls:
  * int ipwm_get_period(struct ipwm *ctx, pwm_period_us_t *period);

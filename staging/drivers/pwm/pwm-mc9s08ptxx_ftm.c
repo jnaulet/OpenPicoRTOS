@@ -92,7 +92,7 @@ int pwm_mc9s08ptxx_ftm_init(struct pwm_mc9s08ptxx_ftm *ctx, int base, clock_id_t
 }
 
 int pwm_mc9s08ptxx_ftm_setup(struct pwm_mc9s08ptxx_ftm *ctx,
-                             struct pwm_mc9s08ptxx_ftm_settings *settings)
+                             const struct pwm_mc9s08ptxx_ftm_settings *settings)
 {
     picoRTOS_assert(settings->cpwms < PWM_MC9S08PTXX_FTM_CPWMS_COUNT, return -EINVAL);
     picoRTOS_assert(settings->clks < PWM_MC9S08PTXX_FTM_CLKS_COUNT, return -EINVAL);
@@ -127,7 +127,7 @@ int pwm_mc9s08ptxx_ftm_pwm_init(struct pwm *ctx, struct pwm_mc9s08ptxx_ftm *pare
     return 0;
 }
 
-int pwm_mc9s08ptxx_ftm_pwm_setup(struct pwm *ctx, struct pwm_mc9s08ptxx_ftm_pwm_settings *settings)
+int pwm_mc9s08ptxx_ftm_pwm_setup(struct pwm *ctx, const struct pwm_mc9s08ptxx_ftm_pwm_settings *settings)
 {
     picoRTOS_assert(settings->mode < PWM_MC9S08PTXX_FTM_PWM_MODE_COUNT, return -EINVAL);
 

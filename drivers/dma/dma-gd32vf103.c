@@ -64,7 +64,7 @@ int dma_gd32vf103_init(struct dma *ctx, int base, size_t channel)
     return 0;
 }
 
-static int dma_prepare(struct dma *ctx, struct dma_xfer *xfer)
+static int dma_prepare(struct dma *ctx, const struct dma_xfer *xfer)
 {
     picoRTOS_assert(xfer->size > 0, return -EAGAIN);
     picoRTOS_assert(xfer->size <= sizeof(uint32_t), return -EAGAIN);
@@ -107,7 +107,7 @@ static int dma_prepare(struct dma *ctx, struct dma_xfer *xfer)
     return 0;
 }
 
-int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
+int dma_setup(struct dma *ctx, const struct dma_xfer *xfer)
 {
     int res;
 
@@ -119,7 +119,7 @@ int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
     return 0;
 }
 
-int dma_xfer(struct dma *ctx, struct dma_xfer *xfer)
+int dma_xfer(struct dma *ctx, const struct dma_xfer *xfer)
 {
     int res;
 

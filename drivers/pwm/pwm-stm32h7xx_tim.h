@@ -33,7 +33,7 @@ int pwm_stm32h7xx_tim_init(/*@out@*/ struct pwm_stm32h7xx_tim *ctx,
                            size_t channel_count);
 
 int pwm_stm32h7xx_tim_setup(struct pwm_stm32h7xx_tim *ctx,
-                            struct pwm_stm32h7xx_tim_settings *settings);
+                            const struct pwm_stm32h7xx_tim_settings *settings);
 
 /* PWM */
 
@@ -61,7 +61,7 @@ int pwm_stm32h7xx_tim_pwm_init(/*@out@*/ struct pwm *ctx,
                                struct pwm_stm32h7xx_tim *parent,
                                size_t channel);
 
-int pwm_stm32h7xx_tim_pwm_setup(struct pwm *ctx, struct pwm_stm32h7xx_tim_pwm_settings *settings);
+int pwm_stm32h7xx_tim_pwm_setup(struct pwm *ctx, const struct pwm_stm32h7xx_tim_pwm_settings *settings);
 
 /* Implements:
  * int pwm_set_period(struct pwm *ctx, pwm_period_us_t period);

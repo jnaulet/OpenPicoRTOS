@@ -16,7 +16,7 @@ struct clock_settings {
     clock_cy7c6801xa_clkspd_t clkspd;
 };
 
-int clock_cy7c6801xa_init(struct clock_settings *settings);
+int clock_cy7c6801xa_init(const struct clock_settings *settings);
 
 /* Implements:
  *

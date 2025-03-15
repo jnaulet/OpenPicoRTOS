@@ -131,7 +131,7 @@ static uint32_t nxp_edma_data_size(size_t size)
     return (uint32_t)0;
 }
 
-static int setup_tcd_attr(struct dma *ctx, struct dma_xfer *xfer)
+static int setup_tcd_attr(struct dma *ctx, const struct dma_xfer *xfer)
 {
     picoRTOS_assert(xfer->size <= sizeof(uint64_t), return -EINVAL);
 
@@ -143,7 +143,7 @@ static int setup_tcd_attr(struct dma *ctx, struct dma_xfer *xfer)
     return 0;
 }
 
-static int setup_tcd(struct dma *ctx, struct dma_xfer *xfer)
+static int setup_tcd(struct dma *ctx, const struct dma_xfer *xfer)
 {
     int res;
     struct DMA_NXP_EDMA *base = ctx->parent->base;
@@ -182,7 +182,7 @@ static int setup_tcd(struct dma *ctx, struct dma_xfer *xfer)
 
 /* hooks */
 
-int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
+int dma_setup(struct dma *ctx, const struct dma_xfer *xfer)
 {
     int res;
     struct DMA_NXP_EDMA *base = ctx->parent->base;
@@ -196,7 +196,7 @@ int dma_setup(struct dma *ctx, struct dma_xfer *xfer)
     return 0;
 }
 
-int dma_xfer(struct dma *ctx, struct dma_xfer *xfer)
+int dma_xfer(struct dma *ctx, const struct dma_xfer *xfer)
 {
     int res;
     struct DMA_NXP_EDMA *base = ctx->parent->base;

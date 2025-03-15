@@ -95,7 +95,7 @@ struct PWM_SAME5X_TC {
 #define SYNCBUSY_ENABLE (1 << 1)
 #define SYNCBUSY_SWRST  (1 << 0)
 
-static int sync_busywait(struct pwm_same5x_tc *ctx, uint32_t mask)
+static int sync_busywait(const struct pwm_same5x_tc *ctx, uint32_t mask)
 {
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
@@ -164,7 +164,7 @@ static int set_prescaler(struct pwm_same5x_tc *ctx, pwm_same5x_tc_prescaler_t pr
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_same5x_tc_setup(struct pwm_same5x_tc *ctx, struct pwm_same5x_tc_settings *settings)
+int pwm_same5x_tc_setup(struct pwm_same5x_tc *ctx, const struct pwm_same5x_tc_settings *settings)
 {
     picoRTOS_assert(settings->mode < PWM_SAME5X_TC_MODE_COUNT, return -EINVAL);
     picoRTOS_assert(settings->wavegen < PWM_SAME5X_TC_WAVEGEN_COUNT, return -EINVAL);
@@ -232,7 +232,7 @@ int pwm_same5x_tc_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_same5x_tc *pare
  * Returns:
  * 0 if success, -errno otherwise
  */
-int pwm_same5x_tc_pwm_setup(struct pwm *ctx, struct pwm_same5x_tc_pwm_settings *settings)
+int pwm_same5x_tc_pwm_setup(struct pwm *ctx, const struct pwm_same5x_tc_pwm_settings *settings)
 {
     return set_invert(ctx->parent, ctx->channel, settings->invert);
 }
@@ -335,7 +335,7 @@ int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle)
     return -EIO;
 }
 
-static int cmd_read_back_as_zero(struct pwm_same5x_tc *ctx)
+static int cmd_read_back_as_zero(const struct pwm_same5x_tc *ctx)
 {
     int deadlock = CONFIG_DEADLOCK_COUNT;
 

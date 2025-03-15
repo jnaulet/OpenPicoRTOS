@@ -36,7 +36,7 @@ struct spi {
 };
 
 int spi_atmel_sercom_init(/*@out@*/ struct spi *ctx, int base, clock_id_t clkid);
-int spi_atmel_sercom_setup_dma(struct spi *ctx, struct spi_atmel_sercom_dma_settings *settings);
+int spi_atmel_sercom_setup_dma(struct spi *ctx, const struct spi_atmel_sercom_dma_settings *settings);
 
 /* Runtime calls:
  * int spi_setup(struct spi *ctx, const struct spi_settings *settings);

@@ -19,7 +19,7 @@ struct dmasg {
 };
 
 int dmasg_nxp_edma_dmasg_init(struct dmasg *ctx, struct dmasg_nxp_edma *parent, size_t channel);
-int dmasg_nxp_edma_dmasg_setup(struct dmasg *ctx, struct dmasg_xfer *xfer);
+int dmasg_nxp_edma_dmasg_setup(struct dmasg *ctx, const struct dmasg_xfer *xfer);
 
 /* Runtime calls:
  * int dmasg_xfer(struct dmasg *ctx, struct dmasg_xfer *xfer);

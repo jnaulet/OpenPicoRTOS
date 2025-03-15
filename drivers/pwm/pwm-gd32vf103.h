@@ -29,7 +29,7 @@ struct pwm_gd32vf103_settings {
 };
 
 int pwm_gd32vf103_init(/*@out@*/ struct pwm_gd32vf103 *ctx, int base, clock_id_t clkid);
-int pwm_gd32vf103_setup(struct pwm_gd32vf103 *ctx, struct pwm_gd32vf103_settings *settings);
+int pwm_gd32vf103_setup(struct pwm_gd32vf103 *ctx, const struct pwm_gd32vf103_settings *settings);
 
 /* channels */
 
@@ -50,7 +50,7 @@ struct pwm_gd32vf103_pwm_settings {
 };
 
 int pwm_gd32vf103_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_gd32vf103 *parent, size_t channel);
-int pwm_gd32vf103_pwm_setup(struct pwm *ctx, struct pwm_gd32vf103_pwm_settings *settings);
+int pwm_gd32vf103_pwm_setup(struct pwm *ctx, const struct pwm_gd32vf103_pwm_settings *settings);
 
 /* Implements:
  * int pwm_set_period(struct pwm *ctx, pwm_period_us_t period);

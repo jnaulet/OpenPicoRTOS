@@ -135,7 +135,7 @@ static int set_mode(struct twi *ctx, twi_mode_t mode)
     return 0;
 }
 
-int twi_setup(struct twi *ctx, struct twi_settings *settings)
+int twi_setup(struct twi *ctx, const struct twi_settings *settings)
 {
     int res = 0;
 
@@ -334,7 +334,7 @@ static int twi_read_as_master_sla(struct twi *ctx, size_t n)
     return -EAGAIN;
 }
 
-static int twi_read_as_master_data(struct twi *ctx, const void *buf, size_t n)
+static int twi_read_as_master_data(struct twi *ctx, void *buf, size_t n)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
 

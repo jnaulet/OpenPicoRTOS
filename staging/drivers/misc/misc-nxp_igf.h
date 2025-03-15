@@ -19,6 +19,6 @@ struct nxp_igf_settings {
 };
 
 int nxp_igf_init(struct nxp_igf *ctx, int base, size_t channel);
-int nxp_igf_setup(struct nxp_igf *ctx, struct nxp_igf_settings *settings);
+int nxp_igf_setup(struct nxp_igf *ctx, const struct nxp_igf_settings *settings);
 
 #endif

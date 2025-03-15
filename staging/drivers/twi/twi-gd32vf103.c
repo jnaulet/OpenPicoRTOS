@@ -132,7 +132,7 @@ static int set_mode(struct twi *ctx, twi_mode_t mode)
     return 0;
 }
 
-int twi_setup(struct twi *ctx, struct twi_settings *settings)
+int twi_setup(struct twi *ctx, const struct twi_settings *settings)
 {
     picoRTOS_assert(settings->mode < TWI_MODE_COUNT, return -EINVAL);
     picoRTOS_assert(settings->slave_addr < (twi_addr_t)TWI_ADDR_COUNT, return -EINVAL);

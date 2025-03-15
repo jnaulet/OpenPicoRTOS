@@ -37,7 +37,7 @@ struct pwm_mc9s08ptxx_ftm_settings {
 };
 
 int pwm_mc9s08ptxx_ftm_init(/*@out@*/ struct pwm_mc9s08ptxx_ftm *ctx, int base, clock_id_t clkid);
-int pwm_mc9s08ptxx_ftm_setup(struct pwm_mc9s08ptxx_ftm *ctx, struct pwm_mc9s08ptxx_ftm_settings *settings);
+int pwm_mc9s08ptxx_ftm_setup(struct pwm_mc9s08ptxx_ftm *ctx, const struct pwm_mc9s08ptxx_ftm_settings *settings);
 
 struct pwm {
     /*@temp@*/ struct pwm_mc9s08ptxx_ftm *parent;
@@ -56,7 +56,7 @@ struct pwm_mc9s08ptxx_ftm_pwm_settings {
 };
 
 int pwm_mc9s08ptxx_ftm_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_mc9s08ptxx_ftm *parent, size_t channel);
-int pwm_mc9s08ptxx_ftm_pwm_setup(struct pwm *ctx, struct pwm_mc9s08ptxx_ftm_pwm_settings *settings);
+int pwm_mc9s08ptxx_ftm_pwm_setup(struct pwm *ctx, const struct pwm_mc9s08ptxx_ftm_pwm_settings *settings);
 
 /* Runtime calls:
  * int pwm_set_period(struct pwm *ctx, pwm_period_us_t period);

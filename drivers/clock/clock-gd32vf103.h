@@ -35,7 +35,7 @@ struct clock_settings {
     unsigned long adc_div;
 };
 
-int clock_gd32vf103_init(struct clock_settings *settings);
+int clock_gd32vf103_init(const struct clock_settings *settings);
 
 typedef enum {
     /* AHB */

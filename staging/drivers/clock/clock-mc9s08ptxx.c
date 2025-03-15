@@ -86,7 +86,7 @@ static int setup_sctrim(unsigned freq)
     return 0;
 }
 
-static int fei(struct clock_settings *settings)
+static int fei(const struct clock_settings *settings)
 {
 #define DIV512(x) ((x) >> 9)
 
@@ -111,7 +111,7 @@ static int fei(struct clock_settings *settings)
     return 0;
 }
 
-static int fbi(struct clock_settings *settings)
+static int fbi(const struct clock_settings *settings)
 {
     int res;
     volatile uint8_t ICS_C1 = ICS->ICS_C1;
@@ -145,7 +145,7 @@ static int oscinit_busywait(void)
     return 0;
 }
 
-static int fee(struct clock_settings *settings)
+static int fee(const struct clock_settings *settings)
 {
     /* only high frequency range */
     picoRTOS_assert(settings->xosc >= 4000000ul, return -EINVAL);
@@ -186,7 +186,7 @@ static int fee(struct clock_settings *settings)
     /*@notreached@*/ return -EIO;
 }
 
-static int fbe(struct clock_settings *settings)
+static int fbe(const struct clock_settings *settings)
 {
     volatile uint8_t ICS_C1 = ICS->ICS_C1;
 
@@ -203,7 +203,7 @@ static int fbe(struct clock_settings *settings)
     return 0;
 }
 
-int clock_mc9s08ptxx_init(struct clock_settings *settings)
+int clock_mc9s08ptxx_init(const struct clock_settings *settings)
 {
     picoRTOS_assert(settings->mode < CLOCK_MC9S08PTXX_MODE_COUNT, return -EINVAL);
 

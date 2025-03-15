@@ -35,7 +35,7 @@ struct WD_SAME5X {
 #define SYNCBUSY_WEN      (1 << 2)
 #define SYNCBUSY_ENABLE   (1 << 1)
 
-static int sync_busywait(struct wd *ctx, uint32_t mask)
+static int sync_busywait(const struct wd *ctx, uint32_t mask)
 {
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
@@ -75,7 +75,7 @@ int wd_same5x_init(struct wd *ctx, int base)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int wd_same5x_setup(struct wd *ctx, struct wd_same5x_settings *settings)
+int wd_same5x_setup(struct wd *ctx, const struct wd_same5x_settings *settings)
 {
     picoRTOS_assert(settings->period < WD_SAME5X_PERIOD_COUNT, return -EINVAL);
 

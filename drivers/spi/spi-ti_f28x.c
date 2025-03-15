@@ -143,7 +143,7 @@ static int set_loopback(struct spi *ctx, bool loopback)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int spi_ti_f28x_setup(struct spi *ctx, struct spi_ti_f28x_settings *settings)
+int spi_ti_f28x_setup(struct spi *ctx, const struct spi_ti_f28x_settings *settings)
 {
     return set_loopback(ctx, settings->loopback);
 }
@@ -158,7 +158,7 @@ int spi_ti_f28x_setup(struct spi *ctx, struct spi_ti_f28x_settings *settings)
  * Returns:
  * Always 0
  */
-int spi_ti_f28x_setup_dma(struct spi *ctx, struct spi_ti_f28x_dma_settings *settings)
+int spi_ti_f28x_setup_dma(struct spi *ctx, const struct spi_ti_f28x_dma_settings *settings)
 {
     ctx->fill = settings->fill;
     ctx->drain = settings->drain;

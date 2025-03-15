@@ -358,7 +358,7 @@ static int set_opmod_busywait(struct can *ctx, uint32_t op)
     return 0;
 }
 
-int can_setup(struct can *ctx, struct can_settings *settings)
+int can_setup(struct can *ctx, const struct can_settings *settings)
 {
     picoRTOS_assert(settings->tx_auto_abort < CAN_TX_AUTO_ABORT_COUNT, return -EINVAL);
     picoRTOS_assert(settings->rx_overwrite < CAN_RX_OVERWRITE_COUNT, return -EINVAL);

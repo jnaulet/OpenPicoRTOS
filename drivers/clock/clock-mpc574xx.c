@@ -278,7 +278,7 @@ static int setup_fmpll_phi0(unsigned long freq)
     return -EIO;
 }
 
-static int switch_to_fmpll_phi0(struct clock_settings *settings)
+static int switch_to_fmpll_phi0(const struct clock_settings *settings)
 {
     int res;
 
@@ -331,7 +331,7 @@ static int switch_to_fxosc(unsigned long fxosc)
     return drun_mode_busywait();
 }
 
-static int set_scalable_dividers(struct clock_settings *settings)
+static int set_scalable_dividers(const struct clock_settings *settings)
 {
     picoRTOS_assert(settings->s160_div <= 8ul, return -EINVAL);
     picoRTOS_assert(settings->s80_div <= 8ul, return -EINVAL);
@@ -362,7 +362,7 @@ static int set_scalable_dividers(struct clock_settings *settings)
  * Returns:
  * 0 if success, <0 error code otherwise
  */
-int clock_mpc574xx_init(struct clock_settings *settings)
+int clock_mpc574xx_init(const struct clock_settings *settings)
 {
     int res;
 

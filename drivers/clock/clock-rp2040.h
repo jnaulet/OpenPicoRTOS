@@ -26,7 +26,7 @@ struct clock_settings {
     unsigned long clk_gpout3_div;   /* ! */
 };
 
-int clock_rp2040_init(struct clock_settings *settings);
+int clock_rp2040_init(const struct clock_settings *settings);
 
 int clock_rp2040_enable(clock_id_t clkid);
 int clock_rp2040_disable(clock_id_t clkid);

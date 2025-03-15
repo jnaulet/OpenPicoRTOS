@@ -35,7 +35,7 @@ struct wd_tinyavr_settings {
 };
 
 int wd_tinyavr_init(/*@out@*/ struct wd *ctx, int base);
-int wd_tinyavr_setup(struct wd *ctx, struct wd_tinyavr_settings *settings);
+int wd_tinyavr_setup(struct wd *ctx, const struct wd_tinyavr_settings *settings);
 
 /* Runtime calls:
  * int wd_start(struct wd *ctx);

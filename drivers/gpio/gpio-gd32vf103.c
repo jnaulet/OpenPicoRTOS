@@ -44,7 +44,7 @@ static int set_invert(struct gpio *ctx, gpio_invert_t invert)
     return 0;
 }
 
-int gpio_setup(struct gpio *ctx, struct gpio_settings *settings)
+int gpio_setup(struct gpio *ctx, const struct gpio_settings *settings)
 {
     int res;
 

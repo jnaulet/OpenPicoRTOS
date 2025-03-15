@@ -113,7 +113,7 @@ static int set_loopback(struct spi *ctx, bool loopback)
     return 0;
 }
 
-int spi_renesas_ra4_setup(struct spi *ctx, struct spi_renesas_ra4_settings *settings)
+int spi_renesas_ra4_setup(struct spi *ctx, const struct spi_renesas_ra4_settings *settings)
 {
     return set_loopback(ctx, settings->loopback);
 }
