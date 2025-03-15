@@ -56,13 +56,13 @@ Group: hw-specific  {
       Group: Spi  {
 
          File: SPI  (no auto-title, drivers/spi/spi-avr.c)
+         File: SPI &lparen;IRQ-driven&rparen;  (no auto-title, drivers/spi/spi-avr_irqdriven.c)
          File: SPI / USART  (no auto-title, drivers/spi/spi-avr_usart.c)
-         File: SPI &lparen;IRQ-driven&rparen;  (no auto-title, drivers/spi/spi-avr+irqdriven.c)
          }  # Group: Spi
 
       File: TWI  (no auto-title, drivers/twi/twi-avr.c)
       File: UART  (no auto-title, drivers/uart/uart-avr.c)
-      File: UART &lparen;IRQ-driven&rparen;  (no auto-title, drivers/uart/uart-avr+irqdriven.c)
+      File: UART &lparen;IRQ-driven&rparen;  (no auto-title, drivers/uart/uart-avr_irqdriven.c)
       File: Watchdog  (no auto-title, drivers/wd/wd-avr.c)
       }  # Group: ATMega / AVR
 
@@ -252,8 +252,9 @@ Group: picoRTOS-Runtime-HAL  {
    File: Flash  (no auto-title, drivers/include/flash.h)
    File: GPIO  (no auto-title, drivers/include/gpio.h)
    File: IPWM  (no auto-title, drivers/include/ipwm.h)
-   File: lin.h  (drivers/include/lin.h)
+   File: LIN  (no auto-title, drivers/include/lin.h)
    File: PWM  (no auto-title, drivers/include/pwm.h)
+   File: RNG  (no auto-title, drivers/include/rng.h)
    File: SPI  (no auto-title, drivers/include/spi.h)
    File: TWI  (no auto-title, drivers/include/twi.h)
    File: UART  (no auto-title, drivers/include/uart.h)
