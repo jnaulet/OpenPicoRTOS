@@ -45,7 +45,7 @@ More information here: https://github.com/jnaulet/OpenPicoRTOS/blob/main/etc/Req
 ### Step1: Preparation of your project
 
 To create a project compatible with OpenPicoRTOS you first need to add a specific kind of Makefile to your project.   
-You can find a very basic template here: https://github.com/jnaulet/OpenPicoRTOS/blob/v1.9.x/etc/Makefile.template
+You can find a very basic template here: https://github.com/jnaulet/OpenPicoRTOS/blob/v1.9.x/samples/Makefile.template
 
 ### Step2: configuration of your project
 

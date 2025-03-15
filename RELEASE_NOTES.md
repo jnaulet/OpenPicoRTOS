@@ -1,5 +1,20 @@
 # Release notes
 
+## picoRTOS v1.9.10
+### What"s new ?
+
+This is a very minor update, we just fixed NXP's FlexCAN driver & added a new
+Random Number Generator runtime API.
+
+As static analysis evolves (especially cppcheck), what was acceptable isn't
+anymore, so a lot of 'const' keywords had to be put everywhere to make things
+more compliant.
+Not everything can be fixed in that regard, as APIs might be used differently
+in different drivers, leading to style warnings.
+
+This release will be the last of the v1.9.x series, as the system will
+(lightly) evolve in v1.10.x to add FIFO scheduling options.
+
 ## picoRTOS v1.9.9
 ### What's new ?
 
