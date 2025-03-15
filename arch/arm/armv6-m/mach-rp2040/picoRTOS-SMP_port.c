@@ -33,6 +33,7 @@
 /*@external@*/ extern void arch_start_first_task(picoRTOS_stack_t *sp);
 
 /*@external@*/ extern picoRTOS_stack_t __Stack1Top[];
+/*@external@*/ extern picoRTOS_stack_t __Stack1Bottom[];
 
 /* CLOCK */
 static unsigned long systick_rvr;
@@ -128,8 +129,10 @@ void arch_core_init(picoRTOS_core_t core,
     /* setup core1 init protection */
     arch_spin_lock();
 
-    /* prepare core1 stack */
-    stack = (picoRTOS_stack_t*)__Stack1Top - 1;
+    /* prepare core1 stack.
+     * this complex computation is to avoid compiler warnings
+     */
+    stack = (picoRTOS_stack_t*)__Stack1Bottom + ((__Stack1Top - __Stack1Bottom) >> 2) - 1;
     *stack = (picoRTOS_stack_t)sp;
 
     /* send sequence */
