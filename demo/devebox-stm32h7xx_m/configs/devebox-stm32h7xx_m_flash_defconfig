@@ -2,12 +2,18 @@
 # Automatically generated make config: don't edit
 # OpenPicoRTOS v1.9.x Configuration
 #
+# CONFIG_8051 is not set
 CONFIG_ARM=y
 # CONFIG_AVR is not set
 # CONFIG_C2000 is not set
+# CONFIG_HCS08 is not set
 # CONFIG_MIPS is not set
-# CONFIG_PPC is not set
+# CONFIG_POWERPC is not set
 # CONFIG_RISCV is not set
+# CONFIG_STM8 is not set
+# CONFIG_PTHREAD is not set
+# CONFIG_WIN32 is not set
+CONFIG_CC="gcc"
 
 #
 # ARM architecture
@@ -15,13 +21,16 @@ CONFIG_ARM=y
 # CONFIG_ARMV6M is not set
 # CONFIG_ARMV7M is not set
 CONFIG_ARMV7EM=y
-# CONFIG_MACH_RP2040 is not set
 # CONFIG_MACH_ATSAME5X is not set
 CONFIG_MACH_STM32H7XX=y
+# CONFIG_MACH_RENESAS_RA4 is not set
+# CONFIG_MACH_STM32F401X is not set
+# CONFIG_MACH_STM32L4X is not set
 # CONFIG_FPV4_SP_D16 is not set
 CONFIG_FPV5_SP_D16=y
 CONFIG_L1_CACHE_LINESIZE=32
 CONFIG_CACHE_MAINTENANCE=y
+CONFIG_STUB_NEWLIB_4_4_0=y
 
 #
 # Scheduler options
@@ -32,9 +41,8 @@ CONFIG_SINGLE_CORE=y
 #
 # General setup
 #
-CONFIG_SYSCLK_HZ=200000000
 CONFIG_TICK_HZ=1000
-CONFIG_TASK_COUNT=6
+CONFIG_TASK_COUNT=7
 CONFIG_DEFAULT_STACK_COUNT=128
 CONFIG_DEADLOCK_COUNT=1000
 
@@ -72,11 +80,14 @@ CONFIG_COND=y
 # CONFIG_ADC_RP2040 is not set
 # CONFIG_ADC_SAM3X is not set
 # CONFIG_ADC_SAME5X is not set
+# CONFIG_ADC_RENESAS_RA4 is not set
 
 #
 # CAN drivers
 #
 # CONFIG_CAN_TI_DCAN is not set
+# CONFIG_CAN_ATSAM3X is not set
+# CONFIG_CAN_NXP_FLEXCAN is not set
 
 #
 # Clock drivers
@@ -85,6 +96,7 @@ CONFIG_COND=y
 # CONFIG_CLOCK_ATSAM3X is not set
 # CONFIG_CLOCK_ATSAME5X is not set
 CONFIG_CLOCK_STM32H7XX=y
+# CONFIG_CLOCK_RENESAS_RA4 is not set
 
 #
 # DMA drivers
@@ -109,6 +121,7 @@ CONFIG_DMA_STM32H7XX=y
 # CONFIG_GPIO_ATSAM3X is not set
 # CONFIG_GPIO_ATSAME5X is not set
 CONFIG_GPIO_STM32H7XX=y
+# CONFIG_GPIO_RENESAS_RA4 is not set
 
 #
 # Misc. drivers
@@ -123,6 +136,7 @@ CONFIG_MISC_STM32H7XX_DMAMUX=y
 # CONFIG_MUX_ATSAM3X is not set
 # CONFIG_MUX_ATSAME5X is not set
 CONFIG_MUX_STM32H7XX=y
+# CONFIG_MUX_RENESAS_RA4 is not set
 
 #
 # PWM drivers
@@ -132,6 +146,12 @@ CONFIG_MUX_STM32H7XX=y
 # CONFIG_PWM_ATSAM3X_TC is not set
 # CONFIG_PWM_ATSAME5X is not set
 CONFIG_PWM_STM32H7XX=y
+# CONFIG_PWM_RENESAS_RA4_GPT is not set
+
+#
+# RNG drivers
+#
+# CONFIG_RNG_XORSHIFT32 is not set
 
 #
 # SPI drivers
@@ -140,6 +160,7 @@ CONFIG_PWM_STM32H7XX=y
 # CONFIG_SPI_ATMEL_SERCOM is not set
 # CONFIG_SPI_ATSAM3X is not set
 CONFIG_SPI_STM32H7XX=y
+# CONFIG_SPI_RENESAS_RA4 is not set
 
 #
 # TWI/I2C drivers
@@ -155,6 +176,7 @@ CONFIG_SPI_STM32H7XX=y
 # CONFIG_UART_ATMEL_SERCOM is not set
 # CONFIG_UART_ATSAM3X is not set
 CONFIG_UART_STM32H7XX=y
+# CONFIG_UART_RENESAS_RA4_SCI is not set
 
 #
 # Watchdog drivers
@@ -163,4 +185,85 @@ CONFIG_UART_STM32H7XX=y
 # CONFIG_WD_ATSAM3X is not set
 # CONFIG_WD_ATSAME5X is not set
 CONFIG_WD_STM32H7XX_IWDG=y
-# CONFIG_STAGING is not set
+CONFIG_STAGING=y
+
+#
+# Staging tree
+#
+
+#
+# ADC drivers
+#
+CONFIG_ADC_STM32H7XX_SAR=y
+
+#
+# CAN drivers
+#
+# CONFIG_CAN_ATSAME5X is not set
+CONFIG_CAN_STM32H7XX_FDCAN=y
+
+#
+# Clock drivers
+#
+# CONFIG_CLOCK_STM32F10XXX is not set
+# CONFIG_CLOCK_STM32F401X is not set
+# CONFIG_CLOCK_STM32L4X is not set
+
+#
+# DMA drivers
+#
+
+#
+# DMA-SG drivers
+#
+
+#
+# FLash drivers
+#
+# CONFIG_FLASH_ATSAM3X is not set
+
+#
+# GPIO drivers
+#
+# CONFIG_GPIO_STM32F10XXX is not set
+
+#
+# LIN drivers
+#
+
+#
+# Misc. drivers
+#
+
+#
+# MUX drivers
+#
+# CONFIG_MUX_STM32F10XXX is not set
+
+#
+# PWM drivers
+#
+
+#
+# RNG drivers
+#
+CONFIG_RNG_STM32H7XX_TRNG=y
+
+#
+# SPI drivers
+#
+
+#
+# TWI drivers
+#
+# CONFIG_TWI_STM32H7XX is not set
+# CONFIG_TWI_RENESAS_RA4 is not set
+
+#
+# UART drivers
+#
+
+#
+# Watchdog drivers
+#
+# CONFIG_WD_RENESAS_RA4_WDT is not set

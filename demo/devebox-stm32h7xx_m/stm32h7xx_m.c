@@ -4,6 +4,8 @@
 
 #include "clock-stm32h7xx.h"
 #include "mux-stm32h7xx.h"
+#include "misc-stm32h7xx_dmamux.h"
+#include "dma-stm32h7xx.h"
 
 static void clock_init(void)
 {
@@ -21,8 +23,8 @@ static void clock_init(void)
                 0               /* pll1_r */
             },
             {
-                0,      /* pll2 vco */
-                0,      /* pll2_p */
+                72000000ul,      /* pll2 vco */
+                2ul,      /* pll2_p */
                 0,      /* pll2_q */
                 0       /* pll2_r */
             },
@@ -55,6 +57,21 @@ static void clock_init(void)
 
     /* tim */
     (void)clock_stm32h7xx_enable(CLOCK_STM32H7XX_APB1L_TIM2);
+
+    /* can */
+    (void)clock_stm32h7xx_enable(CLOCK_STM32H7XX_APB1H_FDCAN);
+    (void)clock_stm32h7xx_ker_sel(CLOCK_STM32H7XX_KER_FDCANSEL, 0u); /* hse_ck */
+
+    /* rng */
+    (void)clock_stm32h7xx_enable(CLOCK_STM32H7XX_AHB2_RNG);
+    (void)clock_stm32h7xx_ker_sel(CLOCK_STM32H7XX_KER_RNGSEL, 1u); /* pll1_q_ck */
+
+    /* adc */
+    (void)clock_stm32h7xx_enable(CLOCK_STM32H7XX_AHB4_ADC3);
+    (void)clock_stm32h7xx_ker_sel(CLOCK_STM32H7XX_KER_ADCSEL, 0u); /* pll2_q_clk */
+
+    /* dma */
+    (void)clock_stm32h7xx_enable(CLOCK_STM32H7XX_AHB1_DMA1);
 }
 
 static void mux_init(void)
@@ -76,6 +93,9 @@ static void mux_init(void)
 
     (void)mux_stm32h7xx_alt(&PORTB, (size_t)8, (size_t)8);  /* UART4_RX */
     (void)mux_stm32h7xx_alt(&PORTB, (size_t)9, (size_t)8);  /* UART4_TX */
+
+    (void)mux_stm32h7xx_alt(&PORTA, (size_t)11, (size_t)9); /* FDCAN1_RX */
+    (void)mux_stm32h7xx_alt(&PORTA, (size_t)12, (size_t)9); /* FDCAN1_TX */
 }
 
 static void gpio_init(/*@partial@*/ struct stm32h7xx_m *ctx)
@@ -131,6 +151,59 @@ static void pwm_init(/*@partial@*/ struct stm32h7xx_m *ctx)
     (void)pwm_stm32h7xx_tim_pwm_setup(&ctx->LED, &TIM2_CH2_settings);
 }
 
+static void can_init(/*@partial@*/ struct stm32h7xx_m *ctx)
+{
+    struct can_settings CAN_settings = {
+        125000ul,   /* bitrate */
+        (size_t)32, /* tx_mailbox_count */
+        CAN_TX_AUTO_ABORT_OFF,
+        CAN_RX_OVERWRITE_ON,
+        CAN_LOOPBACK_ON
+    };
+
+    (void)can_stm32h7xx_fdcan_init(&ctx->can.CAN, ADDR_FDCAN1,
+                                   CLOCK_STM32H7XX_HSE_CK,
+                                   (uint32_t)0, (size_t)896);
+
+    (void)can_setup(&ctx->can.CAN, &CAN_settings);
+}
+
+static void rng_init(/*@partial@*/ struct stm32h7xx_m *ctx)
+{
+    (void)rng_stm32h7xx_trng_init(&ctx->can.TRNG, ADDR_RNG, CLOCK_STM32H7XX_PLL1_Q_CK);
+}
+
+static void adc_init(/*@partial@*/ struct stm32h7xx_m *ctx)
+{
+    static struct adc_stm32h7xx_sar ADC3;
+    static struct dmamux DMAMUX1_0;
+
+    /* ADC & DMA */
+    (void)adc_stm32h7xx_sar_init(&ADC3, ADDR_ADC3, ADC_STM32H7XX_SAR_MASTER);
+    (void)dmamux_stm32h7xx_init(&DMAMUX1_0, ADDR_DMAMUX1, (size_t)0);
+    (void)dmamux_stm32h7xx_set_dmareq_id(&DMAMUX1_0, 115ul); /* adc3_dma */
+
+    static struct dma DMA_ADC3;
+    struct dma *DMA_ADC3_runtime = &DMA_ADC3;
+
+    (void)dma_stm32h7xx_init(&DMA_ADC3, ADDR_DMA1, (size_t)0);
+
+    /* plug everything in */
+    struct adc_stm32h7xx_sar_settings ADC_settings = {
+        true, /* tsen */
+        ADC_STM32H7XX_SAR_PRESC_DIV1,
+        ADC_STM32H7XX_SAR_CKMODE_CK_ADCX,
+        ADC_STM32H7XX_SAR_CONT_SINGLE,
+        DMA_ADC3_runtime
+    };
+
+    static struct adc TEMP_DUP;
+
+    (void)adc_stm32h7xx_sar_setup(&ADC3, &ADC_settings);
+    (void)adc_stm32h7xx_sar_adc_init(&ctx->TEMP, &ADC3, (size_t)17);
+    (void)adc_stm32h7xx_sar_adc_init(&TEMP_DUP, &ADC3, (size_t)17);
+}
+
 int stm32h7xx_m_init(struct stm32h7xx_m *ctx)
 {
     clock_init();
@@ -140,6 +213,9 @@ int stm32h7xx_m_init(struct stm32h7xx_m *ctx)
     spi_init(ctx);
     uart_init(ctx);
     pwm_init(ctx);
+    can_init(ctx);
+    rng_init(ctx);
+    adc_init(ctx);
 
     return 0;
 }

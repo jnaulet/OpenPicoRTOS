@@ -24,6 +24,9 @@ all: $(TARGETS)
 %:
 	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) $@
 
+current-config: FORCE
+	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) TARGET=devebox-stm32h7xx_m.elf
+
 PHONY += FORCE
 FORCE:
 
