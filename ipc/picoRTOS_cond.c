@@ -86,6 +86,7 @@ void picoRTOS_cond_wait(struct picoRTOS_cond *cond, struct picoRTOS_mutex *mutex
 
     /* we already own the mutex */
     cond->count++;
+    picoRTOS_flush_dcache(cond, sizeof(*cond));
 
     for (;;) {
         picoRTOS_invalidate_dcache(cond, sizeof(*cond));
