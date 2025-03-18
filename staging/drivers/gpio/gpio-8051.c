@@ -70,6 +70,7 @@ int gpio_setup(struct gpio *ctx, const struct gpio_settings *settings)
     return 0;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 void gpio_write(struct gpio *ctx, bool value)
 {
     switch (ctx->port) {
@@ -111,6 +112,7 @@ void gpio_write(struct gpio *ctx, bool value)
     }
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 bool gpio_read(struct gpio *ctx)
 {
     switch (ctx->port) {
@@ -132,6 +134,7 @@ bool gpio_read(struct gpio *ctx)
     return false;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 void gpio_toggle(struct gpio *ctx)
 {
     switch (ctx->port) {

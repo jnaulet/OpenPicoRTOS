@@ -568,6 +568,7 @@ static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
     /*@notreached@*/ return -EIO;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 int twi_poll(struct twi *ctx)
 {
     if ((ctx->base->ICSR1 & ICSR1_AAS0) != 0) {

@@ -236,6 +236,7 @@ static int set_baudrate(const struct uart *ctx, unsigned long baudrate)
     return 0;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 int uart_setup(struct uart *ctx, const struct uart_settings *settings)
 {
     int res;

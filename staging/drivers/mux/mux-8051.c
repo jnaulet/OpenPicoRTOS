@@ -56,6 +56,7 @@ int mux_8051_init(struct mux *ctx, size_t port)
     return 0;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 int mux_8051_mode(struct mux *ctx, size_t pin, mux_8051_mode_t mode)
 {
     picoRTOS_assert(pin < (size_t)MUX_8051_PIN_COUNT, return -EINVAL);

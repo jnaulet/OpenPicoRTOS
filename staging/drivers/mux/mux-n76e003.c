@@ -29,6 +29,7 @@ int mux_n76e003_init(/*@out@*/ struct mux *ctx, size_t port)
     return 0;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 int mux_n76e003_mode(struct mux *ctx, size_t pin, mux_n76e003_mode_t mode)
 {
     picoRTOS_assert(pin < (size_t)MUX_N76E003_PIN_COUNT, return -EINVAL);

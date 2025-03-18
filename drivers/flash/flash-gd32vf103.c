@@ -77,18 +77,21 @@ int flash_get_nblocks(struct flash *ctx)
     return (int)ctx->block_count;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 int flash_get_erase_size(struct flash *ctx, size_t block)
 {
     picoRTOS_assert(block < ctx->block_count, return -EINVAL);
     return FLASH_GD32VF103_BLOCK_SIZE;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 int flash_get_write_size(struct flash *ctx, size_t block)
 {
     picoRTOS_assert(block < ctx->block_count, return -EINVAL);
     return (int)sizeof(uint32_t);
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 int flash_get_block_addr(struct flash *ctx, size_t block)
 {
     picoRTOS_assert(block < ctx->block_count, return -EINVAL);
@@ -200,12 +203,14 @@ int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n)
     return nwritten;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 int flash_lock(struct flash *ctx, size_t block)
 {
     picoRTOS_assert(block < ctx->block_count, return -EINVAL);
     return -ENOSYS;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 int flash_unlock(struct flash *ctx, size_t block)
 {
     picoRTOS_assert(block < ctx->block_count, return -EINVAL);

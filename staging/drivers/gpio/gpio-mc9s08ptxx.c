@@ -35,6 +35,7 @@ int gpio_setup(struct gpio *ctx, const struct gpio_settings *settings)
     return 0;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 /*@-nullderef@*/
 void gpio_write(struct gpio *ctx, bool value)
 {
@@ -44,6 +45,7 @@ void gpio_write(struct gpio *ctx, bool value)
     else PORT[ctx->port] &= ~ctx->mask;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 bool gpio_read(struct gpio *ctx)
 {
     volatile const uint8_t *PORT = (const uint8_t*)ADDR_PORT;
@@ -51,6 +53,7 @@ bool gpio_read(struct gpio *ctx)
     return ((PORT[ctx->port] & ctx->mask) != 0) ^ ctx->invert;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 void gpio_toggle(struct gpio *ctx)
 {
     volatile uint8_t *PORT = (uint8_t*)ADDR_PORT;

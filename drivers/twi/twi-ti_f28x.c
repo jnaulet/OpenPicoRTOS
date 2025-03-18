@@ -197,6 +197,7 @@ int twi_setup(struct twi *ctx, const struct twi_settings *settings)
     return res;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 int twi_poll(struct twi *ctx)
 {
     if ((ctx->base->I2CSTR & I2CSTR_AAS) != 0) {

@@ -131,6 +131,7 @@ int dma_xfer(struct dma *ctx, const struct dma_xfer *xfer)
     return 0;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 int dma_xfer_done(struct dma *ctx)
 {
     if (ctx->ch->DMA_CHxCNT != 0)
