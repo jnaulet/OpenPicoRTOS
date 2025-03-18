@@ -13,7 +13,12 @@ struct dma {
     size_t channel;
 };
 
+struct dma_stm32h7xx_settings {
+    bool circ; /* circular mode */
+};
+
 int dma_stm32h7xx_init(/*@out@*/ struct dma *ctx, int base, size_t channel);
+int dma_stm32h7xx_setup(struct dma *ctx, const struct dma_stm32h7xx_settings *settings);
 
 /* Runtime calls:
  * int dma_setup(struct dma *ctx, struct dma_xfer *xfer);

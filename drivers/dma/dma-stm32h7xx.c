@@ -117,6 +117,15 @@ int dma_stm32h7xx_init(struct dma *ctx, int base, size_t channel)
     return 0;
 }
 
+int dma_stm32h7xx_setup(struct dma *ctx,
+                        const struct dma_stm32h7xx_settings *settings)
+{
+    if (settings->circ) ctx->ch->SxCR |= SxCR_CIRC;
+    else ctx->ch->SxCR &= ~SxCR_CIRC;
+
+    return 0;
+}
+
 int dma_setup(struct dma *ctx, const struct dma_xfer *xfer)
 {
     picoRTOS_assert(xfer->incr_read <= DMA_XFER_INCREMENT_COUNT, return -EINVAL);
