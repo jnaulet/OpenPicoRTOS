@@ -1,0 +1,55 @@
+#
+# Deploy test
+#
+
+PHONY := __deploy
+__deploy:
+
+skip-makefile := 1
+
+# Read auto.conf if it exists, otherwise ignore
+-include include/config/auto.conf
+
+include scripts/Makefile.gcc
+
+cmd_dep_S    = $(filter %.S,$(shell $(CC) $(dep_flags) -MM $(1)))
+cmd_lf       = $(subst $(space),'\n',$1)
+
+# original tree
+all-files-y += $(c_src-y) $(a_src-y)
+all-files-y += $(sort $(call cmd_dep_h_c,$(c_src-y)))
+cc-files-y := $(filter $(srctree)%,$(all-files-y))
+
+all-files-y += $(sort $(call cmd_dep_S,$(a_src-y)))
+# sdcc can't solve assembly includes, hotfix
+all-files-y += $(wildcard $(subst -I,,$(include-y))/macros.S)
+
+os-files-y := $(filter $(srctree)%,$(all-files-y))
+PHONY += $(os-files-y)
+
+# deployed tree
+deploy-dir := ./picoRTOS
+deploy-y := $(subst $(srctree),$(deploy-dir),$(os-files-y))
+
+# linker script ?
+__deploy: $(deploy-y) $(deploy-dir)/Makefile.in $(always)
+
+$(deploy-dir)/%: $(srctree)/%
+	$(Q)install -m644 -D -t $(dir $@) $<
+
+$(deploy-dir)/Makefile.in: FORCE
+	$(Q)echo '#' > $@
+	$(Q)echo '# picoRTOS standalone makefile (auto-generated)' >> $@
+	$(Q)echo '#' >> $@
+	$(Q)echo 'path := $$(dir $$(lastword $$(MAKEFILE_LIST)))' >> $@
+	$(Q)echo '' >> $@
+	$(Q)echo $(subst $(srctree)/,'c_src-y += $$(path)',$(call cmd_lf,$(filter %.c,$(cc-files-y)))) >> $@
+	$(Q)echo '' >> $@
+	$(Q)echo $(subst $(srctree)/,'h_dep-y += $$(path)',$(call cmd_lf,$(filter %.h,$(cc-files-y)))) >> $@
+	$(Q)echo '' >> $@
+	$(Q)echo $(subst $(srctree)/,'a_src-y += $$(path)',$(call cmd_lf,$(filter %.S,$(cc-files-y)))) >> $@
+	$(Q)echo $(subst $(srctree)/,'a_src-y += $$(path)',$(call cmd_lf,$(filter %.asm,$(cc-files-y)))) >> $@
+	$(Q)echo '' >> $@
+	$(Q)echo $(subst $(srctree)/,'include-y += -I$$(path)',$(call cmd_lf,$(sort $(dir $(cc-files-y))))) >> $@
+
+.PHONY: $(PHONY)

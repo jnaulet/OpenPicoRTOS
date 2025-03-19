@@ -21,6 +21,7 @@ picoRTOS is a small hard RTOS with as little overhead as humanly possible.
   1. [FIFO scheduling](#fifo-scheduling)
   1. [Interrupt management](#interrupt-management)
   1. [Staging tree](#staging-tree)
+  1. [Integration in your workflow](#integration-in-your-workflow)
   1. [Featured demos](#featured-demos)
 
 ## Book of requirements
@@ -264,6 +265,30 @@ This tree contains code that builds & fits the book of requirements but could
 not be tested for one reason or the other.
 
 This code should be considered highly experimental until validation.
+
+## Integration in your workflow
+
+In order to make picoRTOS easy to integrate in your embedded standalone projects,
+a new 'make deploy' target has been added.
+
+This will deploy a minimalistic picoRTOS tree in your working directory, containing
+only the files/drivers you need in order to build your project (except the linker files),
+thus eliminating the potential dead code issue.
+
+Here's the basic workflow:
+
+    # cp path/to/picoRTOS/samples/Makefile.in Kbuild
+    # make -f Kbuild menuconfig
+
+Here you can configure your project according to your needs
+
+    # make -f Kbuild deploy
+
+This will create the corresponding picoRTOS tree & a picoRTOS/Makefile.in file you
+can include in your own Makefile.
+
+You can then add the Kbuild, tree, include/generated/config.h and even the .config in your
+git/svn/other repository.
 
 ## Featured demos
 

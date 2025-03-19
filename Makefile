@@ -342,6 +342,9 @@ splint: FORCE
 cppcheck: FORCE
 	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.static __cppcheck src=$(CURDIR)
 
+deploy: FORCE
+	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.deploy __deploy src=$(CURDIR)
+
 ###
 # Cleaning is done on three levels.
 # make clean     Delete most generated files
@@ -398,6 +401,7 @@ help:
 	@echo  ''
 	@echo  'Other generic targets:'
 	@echo  '  all		  - Build target'
+	@echo  '  deploy          - Deploy a picoRTOS tree in the working directory'
 	@echo  ''
 	@echo  'Static analysis targets:'
 	@echo  '  splint          - Run splint -checks on the source code'
