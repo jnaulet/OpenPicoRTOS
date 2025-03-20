@@ -792,6 +792,7 @@ static int pll_setup(size_t index, const struct pll_settings *settings)
         return res;
 
     /* step2: compute DIVN */
+    picoRTOS_assert(divm_hz > 0, return -EIO);
     divn = settings->vco_hz / divm_hz;
 
     /* turn off if needed */
