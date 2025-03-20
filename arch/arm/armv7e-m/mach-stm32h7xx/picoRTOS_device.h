@@ -78,6 +78,9 @@
 #define ADDR_USART1       0x40011000
 #define ADDR_TIM8         0x40010400
 #define ADDR_TIM1         0x40010000
+#define ADDR_TIM24        0x4000e400
+#define ADDR_TIM23        0x4000e000
+#define ADDR_FDCAN3       0x4000d400
 #define ADDR_CAN_MSG_RAM  0x4000ac00
 #define ADDR_CAN_CCU      0x4000a800
 #define ADDR_FDCAN2       0x4000a400
