@@ -12,6 +12,7 @@ typedef unsigned long picoRTOS_mask_t;
 typedef unsigned long picoRTOS_core_t;
 
 typedef long picoRTOS_intptr_t;
+typedef unsigned long picoRTOS_uintptr_t;
 
 #define ARCH_L1_DCACHE_LINESIZE sizeof(unsigned long)
 

@@ -10,12 +10,13 @@ typedef unsigned long picoRTOS_irq_t;
 typedef unsigned long picoRTOS_cycles_t;
 
 typedef long picoRTOS_intptr_t;
+typedef unsigned long picoRTOS_uintptr_t;
 
 #define ARCH_INITIAL_STACK_COUNT (16 + 1)                       /* +1 for aligner */
 #define ARCH_MIN_STACK_COUNT     (ARCH_INITIAL_STACK_COUNT + 4) /* in -O0 */
 
 /* no cache */
-#define ARCH_L1_DCACHE_LINESIZE sizeof(unsigned long)
+#define ARCH_L1_DCACHE_LINESIZE 4 /* 32bit aligned */
 
 /* splint doesn't like inline assembly */
 #ifdef S_SPLINT_S

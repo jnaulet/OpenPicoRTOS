@@ -64,8 +64,15 @@ struct picoRTOS_task_sub {
 #define SUB_BY_PRIO(x) (picoRTOS.sub[(x)])
 
 /* cache alignment */
-#define L1_CACHE_ALIGN(x, a)         L1_CACHE_ALIGN_MASK((x), ((a) - 1))
 #define L1_CACHE_ALIGN_MASK(x, mask) (((x) + (mask)) & ~(mask))
+/* make this compliant with clang-tidy-18 */
+static void *L1_CACHE_ALIGN(/*@returned@*/ const char *ptr, int align)
+{
+    picoRTOS_uintptr_t uintptr = (picoRTOS_uintptr_t)ptr;
+    picoRTOS_uintptr_t bias = L1_CACHE_ALIGN_MASK(uintptr, (align - 1)) - uintptr;
+
+    return (void*)(ptr + bias);
+}
 
 #define F_RUNNING   (1 << 0)
 #define F_POSTPONED (1 << 1)
@@ -215,7 +222,7 @@ void picoRTOS_task_init(struct picoRTOS_task *task,
     task->fn = fn;
     task->priv = priv;
     /* ensure page cache alignment */
-    task->stack = (picoRTOS_stack_t*)L1_CACHE_ALIGN((picoRTOS_intptr_t)stack, ARCH_L1_DCACHE_LINESIZE);
+    task->stack = (picoRTOS_stack_t*)L1_CACHE_ALIGN((char*)stack, ARCH_L1_DCACHE_LINESIZE);
     task->stack_count = (size_t)((stack + stack_count) - task->stack) & ~STACK_COUNT_MASK;
 }
 

@@ -12,10 +12,11 @@ typedef unsigned long picoRTOS_irq_t;
 typedef unsigned long picoRTOS_cycles_t;
 
 typedef long picoRTOS_intptr_t;
+typedef unsigned long picoRTOS_uintptr_t;
 
 #define ARCH_INITIAL_STACK_COUNT 10
 #define ARCH_MIN_STACK_COUNT ARCH_INITIAL_STACK_COUNT
-#define ARCH_L1_DCACHE_LINESIZE sizeof(long)
+#define ARCH_L1_DCACHE_LINESIZE 4
 
 #define arch_break() __debugbreak()
 

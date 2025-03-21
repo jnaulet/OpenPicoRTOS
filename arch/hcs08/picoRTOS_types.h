@@ -13,12 +13,13 @@ typedef uint8_t picoRTOS_irq_t;
 typedef unsigned int picoRTOS_cycles_t;
 
 typedef int picoRTOS_intptr_t;
+typedef unsigned int picoRTOS_uintptr_t;
 
 #define ARCH_INTIAL_STACK_COUNT 6
 #define ARCH_MIN_STACK_COUNT    (ARCH_INTIAL_STACK_COUNT + 4)
 
 /* no cache */
-#define ARCH_L1_DCACHE_LINESIZE sizeof(unsigned char)
+#define ARCH_L1_DCACHE_LINESIZE 1
 
 /* splint cannot check inline assembly */
 #ifdef S_SPLINT_S

@@ -10,6 +10,7 @@ typedef unsigned int picoRTOS_irq_t;
 typedef unsigned long picoRTOS_cycles_t;
 
 typedef long picoRTOS_intptr_t;
+typedef unsigned long picoRTOS_uintptr_t;
 
 #if (__TMS320C28XX_FPU32__ == 1) || \
     (__TMS320C28XX_FPU64__ == 1)
@@ -22,7 +23,7 @@ typedef long picoRTOS_intptr_t;
 #define ARCH_MIN_STACK_COUNT (ARCH_INTIAL_STACK_COUNT + 4)
 
 /* no cache */
-#define ARCH_L1_DCACHE_LINESIZE sizeof(int)
+#define ARCH_L1_DCACHE_LINESIZE 2 /* 16bit aligned */
 
 /* splint cannot check inline assembly */
 #ifdef S_SPLINT_S

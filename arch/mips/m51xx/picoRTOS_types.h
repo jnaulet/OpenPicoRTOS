@@ -13,6 +13,7 @@ typedef unsigned long picoRTOS_irq_t;
 typedef unsigned long picoRTOS_cycles_t;
 
 typedef long picoRTOS_intptr_t;
+typedef unsigned long picoRTOS_uintptr_t;
 
 #define ARCH_L1_DCACHE_LINESIZE    16
 #define ARCH_L1_DCACHE_STACK_COUNT (ARCH_L1_DCACHE_LINESIZE / 4)
