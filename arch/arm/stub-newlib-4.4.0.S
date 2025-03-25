@@ -15,3 +15,7 @@
 	STUB_NEWLIB _close
 	STUB_NEWLIB _read
 	STUB_NEWLIB _lseek
+	STUB_NEWLIB _fstat
+	STUB_NEWLIB _getpid
+	STUB_NEWLIB _isatty
+	STUB_NEWLIB _kill
