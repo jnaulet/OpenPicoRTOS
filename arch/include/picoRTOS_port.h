@@ -167,11 +167,8 @@ extern void arch_syscall(syscall_t syscall, /*@null@*/ void *priv);
  * The default idle function/task
  *
  * Ths function must provide an infinite loop that puts the CPU in IDLE mode
- *
- * Parameters:
- *  null - SHOULD always be NULL
  */
-extern /*@noreturn@*/ void arch_idle(/*@null@*/ const void *null);
+extern /*@noreturn@*/ void arch_idle(void);
 
 /* ARCH: ATOMIC OPS */
 

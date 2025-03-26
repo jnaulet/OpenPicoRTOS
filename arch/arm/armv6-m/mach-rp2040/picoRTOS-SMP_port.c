@@ -163,10 +163,8 @@ void arch_core_init(picoRTOS_core_t core,
     arch_spin_unlock();
 }
 
-void arch_idle(const void *null)
+void arch_idle(void)
 {
-    arch_assert_void(null == NULL);
-
     /* unlock core0 init */
     if (arch_core() != 0)
         arch_spin_unlock();

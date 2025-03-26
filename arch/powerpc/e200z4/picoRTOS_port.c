@@ -64,10 +64,8 @@ picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
     return sp;
 }
 
-void __attribute__((weak)) arch_idle(const void *null)
+void __attribute__((weak)) arch_idle(void)
 {
-    arch_assert_void(null == NULL);
-
     for (;;)
         ASM("wait");
 }

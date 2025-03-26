@@ -67,10 +67,8 @@ picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
     return sp - 1;
 }
 
-void arch_idle(const void *null)
+void arch_idle(void)
 {
-    arch_assert_void(null == NULL);
-
     for (;;)
         ASM("wfe");
 }

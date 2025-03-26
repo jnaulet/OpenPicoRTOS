@@ -97,10 +97,8 @@ void arch_delay_us(unsigned long n)
         ASM(" nop");
 }
 
-void arch_idle(const void *null)
+void arch_idle(void)
 {
-    arch_assert_void(null == NULL);
-
     for (;;)
         ASM(" orl pcon, #1");
 }

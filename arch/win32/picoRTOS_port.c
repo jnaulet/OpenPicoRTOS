@@ -90,10 +90,8 @@ void arch_syscall(syscall_t syscall, void *priv)
     SuspendThread(t->wthread);
 }
 
-void arch_idle(const void *null)
+void arch_idle(void)
 {
-    arch_assert_void(null == NULL);
-
     for (;;)
         Sleep(1000);
 }

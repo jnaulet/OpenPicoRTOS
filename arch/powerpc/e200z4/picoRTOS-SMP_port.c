@@ -71,10 +71,8 @@ void arch_core_init(picoRTOS_core_t core,
     arch_assert_void(deadlock != -1);
 }
 
-void arch_idle(const void *null)
+void arch_idle(void)
 {
-    arch_assert_void(null == NULL);
-
     /* signal we're idling */
     aux_core_is_idling = true;
     arch_flush_dcache(&aux_core_is_idling, sizeof(aux_core_is_idling));

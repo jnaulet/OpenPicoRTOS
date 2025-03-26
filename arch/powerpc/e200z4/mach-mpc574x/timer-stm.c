@@ -31,13 +31,11 @@ struct STM {
 static struct STM *STM0 = (struct STM*)ADDR_STM0;
 static uint32_t timer_stm_period = 0;
 
-static void Timer_Handler(const void *priv)
+static void Timer_Handler(void)
 {
     ASM("e_add16i 1, 1, -4");
     ASM("se_mflr 0");
     ASM("e_stw 0, 0 (1)");
-
-    arch_assert_void(priv == NULL);
 
     ASM("mfsprg 3, 0");         /* load task pointer from sprg0 */
     ASM("e_bl picoRTOS_tick");  /* call tick */
