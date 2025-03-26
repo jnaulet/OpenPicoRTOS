@@ -132,7 +132,11 @@ void arch_core_init(picoRTOS_core_t core,
     /* prepare core1 stack.
      * this complex computation is to avoid compiler warnings
      */
-    stack = (picoRTOS_stack_t*)__Stack1Bottom + ((__Stack1Top - __Stack1Bottom) >> 2) - 1;
+    picoRTOS_uintptr_t Stack1Top = (picoRTOS_uintptr_t)__Stack1Top;
+    picoRTOS_uintptr_t Stack1Bottom = (picoRTOS_uintptr_t)__Stack1Bottom;
+    picoRTOS_uintptr_t bias = ((Stack1Top - Stack1Bottom) >> 2);
+    
+    stack = (picoRTOS_stack_t*)__Stack1Bottom + bias - 1;
     *stack = (picoRTOS_stack_t)sp;
 
     /* send sequence */
