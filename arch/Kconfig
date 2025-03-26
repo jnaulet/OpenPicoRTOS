@@ -43,6 +43,18 @@ config CC
        default "sdcc" if 8051 || HCS08 || STM8
        default "cl2000" if C2000
 
+config CC_GCC
+       bool
+       default y if CC="gcc"
+
+config CC_SDCC
+       bool
+       default y if CC="sdcc"
+
+config CC_CL2000
+       bool
+       default y if CC="cl2000"
+
 source "arch/8051/Kconfig"
 source "arch/arm/Kconfig"
 source "arch/avr/Kconfig"
