@@ -3,5 +3,8 @@ menu "EEPROM drivers"
 config EEPROM_AVR
        depends on AVR
        bool "AVR EEPROM"
-
+       
+config EEPROM_CY15B004J
+       bool "Cypress CY15B004J EEPROM"
+       
 endmenu
