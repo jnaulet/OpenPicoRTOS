@@ -74,8 +74,8 @@ void arch_delay_us(unsigned long n)
 {
     arch_assert_void(n != 0);
 
-    /* 4 cycles per instruction on n76e003 */
-    unsigned long ncycles = (n * (sysclk_hz / 1000000ul)) >> 2;
+    /* ~32 cycles per loop on n76e003 */
+    unsigned long ncycles = (n * (sysclk_hz / 1000000ul)) >> 5;
 
     while (ncycles-- != 0)
         ASM(" nop");
