@@ -23,4 +23,7 @@ int mux_stm32h7xx_alt(struct mux *ctx, size_t pin, size_t alt);
 int mux_stm32h7xx_pull_up(struct mux *ctx, size_t pin);
 int mux_stm32h7xx_pull_down(struct mux *ctx, size_t pin);
 
+int mux_stm32h7xx_push_pull(struct mux *ctx, size_t pin);
+int mux_stm32h7xx_open_drain(struct mux *ctx, size_t pin);
+
 #endif

@@ -184,3 +184,19 @@ int mux_stm32h7xx_pull_down(struct mux *ctx, size_t pin)
     ctx->base->PUPDR |= PUPDR_PUPDR0(0x2) << lshift;
     return 0;
 }
+
+int mux_stm32h7xx_push_pull(struct mux *ctx, size_t pin)
+{
+    picoRTOS_assert(pin < (size_t)MUX_STM32H7XX_PIN_COUNT, return -EINVAL);
+
+    ctx->base->OTYPER &= ~(1u << pin);
+    return 0;
+}
+
+int mux_stm32h7xx_open_drain(struct mux *ctx, size_t pin)
+{
+    picoRTOS_assert(pin < (size_t)MUX_STM32H7XX_PIN_COUNT, return -EINVAL);
+
+    ctx->base->OTYPER |= (1u << pin);
+    return 0;
+}
