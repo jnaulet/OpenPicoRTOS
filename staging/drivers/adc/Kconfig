@@ -12,4 +12,8 @@ config ADC_MC9S08PTXX
        depends on HCS08
        bool "NXP MC9S08PTxx series ADC"
 
+config ADC_N76E003_SAR
+       depends on 8051
+       bool "Nuvoton N76E003 series ADC"
+
 endmenu
