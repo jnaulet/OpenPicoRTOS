@@ -6,12 +6,8 @@
 
 #include "n76e003.h"
 
-/* IPCs
- * Due to a bug in SDCC v4.2.6 by Nuvoton (XISEG section starts at 0)
- * this cannot be statically initialized
- */
-static struct picoRTOS_mutex mutex;
-static struct picoRTOS_cond cond;
+static struct picoRTOS_mutex mutex = PICORTOS_MUTEX_INITIALIZER;
+static struct picoRTOS_cond cond = PICORTOS_COND_INITIALIZER;
 
 static void tick_main(void *priv)
 {
@@ -112,9 +108,6 @@ int main(void)
 
     picoRTOS_init();
     (void)n76e003_init(&n76e003);
-
-    picoRTOS_mutex_init(&mutex);
-    picoRTOS_cond_init(&cond);
 
     /* tick */
     picoRTOS_task_init(&task, tick_main, &n76e003.TICK, stack0, PICORTOS_STACK_COUNT(stack0));

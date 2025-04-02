@@ -31,6 +31,7 @@ static void mux_init(void)
     (void)mux_n76e003_mode(&P1, (size_t)3, MUX_N76E003_MODE_QUASIBDIR); /* OUT0 */
     (void)mux_n76e003_mode(&P1, (size_t)4, MUX_N76E003_MODE_QUASIBDIR); /* OUT1 */
     (void)mux_n76e003_mode(&P1, (size_t)5, MUX_N76E003_MODE_PUSHPULL);  /* TICK */
+    (void)mux_n76e003_mode(&P1, (size_t)1, MUX_N76E003_MODE_OPENDRAIN); /* PWM */
 }
 
 static int gpio_init(/*@partial@*/ struct n76e003 *ctx)
@@ -59,6 +60,17 @@ static int uart_init(/*@partial@*/ struct n76e003 *ctx)
     return uart_setup(&ctx->UART0, &UART_settings);
 }
 
+static int pwm_init(/*@partial@*/ struct n76e003 *ctx)
+{
+    (void)pwm_n76e003_init(&ctx->PWM, CLOCK_N76E003_FSYS, (size_t)1);
+    (void)pwm_n76e003_set_period(&ctx->PWM, 148ul);
+    // (void)pwm_set_period(&ctx->PWM, (pwm_period_us_t)2000);
+    (void)pwm_set_duty_cycle(&ctx->PWM, PWM_DUTY_CYCLE_PCENT(50));
+
+    pwm_start(&ctx->PWM);
+    return 0;
+}
+
 int n76e003_init(struct n76e003 *ctx)
 {
     /* clocks */
@@ -68,6 +80,7 @@ int n76e003_init(struct n76e003 *ctx)
     /* peripherals */
     (void)gpio_init(ctx);
     (void)uart_init(ctx);
+    (void)pwm_init(ctx);
 
     return 0;
 }

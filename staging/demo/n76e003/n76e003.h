@@ -3,6 +3,7 @@
 
 #include "gpio-n76e003.h"
 #include "uart-n76e003.h"
+#include "pwm-n76e003.h"
 
 struct n76e003 {
     struct gpio TICK;
@@ -12,6 +13,8 @@ struct n76e003 {
     /* Relays */
     struct gpio OUT0;
     struct gpio OUT1;
+    /* PWMs */
+    struct pwm PWM;
 };
 
 int n76e003_init(/*@out@*/ struct n76e003 *ctx);
