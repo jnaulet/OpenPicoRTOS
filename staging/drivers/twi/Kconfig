@@ -20,4 +20,8 @@ config TWI_MC9S08PTXX
        depends on HCS08
        bool "NXP MC9S08PTxx series TWI/I2C"
 
+config TWI_N76E003
+       depends on 8051
+       bool "Nuvoton N76E003 series TWI/I2C"
+
 endmenu
