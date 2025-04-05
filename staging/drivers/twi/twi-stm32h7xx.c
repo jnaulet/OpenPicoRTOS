@@ -39,19 +39,19 @@ struct TWI_STM32H7XX {
 #define CR1_TXIE      (1 << 1)
 #define CR1_PE        (1 << 0)
 
-#define DR2_PECBYE    (1 << 26)
-#define DR2_AUTOEND   (1 << 25)
-#define DR2_RELOAD    (1 << 24)
-#define DR2_NBYTES_M  0xffu
-#define DR2_NBYTES(x) (((x) & DR2_NBYTES_M) << 16)
-#define DR2_NACK      (1 << 15)
-#define DR2_STOP      (1 << 14)
-#define DR2_START     (1 << 13)
-#define DR2_HEAD10R   (1 << 12)
-#define DR2_ADD10     (1 << 11)
-#define DR2_RD_WRN    (1 << 10)
-#define DR2_SADD_M    0x3ffu
-#define DR2_SADD(x)   ((x) & DR2_SADD_M)
+#define CR2_PECBYE    (1 << 26)
+#define CR2_AUTOEND   (1 << 25)
+#define CR2_RELOAD    (1 << 24)
+#define CR2_NBYTES_M  0xffu
+#define CR2_NBYTES(x) (((x) & CR2_NBYTES_M) << 16)
+#define CR2_NACK      (1 << 15)
+#define CR2_STOP      (1 << 14)
+#define CR2_START     (1 << 13)
+#define CR2_HEAD10R   (1 << 12)
+#define CR2_ADD10     (1 << 11)
+#define CR2_RD_WRN    (1 << 10)
+#define CR2_SADD_M    0x3ffu
+#define CR2_SADD(x)   ((x) & CR2_SADD_M)
 
 #define OAR1_OA1EN   (1 << 15)
 #define OAR1_OA1MODE (1 << 10)
@@ -106,30 +106,50 @@ int twi_stm32h7xx_init(struct twi *ctx, int base, clock_id_t clkid)
 {
     ctx->base = (struct TWI_STM32H7XX*)base;
     ctx->clkid = clkid;
+    ctx->start = false;
+    ctx->state = TWI_STM32H7XX_STATE_IDLE;
 
     return 0;
 }
 
 static int set_bitrate(struct twi *ctx, unsigned long bitrate)
 {
-    if (!picoRTOS_assert(bitrate > 0)) return -EINVAL;
+    picoRTOS_assert(bitrate > 0, return -EINVAL);
 
-    picoRTOS_break();
-    /*@notreached@*/ return -EINVAL;
+    clock_freq_t freq = clock_get_freq(ctx->clkid);
+
+    picoRTOS_assert(freq > 0, return -EIO);
+
+    unsigned long per;
+    unsigned long presc = 0;
+
+    do
+        per = ((unsigned long)freq / ++presc) / bitrate / 2ul;
+    while(per > (unsigned long)TIMINGR_SCLH_M);
+
+    ctx->base->TIMINGR = (uint32_t)(TIMINGR_PRESC(presc - 1) |
+                                    TIMINGR_SCLDEL(per / 4ul - 1) |
+                                    TIMINGR_SDADEL(per / 4ul - 1) |
+                                    TIMINGR_SCLH(per - 1) |
+                                    TIMINGR_SCLL(per - 1));
+    return 0;
 }
 
 static int set_mode(struct twi *ctx, twi_mode_t mode)
 {
-    if (!picoRTOS_assert(mode != TWI_MODE_IGNORE)) return -EINVAL;
-    if (!picoRTOS_assert(mode < TWI_MODE_COUNT)) return -EINVAL;
+    picoRTOS_assert(mode != TWI_MODE_IGNORE, return -EINVAL);
+    picoRTOS_assert(mode < TWI_MODE_COUNT, return -EINVAL);
 
     ctx->mode = mode;
     return 0;
 }
 
-int twi_setup(struct twi *ctx, struct twi_settings *settings)
+int twi_setup(struct twi *ctx, const struct twi_settings *settings)
 {
     int res = 0;
+
+    /* disable */
+    ctx->base->CR1 &= ~CR1_PE;
 
     /* bitrate */
     if (settings->bitrate != 0 &&
@@ -141,20 +161,182 @@ int twi_setup(struct twi *ctx, struct twi_settings *settings)
         (res = set_mode(ctx, settings->mode)) < 0)
         return res;
 
-    /* TODO: slave_addr */
+    /* slave_addr */
+    ctx->addr = settings->slave_addr;
 
+    ctx->base->CR1 |= CR1_PE;
     return res;
 }
 
 int twi_poll(struct twi *ctx)
 {
+    /*@i@*/ (void)ctx;
+    return -ENOSYS;
+}
+
+static int twi_rw_as_master_idle(struct twi *ctx, size_t n, bool rw, int flags)
+{
+    picoRTOS_assert(n > 0, return -EINVAL);
+
+    ctx->base->CR2 = (uint32_t)(((flags & TWI_F_STOP) != 0 ? CR2_AUTOEND : 0) |
+                                ((flags & TWI_F_STOP) == 0 ? CR2_RELOAD : 0) |
+                                CR2_NBYTES(n) |
+                                ((flags & TWI_F_START) != 0 ? CR2_START : 0) |
+                                (rw ? CR2_RD_WRN : 0) |
+                                CR2_SADD(ctx->addr << 1));
+
+    ctx->state = TWI_STM32H7XX_STATE_START;
     return -EAGAIN;
 }
 
-int twi_write(struct twi *ctx, const void *buf, size_t n)
+static int twi_write_as_master_start(struct twi *ctx, uint8_t byte, size_t n)
 {
+    picoRTOS_assert(n > 0, return -EINVAL);
+
+    /* NACK (FIXME: STOP) */
+    if ((ctx->base->ISR & ISR_NACKF) != 0) {
+        ctx->state = TWI_STM32H7XX_STATE_IDLE;
+        return -EIO;
+    }
+
+    /* previous byte sent ok */
+    if ((ctx->base->ISR & ISR_TXIS) != 0) {
+        /* send 1st byte */
+        ctx->base->TXDR = (uint32_t)byte;
+        /* 1st is also last */
+        if (n == (size_t)1)
+            ctx->state = TWI_STM32H7XX_STATE_LAST;
+        else
+            ctx->state = TWI_STM32H7XX_STATE_DATA;
+
+        ctx->start = false;
+    }
+
+    return -EAGAIN;
 }
 
-int twi_read(struct twi *ctx, void *buf, size_t n)
+static int twi_write_as_master_data(struct twi *ctx, uint8_t *buf, size_t n)
 {
+    picoRTOS_assert(n > 0, return -EINVAL);
+
+    /* NACK (FIXME: STOP) */
+    if ((ctx->base->ISR & ISR_NACKF) != 0) {
+        ctx->state = TWI_STM32H7XX_STATE_IDLE;
+        return -EIO;
+    }
+
+    /* previous byte sent ok */
+    if ((ctx->base->ISR & ISR_TXIS) != 0) {
+        /* last byte */
+        if (n == (size_t)2)
+            ctx->state = TWI_STM32H7XX_STATE_LAST;
+
+        /* nominal */
+        ctx->base->TXDR = (uint32_t)*++buf;
+        return 1;
+    }
+
+    return -EAGAIN;
+}
+
+static int twi_write_as_master_last(struct twi *ctx)
+{
+    /* last byte transferred */
+    if ((ctx->base->ISR & ISR_TC) != 0 ||
+        (ctx->base->ISR & ISR_TCR) != 0 ||
+        (ctx->base->ISR & ISR_STOPF) != 0) {
+        ctx->state = TWI_STM32H7XX_STATE_IDLE;
+        return 1;
+    }
+
+    return -EAGAIN;
+}
+
+static int twi_write_as_master(struct twi *ctx, const void *buf, size_t n, int flags)
+{
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n < (size_t)CR2_NBYTES_M, return -EINVAL);
+
+    switch (ctx->state) {
+    case TWI_STM32H7XX_STATE_IDLE:
+        return twi_rw_as_master_idle(ctx, n, (bool)TWI_WRITE, flags);
+
+    case TWI_STM32H7XX_STATE_START:
+        return twi_write_as_master_start(ctx, *(uint8_t*)buf, n);
+
+    case TWI_STM32H7XX_STATE_DATA:
+        return twi_write_as_master_data(ctx, (uint8_t*)buf, n);
+
+    case TWI_STM32H7XX_STATE_LAST:
+        return twi_write_as_master_last(ctx);
+
+    default:
+        break;
+    }
+
+    picoRTOS_break();
+    /*@notreached@*/ return -EIO;
+}
+
+int twi_write(struct twi *ctx, const void *buf, size_t n, int flags)
+{
+    picoRTOS_assert(n > 0, return -EINVAL);
+
+    if (ctx->mode == TWI_MODE_MASTER)
+        return twi_write_as_master(ctx, buf, n, flags);
+
+    picoRTOS_break();
+    /*@notreached@*/ return -ENOSYS;
+}
+
+static int twi_read_as_master_data(struct twi *ctx, uint8_t *data, size_t n)
+{
+    uint32_t ISR = ctx->base->ISR;
+
+    if ((ISR & ISR_RXNE) != 0) {
+        /* rx */
+        *data = (uint8_t)ctx->base->RXDR;
+        /* flags */
+        if (n == (size_t)1)
+            if ((ISR & ISR_TC) != 0 ||
+                (ISR & ISR_STOPF) != 0)
+                ctx->state = TWI_STM32H7XX_STATE_IDLE;
+
+        return 1;
+    }
+
+    return -EAGAIN;
+}
+
+static int twi_read_as_master(struct twi *ctx, void *buf, size_t n, int flags)
+{
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n < (size_t)CR2_NBYTES_M, return -EINVAL);
+
+    switch (ctx->state) {
+    case TWI_STM32H7XX_STATE_IDLE:
+        (void)twi_rw_as_master_idle(ctx, n, (bool)TWI_READ, flags);
+        ctx->state = TWI_STM32H7XX_STATE_DATA;
+    /*@fallthrough@*/
+
+    case TWI_STM32H7XX_STATE_DATA:
+        return twi_read_as_master_data(ctx, buf, n);
+
+    default:
+        break;
+    }
+
+    picoRTOS_break();
+    /*@notreached@*/ return -EIO;
+}
+
+int twi_read(struct twi *ctx, void *buf, size_t n, int flags)
+{
+    picoRTOS_assert(n > 0, return -EINVAL);
+
+    if (ctx->mode == TWI_MODE_MASTER)
+        return twi_read_as_master(ctx, buf, n, flags);
+
+    picoRTOS_break();
+    /*@notreached@*/ return -ENOSYS;
 }

@@ -3,12 +3,26 @@
 
 #include "twi.h"
 #include "clock.h"
+#include <stdbool.h>
 
 struct TWI_STM32H7XX;
+
+typedef enum {
+    TWI_STM32H7XX_STATE_IDLE,
+    TWI_STM32H7XX_STATE_START,
+    TWI_STM32H7XX_STATE_DATA,
+    TWI_STM32H7XX_STATE_LAST,
+    TWI_STM32H7XX_STATE_COUNT
+} twi_stm32h7xx_state_t;
 
 struct twi {
     /*@temp@*/ struct TWI_STM32H7XX *base;
     clock_id_t clkid;
+    /* internals */
+    twi_mode_t mode;
+    twi_addr_t addr;
+    bool start;
+    twi_stm32h7xx_state_t state;
 };
 
 int twi_stm32h7xx_init(/*@out@*/ struct twi *ctx, int base, clock_id_t clkid);
