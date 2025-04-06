@@ -60,12 +60,118 @@ static unsigned char SBUF_1;
 #define T3CON_T3PS_M  0x7u
 #define T3CON_T3PS(x) ((x) & T3CON_T3PS_M)
 
+/* FIFO */
+
+static void uart_fifo_init(/*@out@*/ struct uart_fifo *ctx)
+{
+    ctx->r = (uint8_t)UART_FIFO_MASK;
+    ctx->w = (uint8_t)0;
+}
+
+static int uart_fifo_push(struct uart_fifo *ctx, char c)
+{
+    uint8_t next_w = (ctx->w + 1) & (uint8_t)UART_FIFO_MASK;
+
+    if (next_w != ctx->r) {
+        ctx->buf[ctx->w] = c;
+        ctx->w = next_w;
+        return 1;
+    }
+
+    return -EAGAIN;
+}
+
+static int uart_fifo_pop(struct uart_fifo *ctx, char *c)
+{
+    uint8_t next_r = (ctx->r + 1) & (uint8_t)UART_FIFO_MASK;
+
+    if (next_r != ctx->w) {
+        *c = ctx->buf[next_r];
+        ctx->r = next_r;
+        return 1;
+    }
+
+    return -EAGAIN;
+}
+
+#define uart_fifo_isempty(ctx)                                  \
+    ((((ctx)->r + 1) & (uint8_t)UART_FIFO_MASK) == (ctx)->w)
+
+/* UART */
+
+static void uart0_isr(void *priv)
+{
+    char c = (char)0;
+    struct uart *ctx = (struct uart*)priv;
+
+    /* UART 0 */
+    do {
+        /* TX */
+        if ((SCON & SCONx_TI) != (unsigned char)0) {
+            SCON &= ~SCONx_TI; /* ack */
+            if (uart_fifo_pop(&ctx->tx_fifo, &c) == 1)
+                SBUF = (unsigned char)c;
+            else
+                ctx->tx_trig = true;
+        }
+        /* RX */
+        if ((SCON & SCONx_RI) != (unsigned char)0) {
+            (void)uart_fifo_push(&ctx->rx_fifo, (char)SBUF);
+            SCON &= ~SCONx_RI; /* ack */
+        }
+        /* retry to save on context saving */
+    } while((SCON & (SCONx_RI | SCONx_TI)) != (unsigned char)0);
+}
+
+static void uart1_isr(void *priv)
+{
+    char c = (char)0;
+    struct uart *ctx = (struct uart*)priv;
+
+    /* UART 1 */
+    do {
+        /* TX */
+        if ((SCON_1 & SCONx_TI) != (unsigned char)0) {
+            SCON_1 &= ~SCONx_TI;
+            if (uart_fifo_pop(&ctx->tx_fifo, &c) == 1)
+                SBUF_1 = (unsigned char)c;
+            else
+                ctx->tx_trig = true;
+        }
+        /* RX */
+        if ((SCON_1 & SCONx_RI) != (unsigned char)0) {
+            (void)uart_fifo_push(&ctx->rx_fifo, (char)SBUF_1);
+            SCON_1 &= ~SCONx_RI;
+        }
+    } while((SCON_1 & (SCONx_RI | SCONx_TI)) != (unsigned char)0);
+}
+
 int uart_n76e003_init(/*@out@*/ struct uart *ctx, uart_n76e003_t uart)
 {
     picoRTOS_assert(uart < UART_N76E003_COUNT, return -EINVAL);
 
+    /* this driver is 100% interrupt-driven */
+    switch (uart) {
+    case UART_N76E003_UART0_T1: /*@fallthrough@*/
+    case UART_N76E003_UART0_T3:
+        picoRTOS_register_interrupt((picoRTOS_irq_t)IRQ_RI_TI_0, uart0_isr, ctx);
+        picoRTOS_enable_interrupt((picoRTOS_irq_t)IRQ_RI_TI_0);
+        break;
+
+    case UART_N76E003_UART1_T3:
+        picoRTOS_register_interrupt((picoRTOS_irq_t)IRQ_RI_TI_1, uart1_isr, ctx);
+        picoRTOS_enable_interrupt((picoRTOS_irq_t)IRQ_RI_TI_1);
+        break;
+
+    default:
+        picoRTOS_break();
+        /*@notreached@*/ return -EIO;
+    }
+
     ctx->uart = uart;
-    ctx->first_tx = true;
+    uart_fifo_init(&ctx->rx_fifo);
+    uart_fifo_init(&ctx->tx_fifo);
+    ctx->tx_trig = true;
 
     return 0;
 }
@@ -147,104 +253,37 @@ int uart_setup(struct uart *ctx, const struct uart_settings *settings)
     return 0;
 }
 
-static int uart0_write(struct uart *ctx, char c)
-{
-    /* if tx succeeded or it's the first frame we send */
-    if ((SCON & SCONx_TI) != (unsigned char)0 || ctx->first_tx) {
-        ctx->first_tx = false;
-        SCON &= ~SCONx_TI; /* ack */
-        SBUF = (unsigned char)c;
-        return 1;
-    }
-
-    return -EAGAIN;
-}
-
-static int uart1_write(struct uart *ctx, char c)
-{
-    /* if tx succeeded or it's the first frame we send */
-    if ((SCON_1 & SCONx_TI) != (unsigned char)0 || ctx->first_tx) {
-        ctx->first_tx = false;
-        SCON_1 &= ~SCONx_TI; /* ack */
-        SBUF_1 = (unsigned char)c;
-        return 1;
-    }
-
-    return -EAGAIN;
-}
-
 int uart_write(struct uart *ctx, const char *buf, size_t n)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
 
     int sent = 0;
 
-    while (sent != (int)n) {
-        int res;
-        /* according to ctx */
-        switch (ctx->uart) {
-        case UART_N76E003_UART0_T1: /*@fallthrough@*/
-        case UART_N76E003_UART0_T3: res = uart0_write(ctx, *buf); break;
-        case UART_N76E003_UART1_T3: res = uart1_write(ctx, *buf); break;
-        default:
-            picoRTOS_break();
-            /*@notreached@*/ return -EIO;
-        }
-
-        if (res < 0)
+    while ((size_t)sent != n)
+        if (uart_fifo_push(&ctx->tx_fifo, buf[sent++]) == -EAGAIN)
             break;
-
-        sent++;
-    }
 
     if (sent == 0)
         return -EAGAIN;
 
+    /* deliberately trigger the isr */
+    if (ctx->tx_trig) {
+        ctx->tx_trig = false;
+        if (ctx->uart < UART_N76E003_UART1_T3) SCON |= SCONx_TI;
+        else SCON_1 |= SCONx_TI;
+    }
+
     return sent;
 }
 
-static int uart0_read(char *c)
-{
-    if ((SCON & SCONx_RI) != (unsigned char)0) {
-        *c = (char)SBUF;
-        SCON &= ~SCONx_RI; /* ack */
-        return 1;
-    }
-
-    return -EAGAIN;
-}
-
-static int uart1_read(char *c)
-{
-    if ((SCON_1 & SCONx_RI) != (unsigned char)0) {
-        *c = (char)SBUF_1;
-        SCON_1 &= ~SCONx_RI; /* ack */
-        return 1;
-    }
-
-    return -EAGAIN;
-}
-
-/* cppcheck-suppress [constParameterPointer] */
 int uart_read(struct uart *ctx, char *buf, size_t n)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
 
     int recv = 0;
 
-    while (recv != (int)n) {
-        int res;
-        /* according to ctx */
-        switch (ctx->uart) {
-        case UART_N76E003_UART0_T1: /*@fallthrough@*/
-        case UART_N76E003_UART0_T3: res = uart0_read(buf); break;
-        case UART_N76E003_UART1_T3: res = uart1_read(buf); break;
-        default:
-            picoRTOS_break();
-            /*@notreached@*/ return -EIO;
-        }
-
-        if (res < 0)
+    while ((size_t)recv != n) {
+        if (uart_fifo_pop(&ctx->rx_fifo, &buf[recv]) == -EAGAIN)
             break;
 
         recv++;
