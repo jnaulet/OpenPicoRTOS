@@ -59,7 +59,7 @@
 #define ADDR_P1SR    0xb4   /* page1 */
 #define ADDR_P2S     0xb5
 #define ADDR_IPH     0xb7
-#define ADDR_PWMINTC 0xb7 /* page1 */
+#define ADDR_PWMINTC 0xb7   /* page1 */
 #define ADDR_IP      0xb8
 #define ADDR_SADEN   0xb9
 #define ADDR_SADEN_1 0xba
@@ -125,7 +125,7 @@
 #define ADDR_CAPCON3 0xf1
 #define ADDR_CAPCON4 0xf2
 #define ADDR_SPCR    0xf3
-#define ADDR_SPCR2   0xf3 /* page1 */
+#define ADDR_SPCR2   0xf3   /* page1 */
 #define ADDR_SPSR    0xf4
 #define ADDR_SPDR    0xf5
 #define ADDR_AINDIDS 0xf6
