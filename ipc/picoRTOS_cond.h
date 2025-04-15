@@ -19,7 +19,7 @@ struct picoRTOS_cond {
 #define PICORTOS_COND_INITIALIZER               \
     { PICORTOS_COND_NONE, (size_t)0 }
 
-void picoRTOS_cond_init(struct picoRTOS_cond *cond);
+void picoRTOS_cond_init(/*@out@*/ struct picoRTOS_cond *cond);
 
 void picoRTOS_cond_signal(struct picoRTOS_cond * cond);                                     /* signal condition */
 void picoRTOS_cond_broadcast(struct picoRTOS_cond * cond);                                  /* broadcast condition */
