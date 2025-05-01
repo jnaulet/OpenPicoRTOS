@@ -11,6 +11,9 @@ include-$(CONFIG_8051) += -I$(arch-8051)/include
 a_src-$(CONFIG_MACH_N76E003) += $(arch-8051)/mach-n76e003/startup.S
 c_src-$(CONFIG_MACH_N76E003) += $(arch-8051)/mach-n76e003/timer-wkt.c
 c_src-$(CONFIG_MACH_N76E003) += $(arch-8051)/mach-n76e003/interrupt.c
+a_src-$(CONFIG_MACH_MS51) += $(arch-8051)/mach-n76e003/startup.S
+c_src-$(CONFIG_MACH_MS51) += $(arch-8051)/mach-n76e003/timer-wkt.c
+c_src-$(CONFIG_MACH_MS51) += $(arch-8051)/mach-n76e003/interrupt.c
 a_src-$(CONFIG_MACH_UCSIM51) += $(arch-8051)/mach-ucsim_51/startup.S
 c_src-$(CONFIG_MACH_UCSIM51) += $(arch-8051)/mach-mcs51/timer-t2.c
 c_src-$(CONFIG_MACH_UCSIM51) += $(arch-8051)/mach-mcs51/interrupt.c
@@ -24,6 +27,9 @@ c_src-$(CONFIG_MACH_STC12C5AXX) += $(arch-8051)/mach-stc12c5axx/interrupt.c
 # N76E003 memory map
 mcu-$(CONFIG_MACH_N76E003) += --xram-size 768
 mcu-$(CONFIG_MACH_N76E003) += --code-size 18432
+# MS51 memory map
+mcu-$(CONFIG_MACH_MS51) += --xram-size 768
+mcu-$(CONFIG_MACH_MS51) += --code-size 16384
 # CY7C6801xA memory map (shared CODE/XDATA RAM)
 ifeq ($(CONFIG_MACH_CY7C6801xA),y)
 code-size := $(shell expr 16384 - $(CONFIG_XDATA_SIZE))

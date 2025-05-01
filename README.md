@@ -170,6 +170,7 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - GigaDevice GD32VF103
  - LogicGreen LGT8F328P
  - Microchip PIC32MZ-EF
+ - Nuvoton MS51 series
  - Nuvoton N76E003
  - NXP MC9S08PTxx series
  - NXP MPC574x series

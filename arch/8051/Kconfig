@@ -11,6 +11,9 @@ config MACH_UCSIM51
 config MACH_N76E003
        bool "Nuvoton N76E003 Series"
 
+config MACH_MS51
+       bool "Nuvoton MS51 Series"
+
 config MACH_CY7C6801xA
        bool "Cypress CY7C6801xA Series"
 
