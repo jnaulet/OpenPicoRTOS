@@ -44,6 +44,18 @@ typedef uint16_t twi_addr_t;
 #define TWI_WRITE 0
 #define TWI_READ  1
 
+/* Constants: TWI START/STOP, GCALL
+ *
+ * TWI_F_START - Begin with a start
+ * TWI_F_STOP - End with a stop
+ * TWI_F_NACK - End with a NACK
+ * TWI_F_GC   - General call
+ */
+#define TWI_F_START (1 << 0)
+#define TWI_F_STOP  (1 << 1)
+#define TWI_F_NACK  (1 << 2)
+#define TWI_F_GC    (1 << 3)
+
 /* Constants: TWI addresses
  *
  * TWI_ADDR_GENERAL - General call address (0)
@@ -88,11 +100,12 @@ int twi_poll(struct twi *ctx);
  *  ctx - A TWI instance
  *  buf - A buffer containing the data to write
  *  n - The size of the data to write (in bytes)
+ *  flags - The flags for this transfer
  *
  * Returns:
  * The number of byte written if success, -errno otherwise
  */
-int twi_write(struct twi *ctx, const void *buf, size_t n);
+int twi_write(struct twi *ctx, const void *buf, size_t n, int flags);
 
 /* Function: twi_read
  * Read data from a TWI interface
@@ -101,10 +114,11 @@ int twi_write(struct twi *ctx, const void *buf, size_t n);
  *  ctx - A TWI instance
  *  buf - A buffer to receive the data
  *  n - The size of the buffer (in bytes)
+ *  flags - The flags for this transfer
  *
  * Returns:
  * The number of byte read if success, -errno otherwise
  */
-int twi_read(struct twi *ctx, void *buf, size_t n);
+int twi_read(struct twi *ctx, void *buf, size_t n, int flags);
 
 #endif
