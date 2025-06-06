@@ -186,8 +186,8 @@ static void twi_slave_main(void *priv)
 
         if (res == TWI_WRITE) {
             char c = (char)0;
-            while (twi_read(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
-                picoRTOS_schedule();
+            while (twi_read(TWI, &c, sizeof(c), 0) == -EAGAIN &&
+                   timeout-- != 0) picoRTOS_schedule();
 
             picoRTOS_assert_void(timeout != -1);
             picoRTOS_assert_void(c == (char)0xa5);
@@ -195,8 +195,8 @@ static void twi_slave_main(void *priv)
 
         if (res == TWI_READ) {
             char c = (char)0x5a;
-            while (twi_write(TWI, &c, sizeof(c)) == -EAGAIN && timeout-- != 0)
-                picoRTOS_schedule();
+            while (twi_write(TWI, &c, sizeof(c), TWI_F_NACK) == -EAGAIN &&
+                   timeout-- != 0) picoRTOS_schedule();
 
             picoRTOS_assert_void(timeout != -1);
         }
