@@ -418,9 +418,12 @@ static int twi_write_as_slave(struct twi *ctx, const void *buf, size_t n)
     return -EIO;
 }
 
-int twi_write(struct twi *ctx, const void *buf, size_t n)
+int twi_write(struct twi *ctx, const void *buf, size_t n, int flags)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
+
+    /* FIXME */
+    /*@i@*/ (void)flags;
 
     if (ctx->mode == TWI_MODE_MASTER)
         return twi_write_as_master(ctx, buf, n);
@@ -560,9 +563,12 @@ static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
     return -EIO;
 }
 
-int twi_read(struct twi *ctx, void *buf, size_t n)
+int twi_read(struct twi *ctx, void *buf, size_t n, int flags)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
+
+    /* FIXME */
+    /*@i@*/ (void)flags;
 
     if (ctx->mode == TWI_MODE_MASTER)
         return twi_read_as_master(ctx, buf, n);
