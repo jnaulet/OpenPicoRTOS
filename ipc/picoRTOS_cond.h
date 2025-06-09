@@ -13,7 +13,7 @@ enum picoRTOS_cond_act {
 struct picoRTOS_cond {
     enum picoRTOS_cond_act act;
     size_t count;
-} __ATTRIBUTE_ALIGNED__(ARCH_L1_DCACHE_LINESIZE);
+} __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
 
 /* macro for static init */
 #define PICORTOS_COND_INITIALIZER               \

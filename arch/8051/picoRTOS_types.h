@@ -33,7 +33,13 @@ typedef unsigned int picoRTOS_uintptr_t;
  * the startup sequence for the main
  */
 # define main main_no_sdcc_init
+
+/*
+ * Yet another SDCC ack for atttributes
+ */
+# define __attribute__(x)
 #endif
+
 
 /* very-specific */
 void arch_timer_ack(void);

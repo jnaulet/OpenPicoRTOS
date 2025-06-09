@@ -75,7 +75,7 @@ struct picoRTOS_core {
     struct picoRTOS_task_core task[TASK_COUNT];
     struct picoRTOS_task_sub sub[TASK_COUNT];
     picoRTOS_stack_t idle_stack[ARCH_MIN_STACK_COUNT];
-} __ATTRIBUTE_ALIGNED__(ARCH_L1_DCACHE_LINESIZE);
+} __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
 
 /* main core component */
 static struct picoRTOS_core picoRTOS;

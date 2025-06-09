@@ -17,7 +17,7 @@
 
 static unsigned long sysclk_hz = (unsigned long)DEVICE_DEFAULT_SYSCLK_HZ;
 
-static void __ATTRIBUTE_NAKED__ arch_TIMER0_COMPA(/*@unused@*/ void *priv)
+static void __attribute__((naked)) arch_TIMER0_COMPA(/*@unused@*/ void *priv)
 {
     /*@i@*/ (void)priv;
 

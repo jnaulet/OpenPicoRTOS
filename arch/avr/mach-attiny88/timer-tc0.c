@@ -12,7 +12,7 @@
 #define TCNT0  ((volatile unsigned char*)(ADDR_TC0 + 2))
 #define OCR0A  ((volatile unsigned char*)(ADDR_TC0 + 3))
 
-static void __ATTRIBUTE_NAKED__ arch_TIMER0_COMPA(/*@unused@*/ void *priv)
+static void __attribute__((naked)) arch_TIMER0_COMPA(/*@unused@*/ void *priv)
 {
     /*@i@*/ (void)priv;
 

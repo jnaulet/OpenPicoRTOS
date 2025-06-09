@@ -28,12 +28,6 @@ ccflags-$(CONFIG_DEBUG) += --debug
 ccflags-$(CONFIG_NDEBUG) += -DNDEBUG
 ldflags-$(CONFIG_DEBUG) += --debug
 
-# attributes
-ccattributes := -D"__ATTRIBUTE_ALIGNED__(x)="
-ccattributes += -D"__ATTRIBUTE_UNUSED__="
-ccattributes += -D"__ATTRIBUTE_NAKED__=__naked"
-ccattributes += -D"__ATTRIBUTE_PACKED__="
-
 # map ?
 
 # The filename Kbuild has precedence over Makefile

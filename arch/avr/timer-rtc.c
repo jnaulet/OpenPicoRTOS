@@ -13,7 +13,7 @@
 /* CLOCK */
 #define RTC_CLK_HZ 32768
 
-static void __ATTRIBUTE_NAKED__ arch_RTC_CNT(/*@unused@*/ void *priv)
+static void __attribute__((naked)) arch_RTC_CNT(/*@unused@*/ void *priv)
 {
     /*@i@*/ (void)priv;
 

@@ -85,7 +85,7 @@ struct picoRTOS_SMP_core {
     picoRTOS_core_t main_core;
     struct picoRTOS_task_core task[TASK_COUNT];
     struct picoRTOS_task_sub sub[TASK_COUNT];
-} __ATTRIBUTE_ALIGNED__(ARCH_L1_DCACHE_LINESIZE);
+} __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
 
 struct picoRTOS_SMP_stack {
     /* core 0 already has a stack, this is a waste of memory
