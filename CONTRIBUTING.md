@@ -255,7 +255,7 @@ root tree.
 ## Conclusion
 
 I understand these guidelines might seem extremely severe, potentially starving this
-project from talents, but they are here to garantee error-free software.
+project from talents, but they are here to guarantee error-free software.
 
 This is extremely important in safety critical applications for which this RTOS
 has been designed for in the first place.
