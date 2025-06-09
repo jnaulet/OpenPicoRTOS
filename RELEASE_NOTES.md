@@ -281,7 +281,7 @@ Support has been added for the following architectures:
 This support is incomplete as far as the MIPS is concerned (no support for FPU or DSP yet).
 This is on purpose, as the split between architecture ankd BSP is not completely decided yet.
 
-The follwing devices are now at least partially supported:
+The following devices are now at least partially supported:
   - Atmel SAMD5x/E5x
   - Atmel TinyAVR ATtiny1607
   - PIC32MZ-EF
