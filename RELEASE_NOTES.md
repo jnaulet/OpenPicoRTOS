@@ -312,7 +312,7 @@ code-level HAL.
 ## picoRTOS v1.5.4
 ### What's new ?
 
-picoRTOS is back ! Version 1.5.3 has seen the project being retired for professionnal use, so this
+picoRTOS is back ! Version 1.5.3 has seen the project being retired for professional use, so this
 one is a brand new architecture that has been re-written from the ground up.
 
 Unfortunately older users of picoRTOS on PowerPC and C2000 cannot update because despite similar
