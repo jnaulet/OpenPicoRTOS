@@ -39,7 +39,7 @@ Minor update, support for new architecture:
     - STM8: support for STM8Sx003
     - STM8S minimal drivers (clock, mux, gpio) + demo, staging
 
-A few fixes have been made to the build system, mainly to accomodate for newer versions of
+A few fixes have been made to the build system, mainly to accommodate for newer versions of
 the gcc compiler, thanks to David J. Fiddes
 
 ATTiny414 machine has been added, courtesy of Platima.
