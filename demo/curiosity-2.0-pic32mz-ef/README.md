@@ -28,7 +28,7 @@ info from the make command into the configurations.xml file of the project.
 
 It would be nicer to completely generate it but i leave that for another day.
 
-Quit MPLABX, re-open it, right-click the project and at XC32 (Global Options), sleect "Override default device support: Compiler location".
+Quit MPLABX, re-open it, right-click the project and at XC32 (Global Options), select "Override default device support: Compiler location".
 
 Then, in xc32-ld, menu "Libraries", select "Exclude standard libraries" & "Do no link crt0 startup code".
 
