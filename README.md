@@ -320,7 +320,7 @@ Basic demo code is provided for the following boards:
   - WCH CH32V003F4P6 eval board (staging)
 
 A portability demo is available in demo/amigaball-lcd and works with the
-follwing boards (+0.96" LCD):
+following boards (+0.96" LCD):
   - Adafruit ItsyBitsy M4 Express
   - Sipeed Longan Nano
   - Texas Instruments Launchxl-f28379d
