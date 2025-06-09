@@ -172,7 +172,7 @@ them (except c2000, which is a pain anyway).
 
 A more satisfying way to manage caches has been found, hopefully.
 
-PowerPC plaftorms have been added to staging and deserve a huge amount of testing.
+PowerPC platforms have been added to staging and deserve a huge amount of testing.
 
 ## picoRTOS v1.8.2
 ### What's new ?
