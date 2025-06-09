@@ -20,7 +20,7 @@ static void init_clock(void)
         12000000ul,                             /* xosc */
         125000000ul,                            /* pll_sys */
         /* dividers */
-        1ul,                                    /* ref_div */
+        2ul,                                    /* ref_div */
         1ul,                                    /* sys_div */
         1ul,                                    /* clk_gpout0_div */
         1ul,                                    /* clk_gpout1_div */

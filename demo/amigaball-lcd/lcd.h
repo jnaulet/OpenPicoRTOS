@@ -39,7 +39,7 @@ struct lcd {
     /*@temp@*/ struct gpio *dc;
     /*@temp@*/ struct gpio *rst;
     /* frame buffer, LCD Color: RGB565 (MSB rrrrrggggggbbbbb LSB) */
-  uint16_t fb[LCD_FB_PIXELS] __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
+    uint16_t fb[LCD_FB_PIXELS] __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
 };
 
 int lcd_init(/*@out@*/ struct lcd *ctx, struct lcd_phys *phys);
