@@ -2,7 +2,7 @@
 #include "picoRTOS.h"
 
 #define WD_RP2040_LOAD_COUNT   0x1000000ul
-#define WD_RP2040_CYCLES_COUNT 512ul
+#define WD_RP2040_CYCLES_COUNT 512u
 
 struct WD_RP2040 {
     volatile uint32_t CTRL;
@@ -32,9 +32,16 @@ struct WD_RP2040 {
 int wd_rp2040_init(struct wd *ctx, int base, clock_id_t clkid)
 {
     ctx->base = (struct WD_RP2040*)base;
-    ctx->clkid = clkid;
     ctx->load = (uint32_t)(WD_RP2040_LOAD_COUNT * 2 - 1);
 
+    /* prepare cycles for 1us */
+    clock_freq_t freq = clock_get_freq(clkid);
+    unsigned int cycles = (unsigned)freq / 1000000u;
+
+    picoRTOS_assert(freq > 0, return -EIO);
+    picoRTOS_assert(cycles < WD_RP2040_CYCLES_COUNT, return -EINVAL);
+
+    ctx->base->TICK = (uint32_t)(TICK_ENABLE | TICK_CYCLES(cycles));
     return 0;
 }
 
@@ -52,29 +59,12 @@ int wd_rp2040_setup(struct wd *ctx, const struct wd_rp2040_settings *settings)
 {
     picoRTOS_assert(settings->timeout_us > 0, return -EINVAL);
 
-    unsigned long load;
-    unsigned long tick_cycles;
-    clock_freq_t freq = clock_get_freq(ctx->clkid);
-
-    picoRTOS_assert(freq > 0, return -EIO);
-
-    for (tick_cycles = 1ul; tick_cycles < WD_RP2040_CYCLES_COUNT; tick_cycles++) {
-        load = settings->timeout_us * ((unsigned long)freq / 1000000ul) / tick_cycles;
-        /* fix error in logic */
-        load *= 2ul;
-
-        if (load < WD_RP2040_LOAD_COUNT)
-            break;
-    }
+    unsigned long load = settings->timeout_us * 2ul;
 
     picoRTOS_assert(load < WD_RP2040_LOAD_COUNT, return -EINVAL);
-    picoRTOS_assert(tick_cycles < WD_RP2040_CYCLES_COUNT, return -EINVAL);
-
     ctx->load = (uint32_t)load;
 
     ctx->base->LOAD = ctx->load;
-    ctx->base->TICK = (uint32_t)(TICK_ENABLE | TICK_CYCLES(tick_cycles));
-
     return 0;
 }
 
