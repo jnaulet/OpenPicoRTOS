@@ -1,5 +1,21 @@
 # Release notes
 
+## picoRTOS v1.10.0
+### What"s new ?
+
+Important update. A new picoRTOS_postpone() call has been added for FIFO
+scheduling support.
+
+A new 'make deploy' target has been added to allow standalone deployment of
+picoRTOS in a sub-directory (makes debug easier on sdcc targets & allows
+better integration in IDEs).
+
+The I2C/TWI API has been updated with some flags. Some drivers have been
+updated correctly, some not. Time will tell if it's the right way.
+
+The rest is mostly support for the Nuvoton NuMicro/N76E003/MS51 series &
+upgrade of the existing components.
+
 ## picoRTOS v1.9.10
 ### What"s new ?
 
