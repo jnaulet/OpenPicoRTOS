@@ -59,6 +59,7 @@ arch_save_first_context:
 	.thumb_func
 	.type arch_start_first_task, %function
 	.global arch_start_first_task
+	.weak arch_start_first_task
 arch_start_first_task:
 	RESTORE_CONTEXT r0
 	/* switch to psp stack */
@@ -155,32 +156,3 @@ ISR_TABLE:
 	.long 0
 	.long 0
 	.endr
-
-	.section .vectors, "ax"
-
-	.word __StackTop
-	.word Reset_Handler
-	.word NMI_Handler
-	.word HardFault_Handler
-	.word 0 /* reserved */
-	.word 0 /* reserved */
-	.word 0 /* reserved */
-	.word 0 /* reserved */
-	.word 0 /* reserved */
-	.word 0 /* reserved */
-	.word 0 /* reserved */
-	.word SVC_Handler
-	.word 0 /* reserved */
-	.word 0 /* reserved */
-	.word PendSV_Handler
-	.word SysTick_Handler
-	.rept DEVICE_INTERRUPT_VECTOR_COUNT
-	.word Default_Handler
-	.endr
-
-	#include "../include/macros.S"
-
-	/* Weak handlers */
-	def_irq_handler NMI_Handler
-	def_irq_handler HardFault_Handler
-	def_irq_handler PendSV_Handler

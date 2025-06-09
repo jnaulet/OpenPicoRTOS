@@ -7,15 +7,19 @@
 # error Deadlock count is not defined
 #endif
 
-/* SYSTICK */
-#define SYSTICK_CSR ((volatile unsigned long*)0xe000e010)
-#define SYSTICK_RVR ((volatile unsigned long*)0xe000e014)
-#define SYSTICK_CVR ((volatile unsigned long*)0xe000e018)
+/* PWM */
+#define PWM_CHn  7
+#define PWM_CSR  ((volatile unsigned long*)(ADDR_PWM + (PWM_CHn * 0x14) + 0x0))
+#define PWM_DIV  ((volatile unsigned long*)(ADDR_PWM + (PWM_CHn * 0x14) + 0x4))
+#define PWM_CTR  ((volatile unsigned long*)(ADDR_PWM + (PWM_CHn * 0x14) + 0x8))
+#define PWM_TOP  ((volatile unsigned long*)(ADDR_PWM + (PWM_CHn * 0x14) + 0x10))
+#define PWM_INTR ((volatile unsigned long*)(ADDR_PWM + 0xa4))
+#define PWM_INTE ((volatile unsigned long*)(ADDR_PWM + 0xa8))
 
 /* NVIC */
-#define NVIC_ISER         ((volatile unsigned long*)0xe000e100)
-#define NVIC_ICPR         ((volatile unsigned long*)0xe000e280)
-#define NVIC_SHPR3        ((volatile unsigned long*)0xe000ed20)
+#define NVIC_ISER  ((volatile unsigned long*)0xe000e100)
+#define NVIC_ICPR  ((volatile unsigned long*)0xe000e280)
+#define NVIC_SHPR3 ((volatile unsigned long*)0xe000ed20)
 
 /* SIO */
 #define SIO_CPUID     ((volatile unsigned long*)(ADDR_SIO + 0))
@@ -28,35 +32,92 @@
 /* VTOR */
 #define VTOR ((volatile unsigned long*)0xe000ed08)
 
+/* RESET */
+#define RESET ((volatile unsigned long*)(ADDR_RESET + 0))
+
 /* ASM */
-/*@external@*/ extern void arch_SIO_PROC1(void*);
+/*@external@*/ extern void PwmWrap_Handler(void*);
 /*@external@*/ extern void arch_start_first_task(picoRTOS_stack_t *sp);
 
 /*@external@*/ extern picoRTOS_stack_t __Stack1Top[];
 /*@external@*/ extern picoRTOS_stack_t __Stack1Bottom[];
 
 /* CLOCK */
-static unsigned long systick_rvr;
+static unsigned long sysclk_hz = (unsigned long)DEVICE_DEFAULT_SYSCLK_HZ;
 
 void arch_smp_init(void)
 {
+    /* PWM as system clock */
+    unsigned long pwm_div = 1ul;
+    unsigned long pwm_top = (sysclk_hz / (unsigned long)CONFIG_TICK_HZ);
+
+    /* find divider */
+    while (pwm_top > 0xfffful)
+        pwm_top = (sysclk_hz / (unsigned long)CONFIG_TICK_HZ) / (++pwm_div);
+
     /* basic cm0+ init */
     arch_init();
 
-    /* remember core#0 SysTick's period */
-    systick_rvr = *SYSTICK_RVR;
-    /* register FIFO interrupt beforehand, only used by core#1 */
-    arch_register_interrupt((picoRTOS_irq_t)IRQ_SIO_PROC1, arch_SIO_PROC1, NULL);
+    /* un-reset */
+    *RESET &= ~(1ul << 14); /* PWM */
+
+    *PWM_DIV = (pwm_div << 4);
+    *PWM_TOP = pwm_top - 1ul;
+
+    *PWM_INTR = (1ul << PWM_CHn);       /* clear interrupt */
+    *PWM_INTE |= (1ul << PWM_CHn);      /* enable interrupt */
+
+    /* NVIC */
+    *NVIC_ICPR = (1ul << IRQ_PWM_WRAP);
+    *NVIC_ISER |= (1ul << IRQ_PWM_WRAP);
 }
+
+/* STATS */
+
+picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
+{
+    arch_assert_void(counter < ARCH_COUNTER_COUNT);
+
+    if (counter == ARCH_COUNTER_CURRENT)
+        return (picoRTOS_cycles_t)*PWM_CTR;
+
+    if (counter == ARCH_COUNTER_SINCE) {
+        picoRTOS_cycles_t top = (picoRTOS_cycles_t)*PWM_TOP;
+        picoRTOS_cycles_t ctr = (picoRTOS_cycles_t)*PWM_CTR;
+
+        /* several cases here */
+        if (t > top) return top + 1;            /* only used on first tick */
+        if (ctr < t) return (top - t) + ctr;    /* rollover */
+        /* normal */
+        return ctr - t;
+    }
+
+    arch_assert_void(false);
+    return 0;
+}
+
+/* CLOCKS */
+
+void arch_set_clock_frequency(unsigned long freq)
+{
+    arch_assert_void(freq != 0);
+    sysclk_hz = freq;
+}
+
+void arch_delay_us(unsigned long n)
+{
+    arch_assert_void(n != 0);
+
+    unsigned long ncycles = n * ((unsigned long)sysclk_hz / 1000000ul);
+
+    while (ncycles-- != 0)
+        ASM("nop");
+}
+
 
 static void __attribute__((naked)) core1_start_first_task(void)
 {
     ASM("cpsid i");
-
-    /* SYSTICK */
-    *SYSTICK_CSR = 0x4ul;                                   /* stop systick */
-    *SYSTICK_CVR = 0;                                       /* reset */
-    *SYSTICK_RVR = systick_rvr;                             /* set period */
 
     /* clear FIFO flags */
     *SIO_FIFO_ST = 0xfful;
@@ -64,9 +125,9 @@ static void __attribute__((naked)) core1_start_first_task(void)
     /* set PENDSV to min priority */
     *NVIC_SHPR3 |= 0xffff0000ul;
 
-    /* enable SIO_PROC1 irq */
-    *NVIC_ICPR |= (1 << 16);
-    *NVIC_ISER |= (1 << 16);
+    /* enable PwmWrap irq */
+    *NVIC_ICPR = (1ul << IRQ_PWM_WRAP);
+    *NVIC_ISER |= (1ul << IRQ_PWM_WRAP);
 
     ASM("pop {r0}");
     ASM("ldr r1, =arch_start_first_task");
@@ -135,7 +196,7 @@ void arch_core_init(picoRTOS_core_t core,
     picoRTOS_uintptr_t Stack1Top = (picoRTOS_uintptr_t)__Stack1Top;
     picoRTOS_uintptr_t Stack1Bottom = (picoRTOS_uintptr_t)__Stack1Bottom;
     picoRTOS_uintptr_t bias = ((Stack1Top - Stack1Bottom) >> 2);
-    
+
     stack = (picoRTOS_stack_t*)__Stack1Bottom + bias - 1;
     *stack = (picoRTOS_stack_t)sp;
 
@@ -193,16 +254,6 @@ void arch_spin_lock(void)
 void arch_spin_unlock(void)
 {
     *SIO_SPINLOCK0 = 1ul;
-}
-
-void arch_propagate_tick(void)
-{
-    *SIO_FIFO_WR = 0;
-}
-
-void arch_acknowledge_tick(void)
-{
-    arch_flush_rd_fifo();
 }
 
 /* ATOMIC ops */

@@ -122,7 +122,7 @@ void arch_disable_interrupt(picoRTOS_irq_t irq)
 
 /* STATS */
 
-picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
+picoRTOS_cycles_t __attribute__((weak)) arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
 {
     arch_assert_void(counter < ARCH_COUNTER_COUNT);
 
@@ -160,13 +160,13 @@ void arch_flush_dcache(/*@unused@*/ void *addr, /*@unused@*/ size_t n)
 
 /* CLOCKS */
 
-void arch_set_clock_frequency(unsigned long freq)
+void __attribute__((weak)) arch_set_clock_frequency(unsigned long freq)
 {
     arch_assert_void(freq != 0);
     sysclk_hz = (int)freq;
 }
 
-void arch_delay_us(unsigned long n)
+void __attribute__((weak)) arch_delay_us(unsigned long n)
 {
     arch_assert_void(n != 0);
 
