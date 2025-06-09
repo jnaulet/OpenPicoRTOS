@@ -175,17 +175,19 @@ int twi_poll(struct twi *ctx)
 
 /* active operations */
 
-static int twi_rw_as_master_idle(struct twi *ctx)
+static int twi_rw_as_master_idle(struct twi *ctx, int flags)
 {
     if ((ctx->base->I2C_STAT1 & I2C_STAT1_I2CBSY) != 0)
         return -EAGAIN;
 
-    /* send start condition */
-    ctx->base->I2C_CTL0 |= (uint32_t)I2C_CTL0_START;
+    if ((flags & TWI_F_START) != 0) {
+        /* send start condition */
+        ctx->base->I2C_CTL0 |= (uint32_t)I2C_CTL0_START;
+        ctx->state = TWI_GD32VF103_STATE_SLA;
+    }else
+        ctx->state = TWI_GD32VF103_STATE_DATA;
 
-    ctx->state = TWI_GD32VF103_STATE_SLA;
     ctx->last = 0;
-
     return -EAGAIN;
 }
 
@@ -244,29 +246,30 @@ static int twi_write_as_master_data(struct twi *ctx, const void *buf, size_t n)
     return 1;
 }
 
-static int twi_rw_as_master_stop(struct twi *ctx)
+static int twi_rw_as_master_stop(struct twi *ctx, int flags)
 {
     /* no pending transmission */
     if ((ctx->base->I2C_STAT0 & I2C_STAT0_BTC) == 0)
         return -EAGAIN;
 
-    /* send stop condition */
-    ctx->base->I2C_CTL0 |= (uint32_t)I2C_CTL0_STOP;
+    if ((flags & TWI_F_STOP) != 0)
+        /* send stop condition */
+        ctx->base->I2C_CTL0 |= (uint32_t)I2C_CTL0_STOP;
 
     ctx->state = TWI_GD32VF103_STATE_IDLE;
     return ctx->last;
 }
 
-static int twi_write_as_master(struct twi *ctx, const void *buf, size_t n)
+static int twi_write_as_master(struct twi *ctx, const void *buf, size_t n, int flags)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
-    case TWI_GD32VF103_STATE_IDLE: return twi_rw_as_master_idle(ctx);
+    case TWI_GD32VF103_STATE_IDLE: return twi_rw_as_master_idle(ctx, flags);
     case TWI_GD32VF103_STATE_SLA: return twi_write_as_master_sla(ctx);
     case TWI_GD32VF103_STATE_ACK: return twi_rw_as_master_ack(ctx);
     case TWI_GD32VF103_STATE_DATA: return twi_write_as_master_data(ctx, buf, n);
-    case TWI_GD32VF103_STATE_STOP: return twi_rw_as_master_stop(ctx);
+    case TWI_GD32VF103_STATE_STOP: return twi_rw_as_master_stop(ctx, flags);
     default: break;
     }
 
@@ -335,12 +338,12 @@ static int twi_write_as_slave(struct twi *ctx, const void *buf, size_t n)
     return -EIO;
 }
 
-int twi_write(struct twi *ctx, const void *buf, size_t n)
+int twi_write(struct twi *ctx, const void *buf, size_t n, int flags)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
 
     if (ctx->mode == TWI_MODE_MASTER)
-        return twi_write_as_master(ctx, buf, n);
+        return twi_write_as_master(ctx, buf, n, flags);
 
     if (ctx->mode == TWI_MODE_SLAVE)
         return twi_write_as_slave(ctx, buf, n);
@@ -389,16 +392,16 @@ static int twi_read_as_master_data(struct twi *ctx, void *buf, size_t n)
     return 1;
 }
 
-static int twi_read_as_master(struct twi *ctx, void *buf, size_t n)
+static int twi_read_as_master(struct twi *ctx, void *buf, size_t n, int flags)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
-    case TWI_GD32VF103_STATE_IDLE: return twi_rw_as_master_idle(ctx);
+    case TWI_GD32VF103_STATE_IDLE: return twi_rw_as_master_idle(ctx, flags);
     case TWI_GD32VF103_STATE_SLA: return twi_read_as_master_sla(ctx);
     case TWI_GD32VF103_STATE_ACK: return twi_rw_as_master_ack(ctx);
     case TWI_GD32VF103_STATE_DATA: return twi_read_as_master_data(ctx, buf, n);
-    case TWI_GD32VF103_STATE_STOP: return twi_rw_as_master_stop(ctx);
+    case TWI_GD32VF103_STATE_STOP: return twi_rw_as_master_stop(ctx, flags);
     default: break;
     }
 
@@ -442,12 +445,12 @@ static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
     return -EIO;
 }
 
-int twi_read(struct twi *ctx, void *buf, size_t n)
+int twi_read(struct twi *ctx, void *buf, size_t n, int flags)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
 
     if (ctx->mode == TWI_MODE_MASTER)
-        return twi_read_as_master(ctx, buf, n);
+        return twi_read_as_master(ctx, buf, n, flags);
 
     if (ctx->mode == TWI_MODE_SLAVE)
         return twi_read_as_slave(ctx, buf, n);
