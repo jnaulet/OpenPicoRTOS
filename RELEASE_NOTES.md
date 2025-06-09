@@ -145,7 +145,7 @@ OpenPicoRTOS is now more than an OS. It is an OS AND a build system AND a code c
 Migrating to OpenPicoRTOS has been made easier than ever (hopefully).
 
 Some changes have been made to the port API & the main API, especially regarding asserts, that have been
-made ISO-C compliant to accomodate for the now default gcc -pedantic mode.
+made ISO-C compliant to accommodate for the now default gcc -pedantic mode.
 
 Cross-dependencies between the ports and the schedulers have been totally removed.
 
