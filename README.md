@@ -189,7 +189,7 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
 
 On every new cycle (tick), picoRTOS stops the execution of the current task and runs the highest
 priority task available.   
-A few criterias make a task available for scheduling, it has to be:
+A few criteria make a task available for scheduling, it has to be:
   - Ready (aka not sleeping/busy)
   - The tick modulo has to match the task sub-priority (see shared priorities)
   - In case of SMP, the task core mask has to match the current running core
