@@ -170,7 +170,7 @@ Mostly, the AmigaBall LCD demo, courtesy of slmisc on github.
 This demo has allowed to put a series of board to a real test & improve on the DMA for most of
 them (except c2000, which is a pain anyway).
 
-A more satsifying way to manage caches has been found, hopefully.
+A more satisfying way to manage caches has been found, hopefully.
 
 PowerPC plaftorms have been added to staging and deserve a huge amount of testing.
 
