@@ -6,7 +6,6 @@
 
 /* ASM */
 /*@external@*/ extern void arch_core_start(void);
-/*@external@*/ extern void arch_SSCIR0(void *priv);
 
 /* STACK */
 /*@external@*/ extern picoRTOS_stack_t *arch_core_sp[CONFIG_SMP_CORES - 1];
@@ -45,11 +44,6 @@ void arch_core_init(picoRTOS_core_t core,
 
     /* store in exchange ram */
     arch_core_sp[core - 1] = stack;
-
-    /* enable propagated tick interrupt */
-    arch_register_interrupt((picoRTOS_irq_t)IRQ_SSCIR0, arch_SSCIR0, NULL);
-    arch_smp_enable_interrupt((picoRTOS_irq_t)IRQ_SSCIR0,
-                              (picoRTOS_mask_t)1 << core);
 
     /* reset state machine */
     aux_core_is_idling = false;

@@ -39,22 +39,22 @@ static struct PIT *PIT = (struct PIT*)ADDR_PIT;
 
 static void arch_timer_handler(void *priv)
 {
-    ASM("e_add16i 1, 1, -4");
-    ASM("se_mflr 0");
-    ASM("e_stw 0, 0 (1)");
+    ASM("e_add16i %r1, %r1, -4");
+    ASM("se_mflr %r0");
+    ASM("e_stw %r0, 0 (%r1)");
 
     arch_assert_void(priv == NULL);
 
-    ASM("mfsprg 3, 0");         /* load task pointer from sprg0 */
+    ASM("mfsprg %r3, 0");         /* load task pointer from sprg0 */
     ASM("e_bl picoRTOS_tick");  /* call tick */
-    ASM("mtsprg 0, 3");         /* store returned task stack pointer */
+    ASM("mtsprg 0, %r3");         /* store returned task stack pointer */
 
     /* reset flag */
     PIT->PIT[PIT_INDEX].TFLGn = (uint32_t)1;
 
-    ASM("se_lwz 0, 0 (1)");
-    ASM("se_mtlr 0");
-    ASM("e_add16i 1, 1, 4");
+    ASM("se_lwz %r0, 0 (%r1)");
+    ASM("se_mtlr %r0");
+    ASM("e_add16i %r1, %r1, 4");
 }
 
 void arch_timer_init(int period)

@@ -105,16 +105,6 @@ void arch_ack_interrupt(void)
 #ifdef CONFIG_SMP
 #include "picoRTOS-SMP_port.h"
 
-void arch_propagate_tick(void)
-{
-    INTC->SSCIR[0] = (uint8_t)SSCIR_SET;
-}
-
-void arch_acknowledge_tick(void)
-{
-    INTC->SSCIR[0] = (uint8_t)SSCIR_CLR;
-}
-
 static uint16_t prc_sel_from_mask(picoRTOS_mask_t core_mask)
 {
     arch_assert(core_mask != 0, return 0);

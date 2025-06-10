@@ -36,7 +36,7 @@ void arch_init(void)
     arch_intc_init();
 
     /* init periodic timer */
-    arch_timer_init((sysclk_hz / CONFIG_TICK_HZ) - 1);
+    arch_timer_init(sysclk_hz / CONFIG_TICK_HZ);
 }
 
 void arch_suspend(void)

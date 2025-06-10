@@ -27,29 +27,29 @@ struct STM {
 #define CCRn_CEN (1 << 0)
 #define CIRn_CIF (1 << 0)
 
+/* ASM */
+/*@external@*/ extern picoRTOS_core_t arch_core(void);
+
 /* instance */
 static struct STM *STM0 = (struct STM*)ADDR_STM0;
-static uint32_t timer_stm_period = 0;
+static uint32_t timer_stm_period
+__attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
 
 static void Timer_Handler(void)
 {
-    ASM("e_add16i 1, 1, -4");
-    ASM("se_mflr 0");
-    ASM("e_stw 0, 0 (1)");
-
-    ASM("mfsprg 3, 0");         /* load task pointer from sprg0 */
+    ASM("mfsprg %r3, 0");       /* load task pointer from sprg0 */
     ASM("e_bl picoRTOS_tick");  /* call tick */
-    ASM("mtsprg 0, 3");         /* store returned task stack pointer */
+    ASM("mtsprg 0, %r3");       /* store returned task stack pointer */
 
-    /* reset flag & prepare next tick */
-    STM0->CH[3].CIRn = (uint32_t)CIRn_CIF;
-    STM0->CH[3].CMPn += timer_stm_period;
-
-    ASM("se_lwz 0, 0 (1)");
-    ASM("se_mtlr 0");
-    ASM("e_add16i 1, 1, 4");
+    {
+        int core = (int)arch_core();
+        /* reset flag & prepare next tick */
+        STM0->CH[core].CIRn = (uint32_t)CIRn_CIF;
+        STM0->CH[core].CMPn += timer_stm_period;
+    }
 }
 
+#ifndef CONFIG_SMP
 void arch_timer_init(int period)
 {
     arch_assert_void(period > 0);
@@ -60,13 +60,39 @@ void arch_timer_init(int period)
     /* enable STM0 */
     STM0->CR = (uint32_t)(CR_FRZ | CR_TEN);
     /* setup period & start */
-    STM0->CH[3].CMPn = (uint32_t)timer_stm_period;
-    STM0->CH[3].CCRn = (uint32_t)CCRn_CEN;
+    STM0->CH[0].CMPn = (uint32_t)timer_stm_period;
+    STM0->CH[0].CCRn = (uint32_t)CCRn_CEN;
 
     /* register interrupt */
-    arch_register_interrupt((picoRTOS_irq_t)IRQ_STM0_CIR3, (arch_isr_fn)Timer_Handler, NULL);
-    arch_enable_interrupt((picoRTOS_irq_t)IRQ_STM0_CIR3);
+    arch_register_interrupt((picoRTOS_irq_t)IRQ_STM0_CIR0, (arch_isr_fn)Timer_Handler, NULL);
+    arch_enable_interrupt((picoRTOS_irq_t)IRQ_STM0_CIR0);
 }
+#else
+/* ASM */
+/*@external@*/ extern void arch_smp_enable_interrupt(picoRTOS_irq_t irq, picoRTOS_mask_t core_mask);
+
+void arch_timer_init(int period)
+{
+    arch_assert_void(period > 0);
+
+    size_t n = (size_t)CONFIG_SMP_CORES;
+
+    /* STM0 source clock is FS80 (half-speed) */
+    timer_stm_period = (uint32_t)period >> 1;
+    arch_flush_dcache(&timer_stm_period, sizeof(timer_stm_period));
+
+    /* enable STM0 */
+    STM0->CR = (uint32_t)(CR_FRZ | CR_TEN);
+    while (n-- != 0) {
+        /* setup period & start */
+        STM0->CH[n].CMPn = (uint32_t)timer_stm_period;
+        STM0->CH[n].CCRn = (uint32_t)CCRn_CEN;
+        /* register interrupt */
+        arch_register_interrupt((picoRTOS_irq_t)(IRQ_STM0_CIR0 + n), (arch_isr_fn)Timer_Handler, NULL);
+        arch_smp_enable_interrupt((picoRTOS_irq_t)(IRQ_STM0_CIR0 + n), (picoRTOS_mask_t)(1u << n));
+    }
+}
+#endif
 
 /* STAT OPS */
 

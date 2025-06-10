@@ -43,25 +43,6 @@ arch_core_start:
 
 	e_bl arch_start_first_task
 
-	.align 4
-	.type arch_SSCIR0, %function
-	.global arch_SSCIR0
-arch_SSCIR0:
-	/* preserve lr */
-	e_add16i r1, r1, -4
-	se_mflr r0
-	e_stw r0, 0 (r1)
-	/* tick */
-	mfsprg r3, 0		/* move task stack pointer to r3 */
-	e_bl picoRTOS_tick
-	mtsprg 0, r3		/* store returned task stack pointer */
-	/* restore lr */
-	se_lwz r0, 0 (r1)
-	se_mtlr r0
-	e_add16i r1, r1, 4
-	/* out */
-	se_blr
-
 	.section .sbss
 
 	.align 4
