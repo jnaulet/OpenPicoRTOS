@@ -175,7 +175,7 @@ static int spi_init(/*@partial@*/ struct devkit_mpc5748g *ctx)
     return 0;
 }
 
-/*@unused@*/
+#if FIX_THIS_LATER == 1
 static int twi_init(/*@partial@*/ struct devkit_mpc5748g *ctx)
 {
     struct twi_settings TWI_settings = {
@@ -193,6 +193,7 @@ static int twi_init(/*@partial@*/ struct devkit_mpc5748g *ctx)
 
     return 0;
 }
+#endif
 
 static int uart_init(/*@partial@*/ struct devkit_mpc5748g *ctx)
 {
