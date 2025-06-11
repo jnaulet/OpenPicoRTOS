@@ -6,18 +6,13 @@
 
 /* ASM */
 /*@external@*/ extern void arch_core_start(void);
-/*@external@*/ extern void arch_SSCIR0(void *priv);
 
 /* STACK */
 /*@external@*/ extern picoRTOS_stack_t *arch_core_sp[CONFIG_SMP_CORES - 1];
 
 /* DRIVERS */
 /*@external@*/ extern void arch_spinlock_init(void);
-/*@external@*/ extern void arch_smp_intc_init(void);
 /*@external@*/ extern void arch_core_run(picoRTOS_core_t core);
-
-/* SPRS */
-/*@external@*/ extern uint32_t arch_mfdecar(void);
 
 /* SW LOCK */
 static bool aux_core_is_idling
@@ -43,17 +38,11 @@ void arch_core_init(picoRTOS_core_t core,
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
     /* prepare core main stack */
-    stack += (stack_count - (size_t)3);
+    stack += (stack_count - (size_t)2);
     stack[0] = (picoRTOS_stack_t)sp;
-    stack[1] = (picoRTOS_stack_t)arch_mfdecar();
 
     /* store in exchange ram */
     arch_core_sp[core - 1] = stack;
-
-    /* enable propagated tick interrupt */
-    arch_register_interrupt((picoRTOS_irq_t)IRQ_SSCIR0, arch_SSCIR0, NULL);
-    arch_smp_enable_interrupt((picoRTOS_irq_t)IRQ_SSCIR0,
-                              (picoRTOS_mask_t)1 << core);
 
     /* reset state machine */
     aux_core_is_idling = false;

@@ -104,16 +104,6 @@ void arch_ack_interrupt(void)
 #ifdef CONFIG_SMP
 #include "picoRTOS-SMP_port.h"
 
-void arch_propagate_tick(void)
-{
-    INTC->SSCIR[0] = (uint8_t)SSCIR_SET;
-}
-
-void arch_acknowledge_tick(void)
-{
-    INTC->SSCIR[0] = (uint8_t)SSCIR_CLR;
-}
-
 /* INTERRUPT OPS */
 
 #define PRC_SELn_PROC_0        0x0

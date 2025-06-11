@@ -21,6 +21,12 @@ c_src-$(CONFIG_MACH_MPC574X) += $(arch-powerpc)/e200z4/mach-mpc574x/intc-siul2.c
 c_src-$(CONFIG_MACH_MPC574X) += $(arch-powerpc)/e200z4/mach-mpc574x/timer-stm.c
 a_src-$(CONFIG_MACH_MPC577X) += $(arch-powerpc)/e200z7/mach-mpc577x/startup.S
 c_src-$(CONFIG_MACH_MPC577X) += $(arch-powerpc)/e200z7/mach-mpc577x/intc-siu.c
+ifeq ($(CONFIG_SMP),y)
+c_src-$(CONFIG_MACH_MPC577X) += $(arch-powerpc)/e200z7/mach-mpc577x/timer-stm.c
+else
+c_src-$(CONFIG_MACH_MPC577X) += $(arch-powerpc)/e200z7/timer-dec.c
+endif
+
 
 # mcpu
 cpu-$(CONFIG_E200Z4) := -mcpu=e200z4

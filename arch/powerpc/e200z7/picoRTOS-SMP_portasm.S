@@ -43,46 +43,13 @@ arch_core_start:
 	/* IVORS */
 	e_bl arch_init_ivors
 
-	/* timebase */
-	mfhid0 r3
-	E_LIW r4, ~((1 << 14) | (1 << 13)) /* ~(TBEN | SEL_TLCLK) */
-	and r3, r3, r4
-	mthid0 r3
-
 	/* get first task sp */
 	e_lwz r3, 0 (r1)
-	/* setup decrementer */
-	e_lwz r4, 4 (r1)
-	mtdecar r4
-	mtdec r4
+
 	/* consume stack */
-	e_add16i r1, r1, 8
+	e_add16i r1, r1, 4
 
 	e_bl arch_start_first_task
-
-	.text
-
-	.align 4
-	.type arch_SSCIR0, %function
-	.global arch_SSCIR0
-arch_SSCIR0:
-	/* preserve lr */
-	e_add16i r1, r1, -4
-	se_mflr r0
-	e_stw r0, 0 (r1)
-	/* reset DEC */
-	mfdecar r3
-	mtdec r3
-	/* tick */
-	mfsprg r3, 0		/* move task stack pointer to r3 */
-	e_bl picoRTOS_tick
-	mtsprg 0, r3		/* store returned task stack pointer */
-	/* restore lr */
-	se_lwz r0, 0 (r1)
-	se_mtlr r0
-	e_add16i r1, r1, 4
-	/* out */
-	se_blr
 
 	.section .sbss
 

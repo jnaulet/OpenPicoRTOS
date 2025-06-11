@@ -32,6 +32,8 @@
 
 #define ADDR_PLLDIG   0xffe74000
 
+#define ADDR_STMA     0xfff3c000
+
 #define ADDR_EDMAA    0xfff44000
 #define ADDR_EDMAB    0xfff54000
 
@@ -60,6 +62,19 @@
 /* IRQs */
 
 #define IRQ_SSCIR0 0
+#define IRQ_SSCIR1 1
+#define IRQ_SSCIR2 2
+#define IRQ_SSCIR3 3
+#define IRQ_SSCIR4 4
+#define IRQ_SSCIR5 5
+#define IRQ_SSCIR6 6
+#define IRQ_SSCIR7 7
+
+#define IRQ_STM_CIR0 200
+#define IRQ_STM_CIR1 201
+#define IRQ_STM_CIR2 201
+#define IRQ_STM_CIR3 201
+
 /* TBD */
 
 /* DEVICE */
