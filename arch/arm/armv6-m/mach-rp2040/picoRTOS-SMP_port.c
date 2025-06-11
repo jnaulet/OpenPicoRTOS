@@ -7,8 +7,12 @@
 # error Deadlock count is not defined
 #endif
 
+#if CONFIG_RP2040_PWM_CHANNEL > 7
+# error Wrong PWM channel number
+#endif
+
 /* PWM */
-#define PWM_CHn  7
+#define PWM_CHn  CONFIG_RP2040_PWM_CHANNEL
 #define PWM_CSR  ((volatile unsigned long*)(ADDR_PWM + (PWM_CHn * 0x14) + 0x0))
 #define PWM_DIV  ((volatile unsigned long*)(ADDR_PWM + (PWM_CHn * 0x14) + 0x4))
 #define PWM_CTR  ((volatile unsigned long*)(ADDR_PWM + (PWM_CHn * 0x14) + 0x8))

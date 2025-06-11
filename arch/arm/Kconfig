@@ -20,6 +20,11 @@ source arch/arm/armv6-m/Kconfig
 source arch/arm/armv7-m/Kconfig
 source arch/arm/armv7e-m/Kconfig
 
+config RP2040_PWM_CHANNEL
+       int "PWM channel to use as SysTick"
+       depends on MACH_RP2040 && SMP
+       default 7
+
 config L1_CACHE_LINESIZE
        int "Data cache line size"
        depends on ARMV7EM
