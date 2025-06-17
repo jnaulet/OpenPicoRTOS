@@ -19,7 +19,9 @@ __sfr __at(ADDR_SBUF_1) SBUF_1;
 #else
 static unsigned char PCON;
 static unsigned char SCON;
+# ifdef CONFIG_UART_N76E003_UART1
 static unsigned char SCON_1;
+# endif
 static unsigned char TMOD;
 static unsigned char TCON;
 static unsigned char CKCON;
@@ -28,7 +30,9 @@ static unsigned char T3CON;
 static unsigned char RL3;
 static unsigned char RH3;
 static unsigned char SBUF;
+# ifdef CONFIG_UART_N76E003_UART1
 static unsigned char SBUF_1;
+# endif
 #endif
 
 #define PCON_SMOD  (1 << 7)
@@ -117,6 +121,7 @@ static int set_baudrate(const struct uart *ctx, unsigned long baudrate)
         /*@notreached@*/ return -EIO;
     }
 
+#ifdef CONFIG_UART_N76E003_UART1
     /* UART 1 */
 
     SCON_1 = (unsigned char)(SCONx_SM(2) | SCONx_REN);
@@ -127,6 +132,7 @@ static int set_baudrate(const struct uart *ctx, unsigned long baudrate)
     RH3 = (unsigned char)((65536ul - (num / baudrate)) >> 8);
     RL3 = (unsigned char)(65536ul - (num / baudrate));
     T3CON |= T3CON_TR3; /* start timer */
+#endif
     return 0;
 }
 
@@ -160,6 +166,7 @@ static int uart0_write(struct uart *ctx, char c)
     return -EAGAIN;
 }
 
+#ifdef CONFIG_UART_N76E003_UART1
 static int uart1_write(struct uart *ctx, char c)
 {
     /* if tx succeeded or it's the first frame we send */
@@ -172,6 +179,7 @@ static int uart1_write(struct uart *ctx, char c)
 
     return -EAGAIN;
 }
+#endif
 
 int uart_write(struct uart *ctx, const char *buf, size_t n)
 {
@@ -185,7 +193,9 @@ int uart_write(struct uart *ctx, const char *buf, size_t n)
         switch (ctx->uart) {
         case UART_N76E003_UART0_T1: /*@fallthrough@*/
         case UART_N76E003_UART0_T3: res = uart0_write(ctx, *buf); break;
+#ifdef CONFIG_UART_N76E003_UART1
         case UART_N76E003_UART1_T3: res = uart1_write(ctx, *buf); break;
+#endif
         default:
             picoRTOS_break();
             /*@notreached@*/ return -EIO;
@@ -214,6 +224,7 @@ static int uart0_read(char *c)
     return -EAGAIN;
 }
 
+#ifdef CONFIG_UART_N76E003_UART1
 static int uart1_read(char *c)
 {
     if ((SCON_1 & SCONx_RI) != (unsigned char)0) {
@@ -224,6 +235,7 @@ static int uart1_read(char *c)
 
     return -EAGAIN;
 }
+#endif
 
 /* cppcheck-suppress [constParameterPointer] */
 int uart_read(struct uart *ctx, char *buf, size_t n)
@@ -238,7 +250,9 @@ int uart_read(struct uart *ctx, char *buf, size_t n)
         switch (ctx->uart) {
         case UART_N76E003_UART0_T1: /*@fallthrough@*/
         case UART_N76E003_UART0_T3: res = uart0_read(buf); break;
+#ifdef CONFIG_UART_N76E003_UART1
         case UART_N76E003_UART1_T3: res = uart1_read(buf); break;
+#endif
         default:
             picoRTOS_break();
             /*@notreached@*/ return -EIO;
