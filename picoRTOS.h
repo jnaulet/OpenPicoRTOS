@@ -69,20 +69,20 @@ picoRTOS_pid_t picoRTOS_self(void);                                 /* gets the 
 #define PICORTOS_DELAY_SEC(x) (picoRTOS_tick_t)((x) * CONFIG_TICK_HZ)
 
 /* Macro: PICORTOS_DELAY_MSEC(x)
- * Converts milliseconds to picoRTOS_tick_t
+ * Converts milliseconds to picoRTOS_tick_t (rounded to closest upper tick)
  *
  * Parameters:
  *  x - a value in milliseconds
  */
-#define PICORTOS_DELAY_MSEC(x) (picoRTOS_tick_t)(((x) * CONFIG_TICK_HZ) / 1000)
+#define PICORTOS_DELAY_MSEC(x) (picoRTOS_tick_t)((((x) * CONFIG_TICK_HZ) + 999) / 1000)
 
 /* Macro: PICORTOS_DELAY_USEC(x)
- * Converts microseconds in picoRTOS_tick_t
+ * Converts microseconds in picoRTOS_tick_t (rounded to closest upper tick)
  *
  * Parameters:
  *  x - a value in microseconds
  */
-#define PICORTOS_DELAY_USEC(x) (picoRTOS_tick_t)(((x) * CONFIG_TICK_HZ) / 1000000)
+#define PICORTOS_DELAY_USEC(x) (picoRTOS_tick_t)((((x) * CONFIG_TICK_HZ) + 999999) / 1000000)
 
 /* Macro: PICORTOS_DELAY_ELAPSED(ref, x)
  * Checks if a specific delay has passed since ref
