@@ -81,6 +81,7 @@ static int master_rw_idle(struct twi *ctx, int flags)
     }
 
     if (!ctx->pending) {
+        I2CON &= ~I2CON_SI;
         I2CON = (unsigned char)(I2CON_STA | I2CON_I2CEN);
         ctx->pending = true;
 
@@ -178,7 +179,7 @@ static int master_write_data(struct twi *ctx, const void *buf, size_t n, int fla
             }else if (I2STAT == (unsigned char)0x30) {
                 /* NACK */
                 I2CON |= I2CON_STO;
-                ctx->state = TWI_N76E003_STATE_STOP;
+                ctx->state = TWI_N76E003_STATE_IDLE;
                 res = 1;
 
             }else{
@@ -195,14 +196,6 @@ static int master_write_data(struct twi *ctx, const void *buf, size_t n, int fla
     return res;
 }
 
-static int master_rw_stop(struct twi *ctx)
-{
-    /* inform caller it's end of data */
-    I2CON &= ~I2CON_SI;
-    ctx->state = TWI_N76E003_STATE_IDLE;
-    return 0;
-}
-
 int twi_write(struct twi *ctx, const void *buf, size_t n, int flags)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
@@ -211,7 +204,6 @@ int twi_write(struct twi *ctx, const void *buf, size_t n, int flags)
     case TWI_N76E003_STATE_IDLE: return master_rw_idle(ctx, flags);
     case TWI_N76E003_STATE_START: return master_rw_start(ctx, (unsigned char)TWI_WRITE, flags);
     case TWI_N76E003_STATE_DATA: return master_write_data(ctx, buf, n, flags);
-    case TWI_N76E003_STATE_STOP: return master_rw_stop(ctx);
     default: break;
     }
 
@@ -240,12 +232,10 @@ static int master_read_data(struct twi *ctx, void *buf, size_t n, int flags)
             }else if (I2STAT == (unsigned char)0x58) {
                 /* RX, NACK */
                 *(unsigned char*)buf = I2DAT;
-                if ((flags & TWI_F_STOP) != 0) {
+                if ((flags & TWI_F_STOP) != 0)
                     I2CON |= I2CON_STO;
-                    ctx->state = TWI_N76E003_STATE_STOP;
-                }else
-                    ctx->state = TWI_N76E003_STATE_IDLE;
 
+                ctx->state = TWI_N76E003_STATE_IDLE;
                 res = 1;
 
             }else {
@@ -256,7 +246,6 @@ static int master_read_data(struct twi *ctx, void *buf, size_t n, int flags)
 
             /* reset */
             ctx->pending = false;
-            I2CON &= ~I2CON_SI;
         }
     }
 
@@ -271,7 +260,6 @@ int twi_read(struct twi *ctx, void *buf, size_t n, int flags)
     case TWI_N76E003_STATE_IDLE: return master_rw_idle(ctx, flags);
     case TWI_N76E003_STATE_START: return master_rw_start(ctx, (unsigned char)TWI_READ, flags);
     case TWI_N76E003_STATE_DATA: return master_read_data(ctx, buf, n, flags);
-    case TWI_N76E003_STATE_STOP: return master_rw_stop(ctx);
     default: break;
     }
 
