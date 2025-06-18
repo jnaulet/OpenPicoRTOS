@@ -22,7 +22,7 @@ cc-files-y := $(filter $(srctree)%,$(all-files-y))
 
 all-files-y += $(sort $(call cmd_dep_S,$(a_src-y)))
 # sdcc can't solve assembly includes, hotfix
-all-files-y += $(wildcard $(subst -I,,$(include-y))/macros.S)
+all-files-y += $(foreach i,$(subst -I,,$(include-y)),$(wildcard $i/macros.S))
 
 os-files-y := $(filter $(srctree)%,$(all-files-y))
 PHONY += $(os-files-y)
