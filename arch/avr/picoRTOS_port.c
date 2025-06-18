@@ -111,17 +111,3 @@ void arch_disable_interrupt(picoRTOS_irq_t irq)
     arch_assert_void(irq < (picoRTOS_irq_t)(DEVICE_INTERRUPT_VECTOR_COUNT + 1));
     /* no effect */
 }
-
-/* CACHES */
-
-void arch_invalidate_dcache(/*@unused@*/ void *addr, /*@unused@*/ size_t n)
-{
-    /*@i@*/ (void)addr;
-    /*@i@*/ (void)n;
-}
-
-void arch_flush_dcache(/*@unused@*/ void *addr, /*@unused@*/ size_t n)
-{
-    /*@i@*/ (void)addr;
-    /*@i@*/ (void)n;
-}

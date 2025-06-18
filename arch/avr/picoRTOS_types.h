@@ -34,4 +34,7 @@ typedef unsigned int picoRTOS_uintptr_t;
 # define arch_break() ASM("break")
 #endif
 
+#define arch_invalidate_dcache(x, y) /*@i@*/ (void)x
+#define arch_flush_dcache(x, y)      /*@i@*/ (void)x
+
 #endif

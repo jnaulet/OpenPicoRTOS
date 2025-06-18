@@ -60,7 +60,7 @@ void arch_timer_init(int period)
     size_t fmperdiv = (size_t)(SYSDIV_FMPERDIV_M & (*SYSDIV >> SYSDIV_FMPERDIV_S)) + 1;
 
     timer_stm_period = (uint32_t)period >> fmperdiv;
-    arch_flush_dcache(&timer_stm_period, sizeof(timer_stm_period));
+    arch_flush_dcache_opt(&timer_stm_period, sizeof(timer_stm_period));
 
     /* enable STMA */
     STMA->CR = (uint32_t)(CR_FRZ | CR_TEN);
@@ -76,7 +76,7 @@ void arch_timer_init(int period)
 
 /* STAT OPS */
 
-picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
+picoRTOS_cycles_t arch_counter_opt(arch_counter_t counter, picoRTOS_cycles_t t)
 {
     arch_assert_void(counter < ARCH_COUNTER_COUNT);
 

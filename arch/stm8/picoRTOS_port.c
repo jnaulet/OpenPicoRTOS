@@ -123,29 +123,3 @@ void arch_disable_interrupt(picoRTOS_irq_t irq)
     arch_assert_void(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT);
     /* no effect */
 }
-
-/* STATS */
-
-picoRTOS_cycles_t arch_counter(/*@unused@*/ arch_counter_t counter,
-                               /*@unused@*/ picoRTOS_cycles_t t)
-{
-    /* ignore stats for the moment */
-    /*@i@*/ (void)counter;
-    /*@i@*/ (void)t;
-
-    return 0;
-}
-
-/* CACHES */
-
-void arch_invalidate_dcache(/*@unused@*/ void *addr, /*@unused@*/ size_t n)
-{
-    /*@i@*/ (void)addr;
-    /*@i@*/ (void)n;
-}
-
-void arch_flush_dcache(/*@unused@*/ void *addr, /*@unused@*/ size_t n)
-{
-    /*@i@*/ (void)addr;
-    /*@i@*/ (void)n;
-}

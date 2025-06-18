@@ -24,4 +24,8 @@ typedef unsigned long picoRTOS_uintptr_t;
 # define arch_break() ASM("int3")
 #endif
 
+/* CACHES: unsupported */
+#define arch_invalidate_dcache(x, y) /*@i@*/ (void)x
+#define arch_flush_dcache(x, y)      /*@i@*/ (void)x
+
 #endif

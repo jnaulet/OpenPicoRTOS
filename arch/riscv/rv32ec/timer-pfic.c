@@ -31,7 +31,7 @@ int arch_timer_init(void)
 
 /* STATS */
 
-picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
+picoRTOS_cycles_t arch_counter_opt(arch_counter_t counter, picoRTOS_cycles_t t)
 {
     arch_assert_void(counter < ARCH_COUNTER_COUNT);
 

@@ -64,8 +64,8 @@ void arch_timer_init(void)
 
 /* STATS */
 
-picoRTOS_cycles_t arch_counter(/*@unused@*/ arch_counter_t counter,
-                               /*@unused@*/ picoRTOS_cycles_t t)
+picoRTOS_cycles_t arch_counter_opt(/*@unused@*/ arch_counter_t counter,
+                                   /*@unused@*/ picoRTOS_cycles_t t)
 {
     /*@i@*/ (void)counter;
     /*@i@*/ (void)t;

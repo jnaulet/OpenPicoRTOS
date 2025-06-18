@@ -79,7 +79,7 @@ void arch_timer_init(int period)
 
     /* STM0 source clock is FS80 (half-speed) */
     timer_stm_period = (uint32_t)period >> 1;
-    arch_flush_dcache(&timer_stm_period, sizeof(timer_stm_period));
+    arch_flush_dcache_opt(&timer_stm_period, sizeof(timer_stm_period));
 
     /* enable STM0 */
     STM0->CR = (uint32_t)(CR_FRZ | CR_TEN);
@@ -96,7 +96,7 @@ void arch_timer_init(int period)
 
 /* STAT OPS */
 
-picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
+picoRTOS_cycles_t arch_counter_opt(arch_counter_t counter, picoRTOS_cycles_t t)
 {
     arch_assert_void(counter < ARCH_COUNTER_COUNT);
 

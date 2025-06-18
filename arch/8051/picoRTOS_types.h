@@ -35,7 +35,7 @@ typedef unsigned int picoRTOS_uintptr_t;
 # define main main_no_sdcc_init
 
 /*
- * Yet another SDCC ack for atttributes
+ * Yet another SDCC hack for atttributes
  */
 # define __attribute__(x)
 #endif
@@ -43,5 +43,10 @@ typedef unsigned int picoRTOS_uintptr_t;
 
 /* very-specific */
 void arch_timer_ack(void);
+
+/* STUB OPTIONAL API */
+#define arch_counter(x, y)           0
+#define arch_invalidate_dcache(x, y) /*@i@*/ (void)x
+#define arch_flush_dcache(x, y)      /*@i@*/ (void)x
 
 #endif

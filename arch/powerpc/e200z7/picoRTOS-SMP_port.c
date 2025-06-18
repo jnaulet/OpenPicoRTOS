@@ -46,14 +46,14 @@ void arch_core_init(picoRTOS_core_t core,
 
     /* reset state machine */
     aux_core_is_idling = false;
-    arch_flush_dcache(&aux_core_is_idling, sizeof(aux_core_is_idling));
+    arch_flush_dcache_opt(&aux_core_is_idling, sizeof(aux_core_is_idling));
 
     /* start */
     arch_core_run(core);
 
     /* wait until aux core is idling */
     while (!aux_core_is_idling && deadlock-- != 0) {
-        arch_invalidate_dcache(&aux_core_is_idling, sizeof(aux_core_is_idling));
+        arch_invalidate_dcache_opt(&aux_core_is_idling, sizeof(aux_core_is_idling));
         arch_delay_us(1ul);
 #if defined(CONFIG_DEBUG_AUX_CORE_STARTUP) && !defined(S_SPLINT_S)
 # warning CONFIG_DEBUG_AUX_CORE_STARTUP is defined ! Debug only !
@@ -68,7 +68,7 @@ void arch_idle(void)
 {
     /* signal we're idling */
     aux_core_is_idling = true;
-    arch_flush_dcache(&aux_core_is_idling, sizeof(aux_core_is_idling));
+    arch_flush_dcache_opt(&aux_core_is_idling, sizeof(aux_core_is_idling));
 
     for (;;)
         ASM("wait");

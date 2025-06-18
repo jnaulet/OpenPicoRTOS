@@ -15,7 +15,7 @@
 #define CMCC_INDEX_M     0x3fu
 #define CMCC_INDEX(addr) (CMCC_INDEX_M & ((addr) >> (ARCH_L1_DCACHE_LINESIZE / 4)))
 
-void arch_invalidate_dcache(void *addr, size_t n)
+void arch_invalidate_dcache_opt(void *addr, size_t n)
 {
     arch_assert_void(n > 0);
 

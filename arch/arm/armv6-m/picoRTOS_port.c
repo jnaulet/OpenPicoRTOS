@@ -122,7 +122,7 @@ void arch_disable_interrupt(picoRTOS_irq_t irq)
 
 /* STATS */
 
-picoRTOS_cycles_t __attribute__((weak)) arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
+picoRTOS_cycles_t __attribute__((weak)) arch_counter_opt(arch_counter_t counter, picoRTOS_cycles_t t)
 {
     arch_assert_void(counter < ARCH_COUNTER_COUNT);
 
@@ -142,20 +142,6 @@ picoRTOS_cycles_t __attribute__((weak)) arch_counter(arch_counter_t counter, pic
 
     arch_assert_void(false);
     return 0;
-}
-
-/* CACHES */
-
-void arch_invalidate_dcache(/*@unused@*/ void *addr, /*@unused@*/ size_t n)
-{
-    /*@i@*/ (void)addr;
-    /*@i@*/ (void)n;
-}
-
-void arch_flush_dcache(/*@unused@*/ void *addr, /*@unused@*/ size_t n)
-{
-    /*@i@*/ (void)addr;
-    /*@i@*/ (void)n;
 }
 
 /* CLOCKS */

@@ -29,4 +29,8 @@ typedef unsigned long picoRTOS_uintptr_t;
 # define arch_break() ASM("bkpt")
 #endif
 
+/* STUB OPTIONAL API */
+#define arch_invalidate_dcache(x, y) /*@i@*/ (void)x
+#define arch_flush_dcache(x, y)      /*@i@*/ (void)x
+
 #endif

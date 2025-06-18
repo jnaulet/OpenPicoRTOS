@@ -77,30 +77,3 @@ void arch_register_interrupt(picoRTOS_irq_t irq, arch_isr_fn fn, void *priv)
     ISR_TABLE[irq].fn = fn;
     ISR_TABLE[irq].priv = priv;
 }
-
-/* STATS */
-
-picoRTOS_cycles_t arch_counter(/*@unused@*/ arch_counter_t counter,
-                               /*@unused@*/ picoRTOS_cycles_t t)
-{
-    /* ignore stats as it's very time consuming & there's no way to look
-     * at them anyway */
-    /*@i@*/ (void)counter;
-    /*@i@*/ (void)t;
-
-    return 0;
-}
-
-/* CACHES */
-
-void arch_invalidate_dcache(/*@unused@*/ void *addr, /*@unused@*/ size_t n)
-{
-    /*@i@*/ (void)addr;
-    /*@i@*/ (void)n;
-}
-
-void arch_flush_dcache(/*@unused@*/ void *addr, /*@unused@*/ size_t n)
-{
-    /*@i@*/ (void)addr;
-    /*@i@*/ (void)n;
-}

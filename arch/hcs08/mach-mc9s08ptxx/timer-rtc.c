@@ -80,8 +80,8 @@ void arch_delay_us(unsigned long n)
 
 /* STATS */
 
-picoRTOS_cycles_t arch_counter(/*@unused@*/ arch_counter_t counter,
-                               /*@unused@*/ picoRTOS_cycles_t t)
+picoRTOS_cycles_t arch_counter_opt(/*@unused@*/ arch_counter_t counter,
+                                   /*@unused@*/ picoRTOS_cycles_t t)
 {
     arch_assert_void(counter < ARCH_COUNTER_COUNT);
 
