@@ -1,6 +1,7 @@
 menu "RNG drivers"
 
 config RNG_STM32H7XX_TRNG
+       depends on ARM
        bool "STM32H7xx True Random Number Generator"
 
 endmenu
