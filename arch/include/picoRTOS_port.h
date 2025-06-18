@@ -235,14 +235,15 @@ extern /*@unused@*/ void arch_disable_interrupt(picoRTOS_irq_t irq);
 
 /* STATS */
 
+#ifndef arch_counter
 typedef enum {
     ARCH_COUNTER_CURRENT,
     ARCH_COUNTER_SINCE,
     ARCH_COUNTER_COUNT
 } arch_counter_t;
 
-/* Function: arch_counter
- * Provides the current cpu counter value
+/* Function: arch_counter_opt
+ * Provides the current cpu counter value (optional)
  *
  * This value should be between (0-PICORTOS_CYCLES_PER_TICK) and will
  * be used to populate the watermarks in picoRTOS_core::task[n]::stat
@@ -254,27 +255,35 @@ typedef enum {
  * Returns:
  *  The value of the counter in picoRTOS_cycles_t
  */
-extern /*@external@*/ picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t);
+extern /*@external@*/ picoRTOS_cycles_t arch_counter_opt(arch_counter_t counter, picoRTOS_cycles_t t);
+# define arch_counter arch_counter_opt
+#endif
 
 /* CACHES */
 
-/* Function: arch_invalidate_dcache
- * Invalidates one or more cache lines
+#ifndef arch_invalidate_dcache
+/* Function: arch_invalidate_dcache_opt
+ * Invalidates one or more cache lines (optional)
  *
  * Parameters:
  *  addr - A cacheable address in RAM
  *  n - The number of bytes to invalidate
  */
-extern /*@external@*/ void arch_invalidate_dcache(void *addr, size_t n);
+extern /*@external@*/ void arch_invalidate_dcache_opt(void *addr, size_t n);
+# define arch_invalidate_dcache arch_invalidate_dcache_opt
+#endif
 
-/* Function: arch_flush_dcache
- * Flushes one or more cache lines
+#ifndef arch_flush_dcache
+/* Function: arch_flush_dcache_opt
+ * Flushes one or more cache lines (optional)
  *
  * Parameters:
  *  addr - A cacheable address in RAM
  *  n - The number of bytes to flush
  */
-extern /*@external@*/ void arch_flush_dcache(void *addr, size_t n);
+extern /*@external@*/ void arch_flush_dcache_opt(void *addr, size_t n);
+# define arch_flush_dcache arch_flush_dcache_opt
+#endif
 
 /* CLOCKS */
 
