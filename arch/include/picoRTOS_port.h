@@ -254,7 +254,7 @@ typedef enum {
  * Returns:
  *  The value of the counter in picoRTOS_cycles_t
  */
-extern picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t);
+extern /*@external@*/ picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t);
 
 /* CACHES */
 

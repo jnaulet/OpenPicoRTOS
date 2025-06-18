@@ -320,6 +320,7 @@ naturaldocs: FORCE
 cloc: FORCE
 	cloc scheduler/picoRTOS.c
 	cloc scheduler/picoRTOS-SMP.c
+	cloc scheduler/picoRTOS-lite.c
 
 check: FORCE
 	cd test && ./run_tests.sh

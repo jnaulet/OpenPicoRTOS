@@ -9,6 +9,9 @@ config SINGLE_CORE
 config SMP
        bool "picoRTOS-SMP (SMP)"
 
+config LITE
+       bool "picoRTOS-lite (single core, no round-robin)"
+
 endchoice
 
 config SMP_CORES
