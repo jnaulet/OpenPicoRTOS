@@ -24,7 +24,7 @@ typedef enum {
 struct adc_stm32h7xx_sar {
     /* result (clangtidy performance issue) */
     uint32_t DR[ADC_STM32H7XX_SAR_SEQUENCE_COUNT]
-    __ATTRIBUTE_ALIGNED__(ARCH_L1_DCACHE_LINESIZE);
+    __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
     uint32_t DR_mask;
     /* base */
     /*@temp@*/ struct ADC_STM32H7XX_SAR *base;

@@ -30,8 +30,8 @@ struct can {
     size_t n_filter_29bit;
     /* use later */
     size_t n_words;
-  /* bus off */
-  int bus_off_recovery;
+    /* bus off */
+    int bus_off_recovery;
 };
 
 int can_stm32h7xx_fdcan_init(/*@out@*/ struct can *ctx, int base, clock_id_t clkid,

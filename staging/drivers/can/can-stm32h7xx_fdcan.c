@@ -369,7 +369,7 @@ struct rx_buf {
     volatile uint32_t R1;
     volatile uint32_t R2;
     volatile uint32_t R3;
-} __ATTRIBUTE_PACKED__;
+} __attribute__((packed));
 
 #define R0_ESI   (1u << 31)
 #define R0_XTD   (1 << 30)
@@ -392,7 +392,7 @@ struct tx_buf {
     volatile uint32_t T1;
     volatile uint32_t T2;
     volatile uint32_t T3;
-} __ATTRIBUTE_PACKED__;
+} __attribute__((packed));
 
 #define T0_ESI   (1u << 31)
 #define T0_XTD   (1 << 30)
@@ -411,7 +411,7 @@ struct tx_buf {
 struct tx_event {
     volatile uint32_t E0;
     volatile uint32_t E1;
-} __ATTRIBUTE_PACKED__;
+} __attribute__((packed));
 
 #define C99_E0_ESI   (1u << 31)
 #define C99_E0_XTD   (1 << 30)
