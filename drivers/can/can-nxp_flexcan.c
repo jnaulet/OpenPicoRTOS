@@ -1,5 +1,7 @@
 #include "can-nxp_flexcan.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
 #include <stdint.h>
@@ -314,9 +316,12 @@ static int nxp_flexcan_soft_reset(struct can *ctx)
     /* soft reset */
     ctx->base->MCR |= MCR_SOFTRST;
 
-    while (deadlock-- != 0)
+    while (deadlock-- != 0) {
         if ((ctx->base->MCR & MCR_SOFTRST) == 0)
             break;
+
+        arch_delay_us(1ul);
+    }
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
@@ -329,10 +334,13 @@ static int nxp_flexcan_freeze(struct can *ctx)
     /* set frz & halt */
     ctx->base->MCR |= (MCR_FRZ | MCR_HALT);
 
-    while (deadlock-- != 0)
+    while (deadlock-- != 0) {
         if ((ctx->base->MCR & MCR_FRZACK) != 0 &&
             (ctx->base->MCR & MCR_NOTRDY) != 0)
             break;
+
+        arch_delay_us(1ul);
+    }
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
@@ -345,10 +353,13 @@ static int nxp_flexcan_unfreeze(struct can *ctx)
     /* clear frz & halt */
     ctx->base->MCR &= ~(MCR_FRZ | MCR_HALT);
 
-    while (deadlock-- != 0)
+    while (deadlock-- != 0) {
         if ((ctx->base->MCR & MCR_FRZACK) == 0 &&
             (ctx->base->MCR & MCR_NOTRDY) == 0)
             break;
+
+        arch_delay_us(1ul);
+    }
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
