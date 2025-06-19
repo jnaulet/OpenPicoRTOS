@@ -1,5 +1,7 @@
 #include "spi-gd32vf103.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 #include <stdint.h>
 
@@ -197,6 +199,7 @@ static int spi_enable(struct spi *ctx)
     while ((ctx->base->SPI_CTL0 & SPI_CTL0_SPIEN) == 0 && deadlock-- != 0) {
         /*@i@*/ (void)ctx->base->SPI_STAT;
         ctx->base->SPI_CTL0 |= SPI_CTL0_SPIEN;
+        arch_delay_us(1ul);
     }
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
