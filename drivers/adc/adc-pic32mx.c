@@ -1,6 +1,7 @@
 #include "adc-pic32mx.h"
 
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
 #include <stdint.h>
@@ -222,10 +223,13 @@ static int vref_ready_busywait(struct adc_pic32mx *ctx)
 {
     int loop = CONFIG_DEADLOCK_COUNT;
 
-    while (loop-- != 0)
+    while (loop-- != 0) {
         if ((ctx->base->ADCCON2 & ADCCON2_BGVRRDY) != 0 &&
             (ctx->base->ADCCON2 & ADCCON2_REFFLT) == 0)
             break;
+
+        arch_delay_us(1ul);
+    }
 
     picoRTOS_assert(loop != -1, return -EBUSY);
     return 0;
@@ -304,9 +308,12 @@ static int wakeup_ready_busywait(struct adc *ctx)
     int loop = CONFIG_DEADLOCK_COUNT;
     struct adc_pic32mx *parent = ctx->parent;
 
-    while (loop-- != 0)
+    while (loop-- != 0) {
         if ((parent->base->ADCANCON & ADCANCON_WKRDYx(ctx->sar)) != 0)
             break;
+
+        arch_delay_us(1ul);
+    }
 
     picoRTOS_assert(loop != -1, return -EBUSY);
     return 0;
