@@ -23,10 +23,10 @@ static void clock_init(void)
                 0               /* pll1_r */
             },
             {
-                72000000ul,      /* pll2 vco */
-                2ul,      /* pll2_p */
-                0,      /* pll2_q */
-                0       /* pll2_r */
+                72000000ul, /* pll2 vco */
+                2ul,        /* pll2_p */
+                0,          /* pll2_q */
+                0           /* pll2_r */
             },
             {
                 0,      /* pll3 vco */
@@ -179,7 +179,8 @@ static void adc_init(/*@partial@*/ struct stm32h7xx_m *ctx)
     static struct dmamux DMAMUX1_0;
 
     /* ADC & DMA */
-    (void)adc_stm32h7xx_sar_init(&ADC3, ADDR_ADC3, ADC_STM32H7XX_SAR_MASTER);
+    (void)adc_stm32h7xx_sar_init(&ADC3, ADDR_ADC3, CLOCK_STM32H7XX_PLL2_Q_CK,
+                                 ADC_STM32H7XX_SAR_MASTER);
     (void)dmamux_stm32h7xx_init(&DMAMUX1_0, ADDR_DMAMUX1, (size_t)0);
     (void)dmamux_stm32h7xx_set_dmareq_id(&DMAMUX1_0, 115ul); /* adc3_dma */
 
@@ -194,6 +195,8 @@ static void adc_init(/*@partial@*/ struct stm32h7xx_m *ctx)
         ADC_STM32H7XX_SAR_PRESC_DIV1,
         ADC_STM32H7XX_SAR_CKMODE_CK_ADCX,
         ADC_STM32H7XX_SAR_CONT_SINGLE,
+        ADC_STM32H7XX_SAR_RES_12BITS,
+        1u, /* oversampling */
         DMA_ADC3_runtime
     };
 

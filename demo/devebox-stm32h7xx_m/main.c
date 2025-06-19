@@ -176,10 +176,7 @@ static void can_main(void *priv)
         /* random */
         while (rng_read(TRNG, tx, sizeof(tx)) < 0 &&
                !PICORTOS_DELAY_ELAPSED(ref, CAN_TIMEOUT) &&
-               deadlock-- != 0) {
-            picoRTOS_postpone();
-            continue;
-        }
+               deadlock-- != 0) picoRTOS_postpone();
 
         picoRTOS_assert_void(deadlock != -1);
         picoRTOS_assert_void(!PICORTOS_DELAY_ELAPSED(ref, CAN_TIMEOUT));
