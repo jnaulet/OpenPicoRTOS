@@ -14,6 +14,7 @@ DIR=unit_tests
 make -C $DIR
 ./$DIR/test_picoRTOS > $DIR.log
 ./$DIR/test_picoRTOS-SMP > $DIR.log
+./$DIR/test_picoRTOS-lite > $DIR.log
 
 # second: only show failures
 FAIL=$(grep FAIL $DIR.log)

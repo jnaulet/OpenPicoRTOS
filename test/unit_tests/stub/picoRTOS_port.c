@@ -30,7 +30,7 @@ void arch_syscall(syscall_t syscall, void *priv)
 {
 }
 
-void arch_idle(void *null)
+void arch_idle(void)
 {
 }
 
@@ -66,12 +66,7 @@ picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *var,
     return val;
 }
 
-picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
-{
-    return 0;
-}
-
-picoRTOS_cycles_t arch_count_since(picoRTOS_cycles_t y)
+picoRTOS_cycles_t arch_counter_opt(arch_counter_t counter, picoRTOS_cycles_t t)
 {
     return 0;
 }
@@ -113,14 +108,6 @@ void arch_spin_unlock(void)
 {
 }
 
-void arch_propagate_tick(void)
-{
-}
-
-void arch_acknowledge_tick(void)
-{
-}
-
 void arch_smp_enable_interrupt(picoRTOS_irq_t irq,
                                picoRTOS_mask_t core_mask)
 {
@@ -133,12 +120,12 @@ void arch_smp_disable_interrupt(picoRTOS_irq_t irq,
 
 /* CACHES */
 
-void arch_invalidate_dcache(void *addr __attribute__ ((unused)),
-                            size_t n __attribute__ ((unused)))
+void arch_invalidate_dcache_opt(void *addr __attribute__ ((unused)),
+                                size_t n __attribute__ ((unused)))
 {
 }
 
-void arch_flush_dcache(void *addr __attribute__ ((unused)),
-                       size_t n __attribute__ ((unused)))
+void arch_flush_dcache_opt(void *addr __attribute__ ((unused)),
+                           size_t n __attribute__ ((unused)))
 {
 }

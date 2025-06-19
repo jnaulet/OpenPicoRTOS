@@ -1,4 +1,4 @@
-TESTS := test_picoRTOS test_picoRTOS-SMP
+TESTS := test_picoRTOS test_picoRTOS-SMP test_picoRTOS-lite
 
 CC := gcc
 
@@ -7,7 +7,6 @@ BUILD_DIR = build
 
 CFLAGS := -I.  -Istub -I$(PICORTOS_DIR) -g3 -O0
 CFLAGS += -I$(PICORTOS_DIR)/arch/include
-CFLAGS += -D"__ATTRIBUTE_ALIGNED__(x)=__attribute__((aligned(x)))"
 
 LDFLAGS :=
 
@@ -22,6 +21,10 @@ test_picoRTOS: $(OBJ)
 
 test_picoRTOS-SMP: $(OBJ)
 	$(CC) $(CFLAGS) -DTEST_PICORTOS_SMP -c test.c -o $@.o
+	$(CC) $^ $@.o -o $@ $(LDFLAGS)
+
+test_picoRTOS-lite: $(OBJ)
+	$(CC) $(CFLAGS) -DTEST_PICORTOS_LITE -c test.c -o $@.o
 	$(CC) $^ $@.o -o $@ $(LDFLAGS)
 
 $(BUILD_DIR)/%.o: %.c
