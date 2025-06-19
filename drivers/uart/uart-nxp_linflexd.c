@@ -1,5 +1,7 @@
 #include "uart-nxp_linflexd.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 #include <stdint.h>
 
@@ -68,9 +70,12 @@ static int request_init_mode(struct uart *ctx)
     ctx->base->LINCR1 &= ~LINCR1_SLEEP;
     ctx->base->LINCR1 |= LINCR1_INIT;
 
-    while (deadlock-- != 0)
+    while (deadlock-- != 0) {
         if ((ctx->base->LINSR & LINSR_LINS(LINSR_LINS_M)) == LINSR_LINS(1))
             break;
+
+        arch_delay_us(1ul);
+    }
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
