@@ -56,9 +56,12 @@ static int enabled_and_stable_busywait(unsigned char mask)
 {
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    while (deadlock-- != 0)
+    while (deadlock-- != 0) {
         if ((CKSWT & mask) != (unsigned char)0)
             break;
+
+        arch_delay_us(1ul);
+    }
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
