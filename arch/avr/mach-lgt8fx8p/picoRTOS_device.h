@@ -6,6 +6,8 @@
 #define ADDR_PORTB  0x23
 #define ADDR_PORTC  0x26
 #define ADDR_PORTD  0x29
+#define ADDR_PORTE  0x2c
+#define ADDR_PORTF  0x32
 #define ADDR_TIFR0  0x35
 #define ADDR_TIFR1  0x36
 #define ADDR_TIFR2  0x37
@@ -20,7 +22,7 @@
 #define ADDR_TC0    0x44
 #define ADDR_TC1    0x80
 #define ADDR_TC2    0xb0
-#define ADDR_SPI    0x4c
+#define ADDR_SPI    0x39
 #define ADDR_SPMCSR 0x57
 #define ADDR_WDT    0x60
 #define ADDR_CLKPR  0x61
@@ -63,6 +65,6 @@
 /* DEVICE INFO */
 
 #define DEVICE_INTERRUPT_VECTOR_COUNT 25
-#define DEVICE_DEFAULT_SYSCLK_HZ      32000000ul
+#define DEVICE_DEFAULT_SYSCLK_HZ      4000000ul
 
 #endif

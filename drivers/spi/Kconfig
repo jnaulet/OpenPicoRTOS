@@ -20,6 +20,10 @@ config SPI_AVR_USART
        depends on AVR
        bool "AVR/ATMega series SPIM on USART"
 
+config SPI_LGT8FX8P
+       depends on AVR
+       bool "LogicGreen LGTFx8P series SPI"
+
 config SPI_GD32VF103
        depends on RISCV
        bool "GD32VF103 series SPI"
