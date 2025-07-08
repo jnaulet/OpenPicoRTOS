@@ -176,10 +176,19 @@ static int twi_rw_as_master_idle(struct twi *ctx, int flags)
     }
 
     /* 1. Application writes to TWCR to initiate transmission of START */
-    ctx->base->TWCR = (uint8_t)(TWCR_TWSTA | TWCR_TWEA | TWCR_TWEN);
+    ctx->base->TWCR = (uint8_t)(TWCR_TWINT | TWCR_TWSTA | TWCR_TWEN);
 
     ctx->state = TWI_AVR_STATE_START;
     return -EAGAIN;
+}
+
+static int twi_master_stop(struct twi *ctx, int ret)
+{
+    /* Application loads appropriate control signals to send STOP into TWCR,
+     * making sure that TWINT is written to one */
+    ctx->base->TWCR = (uint8_t)(TWCR_TWINT | TWCR_TWSTO | TWCR_TWEN);
+    ctx->state = TWI_AVR_STATE_IDLE;
+    return ret;
 }
 
 static int twi_rw_as_master_start(struct twi *ctx, twi_avr_rw_t rw)
@@ -195,17 +204,14 @@ static int twi_rw_as_master_start(struct twi *ctx, twi_avr_rw_t rw)
 
     /* 3. Check TWSR to see if START was sent */
     if (tws != TWSR_MT_START_SENT &&
-        tws != TWSR_MT_REPEATED_START_SENT) {
-        ctx->last = -EFAULT;
-        ctx->state = TWI_AVR_STATE_STOP;
-        return -EAGAIN;
-    }
+        tws != TWSR_MT_REPEATED_START_SENT)
+        return twi_master_stop(ctx, -EFAULT);
 
     /* Application loads SLA+W into TWDR, and loads appropriate control
      * signals into TWCR, makin sure that TWINT is written to one,
      * and TWSTA is written to zero */
     ctx->base->TWDR = (uint8_t)TWAR_TWA(ctx->slave_addr) | rw;
-    ctx->base->TWCR = twcr & ~TWCR_TWSTA;
+    ctx->base->TWCR = twcr & ~(TWCR_TWSTA | TWCR_TWSTO);
 
     ctx->state = TWI_AVR_STATE_SLA;
     return -EAGAIN;
@@ -223,11 +229,8 @@ static int twi_write_as_master_sla(struct twi *ctx, const void *buf, size_t n)
         return -EAGAIN;
 
     /* 5. Check TWSR to see if SLA+W was sent and ACK received */
-    if (tws != TWSR_MT_SLAW_SENT_ACK_RECV) {
-        ctx->last = -EPIPE;
-        ctx->state = TWI_AVR_STATE_STOP;
-        return -EAGAIN;
-    }
+    if (tws != TWSR_MT_SLAW_SENT_ACK_RECV)
+        return twi_master_stop(ctx, -EPIPE);
 
     /* Application loads data into TWDR, and loads appropriate control
      * signals into TWCR, making sure that TWINT is written to one */
@@ -269,12 +272,8 @@ static int twi_write_as_master_data(struct twi *ctx, const void *buf, size_t n)
         return 1;
     }
 
-    if (tws == TWSR_MT_BYTE_SENT_ACK_NOT_RECV) {
-        /* just stop */
-        ctx->last = 1;
-        ctx->state = TWI_AVR_STATE_STOP;
-        return -EAGAIN;
-    }
+    if (tws == TWSR_MT_BYTE_SENT_ACK_NOT_RECV)
+        return twi_master_stop(ctx, 1);
 
     picoRTOS_break();
     /*@notreached@*/
@@ -325,14 +324,12 @@ static int twi_read_as_master_sla(struct twi *ctx, size_t n)
         return -EAGAIN;
 
     /* 5. Check TWSR to see if SLA+W was sent and ACK received */
-    if (tws != TWSR_MR_SLAR_SENT_ACK_RECV) {
-        ctx->last = -EPIPE;
-        ctx->state = TWI_AVR_STATE_STOP;
-        return -EAGAIN;
-    }
+    if (tws != TWSR_MR_SLAR_SENT_ACK_RECV)
+        return twi_master_stop(ctx, -EPIPE);
 
     /* 1 byte xfer */
     if (n == (size_t)1) twcr &= ~TWCR_TWEA;
+    else twcr |= TWCR_TWEA;
 
     ctx->base->TWCR = twcr;
     ctx->state = TWI_AVR_STATE_DATA;
@@ -351,23 +348,15 @@ static int twi_read_as_master_data(struct twi *ctx, void *buf, size_t n)
         return -EAGAIN;
 
     if (tws != TWSR_MR_BYTE_RECV_ACK_RET &&
-        tws != TWSR_MR_BYTE_RECV_NACK_RET) {
-        ctx->last = -EIO;
-        ctx->state = TWI_AVR_STATE_STOP;
-        return -EAGAIN;
-    }
+        tws != TWSR_MR_BYTE_RECV_NACK_RET)
+        return twi_master_stop(ctx, -EIO);
 
     /* data received */
     *(uint8_t*)buf = ctx->base->TWDR;
 
-    if (n == (size_t)1) {
-        ctx->last = 1;
-        ctx->state = TWI_AVR_STATE_STOP;
-        return -EAGAIN;
-    }
-
     /* last byte xfer */
     if (n == (size_t)2) twcr &= ~TWCR_TWEA;
+    if (n == (size_t)1) return twi_master_stop(ctx, 1);
 
     ctx->base->TWCR = twcr;
     return 1;
