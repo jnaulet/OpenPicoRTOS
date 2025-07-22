@@ -44,17 +44,23 @@ typedef uint16_t twi_addr_t;
 #define TWI_WRITE 0
 #define TWI_READ  1
 
-/* Constants: TWI START/STOP, GCALL
+/* For backwards compatibility */
+#define TWI_F_START TWI_F_S
+#define TWI_F_STOP  TWI_F_P
+#define TWI_F_GC    TWI_F_G
+
+/* Constants: TWI START/STOP/RESTART, GCALL
  *
- * TWI_F_START - Begin with a start
- * TWI_F_STOP - End with a stop
- * TWI_F_NACK - End with a NACK
- * TWI_F_GC   - General call
+ * TWI_F_S - Begin with a start/repeated start
+ * TWI_F_P - End with a stop
+ * TWI_F_G - General call
+ * TWI_F_N(x) - Limits the current call transfer to n bytes
  */
-#define TWI_F_START (1 << 0)
-#define TWI_F_STOP  (1 << 1)
-#define TWI_F_NACK  (1 << 2)
-#define TWI_F_GC    (1 << 3)
+#define TWI_F_S    (1 << 10)
+#define TWI_F_P    (1 << 9)
+#define TWI_F_G    (1 << 8)
+#define TWI_F_N_M  0xff
+#define TWI_F_N(x) ((x) & TWI_F_N_M)
 
 /* Constants: TWI addresses
  *
