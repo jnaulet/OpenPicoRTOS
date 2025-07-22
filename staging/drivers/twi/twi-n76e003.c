@@ -75,7 +75,7 @@ static int master_rw_idle(struct twi *ctx, int flags)
 {
     int res = -EAGAIN;
 
-    if ((flags & TWI_F_START) == 0) {
+    if ((flags & TWI_F_S) == 0) {
         ctx->state = TWI_N76E003_STATE_DATA;
         return -EAGAIN;
     }
@@ -109,7 +109,7 @@ static int master_rw_idle(struct twi *ctx, int flags)
     return res;
 }
 
-static int master_rw_start(struct twi *ctx, unsigned char rw, /*@unused@*/ int flags)
+static int master_rw_start(struct twi *ctx, unsigned char rw)
 {
     picoRTOS_assert(rw <= (unsigned char)TWI_READ, return -EINVAL);
 
@@ -166,7 +166,7 @@ static int master_write_data(struct twi *ctx, const void *buf, size_t n, int fla
             if (I2STAT == (unsigned char)0x28) {
                 /* ACK */
                 if (n == (size_t)1) {
-                    if ((flags & TWI_F_STOP) != 0) {
+                    if ((flags & TWI_F_P) != 0) {
                         I2CON |= I2CON_STO;
                         I2CON &= ~I2CON_SI;
                     }
@@ -202,7 +202,7 @@ int twi_write(struct twi *ctx, const void *buf, size_t n, int flags)
 
     switch (ctx->state) {
     case TWI_N76E003_STATE_IDLE: return master_rw_idle(ctx, flags);
-    case TWI_N76E003_STATE_START: return master_rw_start(ctx, (unsigned char)TWI_WRITE, flags);
+    case TWI_N76E003_STATE_START: return master_rw_start(ctx, (unsigned char)TWI_WRITE);
     case TWI_N76E003_STATE_DATA: return master_write_data(ctx, buf, n, flags);
     default: break;
     }
@@ -229,10 +229,17 @@ static int master_read_data(struct twi *ctx, void *buf, size_t n, int flags)
                 *(unsigned char*)buf = I2DAT;
                 res = 1;
 
+                /* cut rx short */
+                if (n == (size_t)1) {
+                    ctx->state = TWI_N76E003_STATE_IDLE;
+                    if ((flags & TWI_F_P) != 0)
+                        I2CON |= I2CON_STO;
+                }
+
             }else if (I2STAT == (unsigned char)0x58) {
                 /* RX, NACK */
                 *(unsigned char*)buf = I2DAT;
-                if ((flags & TWI_F_STOP) != 0)
+                if ((flags & TWI_F_P) != 0)
                     I2CON |= I2CON_STO;
 
                 ctx->state = TWI_N76E003_STATE_IDLE;
@@ -258,7 +265,7 @@ int twi_read(struct twi *ctx, void *buf, size_t n, int flags)
 
     switch (ctx->state) {
     case TWI_N76E003_STATE_IDLE: return master_rw_idle(ctx, flags);
-    case TWI_N76E003_STATE_START: return master_rw_start(ctx, (unsigned char)TWI_READ, flags);
+    case TWI_N76E003_STATE_START: return master_rw_start(ctx, (unsigned char)TWI_READ);
     case TWI_N76E003_STATE_DATA: return master_read_data(ctx, buf, n, flags);
     default: break;
     }

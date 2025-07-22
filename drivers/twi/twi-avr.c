@@ -170,7 +170,7 @@ int twi_poll(struct twi *ctx)
 
 static int twi_rw_as_master_idle(struct twi *ctx, int flags)
 {
-    if ((flags & TWI_F_START) == 0) {
+    if ((flags & TWI_F_S) == 0) {
         ctx->state = TWI_AVR_STATE_DATA;
         return -EAGAIN;
     }
@@ -285,7 +285,7 @@ static int twi_rw_as_master_stop(struct twi *ctx, int flags)
     if ((ctx->base->TWCR & TWCR_TWINT) == 0)
         return -EAGAIN;
 
-    if ((flags & TWI_F_STOP) != 0)
+    if ((flags & TWI_F_P) != 0)
         /* Application loads appropriate control signals to send STOP into TWCR,
          * making sure that TWINT is written to one */
         ctx->base->TWCR = (uint8_t)(TWCR_TWINT | TWCR_TWSTO | TWCR_TWEN);
@@ -397,7 +397,7 @@ static int twi_rw_as_slave_idle(struct twi *ctx)
     return -EAGAIN;
 }
 
-static int twi_write_as_slave_sla(struct twi *ctx, const void *buf, size_t n, int flags)
+static int twi_write_as_slave_sla(struct twi *ctx, const void *buf, size_t n)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
 
@@ -411,10 +411,6 @@ static int twi_write_as_slave_sla(struct twi *ctx, const void *buf, size_t n, in
         tws != TWSR_ST_SLAR_ARB_LOST_ACK_RET)
         return twi_error(ctx);
 
-    /* 1 byte frame */
-    if (n == (size_t)1 && (flags & TWI_F_NACK) != 0)
-        twcr &= ~TWCR_TWEA;
-
     /* send 1st byte */
     ctx->base->TWDR = *(uint8_t*)buf;
     ctx->base->TWCR = twcr;
@@ -423,7 +419,7 @@ static int twi_write_as_slave_sla(struct twi *ctx, const void *buf, size_t n, in
     return -EAGAIN;
 }
 
-static int twi_write_as_slave_data(struct twi *ctx, const void *buf, size_t n, int flags)
+static int twi_write_as_slave_data(struct twi *ctx, const void *buf, size_t n)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
 
@@ -445,24 +441,20 @@ static int twi_write_as_slave_data(struct twi *ctx, const void *buf, size_t n, i
     if (tws != TWSR_ST_BYTE_SENT_ACK_RECV)
         return twi_error(ctx);
 
-    /* prepate last byte */
-    if (n == (size_t)1 && (flags & TWI_F_NACK) != 0)
-        twcr &= ~TWCR_TWEA;
-
     ctx->base->TWDR = *(uint8_t*)buf;
     ctx->base->TWCR = twcr;
 
     return 1;
 }
 
-static int twi_write_as_slave(struct twi *ctx, const void *buf, size_t n, int flags)
+static int twi_write_as_slave(struct twi *ctx, const void *buf, size_t n)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
     case TWI_AVR_STATE_IDLE: return twi_rw_as_slave_idle(ctx);
-    case TWI_AVR_STATE_SLA: return twi_write_as_slave_sla(ctx, buf, n, flags);
-    case TWI_AVR_STATE_DATA: return twi_write_as_slave_data(ctx, buf, n, flags);
+    case TWI_AVR_STATE_SLA: return twi_write_as_slave_sla(ctx, buf, n);
+    case TWI_AVR_STATE_DATA: return twi_write_as_slave_data(ctx, buf, n);
     default: break;
     }
 
@@ -566,7 +558,7 @@ int twi_write(struct twi *ctx, const void *buf, size_t n, int flags)
         return twi_write_as_master(ctx, buf, n, flags);
 
     if (ctx->mode == TWI_MODE_SLAVE)
-        return twi_write_as_slave(ctx, buf, n, flags);
+        return twi_write_as_slave(ctx, buf, n);
 
     picoRTOS_break();
     /*@notreached@*/

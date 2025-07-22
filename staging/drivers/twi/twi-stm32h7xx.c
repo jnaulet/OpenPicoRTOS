@@ -178,10 +178,10 @@ static int twi_rw_as_master_idle(struct twi *ctx, size_t n, bool rw, int flags)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
 
-    ctx->base->CR2 = (uint32_t)(((flags & TWI_F_STOP) != 0 ? CR2_AUTOEND : 0) |
-                                ((flags & TWI_F_STOP) == 0 ? CR2_RELOAD : 0) |
+    ctx->base->CR2 = (uint32_t)(((flags & TWI_F_P) != 0 ? CR2_AUTOEND : 0) |
+                                ((flags & TWI_F_P) == 0 ? CR2_RELOAD : 0) |
                                 CR2_NBYTES(n) |
-                                ((flags & TWI_F_START) != 0 ? CR2_START : 0) |
+                                ((flags & TWI_F_S) != 0 ? CR2_START : 0) |
                                 (rw ? CR2_RD_WRN : 0) |
                                 CR2_SADD(ctx->addr << 1));
 
@@ -196,7 +196,7 @@ static int twi_write_as_master_start(struct twi *ctx, uint8_t byte, size_t n)
     /* NACK (FIXME: STOP) */
     if ((ctx->base->ISR & ISR_NACKF) != 0) {
         ctx->state = TWI_STM32H7XX_STATE_IDLE;
-        return -EIO;
+        return -ENOENT;
     }
 
     /* previous byte sent ok */
