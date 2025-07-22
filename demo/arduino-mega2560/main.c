@@ -221,7 +221,7 @@ static void twi_main(void *priv)
 
         if (res == TWI_READ) {
             char c = (char)0x5a;
-            while (twi_write(TWI, &c, sizeof(c), TWI_F_NACK) == -EAGAIN &&
+            while (twi_write(TWI, &c, sizeof(c), 0) == -EAGAIN &&
                    timeout-- != 0) picoRTOS_schedule();
 
             picoRTOS_assert_void(timeout != -1);

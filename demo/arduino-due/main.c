@@ -363,12 +363,12 @@ static void twi_master_main(void *priv)
         char c = (char)0xa5;
         int timeout = (int)PICORTOS_DELAY_MSEC(500);
 
-        while (twi_write(TWI, &c, sizeof(c), TWI_F_START | TWI_F_STOP) == -EAGAIN &&
+        while (twi_write(TWI, &c, sizeof(c), TWI_F_S | TWI_F_P) == -EAGAIN &&
                timeout-- != 0) picoRTOS_schedule();
 
         picoRTOS_assert_void(timeout != -1);
 
-        while (twi_read(TWI, &c, sizeof(c), TWI_F_START | TWI_F_STOP) == -EAGAIN &&
+        while (twi_read(TWI, &c, sizeof(c), TWI_F_S | TWI_F_P) == -EAGAIN &&
                timeout-- != 0) picoRTOS_schedule();
 
         picoRTOS_assert_void(timeout != -1);
