@@ -69,7 +69,7 @@ int uart_n76e003_init(/*@out@*/ struct uart *ctx, uart_n76e003_t uart)
     picoRTOS_assert(uart < UART_N76E003_COUNT, return -EINVAL);
 
     ctx->uart = uart;
-    ctx->first_tx = true;
+    ctx->busy = false;
 
     return 0;
 }
@@ -155,29 +155,33 @@ int uart_setup(struct uart *ctx, const struct uart_settings *settings)
 
 static int uart0_write(struct uart *ctx, char c)
 {
-    /* if tx succeeded or it's the first frame we send */
-    if ((SCON & SCONx_TI) != (unsigned char)0 || ctx->first_tx) {
-        ctx->first_tx = false;
-        SCON &= ~SCONx_TI; /* ack */
+    if (!ctx->busy) {
         SBUF = (unsigned char)c;
-        return 1;
+        ctx->busy = true;
     }
 
-    return -EAGAIN;
+    if ((SCON & SCONx_TI) == (unsigned char)0)
+        return -EAGAIN;
+
+    SCON &= ~SCONx_TI; /* ack */
+    ctx->busy = false;
+    return 1;
 }
 
 #ifdef CONFIG_UART_N76E003_UART1
 static int uart1_write(struct uart *ctx, char c)
 {
-    /* if tx succeeded or it's the first frame we send */
-    if ((SCON_1 & SCONx_TI) != (unsigned char)0 || ctx->first_tx) {
-        ctx->first_tx = false;
-        SCON_1 &= ~SCONx_TI; /* ack */
-        SBUF_1 = (unsigned char)c;
-        return 1;
+    if (!ctx->busy) {
+        SBUF = (unsigned char)c;
+        ctx->busy = true;
     }
 
-    return -EAGAIN;
+    if ((SCON & SCONx_TI) == (unsigned char)0)
+        return -EAGAIN;
+
+    SCON &= ~SCONx_TI; /* ack */
+    ctx->busy = false;
+    return 1;
 }
 #endif
 

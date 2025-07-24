@@ -16,7 +16,7 @@ typedef enum {
 
 struct uart {
     uart_n76e003_t uart;
-    bool first_tx;
+    bool busy;
 };
 
 int uart_n76e003_init(/*@out@*/ struct uart *ctx, uart_n76e003_t uart);
