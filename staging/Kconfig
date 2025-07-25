@@ -19,6 +19,7 @@ source staging/drivers/rng/Kconfig
 source staging/drivers/spi/Kconfig
 source staging/drivers/twi/Kconfig
 source staging/drivers/uart/Kconfig
+source staging/drivers/w1/Kconfig
 source staging/drivers/wd/Kconfig
 
 endmenu

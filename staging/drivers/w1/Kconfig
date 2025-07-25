@@ -1,0 +1,6 @@
+menu "1-Wire drivers"
+
+config W1_UART
+       bool "Generic 1-Wire interface over UART"
+
+endmenu

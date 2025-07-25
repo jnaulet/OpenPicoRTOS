@@ -54,4 +54,5 @@ include staging/drivers/rng/Makefile
 include staging/drivers/spi/Makefile
 include staging/drivers/twi/Makefile
 include staging/drivers/uart/Makefile
+include staging/drivers/w1/Makefile
 include staging/drivers/wd/Makefile
