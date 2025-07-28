@@ -42,9 +42,24 @@ __non_interruptible_startup:
 	mov sp, #__start__stack - 1
 	ZERO_RAM s_XSEG, l_XSEG
 	COPY_TO_RAM s_XINIT, s_XISEG, l_XISEG
-	;; jump to main
-	ljmp _main_no_sdcc_init
+	;; static variables init
+	ljmp __gsinit
+
 
 	.globl _exit
 _exit:
 	sjmp _exit
+
+	.area GSINIT0 (CODE)
+	.area GSINIT1 (CODE)
+	.area GSINIT2 (CODE)
+	.area GSINIT3 (CODE)
+	.area GSINIT4 (CODE)
+	.area GSINIT5 (CODE)
+	.globl __gsinit
+__gsinit:
+	.area GSINIT (CODE)
+	.area GSFINAL (CODE)
+	;; jump to main
+	ljmp _main_no_sdcc_init
+
