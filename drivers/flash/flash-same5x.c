@@ -151,6 +151,7 @@ int flash_get_erase_size(struct flash *ctx, size_t block)
     return (int)ctx->block_size;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 int flash_get_write_size(struct flash *ctx, size_t block)
 {
     picoRTOS_assert(block < ctx->block_count, return -EINVAL);
@@ -159,6 +160,7 @@ int flash_get_write_size(struct flash *ctx, size_t block)
     return (int)QWORD_SIZE;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 int flash_get_block_addr(struct flash *ctx, size_t block)
 {
     picoRTOS_assert(block < ctx->block_count, return -EINVAL);
@@ -213,6 +215,7 @@ int flash_erase(struct flash *ctx, size_t block)
     return run_cmd(ctx, CMD_EB, block * ctx->block_size);
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 int flash_blankcheck(struct flash *ctx, size_t block)
 {
     picoRTOS_assert(block < ctx->block_count, return -EINVAL);
