@@ -217,6 +217,7 @@ int twi_setup(struct twi *ctx, const struct twi_settings *settings)
     return 0;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 int twi_poll(struct twi *ctx)
 {
     if ((ctx->base->INTFLAG & INTFLAG_AMATCH) != 0) {
