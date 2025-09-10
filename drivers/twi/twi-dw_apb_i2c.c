@@ -222,6 +222,7 @@ int twi_setup(struct twi *ctx, const struct twi_settings *settings)
     return 0;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 int twi_poll(struct twi *ctx)
 {
     if ((ctx->base->IC_RAW_INTR_STAT & IC_INTR_STAT_R_RX_FULL) != 0) return TWI_WRITE;
