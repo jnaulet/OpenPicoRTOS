@@ -9,7 +9,6 @@ struct TWI_STM32H7XX;
 
 typedef enum {
     TWI_STM32H7XX_STATE_IDLE,
-    TWI_STM32H7XX_STATE_START,
     TWI_STM32H7XX_STATE_DATA,
     TWI_STM32H7XX_STATE_LAST,
     TWI_STM32H7XX_STATE_COUNT
@@ -21,7 +20,7 @@ struct twi {
     /* internals */
     twi_mode_t mode;
     twi_addr_t addr;
-    bool start;
+    bool pending;
     twi_stm32h7xx_state_t state;
 };
 

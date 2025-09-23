@@ -106,7 +106,7 @@ int twi_stm32h7xx_init(struct twi *ctx, int base, clock_id_t clkid)
 {
     ctx->base = (struct TWI_STM32H7XX*)base;
     ctx->clkid = clkid;
-    ctx->start = false;
+    ctx->pending = false;
     ctx->state = TWI_STM32H7XX_STATE_IDLE;
 
     return 0;
@@ -125,7 +125,7 @@ static int set_bitrate(struct twi *ctx, unsigned long bitrate)
 
     do
         per = ((unsigned long)freq / ++presc) / bitrate / 2ul;
-    while(per > (unsigned long)TIMINGR_SCLH_M);
+    while (per > (unsigned long)TIMINGR_SCLH_M);
 
     ctx->base->TIMINGR = (uint32_t)(TIMINGR_PRESC(presc - 1) |
                                     TIMINGR_SCLDEL(per / 4ul - 1) |
@@ -179,38 +179,13 @@ static int twi_rw_as_master_idle(struct twi *ctx, size_t n, bool rw, int flags)
     picoRTOS_assert(n > 0, return -EINVAL);
 
     ctx->base->CR2 = (uint32_t)(((flags & TWI_F_P) != 0 ? CR2_AUTOEND : 0) |
-                                ((flags & TWI_F_P) == 0 ? CR2_RELOAD : 0) |
                                 CR2_NBYTES(n) |
                                 ((flags & TWI_F_S) != 0 ? CR2_START : 0) |
                                 (rw ? CR2_RD_WRN : 0) |
                                 CR2_SADD(ctx->addr << 1));
 
-    ctx->state = TWI_STM32H7XX_STATE_START;
-    return -EAGAIN;
-}
-
-static int twi_write_as_master_start(struct twi *ctx, uint8_t byte, size_t n)
-{
-    picoRTOS_assert(n > 0, return -EINVAL);
-
-    /* NACK (FIXME: STOP) */
-    if ((ctx->base->ISR & ISR_NACKF) != 0) {
-        ctx->state = TWI_STM32H7XX_STATE_IDLE;
-        return -ENOENT;
-    }
-
-    /* previous byte sent ok */
-    if ((ctx->base->ISR & ISR_TXIS) != 0) {
-        /* send 1st byte */
-        ctx->base->TXDR = (uint32_t)byte;
-        /* 1st is also last */
-        if (n == (size_t)1)
-            ctx->state = TWI_STM32H7XX_STATE_LAST;
-        else
-            ctx->state = TWI_STM32H7XX_STATE_DATA;
-
-        ctx->start = false;
-    }
+    ctx->state = TWI_STM32H7XX_STATE_DATA;
+    ctx->pending = false;
 
     return -EAGAIN;
 }
@@ -222,18 +197,23 @@ static int twi_write_as_master_data(struct twi *ctx, uint8_t *buf, size_t n)
     /* NACK (FIXME: STOP) */
     if ((ctx->base->ISR & ISR_NACKF) != 0) {
         ctx->state = TWI_STM32H7XX_STATE_IDLE;
-        return -EIO;
+        return ctx->pending ? -EIO : -ENOENT;
     }
 
     /* previous byte sent ok */
     if ((ctx->base->ISR & ISR_TXIS) != 0) {
-        /* last byte */
-        if (n == (size_t)2)
-            ctx->state = TWI_STM32H7XX_STATE_LAST;
+        /* send byte */
+        if (!ctx->pending) {
+            ctx->base->TXDR = (uint32_t)*buf;
+            ctx->pending = true;
 
-        /* nominal */
-        ctx->base->TXDR = (uint32_t)*++buf;
-        return 1;
+            if (n == (size_t)1) ctx->state = TWI_STM32H7XX_STATE_LAST;
+            return -EAGAIN;
+
+        }else{
+            ctx->pending = false;
+            return 1;
+        }
     }
 
     return -EAGAIN;
@@ -260,9 +240,6 @@ static int twi_write_as_master(struct twi *ctx, const void *buf, size_t n, int f
     switch (ctx->state) {
     case TWI_STM32H7XX_STATE_IDLE:
         return twi_rw_as_master_idle(ctx, n, (bool)TWI_WRITE, flags);
-
-    case TWI_STM32H7XX_STATE_START:
-        return twi_write_as_master_start(ctx, *(uint8_t*)buf, n);
 
     case TWI_STM32H7XX_STATE_DATA:
         return twi_write_as_master_data(ctx, (uint8_t*)buf, n);
@@ -291,17 +268,16 @@ int twi_write(struct twi *ctx, const void *buf, size_t n, int flags)
 
 static int twi_read_as_master_data(struct twi *ctx, uint8_t *data, size_t n)
 {
-    uint32_t ISR = ctx->base->ISR;
-
-    if ((ISR & ISR_RXNE) != 0) {
+    if ((ctx->base->ISR & ISR_RXNE) != 0) {
         /* rx */
         *data = (uint8_t)ctx->base->RXDR;
-        /* flags */
-        if (n == (size_t)1)
-            if ((ISR & ISR_TC) != 0 ||
-                (ISR & ISR_STOPF) != 0)
-                ctx->state = TWI_STM32H7XX_STATE_IDLE;
+        if (n != (size_t)1) return 1;
+    }
 
+    if ((ctx->base->ISR & ISR_TC) != 0 ||
+        (ctx->base->ISR & ISR_STOPF) != 0) {
+        /* transfer complete / stop */
+        ctx->state = TWI_STM32H7XX_STATE_IDLE;
         return 1;
     }
 
