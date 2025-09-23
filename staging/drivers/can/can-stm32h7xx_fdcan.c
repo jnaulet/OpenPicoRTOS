@@ -474,7 +474,7 @@ static int set_init_cce(/*@reldef@*/ const struct can *ctx, bool value)
     do{
         ctx->base->CCCR = cccr;
         arch_delay_us(1ul);
-    } while(ctx->base->CCCR != cccr && deadlock-- != 0);
+    } while (ctx->base->CCCR != cccr && deadlock-- != 0);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;

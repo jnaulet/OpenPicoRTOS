@@ -391,7 +391,7 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
     do {
         size_t hz = (size_t)parent->freq / ++psc;
         ctx->ncycles = (hz / (size_t)1000000) * (size_t)period;
-    } while(ctx->ncycles > (size_t)PWM_STM32H7XX_PWM_ARR_MAX);
+    } while (ctx->ncycles > (size_t)PWM_STM32H7XX_PWM_ARR_MAX);
 
     picoRTOS_assert(ctx->ncycles > 0, return -EINVAL);
 
