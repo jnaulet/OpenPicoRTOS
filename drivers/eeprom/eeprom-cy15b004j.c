@@ -92,14 +92,15 @@ int eeprom_erase(struct eeprom *ctx, size_t addr, size_t n)
     return -ENOSYS;
 }
 
-static int req_address_write(struct eeprom *ctx, size_t addr)
+static int req_address_write(struct eeprom *ctx, size_t addr, size_t n)
 {
     picoRTOS_assert(addr < (size_t)C99_EEPROM_CY15B004J_ADDR_COUNT, return -EINVAL);
+    picoRTOS_assert(n > 0, return -EINVAL);
 
     uint8_t addr8 = (uint8_t)addr;
 
-    /* +1 to avoid repeated start */
-    if (twi_write(ctx->twi, &addr8, sizeof(addr8) + 1, TWI_F_S) == 1)
+    /* avoid repeated start */
+    if (twi_write(ctx->twi, &addr8, sizeof(addr8) + n, TWI_F_S | TWI_F_P | TWI_F_N(1)) == 1)
         ctx->state = CY15B004J_STATE_DATA;
 
     return -EAGAIN;
@@ -111,7 +112,7 @@ static int data_write(struct eeprom *ctx, const void *buf, size_t n)
 
     int res;
 
-    if ((res = twi_write(ctx->twi, buf, n, TWI_F_P)) == (int)n)
+    if ((res = twi_write(ctx->twi, buf, n, 0)) == (int)n)
         ctx->state = CY15B004J_STATE_SETUP;
 
     return res;
@@ -124,7 +125,7 @@ int eeprom_write(struct eeprom *ctx, size_t addr, const void *buf, size_t n)
 
     switch (ctx->state) {
     case CY15B004J_STATE_SETUP: return setup(ctx, addr);
-    case CY15B004J_STATE_ADDRESS: return req_address_write(ctx, addr);
+    case CY15B004J_STATE_ADDRESS: return req_address_write(ctx, addr, n);
     case CY15B004J_STATE_DATA: return data_write(ctx, buf, n);
     default: break;
     }
