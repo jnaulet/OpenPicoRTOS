@@ -1,5 +1,7 @@
 #include "rng-stm32h7xx_trng.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 #include <stdint.h>
 
@@ -11,7 +13,7 @@ struct RNG_STM32H7XX_TRNG {
     volatile uint32_t HTCR;
 };
 
-#define CR_CONFIGLOCK     (1 << 31u)
+#define CR_CONFIGLOCK     (1u << 31)
 #define CR_CONDRST        (1 << 30)
 #define CR_RNG_CONFIG1_M  0x3fu
 #define CR_RNG_CONFIG1(x) (((x) & CR_RNG_CONFIG1_M) << 20)
@@ -36,14 +38,11 @@ int rng_stm32h7xx_trng_init(struct rng *ctx, int base, clock_id_t clkid)
 {
     clock_freq_t freq;
     unsigned int div_p2;
+    int deadlock = CONFIG_DEADLOCK_COUNT;
 
     ctx->base = (struct RNG_STM32H7XX_TRNG*)base;
     if ((freq = clock_get_freq(clkid)) <= 0)
         return -EINVAL;
-
-    /* reset */
-    ctx->base->CR |= (uint32_t)CR_CONDRST;
-    ctx->base->CR &= ~(uint32_t)CR_CONDRST;
 
     /* st recommended configuration */
     /* 48mhz clock */
@@ -53,17 +52,26 @@ int rng_stm32h7xx_trng_init(struct rng *ctx, int base, clock_id_t clkid)
 
     picoRTOS_assert(div_p2 < 16u, return -EIO);
 
-    /* configuration A */
-    ctx->base->CR = (uint32_t)(CR_RNG_CONFIG1(0xf) |
+    /* Reset to configuration A */
+    ctx->base->CR = (uint32_t)(CR_CONDRST |
+                               CR_RNG_CONFIG1(0xf) |
                                CR_RNG_CONFIG3(0xd) |
                                CR_CLKDIV(div_p2));
+
     /* When writing this register, the magic number 0x17590ABC
      * must be written immediately before the indicated value. */
     ctx->base->HTCR = (uint32_t)0x17590abc;
-    ctx->base->HTCR = (uint32_t)0x72ac;
+    ctx->base->HTCR = (uint32_t)0xaa74; /* FIXME: this is chip-specific */
+
+    /* un-reset */
+    ctx->base->CR &= ~(uint32_t)CR_CONDRST;
+    while ((ctx->base->CR & CR_CONDRST) != 0 &&
+           deadlock-- != 0) arch_delay_us(1ul);
+
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
 
     /* turn on */
-    ctx->base->CR |= CR_RNGEN;
+    ctx->base->CR |= (CR_CONFIGLOCK | CR_RNGEN);
     return 0;
 }
 
