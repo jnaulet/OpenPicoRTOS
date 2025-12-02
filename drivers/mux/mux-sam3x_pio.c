@@ -100,7 +100,7 @@ static int mux_sam3x_pio(struct mux_sam3x_pio *ctx, mux_sam3x_pio_t mux, uint32_
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EIO;
     }

@@ -137,7 +137,7 @@ static int set_baudrate(struct uart *ctx, unsigned long baudrate)
         }
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 
@@ -162,7 +162,7 @@ static int set_cs(struct uart *ctx, size_t cs)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 

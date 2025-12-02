@@ -278,7 +278,7 @@ static int setup_pll(struct clock_settings *settings)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -306,7 +306,7 @@ static int setup_pll(struct clock_settings *settings)
     }
 
     /* something went wrong */
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 
@@ -334,7 +334,7 @@ static int set_hpre(unsigned int prescaler)
     case 256: RCC->RCC_CFGR |= RCC_CFGR_HPRE(14); break;
     case 512: RCC->RCC_CFGR |= RCC_CFGR_HPRE(15); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -356,7 +356,7 @@ static int set_ppre1(unsigned int prescaler)
     case 8: RCC->RCC_CFGR |= RCC_CFGR_PPRE1(6); break;
     case 16: RCC->RCC_CFGR |= RCC_CFGR_PPRE1(7); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -379,7 +379,7 @@ static int set_ppre2(unsigned int prescaler)
     case 8: RCC->RCC_CFGR |= RCC_CFGR_PPRE2(6); break;
     case 16: RCC->RCC_CFGR |= RCC_CFGR_PPRE2(7); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -399,7 +399,7 @@ static int set_adcpre(unsigned int prescaler)
     case 4: RCC->RCC_CFGR |= RCC_CFGR_ADCPRE(1); break;
     case 8: RCC->RCC_CFGR |= RCC_CFGR_ADCPRE(2); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -451,7 +451,7 @@ int clock_stm32f10xxx_init(struct clock_settings *settings)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -496,7 +496,7 @@ int clock_stm32f10xxx_enable(clock_stm32f10xxx_clk_t clk)
     case 1: RCC->RCC_APB2ENR |= mask; break;    /* APB2 */
     case 2: RCC->RCC_APB1ENR |= mask; break;    /* APB1 */
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -515,7 +515,7 @@ int clock_stm32f10xxx_disable(clock_stm32f10xxx_clk_t clk)
     case 1: RCC->RCC_APB2ENR &= ~mask; break;   /* APB2 */
     case 2: RCC->RCC_APB1ENR &= ~mask; break;   /* APB1 */
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -545,6 +545,6 @@ clock_freq_t clock_get_freq(clock_id_t clkid)
     }
 
     /* unknown */
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return (clock_freq_t)-EIO;
 }

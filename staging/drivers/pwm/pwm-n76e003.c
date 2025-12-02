@@ -192,7 +192,7 @@ int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 

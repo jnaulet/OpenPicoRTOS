@@ -109,7 +109,7 @@ int mux_gd32vf103_input(struct mux *ctx, size_t pin, mux_gd32vf103_input_t mode)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -154,7 +154,7 @@ int mux_gd32vf103_output(struct mux *ctx, size_t pin,
     case MUX_GD32VF103_SPEED_2MHZ: reg |= (GPIOx_CTL0_MD0(2) << shift); break;
     case MUX_GD32VF103_SPEED_50MHZ: reg |= (GPIOx_CTL0_MD0(3) << shift); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -200,7 +200,7 @@ int mux_gd32vf103_afio(struct mux *ctx, size_t pin,
     case MUX_GD32VF103_SPEED_2MHZ: reg |= (GPIOx_CTL0_MD0(2) << shift); break;
     case MUX_GD32VF103_SPEED_50MHZ: reg |= (GPIOx_CTL0_MD0(3) << shift); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -274,6 +274,6 @@ int mux_gd32vf103_afio_remap(mux_gd32vf103_afio_remap_t remap, uint32_t value)
         break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }

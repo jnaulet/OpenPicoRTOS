@@ -97,7 +97,7 @@ static int master_rw_idle(struct twi *ctx, int flags)
                 I2CON |= I2CON_STO;
                 I2CON &= ~(I2CON_STA | I2CON_SI);
                 /* stop debugging */
-                picoRTOS_break();
+                picoRTOS_assert_void(false);
                 /*@notreached@*/ res = -EIO;
             }
 
@@ -138,7 +138,7 @@ static int master_rw_start(struct twi *ctx, unsigned char rw)
 
             }else{
                 /* ??? */
-                picoRTOS_break();
+                picoRTOS_assert_void(false);
                 /*@notreached@*/ res = -EIO;
             }
 
@@ -184,7 +184,7 @@ static int master_write_data(struct twi *ctx, const void *buf, size_t n, int fla
 
             }else{
                 /* ??? */
-                picoRTOS_break();
+                picoRTOS_assert_void(false);
                 /*@notreached@*/ res = -EIO;
             }
 
@@ -207,7 +207,7 @@ int twi_write(struct twi *ctx, const void *buf, size_t n, int flags)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 
@@ -247,7 +247,7 @@ static int master_read_data(struct twi *ctx, void *buf, size_t n, int flags)
 
             }else {
                 /* ??? */
-                picoRTOS_break();
+                picoRTOS_assert_void(false);
                 /*@notreached@*/ res = -EIO;
             }
 
@@ -270,7 +270,7 @@ int twi_read(struct twi *ctx, void *buf, size_t n, int flags)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 

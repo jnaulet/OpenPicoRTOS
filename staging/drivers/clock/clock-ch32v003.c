@@ -95,7 +95,7 @@ static int turn_pll_on(clock_ch32v003_pllsrc_t pllsrc)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -129,7 +129,7 @@ static int switch_to(clock_ch32v003_sysclk_t sysclk)
     case CLOCK_CH32V003_SYSCLK_HSE: clocks.sysclk = clocks.hse; break;
     case CLOCK_CH32V003_SYSCLK_PLLCLK: clocks.sysclk = clocks.pll; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -158,7 +158,7 @@ static int div_hclk(unsigned long hclk_div)
     case 128: RCC->CFGR0 = (uint32_t)(cfgr0 | CFGR0_HPRE(14)); break;
     case 256: RCC->CFGR0 = (uint32_t)(cfgr0 | CFGR0_HPRE(15)); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -209,7 +209,7 @@ int clock_ch32v003_enable(clock_ch32v003_clk_t clk)
     case 1: RCC->APB2PCENR |= mask; break;      /* APB2 */
     case 2: RCC->APB1PCENR |= mask; break;      /* APB1 */
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -228,7 +228,7 @@ int clock_ch32v003_disable(clock_ch32v003_clk_t clk)
     case 1: RCC->APB2PCENR &= ~mask; break;     /* APB2 */
     case 2: RCC->APB1PCENR &= ~mask; break;     /* APB1 */
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -246,6 +246,6 @@ clock_freq_t clock_get_freq(clock_id_t clkid)
     }
 
     /* unknown */
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return (clock_freq_t)-EIO;
 }

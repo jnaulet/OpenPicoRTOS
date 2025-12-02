@@ -164,7 +164,7 @@ int flash_erase(struct flash *ctx, size_t block)
         break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 
@@ -200,7 +200,7 @@ static int flash_write_row(struct flash *ctx, const void *data)
         break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 
@@ -225,7 +225,7 @@ static int flash_write_qword(struct flash *ctx, const void *data)
         break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 
@@ -247,7 +247,7 @@ static int flash_write_word(struct flash *ctx, const void *data)
         break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 

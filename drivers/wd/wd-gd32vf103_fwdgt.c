@@ -67,7 +67,7 @@ int wd_gd32vf103_fwdgt_setup(struct wd *ctx, const struct wd_gd32vf103_fwdgt_set
         }
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EINVAL;
 }
 

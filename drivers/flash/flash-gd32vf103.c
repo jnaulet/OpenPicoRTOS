@@ -150,7 +150,7 @@ int flash_erase(struct flash *ctx, size_t block)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 

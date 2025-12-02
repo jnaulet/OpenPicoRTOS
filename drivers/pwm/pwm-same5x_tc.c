@@ -143,7 +143,7 @@ static int set_prescaler(struct pwm_same5x_tc *ctx, pwm_same5x_tc_prescaler_t pr
     case PWM_SAME5X_TC_PRESCALER_DIV256: ctx->prescaler = 256ul; break;
     case PWM_SAME5X_TC_PRESCALER_DIV1024: ctx->prescaler = 1024ul; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EIO;
     }
@@ -280,7 +280,7 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }
@@ -330,7 +330,7 @@ int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }

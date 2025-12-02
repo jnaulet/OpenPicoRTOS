@@ -181,7 +181,7 @@ static int set_bitrate(struct spi *ctx, unsigned long bitrate)
     }
 
     /* can't compute bitrate */
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }
@@ -200,7 +200,7 @@ static int set_clock_mode(struct spi *ctx, spi_clock_mode_t mode)
     case SPI_CLOCK_MODE_2: cpol = 1; cpha = 0; break;
     case SPI_CLOCK_MODE_3: cpol = 1; cpha = 1; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -314,7 +314,7 @@ static int push_frame(struct spi *ctx, const uint8_t *frame, bool eoq)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -343,7 +343,7 @@ static int pop_frame(struct spi *ctx, uint8_t *frame)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 

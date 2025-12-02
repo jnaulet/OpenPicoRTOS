@@ -110,7 +110,7 @@ int wd_stm32h7xx_iwdg_setup(struct wd *ctx, const struct wd_stm32h7xx_iwdg_setti
         }
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 

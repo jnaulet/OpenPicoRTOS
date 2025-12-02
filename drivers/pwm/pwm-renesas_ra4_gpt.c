@@ -228,7 +228,7 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
         }
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 

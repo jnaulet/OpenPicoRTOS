@@ -189,7 +189,7 @@ int adc_nxp_eqadc_setup(struct adc_nxp_eqadc *ctx, const struct adc_nxp_eqadc_se
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 

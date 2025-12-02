@@ -159,7 +159,7 @@ static bool nxp_flexcan_read_mb_flag(struct can *ctx, size_t index)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return false;
 }
@@ -176,7 +176,7 @@ static void nxp_flexcan_clear_mb_flag(struct can *ctx, size_t index)
     case 1: ctx->base->IFLAG2 = mask; break;
     case 2: ctx->base->IFLAG3 = mask; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         break;
     }
@@ -274,7 +274,7 @@ static int nxp_flexcan_set_bitrate(struct can *ctx, unsigned long bitrate)
             return 0;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EINVAL;
 }
@@ -583,7 +583,7 @@ static int mailbox_write(struct CAN_NXP_FLEXCAN_MB *mb, const void *buf, size_t 
     case 2: mb->DATAL |= (uint32_t)buf8[1] << 16;       /*@fallthrough@*/
     case 1: mb->DATAL |= (uint32_t)buf8[0] << 24; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EIO;
     }
@@ -648,7 +648,7 @@ static int mailbox_read(const struct CAN_NXP_FLEXCAN_MB *mb,
     case 2: buf8[1] = (uint8_t)(mb->DATAL >> 16);       /*@fallthrough@*/
     case 1: buf8[0] = (uint8_t)(mb->DATAL >> 24); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EIO;
     }
@@ -698,7 +698,7 @@ static int nxp_flexcan_read_mailbox(struct can *ctx, size_t index,
     }
 
     /* unhandled cases */
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }

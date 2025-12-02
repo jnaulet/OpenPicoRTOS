@@ -170,7 +170,7 @@ static int setup_pll(clock_gd32vf103_pllsel_t pllsel,
             }
         }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EINVAL;
 }
 
@@ -211,7 +211,7 @@ static int setup_ahb_div(unsigned long ahb_div)
     case 256: rcu_cfg0 |= RCU_CFG0_AHBPSC(0xe); break;
     case 512: rcu_cfg0 |= RCU_CFG0_AHBPSC(0xf); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -241,7 +241,7 @@ static int setup_apb1_div(unsigned long apb1_div)
     case 8: rcu_cfg0 |= RCU_CFG0_APB1PSC(0x6); break;
     case 16: rcu_cfg0 |= RCU_CFG0_APB1PSC(0x7); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -271,7 +271,7 @@ static int setup_apb2_div(unsigned long apb2_div)
     case 8: rcu_cfg0 |= RCU_CFG0_APB2PSC(0x6); break;
     case 16: rcu_cfg0 |= RCU_CFG0_APB2PSC(0x7); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -310,7 +310,7 @@ static int setup_adc_div(unsigned long adc_div)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -358,7 +358,7 @@ int clock_gd32vf103_init(const struct clock_settings *settings)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -401,7 +401,7 @@ int clock_gd32vf103_enable(clock_gd32vf103_clk_t clk)
     case 2: RCU->RCU_APB2EN |= (1u << bit); break;
     /* ? */
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -433,7 +433,7 @@ int clock_gd32vf103_disable(clock_gd32vf103_clk_t clk)
     case 2: RCU->RCU_APB2EN &= ~(1u << bit); break;
     /* ? */
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -457,6 +457,6 @@ clock_freq_t clock_get_freq(clock_id_t clkid)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return (clock_freq_t)-EIO;
 }

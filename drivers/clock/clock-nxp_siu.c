@@ -292,7 +292,7 @@ static int setup_pll0(unsigned long freq,
             }
         }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }
@@ -325,7 +325,7 @@ static int setup_pll1(unsigned long freq)
             }
         }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }
@@ -341,7 +341,7 @@ static int setup_sysclk(unsigned long sysclkdiv)
     case 8: value = (uint32_t)2; break;
     case 16: value = (uint32_t)3; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -370,7 +370,7 @@ static int setup_per_clk(unsigned long perdiv)
     case 4: value = (uint32_t)1; break;
     case 8: value = (uint32_t)2; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -392,7 +392,7 @@ static int setup_fm_per_clk(unsigned long fmperdiv)
     case 4: value = (uint32_t)1; break;
     case 8: value = (uint32_t)2; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -409,7 +409,7 @@ static int setup_etpu_clk(unsigned long etpudiv)
     case 1: SIU->SYSDIV |= SYSDIV_ETPUDIV; break;
     case 2: SIU->SYSDIV &= ~SYSDIV_ETPUDIV; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -538,7 +538,7 @@ clock_freq_t clock_get_freq(clock_id_t clkid)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return (clock_freq_t)-EIO;
 }

@@ -189,7 +189,7 @@ static int copy_to_bdr(struct lin *ctx, const void *buf, size_t n)
     case 2: ctx->base->BDRL |= BDRn_DATA1(buf8[1]); /*@fallthrough@*/
     case 1: ctx->base->BDRL |= BDRn_DATA0(buf8[0]); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -247,7 +247,7 @@ static int lin_write_as_master(struct lin *ctx, uint8_t id, const void *buf, siz
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }
@@ -293,7 +293,7 @@ int lin_write(struct lin *ctx, uint8_t id, const void *buf, size_t n)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 
@@ -314,7 +314,7 @@ static int copy_from_bdr(struct lin *ctx, void *buf, size_t n)
     case 2: buf8[1] = (uint8_t)(ctx->base->BDRL >> 8);  /*@fallthrough@*/
     case 1: buf8[0] = (uint8_t)(ctx->base->BDRL >> 0); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -388,7 +388,7 @@ static int lin_read_as_master(struct lin *ctx, uint8_t id, void *buf, size_t n)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }
@@ -439,7 +439,7 @@ int lin_read(struct lin *ctx, uint8_t *id, void *buf, size_t n)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }

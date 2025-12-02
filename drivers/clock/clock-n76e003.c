@@ -193,7 +193,7 @@ int clock_n76e003_init(struct clock_settings *settings)
     case CLOCK_N76E003_FOSC_FECLK: res = ckswt_osc_feclk(settings->feclk); break;
     case CLOCK_N76E003_FOSC_FLIRC: res = ckswt_osc_flirc(); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 

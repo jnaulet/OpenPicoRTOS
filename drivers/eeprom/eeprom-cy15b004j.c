@@ -79,7 +79,7 @@ int eeprom_read(struct eeprom *ctx, size_t addr, void *buf, size_t n)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 
@@ -130,6 +130,6 @@ int eeprom_write(struct eeprom *ctx, size_t addr, const void *buf, size_t n)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }

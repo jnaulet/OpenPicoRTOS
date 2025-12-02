@@ -207,7 +207,7 @@ static int set_bitrate(struct can *ctx, unsigned long bitrate)
             return 0;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EINVAL;
 }
@@ -333,7 +333,7 @@ static int transfer_tx_mailbox(struct can *ctx, size_t index,
     case 2: mb->CAN_MDL |= (uint32_t)buf8[1] << 16;     /*@fallthrough@*/
     case 1: mb->CAN_MDL |= (uint32_t)buf8[0] << 24; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EIO;
     }
@@ -397,7 +397,7 @@ static int transfer_rx_mailbox(struct can *ctx, size_t index,
     case 2: buf8[1] = (uint8_t)(mb->CAN_MDL >> 16);     /*@fallthrough@*/
     case 1: buf8[0] = (uint8_t)(mb->CAN_MDL >> 24); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EIO;
     }
@@ -427,7 +427,7 @@ int can_read(struct can *ctx, can_id_t *id, void *buf, size_t n)
         if ((mrdy & (1 << index)) != 0)
             return transfer_rx_mailbox(ctx, index, id, buf, n);
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }

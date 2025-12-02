@@ -98,7 +98,7 @@ int clock_lgt8fx8p_init(struct clock_settings *settings)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -134,7 +134,7 @@ clock_freq_t clock_get_freq(clock_id_t clkid)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return (clock_freq_t)-EIO;
 }

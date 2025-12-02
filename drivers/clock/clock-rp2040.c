@@ -269,7 +269,7 @@ static int pll_config(struct PLL *pll, unsigned long hz)
         }
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }
@@ -481,7 +481,7 @@ clock_freq_t clock_get_freq(clock_id_t clkid)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return (clock_freq_t)-EIO;
 }
@@ -507,7 +507,7 @@ int clock_rp2040_enable(clock_id_t clkid)
     case CLOCK_RP2040_GPOUT2: CLK->CLK_GPOUTn[2].CTRL |= CLK_GPOUTn_CTRL_ENABLE; break;
     case CLOCK_RP2040_GPOUT3: CLK->CLK_GPOUTn[3].CTRL |= CLK_GPOUTn_CTRL_ENABLE; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EIO;
     }
@@ -536,7 +536,7 @@ int clock_rp2040_disable(clock_id_t clkid)
     case CLOCK_RP2040_GPOUT2: CLK->CLK_GPOUTn[2].CTRL &= ~CLK_GPOUTn_CTRL_ENABLE; break;
     case CLOCK_RP2040_GPOUT3: CLK->CLK_GPOUTn[3].CTRL &= ~CLK_GPOUTn_CTRL_ENABLE; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EIO;
     }

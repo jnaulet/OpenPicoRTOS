@@ -86,7 +86,7 @@ static int set_clksel(struct pwm_tinyavr_tca *ctx, pwm_tinyavr_tca_clksel_t clks
     case PWM_TINYAVR_TCA_CLKSEL_DIV256: ctx->div = 256ul; break;
     case PWM_TINYAVR_TCA_CLKSEL_DIV1024: ctx->div = 1024ul; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EINVAL;
     }
@@ -181,7 +181,7 @@ void pwm_start(struct pwm *ctx)
     case PWM_TINYAVR_TCA_CMP1: parent->base->CTRLB |= CTRLB_CMP1EN; break;
     case PWM_TINYAVR_TCA_CMP2: parent->base->CTRLB |= CTRLB_CMP2EN; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
     }
 }
 
@@ -194,6 +194,6 @@ void pwm_stop(struct pwm *ctx)
     case PWM_TINYAVR_TCA_CMP1: parent->base->CTRLB &= ~CTRLB_CMP1EN; break;
     case PWM_TINYAVR_TCA_CMP2: parent->base->CTRLB &= ~CTRLB_CMP2EN; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
     }
 }

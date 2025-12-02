@@ -104,7 +104,7 @@ int adc_tinyavr_setup(struct adc_tinyavr *ctx, const struct adc_tinyavr_settings
     else if (pdiv > 2ul) ctx->base->CTRLC |= CTRLC_PRESC(0x1);
     else if (pdiv > 1ul) ctx->base->CTRLC |= CTRLC_PRESC(0x0);
     else{
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EINVAL;
     }
@@ -197,7 +197,7 @@ int adc_read(struct adc *ctx, int *data)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }

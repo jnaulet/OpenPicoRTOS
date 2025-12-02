@@ -59,7 +59,7 @@ int mux_n76e003_mode(struct mux *ctx, size_t pin, mux_n76e003_mode_t mode)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 

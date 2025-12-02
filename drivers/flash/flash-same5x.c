@@ -204,7 +204,7 @@ static int run_cmd(struct flash *ctx, int cmd, size_t addr)
         break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 
@@ -263,7 +263,7 @@ static int write_data(struct flash *ctx, int cmd, size_t addr,
         break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 
@@ -287,7 +287,7 @@ int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n)
                              &data8[nwritten], (size_t)QWORD_SIZE);
 
         else{
-            picoRTOS_break();
+            picoRTOS_assert_void(false);
             /*@notreached@*/
             return -EINVAL;
         }

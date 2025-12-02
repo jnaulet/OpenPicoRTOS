@@ -141,7 +141,7 @@ int adc_read(struct adc *ctx, int *data)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }

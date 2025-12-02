@@ -201,7 +201,7 @@ int pwm_gd32vf103_setup(struct pwm_gd32vf103 *ctx, const struct pwm_gd32vf103_se
     case PWM_GD32VF103_WAVEFORM_CAPWM_DOWN: ctx->base->TIMERx_CTL0 |= TIMERx_CTL0_CAM(1); break;
     case PWM_GD32VF103_WAVEFORM_CAPWM_UP_DOWN: ctx->base->TIMERx_CTL0 |= TIMERx_CTL0_CAM(3); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -252,7 +252,7 @@ int pwm_gd32vf103_pwm_init(struct pwm *ctx, struct pwm_gd32vf103 *parent, size_t
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -301,7 +301,7 @@ int pwm_gd32vf103_pwm_setup(struct pwm *ctx, const struct pwm_gd32vf103_pwm_sett
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -333,7 +333,7 @@ int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle)
     case 2: parent->base->TIMERx_CH2CV = (uint32_t)TIMERx_CHxCV_CHxVAL(chxval); break;
     case 3: parent->base->TIMERx_CH3CV = (uint32_t)TIMERx_CHxCV_CHxVAL(chxval); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -349,7 +349,7 @@ void pwm_start(struct pwm *ctx)
     case 1: parent->base->TIMERx_CHCTL2 |= TIMERx_CHCTL2_CH1EN; break;
     case 2: parent->base->TIMERx_CHCTL2 |= TIMERx_CHCTL2_CH2EN; break;
     case 3: parent->base->TIMERx_CHCTL2 |= TIMERx_CHCTL2_CH3EN; break;
-    default: picoRTOS_break();
+    default: picoRTOS_assert_void(false);
     }
 
     /* enable timer */
@@ -365,6 +365,6 @@ void pwm_stop(struct pwm *ctx)
     case 1: parent->base->TIMERx_CHCTL2 &= ~TIMERx_CHCTL2_CH1EN; break;
     case 2: parent->base->TIMERx_CHCTL2 &= ~TIMERx_CHCTL2_CH2EN; break;
     case 3: parent->base->TIMERx_CHCTL2 &= ~TIMERx_CHCTL2_CH3EN; break;
-    default: picoRTOS_break();
+    default: picoRTOS_assert_void(false);
     }
 }

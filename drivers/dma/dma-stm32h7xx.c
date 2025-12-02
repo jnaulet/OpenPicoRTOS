@@ -195,7 +195,7 @@ int dma_xfer_done(struct dma *ctx)
     case 1: xISR_TCIFn = (uint32_t)LISR_TCIF1; break;
     case 0: xISR_TCIFn = (uint32_t)LISR_TCIF0; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 

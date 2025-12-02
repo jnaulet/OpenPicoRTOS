@@ -251,7 +251,7 @@ static int twi_write_as_master(struct twi *ctx, const void *buf, size_t n, int f
         break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 
@@ -262,7 +262,7 @@ int twi_write(struct twi *ctx, const void *buf, size_t n, int flags)
     if (ctx->mode == TWI_MODE_MASTER)
         return twi_write_as_master(ctx, buf, n, flags);
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -ENOSYS;
 }
 
@@ -302,7 +302,7 @@ static int twi_read_as_master(struct twi *ctx, void *buf, size_t n, int flags)
         break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 
@@ -313,6 +313,6 @@ int twi_read(struct twi *ctx, void *buf, size_t n, int flags)
     if (ctx->mode == TWI_MODE_MASTER)
         return twi_read_as_master(ctx, buf, n, flags);
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -ENOSYS;
 }

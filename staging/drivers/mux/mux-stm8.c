@@ -36,7 +36,7 @@ int mux_stm8_output(struct mux *ctx, size_t pin, mux_stm8_output_t type)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -62,7 +62,7 @@ int mux_stm8_input(struct mux *ctx, size_t pin, mux_stm8_input_t type)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 

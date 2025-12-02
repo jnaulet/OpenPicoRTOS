@@ -225,7 +225,7 @@ static int set_clkmode(struct spi *ctx, spi_clock_mode_t clkmode)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -365,7 +365,7 @@ static int spi_xfer_dma(struct spi *ctx, void *rx, const void *tx, size_t n)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 

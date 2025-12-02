@@ -266,7 +266,7 @@ int clock_same5x_gclk_generator_setup(size_t index, const struct clock_same5x_gc
     case CLOCK_SAME5X_GCLK_SRC_DPLL0: freq = clocks.dpll[0]; break;
     case CLOCK_SAME5X_GCLK_SRC_DPLL1: freq = clocks.dpll[1]; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EINVAL;
     }
@@ -550,7 +550,7 @@ int clock_same5x_mclk_enable(clock_same5x_mclk_t mclk)
     case 3: MCLK->APBCMASK |= (1 << shift); break;
     case 4: MCLK->APBDMASK |= (1 << shift); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EIO;
     }
@@ -581,7 +581,7 @@ int clock_same5x_mclk_disable(clock_same5x_mclk_t mclk)
     case 3: MCLK->APBCMASK &= ~(1 << shift); break;
     case 4: MCLK->APBDMASK &= ~(1 << shift); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EIO;
     }

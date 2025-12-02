@@ -113,7 +113,7 @@ int mux_tinyavr_select_alt_pin(mux_tinyavr_alt_t alt)
     case 2: PORTMUX->CTRLC |= (1 << shift); break;
     case 3: PORTMUX->CTRLD |= (1 << shift); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 

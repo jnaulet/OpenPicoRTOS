@@ -179,7 +179,7 @@ int flash_erase(struct flash *ctx, size_t block)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }
@@ -196,7 +196,7 @@ int flash_blankcheck(/*@unused@*/ struct flash *ctx __attribute__ ((unused)),
 
     while (count-- != 0) {
         if (*ptr32++ != (uint32_t)-1) {
-            picoRTOS_break();
+            picoRTOS_assert_void(false);
             /*@notreached@*/ return -EFAULT;
         }
     }
@@ -277,7 +277,7 @@ int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }

@@ -98,7 +98,7 @@ int mux_8051_mode(struct mux *ctx, size_t pin, mux_8051_mode_t mode)
 #endif
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 

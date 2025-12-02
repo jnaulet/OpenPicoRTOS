@@ -642,7 +642,7 @@ static int set_bitrate(struct can *ctx, unsigned long bitrate)
             return 0;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EINVAL;
 }
@@ -766,7 +766,7 @@ static int buffer_write(struct tx_buf *txb, const void *buf, size_t n)
     case 2: txb->T2 |= (uint32_t)buf8[1] << 8;          /*@fallthrough@*/
     case 1: txb->T2 |= (uint32_t)buf8[0] << 0; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EIO;
     }
@@ -833,7 +833,7 @@ static int buffer_read(const struct rx_buf *rxb, void *buf, size_t n)
     case 2: buf8[1] = (uint8_t)(rxb->R2 >> 8);          /*@fallthrough@*/
     case 1: buf8[0] = (uint8_t)(rxb->R2 >> 0); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EIO;
     }

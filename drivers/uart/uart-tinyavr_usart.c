@@ -111,7 +111,7 @@ static int set_cs(struct uart *ctx, size_t cs)
     case 8: ctx->base->CTRLC |= CTRLC_CHSIZE(3); break;
     // case 9: ctrlc |= CTRLC_CHSIZE(6); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EIO;
     }

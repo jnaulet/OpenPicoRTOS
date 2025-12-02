@@ -154,7 +154,7 @@ static int request_intflg(struct adc_ti_type4 *ctx, size_t soc,
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         res = -EIO;
     }

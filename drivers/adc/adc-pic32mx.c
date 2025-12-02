@@ -390,7 +390,7 @@ static int set_input_mode(struct adc *ctx, adc_pic32mx_adc_im_t im)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 

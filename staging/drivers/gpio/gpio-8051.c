@@ -107,7 +107,7 @@ void gpio_write(struct gpio *ctx, bool value)
         break;
 #endif
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ break;
     }
 }
@@ -127,7 +127,7 @@ bool gpio_read(struct gpio *ctx)
     case 5: return ((P5 & ctx->mask) != 0) ^ ctx->invert;
 #endif
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ break;
     }
 
@@ -149,7 +149,7 @@ void gpio_toggle(struct gpio *ctx)
     case 5: P5 ^= ctx->mask; break;
 #endif
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ break;
     }
 }

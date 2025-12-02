@@ -220,7 +220,7 @@ int uart_write(struct uart *ctx, const char *buf, size_t n)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 
@@ -275,6 +275,6 @@ int uart_read(struct uart *ctx, char *buf, size_t n)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }

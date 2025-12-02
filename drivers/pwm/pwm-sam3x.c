@@ -191,7 +191,7 @@ static clock_freq_t pwm_sam3x_get_freq(struct pwm_sam *ctx, pwm_sam_pwm_cpre_t c
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return (clock_freq_t)-EIO;
     }

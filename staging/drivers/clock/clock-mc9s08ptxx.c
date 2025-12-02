@@ -182,7 +182,7 @@ static int fee(const struct clock_settings *settings)
         x >>= 1;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 
@@ -218,7 +218,7 @@ int clock_mc9s08ptxx_init(const struct clock_settings *settings)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 
@@ -233,6 +233,6 @@ clock_freq_t clock_get_freq(clock_id_t clkid)
     }
 
     /* unknown */
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return (clock_freq_t)-EIO;
 }

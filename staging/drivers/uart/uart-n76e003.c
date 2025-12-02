@@ -117,7 +117,7 @@ static int set_baudrate(const struct uart *ctx, unsigned long baudrate)
         }
 
         /* shouldn't end up here */
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -201,7 +201,7 @@ int uart_write(struct uart *ctx, const char *buf, size_t n)
         case UART_N76E003_UART1_T3: res = uart1_write(ctx, *buf); break;
 #endif
         default:
-            picoRTOS_break();
+            picoRTOS_assert_void(false);
             /*@notreached@*/ return -EIO;
         }
 
@@ -258,7 +258,7 @@ int uart_read(struct uart *ctx, char *buf, size_t n)
         case UART_N76E003_UART1_T3: res = uart1_read(buf); break;
 #endif
         default:
-            picoRTOS_break();
+            picoRTOS_assert_void(false);
             /*@notreached@*/ return -EIO;
         }
 

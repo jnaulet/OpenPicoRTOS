@@ -100,7 +100,7 @@ static int set_clkmode(struct spi *ctx, spi_clock_mode_t clkmode)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EINVAL;
     }
@@ -129,7 +129,7 @@ static int set_bitrate(struct spi *ctx, unsigned long bitrate)
         }
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EINVAL;
 }
 

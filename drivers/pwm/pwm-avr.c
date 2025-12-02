@@ -115,7 +115,7 @@ static int set_waveform(struct pwm_avr *ctx, pwm_avr_waveform_t wf)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EINVAL;
     }
@@ -163,7 +163,7 @@ static int set_OCnA_mode(struct pwm_avr *ctx, pwm_avr_mode_t mode)
         ctx->waveform != PWM_AVR_WAVEFORM_FAST_PWM_ICRn &&
         ctx->waveform != PWM_AVR_WAVEFORM_FAST_PWM_OCRnA) {
         /* non-authorised values */
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EIO;
     }
@@ -210,7 +210,7 @@ static int set_output_compare_mode(struct pwm_avr *ctx,
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached */
     return -EINVAL;
 }
@@ -295,7 +295,7 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EIO;
     }
@@ -314,7 +314,7 @@ int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle)
     case PWM_AVR_OCnB: parent->base->OCRnB = OCRn; break;
     case PWM_AVR_OCnC: parent->base->OCRnC = OCRn; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EIO;
     }

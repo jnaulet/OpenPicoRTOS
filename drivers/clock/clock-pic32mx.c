@@ -142,7 +142,7 @@ static int configure_pll_input(clock_pic32mx_plliclk_t iclk)
     else if (clocks.posc < (clock_freq_t)42000000) range = 4;
     else if (clocks.posc < (clock_freq_t)64000000) range = 5;
     else{
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EIO;
     }
@@ -192,7 +192,7 @@ static int configure_pll(clock_pic32mx_plliclk_t iclk,
                 }
             }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EINVAL;
 }
 
@@ -215,7 +215,7 @@ static int switch_osc(clock_pic32mx_osc_t osc)
     /* Beware: this might change in the future */
     case CLOCK_PIC32MX_OSC_FRCDIV: clocks.sysclk = (clock_freq_t)FRC_DEFAULT; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -333,7 +333,7 @@ clock_freq_t clock_get_freq(clock_id_t clkid)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return (clock_freq_t)-EINVAL;
 }

@@ -373,7 +373,7 @@ static void flash_main(void *priv)
 
     /* blankcheck */
     if (flash_blankcheck(FLASH, block) < 0)
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
 
     /* at last, write */
     n = sizeof(buf);

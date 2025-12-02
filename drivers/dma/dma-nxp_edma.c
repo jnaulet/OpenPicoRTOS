@@ -123,7 +123,7 @@ static uint32_t nxp_edma_data_size(size_t size)
     case sizeof(uint32_t): return (uint32_t)2;
     case sizeof(uint64_t): return (uint32_t)3;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         break;
     }

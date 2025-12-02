@@ -204,7 +204,7 @@ static int hoco_get_freq(/*@out@*/ unsigned long *freq)
 
     default:
         *freq = 0;
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -265,7 +265,7 @@ static int setup_clock_source(const struct clock_settings *settings)
     case CLOCK_RENESAS_RA4_CKSEL_SOSC: clocks.main = SOSC_HZ; break;
     case CLOCK_RENESAS_RA4_CKSEL_PLL: res = setup_pll(settings->pll); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -346,7 +346,7 @@ int clock_renesas_ra4_module_start(size_t module)
     case 2: MSTP->MSTPCRC &= ~(uint32_t)(1 << shift); break;        /* C */
     case 3: MSTP->MSTPCRD &= ~(uint32_t)(1 << shift); break;        /* D */
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -374,7 +374,7 @@ int clock_renesas_ra4_module_stop(size_t module)
     case 2: MSTP->MSTPCRC |= (uint32_t)(1 << shift); break;         /* C */
     case 3: MSTP->MSTPCRD |= (uint32_t)(1 << shift); break;         /* D */
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -398,7 +398,7 @@ clock_freq_t clock_get_freq(clock_id_t clkid)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return (clock_freq_t)-EIO;
 }

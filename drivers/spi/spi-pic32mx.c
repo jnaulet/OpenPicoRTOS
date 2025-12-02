@@ -139,7 +139,7 @@ static int set_clkmode(struct spi *ctx, spi_clock_mode_t clkmode)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EINVAL;
     }
@@ -158,7 +158,7 @@ static int set_frame_size(struct spi *ctx, size_t frame_size)
     case 16: ctx->base->SPIxCON.SET = (uint32_t)SPIxCON_MODE16; break;
     case 8: break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 

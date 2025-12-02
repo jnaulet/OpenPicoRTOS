@@ -415,7 +415,7 @@ int adc_stm32h7xx_sar_adc_init(struct adc *ctx,
     case 1: parent->base->SQR1 |= SQR1_SQ2(channel); break;
     case 0: parent->base->SQR1 |= SQR1_SQ1(channel); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 

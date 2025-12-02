@@ -132,7 +132,7 @@ int adc_gd32vf103_setup(struct adc_gd32vf103 *ctx, const struct adc_gd32vf103_se
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -285,7 +285,7 @@ int adc_read(struct adc *ctx, int *data)
         return adc_read_scan(ctx, data);
 
     /* unsupported mode */
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EFAULT;
 }
 

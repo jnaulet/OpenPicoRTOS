@@ -108,7 +108,7 @@ static int set_clkmode(spi_clock_mode_t clkmode)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EINVAL;
     }

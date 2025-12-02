@@ -318,7 +318,7 @@ static int twi_write_as_master(struct twi *ctx, const void *buf, size_t n)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }
@@ -414,7 +414,7 @@ static int twi_write_as_slave(struct twi *ctx, const void *buf, size_t n)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }
@@ -433,7 +433,7 @@ int twi_write(struct twi *ctx, const void *buf, size_t n, int flags)
     if (ctx->mode == TWI_MODE_SLAVE)
         return twi_write_as_slave(ctx, buf, n);
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }
@@ -507,7 +507,7 @@ static int twi_read_as_master(struct twi *ctx, void *buf, size_t n)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }
@@ -559,7 +559,7 @@ static int twi_read_as_slave(struct twi *ctx, void *buf, size_t n)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }
@@ -577,7 +577,7 @@ int twi_read(struct twi *ctx, void *buf, size_t n, int flags)
     if (ctx->mode == TWI_MODE_SLAVE)
         return twi_read_as_slave(ctx, buf, n);
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }

@@ -162,7 +162,7 @@ static int set_cs(struct uart *ctx, size_t cs)
     case 7: ctx->base->UCSRnC |= UCSRnC_UCSZ(2); break;
     case 8: ctx->base->UCSRnC |= UCSRnC_UCSZ(3); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EIO;
     }
@@ -273,7 +273,7 @@ static int uart_write_irqdriven(struct uart *ctx, const char *buf, size_t n)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 
@@ -348,7 +348,7 @@ int uart_write(struct uart *ctx, const char *buf, size_t n)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 
@@ -360,6 +360,6 @@ int uart_read(struct uart *ctx, char *buf, size_t n)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }

@@ -164,7 +164,7 @@ int uart_n76e003_init(/*@out@*/ struct uart *ctx, uart_n76e003_t uart)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -219,7 +219,7 @@ static int set_baudrate(const struct uart *ctx, unsigned long baudrate)
         }
 
         /* shouldn't end up here */
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 

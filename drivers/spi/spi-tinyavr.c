@@ -107,7 +107,7 @@ static int set_bitrate(struct spi *ctx, unsigned long bitrate)
         if (pdiv < 4ul) ctx->base->CTRLA |= CTRLA_CLK2X;
         ctx->base->CTRLA |= CTRLA_PRESC(0);
     }else{
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EINVAL;
     }

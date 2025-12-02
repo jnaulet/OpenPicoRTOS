@@ -260,7 +260,7 @@ int pwm_stm32h7xx_tim_setup(struct pwm_stm32h7xx_tim *ctx,
     case PWM_STM32H7XX_TIM_ALIGN_CENTER_MODE_2: ctx->base->CR1 |= CR1_CMS(2); break;
     case PWM_STM32H7XX_TIM_ALIGN_CENTER_MODE_3: ctx->base->CR1 |= CR1_CMS(3); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -307,7 +307,7 @@ static int set_oc(struct pwm *ctx, pwm_stm32h7xx_tim_oc_t oc)
     case 4: /*@fallthrough@*/
     case 5: CCMRx = &parent->base->CCMR3; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -347,7 +347,7 @@ static int set_oc(struct pwm *ctx, pwm_stm32h7xx_tim_oc_t oc)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -414,7 +414,7 @@ int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle)
     case 4: parent->base->CCR5 = (uint32_t)CCRx; break;
     case 5: parent->base->CCR6 = (uint32_t)CCRx; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 

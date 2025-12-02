@@ -95,7 +95,7 @@ static int nxp_emios_get_UC(struct pwm_nxp_emios *ctx, size_t channel,
     }
 
     *uc = NULL;
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EINVAL;
 }
 
@@ -294,7 +294,7 @@ int ipwm_get_period(struct ipwm *ctx, pwm_period_us_t *period)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }
@@ -355,7 +355,7 @@ int ipwm_get_duty_cycle(struct ipwm *ctx, pwm_duty_cycle_t *duty_cycle)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }

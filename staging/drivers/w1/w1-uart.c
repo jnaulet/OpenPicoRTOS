@@ -59,7 +59,7 @@ int w1_reset(struct w1 *ctx)
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EINVAL;
 }
 

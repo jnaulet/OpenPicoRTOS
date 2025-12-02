@@ -56,7 +56,7 @@ static int parse_osccfg(void)
         return 0;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
 }
@@ -98,7 +98,7 @@ static int setup_prescaler(clock_tinyavr_pdiv_t pdiv)
     case CLOCK_TINYAVR_PDIV_24: clocks.per_div = (clock_freq_t)24; break;
     case CLOCK_TINYAVR_PDIV_48: clocks.per_div = (clock_freq_t)48; break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -132,7 +132,7 @@ int clock_tinyavr_init(const struct clock_settings *settings)
     case CLOCK_TINYAVR_CLKSEL_XOSC32K:  /*@fallthrough@*/
     case CLOCK_TINYAVR_CLKSEL_EXTCLK:   /*@fallthrough@*/
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -178,7 +178,7 @@ clock_freq_t clock_get_freq(clock_id_t clkid)
     }
 
     /* error */
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/
     return (clock_freq_t)-EINVAL;
 }

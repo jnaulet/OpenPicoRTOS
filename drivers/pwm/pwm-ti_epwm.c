@@ -228,7 +228,7 @@ static int set_tbclk(struct pwm_ti_epwm *ctx, unsigned long hz)
         clkdiv *= 2ul;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 
@@ -244,7 +244,7 @@ static int set_waveform(struct pwm_ti_epwm *ctx, pwm_ti_epwm_waveform_t wf)
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EINVAL;
     }
@@ -289,7 +289,7 @@ static int set_output_a(struct pwm_ti_epwm *ctx, aqctl_action_t act, pwm_ti_epwm
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 
@@ -333,7 +333,7 @@ static int set_output_b(struct pwm_ti_epwm *ctx, aqctl_action_t act, pwm_ti_epwm
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/
         return -EIO;
     }
@@ -433,7 +433,7 @@ int pwm_ti_epwm_pwm_setup(struct pwm *ctx, const struct pwm_ti_epwm_pwm_settings
     default: break;
     }
 
-    picoRTOS_break();
+    picoRTOS_assert_void(false);
     /*@notreached@*/ return -EIO;
 }
 
@@ -461,7 +461,7 @@ int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle)
     case PWM_TI_EPWM_CMPA: parent->base->CMPA = (uint32_t)CMPA_CMPA(value); break;
     case PWM_TI_EPWM_CMPB: parent->base->CMPB = (uint32_t)CMPB_CMPB(value); break;
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EIO;
     }
 

@@ -107,7 +107,7 @@ int pwm_mc9s08ptxx_ftm_setup(struct pwm_mc9s08ptxx_ftm *ctx,
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
@@ -149,7 +149,7 @@ int pwm_mc9s08ptxx_ftm_pwm_setup(struct pwm *ctx, const struct pwm_mc9s08ptxx_ft
         break;
 
     default:
-        picoRTOS_break();
+        picoRTOS_assert_void(false);
         /*@notreached@*/ return -EINVAL;
     }
 
