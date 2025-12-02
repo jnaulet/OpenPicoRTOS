@@ -51,8 +51,9 @@ void picoRTOS_sleep_until(picoRTOS_tick_t *ref,                         /* put c
 /*@noreturn@*/ void picoRTOS_kill(void);                            /* kills the current task */
 
 picoRTOS_pid_t picoRTOS_self(void);                                 /* gets the current thread priority */
-/*@unused@*/ picoRTOS_tick_t picoRTOS_get_tick(void);               /* get current tick */
-
+/*@unused@*/ picoRTOS_tick_t picoRTOS_get_tick(void)                /* get current tick */
+    /*@modifies nothing@*/;
+  
 /* Macro: picoRTOS_schedule()
  * Puts the current task to sleep until next tick
  */
@@ -111,43 +112,64 @@ void picoRTOS_flush_dcache(void *addr, size_t n);
 
 /* Group: picoRTOS assert API */
 
+/* Macro: picoRTOS_fatal()
+ * Stalls the system */
+# define picoRTOS_fatal()                       \
+    {                                           \
+        arch_suspend();                         \
+        arch_break();                           \
+    }
+
+#ifndef S_SPLINT_S
+# define __side_effect_free(x)
+#else
+/*@external@*/
+void __side_effect_free(/*@sef@*/ bool pred);
+#endif
+
 #if !defined(NDEBUG)
-/* Macro: picoRTOS_break()
- * Throws a debug exception, ignored if -DNDEBUG */
-# define picoRTOS_break() arch_break()
+
 /* Macro: picoRTOS_assert(x, or_else)
  * Returns x, throws a debug exception & executes or_else if x is false,
  * unless -DNDEBUG */
-# define picoRTOS_assert(x, or_else)                \
-    if (!(x)) {                                       \
-        picoRTOS_break(); /*@notreached@*/              \
-        { or_else; }                                    \
+# define picoRTOS_assert(x, or_else)            \
+    if (!(x)) {                                 \
+        __side_effect_free(x);                  \
+        arch_break();                           \
+        /*@notreached@*/ { or_else; }           \
     }
+
 /* Macro: picoRTOS_assert_void(x)
  * Throws a debug exception if x is false, unless -DNDEBUG */
-# define picoRTOS_assert_void(x) if (!(x)) picoRTOS_break()
+# define picoRTOS_assert_void(x)                \
+    if (!(x)){                                  \
+        __side_effect_free(x);                  \
+        arch_break();                           \
+    }
+
+#else
+
+# define picoRTOS_assert(x, or_else)
+# define picoRTOS_assert_void(x)
+
+#endif
+
 /* Macro: picoRTOS_assert_fatal(x, or_else)
  * Returns x, throws a debug exception & executes or_else if x is false,
  * stalls the system if -DNDEBUG */
-# define picoRTOS_assert_fatal(x, or_else) picoRTOS_assert(x, or_else)
+#define picoRTOS_assert_fatal(x, or_else)       \
+    if (!(x)) {                                 \
+        __side_effect_free(x);                  \
+        picoRTOS_fatal();                       \
+        /*@notreached@*/ { or_else; }           \
+    }
+
 /* Macro: picoRTOS_assert_void_fatal(x)
  * Throws a debug exception if x is false, stalls the system if -DNDEBUG */
-# define picoRTOS_assert_void_fatal(x) picoRTOS_assert_void(x)
-#else
-# define picoRTOS_break() for (;;) {}
-# define picoRTOS_assert(x, or_else) if (!(x)) { or_else; }
-# define picoRTOS_assert_void(x) {}
-# define picoRTOS_assert_fatal(x, or_else)          \
-    if (!(x)) {                                       \
-        picoRTOS_suspend();                             \
-        picoRTOS_break(); /*@notreached@*/              \
-        { or_else; }                                    \
+#define picoRTOS_assert_void_fatal(x)           \
+    if (!(x)){                                  \
+        __side_effect_free(x);                  \
+        picoRTOS_fatal();                       \
     }
-# define picoRTOS_assert_void_fatal(x)                           \
-    if (!(x)) {                                                    \
-        picoRTOS_suspend();                                          \
-        picoRTOS_break();                                            \
-    }
-#endif
 
 #endif

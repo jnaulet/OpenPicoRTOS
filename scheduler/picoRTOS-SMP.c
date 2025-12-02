@@ -495,8 +495,8 @@ static void syscall_sleep_until(struct picoRTOS_task_core *task,
 
     /* missed the clock: retry until deadlock */
     if (++task->deadline_miss_count > (size_t)CONFIG_DEADLOCK_COUNT) {
-        picoRTOS_break();
-        /*@notreached@*/ sc->ref = picoRTOS.tick;
+        picoRTOS_assert_void(false); /* force break */
+        sc->ref = picoRTOS.tick;
     }
 
     /* stats */

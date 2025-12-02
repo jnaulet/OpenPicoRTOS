@@ -83,7 +83,7 @@ typedef void (*arch_isr_fn)(void*);             /* interrupt service routine */
  * Returns:
  * The value of the predicate
  */
-#define arch_assert(x, or_else) if (!(x)) { arch_break(); /*@notreached@*/ or_else; }
+#define arch_assert(x, or_else) if (!(x)) { arch_break(); /*@notreached@*/ { or_else; } }
 
 /* Macro: arch_assert_void(x)
  * Throws a debug exception if x is false, stalls if -DNDEBUG

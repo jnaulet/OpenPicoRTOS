@@ -38,7 +38,7 @@ extern void arch_core_init(picoRTOS_core_t core,
  * Returns:
  * The current running core index
  */
-extern picoRTOS_core_t arch_core(void);
+extern picoRTOS_core_t arch_core(void) /*@*/;
 
 /* Function: arch_spin_lock
  * Locks the SMP spinlock
