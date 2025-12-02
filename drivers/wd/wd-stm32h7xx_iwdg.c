@@ -80,11 +80,10 @@ int wd_stm32h7xx_iwdg_setup(struct wd *ctx, const struct wd_stm32h7xx_iwdg_setti
     picoRTOS_assert(settings->window_ms <= settings->timeout_ms, return -EINVAL);
 
     size_t p;
-    clock_freq_t freq;
+    clock_freq_t freq = clock_get_freq(ctx->clkid);
     static const unsigned long pr[] = { 4ul, 8ul, 16ul, 32ul, 64ul, 128ul, 256ul };
 
-    picoRTOS_assert((freq = clock_get_freq(ctx->clkid)) > 0,
-                    return -EIO);
+    picoRTOS_assert(freq > 0, return -EIO);
 
     /* determine prescaler + reload + window */
     for (p = 0; p < (size_t)7; p++) {
