@@ -18,13 +18,7 @@ include scripts/Kbuild.include
 include scripts/Sources.include
 
 # debug options
-ccflags-$(CONFIG_NDEBUG) += -DNDEBUG
-
-# attributes
-ccattributes := -D"__ATTRIBUTE_ALIGNED__(x)"=
-ccattributes += -D__ATTRIBUTE_UNUSED__=
-ccattributes += -D__ATTRIBUTE_NAKED__=
-ccattributes += -D__ATTRIBUTE_PACKED__=
+# ccflags-$(CONFIG_NDEBUG) += -DNDEBUG
 
 # The filename Kbuild has precedence over Makefile
 kbuild-dir := $(if $(filter /%,$(src)),$(src),$(srctree)/$(src))
