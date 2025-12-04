@@ -482,14 +482,15 @@ static int set_init_cce(/*@reldef@*/ const struct can *ctx, bool value)
 
 static void init_fdcan_filters(struct can *ctx)
 {
+    int n;
     struct std_filter *sf = (struct std_filter *)ctx->filter_11bit;
     struct ext_filter *ef = (struct ext_filter *)ctx->filter_29bit;
 
     /* std */
-    for (int n = STD_FILTERS_SIZE_COUNT; n-- != 0;)
+    for (n = STD_FILTERS_SIZE_COUNT; n-- != 0;)
         sf[n].S0 = (uint32_t)S0_SFT(0x3);
     /* extended */
-    for (int n = XTD_FILTERS_SIZE_COUNT; n-- != 0;)
+    for (n = XTD_FILTERS_SIZE_COUNT; n-- != 0;)
         ef[n].F0 = (uint32_t)F0_EFEC(0x0);
 
     /* don't accept non-matching messages */
@@ -510,7 +511,7 @@ int can_stm32h7xx_fdcan_init(struct can *ctx, int base, clock_id_t clkid,
     ctx->n_filter_11bit = 0;
     ctx->n_filter_29bit = 0;
     ctx->n_words = n_words;
-    ctx->bus_off_recovery = 0;
+    ctx->bus_off_recovery = false;
 
     /* software initialization */
     if ((res = set_init_cce(ctx, true)) < 0)
@@ -785,17 +786,16 @@ int can_write(struct can *ctx, can_id_t id, const void *buf, size_t n)
     uint32_t txfqs = ctx->base->TXFQS;
 
     /* bus_off recovery */
-    if (ctx->bus_off_recovery != 0 &&
-        (ctx->base->PSR & PSR_LEC_M) == PSR_LEC_BIT0ERROR) {
-        ctx->bus_off_recovery--;
-        return -EBUSY;
+    if (ctx->bus_off_recovery) {
+        if ((ctx->base->ECR & C99_ECR_REC(C99_ECR_REC_M)) != 0) return -EBUSY;
+        else ctx->bus_off_recovery = false;
     }
 
     /* bus_off management */
     if ((ctx->base->PSR & PSR_BO) != 0) {
         ctx->base->CCCR &= ~CCCR_INIT; /* hotfix */
         /* recovery takes 129x11 idle bits */
-        ctx->bus_off_recovery = BUS_OFF_RECOVERY_COUNT;
+        ctx->bus_off_recovery = true;
         return -EIO; /* -ECOMM; */
     }
 

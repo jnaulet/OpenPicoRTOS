@@ -10,6 +10,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 struct CAN_STM32H7XX_FDCAN;
 
@@ -31,7 +32,7 @@ struct can {
     /* use later */
     size_t n_words;
     /* bus off */
-    int bus_off_recovery;
+    bool bus_off_recovery;
 };
 
 int can_stm32h7xx_fdcan_init(/*@out@*/ struct can *ctx, int base, clock_id_t clkid,
