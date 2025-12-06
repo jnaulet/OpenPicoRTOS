@@ -29,7 +29,8 @@ typedef unsigned long picoRTOS_core_t;
 # define ASM(x) {}
 #else
 # define ASM(x) { __asm__ volatile (x); }
-# define arch_break() ASM("se_illegal\n se_nop")
 #endif
+
+#define arch_break() ASM("se_illegal\n se_nop")
 
 #endif

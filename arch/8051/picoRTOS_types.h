@@ -26,7 +26,6 @@ typedef unsigned int picoRTOS_uintptr_t;
 # define ASM(x) {}
 #else
 # define ASM(x) { __asm__ (x); }
-# define arch_break() ASM(" sjmp .") /* branch to self */
 
 /*
  * Ugly hack to prevent SDCC from generating
@@ -40,6 +39,7 @@ typedef unsigned int picoRTOS_uintptr_t;
 # define __attribute__(x)
 #endif
 
+#define arch_break() ASM(" sjmp .") /* branch to self */
 
 /* very-specific */
 void arch_timer_ack(void);

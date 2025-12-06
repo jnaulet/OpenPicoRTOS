@@ -68,13 +68,10 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp);
 typedef void (*arch_entry_point_fn)(void*);     /* entry point */
 typedef void (*arch_isr_fn)(void*);             /* interrupt service routine */
 
-#if defined(NDEBUG) || !defined(arch_break)
-# undef arch_break
-# define arch_break() for (;;) {}
-#endif
+#if !defined(NDEBUG)
 
 /* Macro: arch_assert(x, or_else)
- * Throws a debug exception & execute or_else if x is false, stalls if -DNDEBUG
+ * Throws a debug exception & execute or_else if x is false, unless -DNDEBUG
  *
  * Parameters:
  *  x - predicate
@@ -83,15 +80,22 @@ typedef void (*arch_isr_fn)(void*);             /* interrupt service routine */
  * Returns:
  * The value of the predicate
  */
-#define arch_assert(x, or_else) if (!(x)) { arch_break(); /*@notreached@*/ { or_else; } }
+# define arch_assert(x, or_else) if (!(x)) { arch_break(); /*@notreached@*/ { or_else; } }
 
 /* Macro: arch_assert_void(x)
- * Throws a debug exception if x is false, stalls if -DNDEBUG
+ * Throws a debug exception if x is false, unless -DNDEBUG
  *
  * Parameters:
  *  x - predicate
  */
-#define arch_assert_void(x) if (!(x)) arch_break()
+# define arch_assert_void(x) if (!(x)) arch_break()
+
+#else
+
+# define arch_assert(x, or_else)
+# define arch_assert_void(x)
+
+#endif
 
 /* Function: arch_init
  * Architecture port initialization function

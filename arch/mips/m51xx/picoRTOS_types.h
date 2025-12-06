@@ -44,7 +44,8 @@ typedef unsigned long picoRTOS_uintptr_t;
 # define ASM(x) {}
 #else
 # define ASM(x) { __asm__ volatile (x); }
-# define arch_break() ASM("sdbbp")
 #endif
+
+#define arch_break() ASM("sdbbp")
 
 #endif

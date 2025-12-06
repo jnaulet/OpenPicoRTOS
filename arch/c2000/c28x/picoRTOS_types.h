@@ -30,8 +30,9 @@ typedef unsigned long picoRTOS_uintptr_t;
 # define ASM(x) {}
 #else
 # define ASM(x) { __asm(x); }
-# define arch_break() ASM("  estop0")
 #endif
+
+#define arch_break() ASM("  estop0")
 
 #define arch_invalidate_dcache(x, y) /*@i@*/ (void)x
 #define arch_flush_dcache(x, y)      /*@i@*/ (void)x

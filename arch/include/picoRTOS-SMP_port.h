@@ -28,7 +28,7 @@ extern void arch_smp_init(void);
  *  sp - The auxiliary core 'idle' task prepared stack (ready for context restoration)
  */
 extern void arch_core_init(picoRTOS_core_t core,
-                           picoRTOS_stack_t *stack,
+                           /*@notnull@*/ picoRTOS_stack_t *stack,
                            size_t stack_count,
                            picoRTOS_stack_t *sp);
 

@@ -26,7 +26,6 @@ typedef unsigned int picoRTOS_uintptr_t;
 # define ASM(x) {}
 #else
 # define ASM(x) { __asm__ (x); }
-# define arch_break() ASM("break")
 
 /*
  * Ugly hack to prevent SDCC from generating
@@ -39,6 +38,8 @@ typedef unsigned int picoRTOS_uintptr_t;
  */
 # define __attribute__(x)
 #endif
+
+#define arch_break() ASM("break")
 
 /* STUB OPTIONAL API */
 #define arch_counter(x, y)           0

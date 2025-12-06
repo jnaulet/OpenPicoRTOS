@@ -31,8 +31,9 @@ typedef unsigned int picoRTOS_uintptr_t;
 # define ASM(x) {}
 #else
 # define ASM(x) { __asm__ volatile (x); }
-# define arch_break() ASM("break")
 #endif
+
+#define arch_break() ASM("break")
 
 #define arch_invalidate_dcache(x, y) /*@i@*/ (void)x
 #define arch_flush_dcache(x, y)      /*@i@*/ (void)x
