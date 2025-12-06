@@ -423,6 +423,14 @@ void picoRTOS_resume(void)
     arch_resume();
 }
 
+void picoRTOS_fatal(void)
+{
+    arch_suspend();
+    arch_spin_lock();
+    for (;;)
+        arch_break();
+}
+
 void picoRTOS_postpone(void)
 {
     picoRTOS_assert_fatal(TASK_CURRENT().state == PICORTOS_TASK_STATE_BUSY, return );

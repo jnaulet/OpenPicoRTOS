@@ -42,6 +42,7 @@ picoRTOS_priority_t picoRTOS_get_last_available_priority(void);         /* get l
 /*@maynotreturn@*/ void picoRTOS_start(void);                           /* starts picoRTOS */
 void picoRTOS_suspend(void);                                            /* suspends the scheduling */
 void picoRTOS_resume(void);                                             /* resumes the scheduling */
+/*@unused@*/ /*@noreturn@*/ void picoRTOS_fatal(void);                  /* stalls picoRTOS */
 
 void picoRTOS_postpone(void);                                           /* move to next task, put back in FIFO */
 void picoRTOS_sleep(picoRTOS_tick_t delay);                             /* put current task to sleep */
@@ -112,14 +113,6 @@ void picoRTOS_flush_dcache(void *addr, size_t n);
 
 /* Group: picoRTOS assert API */
 
-/* Macro: picoRTOS_fatal()
- * Stalls the system */
-# define picoRTOS_fatal()                       \
-    {                                           \
-        arch_suspend();                         \
-        arch_break();                           \
-    }
-
 #ifndef S_SPLINT_S
 # define __side_effect_free(x)
 #else
@@ -136,7 +129,7 @@ void __side_effect_free(/*@sef@*/ bool pred);
     if (!(x)) {                                 \
         __side_effect_free(x);                  \
         arch_break();                           \
-        /*@notreached@*/ { or_else; }           \
+        { or_else; }                            \
     }
 
 /* Macro: picoRTOS_assert_void(x)

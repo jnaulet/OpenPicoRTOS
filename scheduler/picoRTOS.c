@@ -427,6 +427,16 @@ void picoRTOS_resume(void)
     arch_resume();
 }
 
+/* Function: picoRTOS_fatal
+ * Stalls picoRTOS
+ */
+void picoRTOS_fatal(void)
+{
+    arch_suspend();
+    for (;;)
+        arch_break();
+}
+
 /* Function: picoRTOS_postpone
  * Puts the current task back in the scheduler's FIFO (don't wait for next tick)
  */

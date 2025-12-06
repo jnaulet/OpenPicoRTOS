@@ -182,6 +182,13 @@ void picoRTOS_resume(void)
     arch_resume();
 }
 
+void picoRTOS_fatal(void)
+{
+    arch_suspend();
+    for (;;)
+        arch_break();
+}
+
 void picoRTOS_postpone(void)
 {
     picoRTOS_assert_fatal((picoRTOS.flags & F_RUNNING) != 0, return );
