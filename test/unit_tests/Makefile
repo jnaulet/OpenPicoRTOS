@@ -31,6 +31,10 @@ $(BUILD_DIR)/%.o: %.c
 	-mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+indent:
+	uncrustify -c ../../etc/uncrustify.cfg $(SRC) test.c \
+	  --replace --no-backup
+
 clean:
 	-rm -rf $(BUILD_DIR)
 	-rm -f $(TESTS) *.o

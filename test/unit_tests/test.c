@@ -1,18 +1,28 @@
 #include "unit_test.h"
 #include <stdbool.h>
+
+#include "picoRTOS.h"
 #include "picoRTOS_types.h"
 
 /* global state machine */
-static bool halted;
+static bool fatal;
 static picoRTOS_core_t core;
 
 #define RESET_STATE_MACHINE()                   \
-    halted = false
+  do {                                          \
+    fatal = false;                              \
+  } while(0)
 
 static inline picoRTOS_core_t arch_core(void)
 {
     return core;
 }
+
+#undef picoRTOS_assert_fatal
+#undef picoRTOS_assert_fatal_void
+
+#define picoRTOS_assert_fatal(x, or_else) if(!(x)){ fatal = true; { or_else; }}
+#define picoRTOS_assert_fatal_void(x) if(!(x)){ fatal = true; }
 
 /*
  * These unit tests will ensure picoRTOS & picoRTOS-SMP get the same
@@ -41,8 +51,7 @@ static void dummy_fn1(void *priv)
     (void)priv;
 }
 
-UNIT_TEST(task_core_init)
-{
+UNIT_TEST(task_core_init){
     struct picoRTOS_task_core task;
 
     /* reset */
@@ -63,8 +72,7 @@ UNIT_TEST(task_core_init)
     u_assert_var_equals(task.sub_prio, 0);
 }
 
-UNIT_TEST(task_idle_init)
-{
+UNIT_TEST(task_idle_init){
     task_idle_init();
 
     u_assert_var_equals(TASK_BY_PID(TASK_IDLE_PID).state, PICORTOS_TASK_STATE_READY);
@@ -97,28 +105,22 @@ UNIT_TEST(picoRTOS_init){
     u_assert_var_equals(picoRTOS.flags, 0);
 }
 
-UNIT_TEST(task_core_is_available)
-{
+UNIT_TEST(task_core_is_available){
 }
 
-UNIT_TEST(task_core_stat_begin)
-{
+UNIT_TEST(task_core_stat_begin){
 }
 
-UNIT_TEST(core_stat_watermark)
-{
+UNIT_TEST(core_stat_watermark){
 }
 
-UNIT_TEST(task_core_stat_switch)
-{
+UNIT_TEST(task_core_stat_switch){
 }
 
-UNIT_TEST(task_core_stat_preempt)
-{
+UNIT_TEST(task_core_stat_preempt){
 }
 
-UNIT_TEST(picoRTOS_task_init)
-{
+UNIT_TEST(picoRTOS_task_init){
     int dummy = 0;
     struct picoRTOS_task task;
     picoRTOS_stack_t stack[CONFIG_DEFAULT_STACK_COUNT];
@@ -132,20 +134,19 @@ UNIT_TEST(picoRTOS_task_init)
     /* test #1, must fail */
     RESET_STATE_MACHINE();
     picoRTOS_task_init(&task, dummy_fn0, &dummy, stack, (size_t)1);
-    u_assert(halted);
+    u_assert(fatal);
 
     /* test #2, ok */
     RESET_STATE_MACHINE();
     picoRTOS_task_init(&task, dummy_fn0, &dummy, stack, PICORTOS_STACK_COUNT(stack));
-    u_assert(!halted);
+    u_assert(!fatal);
     u_assert_ptr_equals(task.fn, dummy_fn0);
     u_assert_ptr_equals(task.priv, &dummy);
     u_assert_ptr_equals(task.stack, stack);
     u_assert_var_equals(task.stack_count, CONFIG_DEFAULT_STACK_COUNT);
 }
 
-UNIT_TEST(picoRTOS_add_task)
-{
+UNIT_TEST(picoRTOS_add_task){
 #define RANDOM_PID  (CONFIG_TASK_COUNT / 3)
 #define RANDOM_PRIO 4
 
@@ -164,7 +165,7 @@ UNIT_TEST(picoRTOS_add_task)
     /* test #1, must fail */
     RESET_STATE_MACHINE();
     picoRTOS_add_task(&task, CONFIG_TASK_COUNT);
-    u_assert(halted);
+    u_assert(fatal);
 
 #ifndef TEST_PICORTOS_LITE
     /* test #2, must be ok */
@@ -172,7 +173,7 @@ UNIT_TEST(picoRTOS_add_task)
     for (n = CONFIG_TASK_COUNT; n-- != 0;)
         picoRTOS_add_task(&task, RANDOM_PRIO);
 
-    u_assert(!halted);
+    u_assert(!fatal);
     u_assert_ptr_equals(TASK_BY_PID(RANDOM_PID).sp, stack);
     u_assert_var_equals(TASK_BY_PID(RANDOM_PID).state, PICORTOS_TASK_STATE_READY);
     u_assert_ptr_equals(TASK_BY_PID(RANDOM_PID).stack_bottom, stack);
@@ -182,12 +183,11 @@ UNIT_TEST(picoRTOS_add_task)
     /* test #3, must fail */
     RESET_STATE_MACHINE();
     picoRTOS_add_task(&task, RANDOM_PRIO);
-    u_assert(halted);
+    u_assert(fatal);
 #endif
 }
 
-UNIT_TEST(task_core_quickcpy)
-{
+UNIT_TEST(task_core_quickcpy){
     int dummy0 = 0;
     int dummy1 = 0;
     struct picoRTOS_task task;
@@ -211,8 +211,7 @@ UNIT_TEST(task_core_quickcpy)
     u_assert_var_equals(TASK_BY_PID(0).prio, TASK_BY_PID(1).prio);
 }
 
-UNIT_TEST(task_core_quickswap)
-{
+UNIT_TEST(task_core_quickswap){
     int dummy0 = 0;
     int dummy1 = 0;
     struct picoRTOS_task task;
@@ -241,8 +240,7 @@ UNIT_TEST(task_core_quickswap)
     u_assert_var_equals(TASK_BY_PID(1).prio, 0);
 }
 
-UNIT_TEST(picoRTOS_get_next_available_priority)
-{
+UNIT_TEST(picoRTOS_get_next_available_priority){
     int dummy = 0;
     picoRTOS_priority_t prio;
     struct picoRTOS_task task;
@@ -274,8 +272,7 @@ UNIT_TEST(picoRTOS_get_next_available_priority)
     u_assert_var_equals(prio, 7);
 }
 
-UNIT_TEST(picoRTOS_get_last_available_priority)
-{
+UNIT_TEST(picoRTOS_get_last_available_priority){
     int dummy = 0;
     picoRTOS_priority_t prio;
     struct picoRTOS_task task;
@@ -307,8 +304,7 @@ UNIT_TEST(picoRTOS_get_last_available_priority)
     u_assert_var_equals(prio, CONFIG_TASK_COUNT - 8);
 }
 
-UNIT_TEST(core_sort_tasks)
-{
+UNIT_TEST(core_sort_tasks){
     int dummy = 0;
     struct picoRTOS_task task;
     picoRTOS_stack_t stack[CONFIG_DEFAULT_STACK_COUNT];
@@ -342,8 +338,7 @@ UNIT_TEST(core_sort_tasks)
     u_assert_var_equals(TASK_BY_PID(9).prio, 31);
 }
 
-UNIT_TEST(core_arrange_shared_priorities)
-{
+UNIT_TEST(core_arrange_shared_priorities){
     int dummy = 0;
     struct picoRTOS_task task;
     picoRTOS_stack_t stack[CONFIG_DEFAULT_STACK_COUNT];
@@ -389,8 +384,7 @@ UNIT_TEST(core_arrange_shared_priorities)
     u_assert_var_equals(SUB_BY_PRIO(TASK_BY_PID(9).prio).count, 3);
 }
 
-UNIT_TEST(picoRTOS_start)
-{
+UNIT_TEST(picoRTOS_start){
     /* reset */
     picoRTOS_init();
 
@@ -401,58 +395,52 @@ UNIT_TEST(picoRTOS_start)
     picoRTOS_init();
 }
 
-UNIT_TEST(picoRTOS_suspend)
-{
+UNIT_TEST(picoRTOS_suspend){
     /* reset */
     picoRTOS_init();
 
     RESET_STATE_MACHINE();
     picoRTOS_suspend();
-    u_assert(halted);
+    u_assert(fatal);
 }
 
-UNIT_TEST(picoRTOS_resume)
-{
+UNIT_TEST(picoRTOS_resume){
     /* reset */
     picoRTOS_init();
 
     RESET_STATE_MACHINE();
     picoRTOS_resume();
-    u_assert(halted);
+    u_assert(fatal);
 }
 
-UNIT_TEST(picoRTOS_postpone)
-{
+UNIT_TEST(picoRTOS_postpone){
     /* reset */
     picoRTOS_init();
 
     RESET_STATE_MACHINE();
     picoRTOS_postpone();
-    u_assert(halted);
+    u_assert(fatal);
 }
 
-UNIT_TEST(picoRTOS_schedule)
-{
+UNIT_TEST(picoRTOS_schedule){
     /* reset */
     picoRTOS_init();
 
     RESET_STATE_MACHINE();
     picoRTOS_schedule();
-    u_assert(halted);
+    u_assert(fatal);
 }
 
-UNIT_TEST(picoRTOS_sleep)
-{
+UNIT_TEST(picoRTOS_sleep){
     /* reset */
     picoRTOS_init();
 
     RESET_STATE_MACHINE();
     picoRTOS_sleep(0);
-    u_assert(halted);
+    u_assert(fatal);
 }
 
-UNIT_TEST(picoRTOS_get_tick)
-{
+UNIT_TEST(picoRTOS_get_tick){
     picoRTOS_tick_t tick;
 
     /* reset */
@@ -461,7 +449,7 @@ UNIT_TEST(picoRTOS_get_tick)
     /* test #1 */
     RESET_STATE_MACHINE();
     picoRTOS_get_tick();
-    u_assert(halted);
+    u_assert(fatal);
 
     /* test #2 */
     RESET_STATE_MACHINE();
@@ -472,12 +460,11 @@ UNIT_TEST(picoRTOS_get_tick)
     TASK_CURRENT().state = PICORTOS_TASK_STATE_BUSY;
 #endif
     tick = picoRTOS_get_tick();
-    u_assert(!halted);
+    u_assert(!fatal);
     u_assert_var_equals(tick, (picoRTOS_tick_t)-1);
 }
 
-UNIT_TEST(picoRTOS_sleep_until)
-{
+UNIT_TEST(picoRTOS_sleep_until){
     picoRTOS_tick_t ref = 0;
 
     /* reset */
@@ -486,7 +473,7 @@ UNIT_TEST(picoRTOS_sleep_until)
     /* test #1, must fail */
     RESET_STATE_MACHINE();
     picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
-    u_assert(halted);
+    u_assert(fatal);
 
     struct picoRTOS_task task;
     picoRTOS_stack_t stack[CONFIG_DEFAULT_STACK_COUNT];
@@ -498,7 +485,7 @@ UNIT_TEST(picoRTOS_sleep_until)
     /* test #2, must fail */
     RESET_STATE_MACHINE();
     picoRTOS_sleep_until(&ref, 0);
-    u_assert(halted);
+    u_assert(fatal);
 
     /* test #3 */
     RESET_STATE_MACHINE();
@@ -509,41 +496,38 @@ UNIT_TEST(picoRTOS_sleep_until)
     TASK_CURRENT().state = PICORTOS_TASK_STATE_BUSY;
 #endif
     picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
-    u_assert(!halted);
+    u_assert(!fatal);
 
     /* test #4, limit */
     picoRTOS.tick = PICORTOS_DELAY_SEC(1);
     picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
-    u_assert(!halted);
+    u_assert(!fatal);
 }
 
-UNIT_TEST(picoRTOS_kill)
-{
+UNIT_TEST(picoRTOS_kill){
     /* reset */
     picoRTOS_init();
 
     RESET_STATE_MACHINE();
     picoRTOS_kill();
-    u_assert(halted);
+    u_assert(fatal);
 }
 
-UNIT_TEST(picoRTOS_self)
-{
+UNIT_TEST(picoRTOS_self){
     /* reset */
     picoRTOS_init();
 
     RESET_STATE_MACHINE();
     (void)picoRTOS_self();
-    u_assert(halted);
+    u_assert(fatal);
 }
 
-UNIT_TEST(syscall_sleep)
-{
+UNIT_TEST(syscall_sleep){
     struct picoRTOS_task task;
     picoRTOS_stack_t stack[CONFIG_DEFAULT_STACK_COUNT];
 
     struct syscall_sleep sleep;
-    
+
     /* reset */
     picoRTOS_init();
 
@@ -571,8 +555,7 @@ UNIT_TEST(syscall_sleep)
     u_assert_var_equals(TASK_CURRENT().tick, PICORTOS_DELAY_SEC(1));
 }
 
-UNIT_TEST(syscall_kill)
-{
+UNIT_TEST(syscall_kill){
     struct picoRTOS_task task;
     picoRTOS_stack_t stack[CONFIG_DEFAULT_STACK_COUNT];
 
@@ -587,56 +570,54 @@ UNIT_TEST(syscall_kill)
 #endif
 
     PICORTOS_DOT_INDEX = 0;
-    
+
     /* test #1 */
     syscall_kill(&TASK_CURRENT());
     u_assert_var_equals(TASK_CURRENT().state, PICORTOS_TASK_STATE_EMPTY);
 }
 
-UNIT_TEST(syscall_sleep_until)
-{
-      struct picoRTOS_task task;
-      picoRTOS_stack_t stack[CONFIG_DEFAULT_STACK_COUNT];
+UNIT_TEST(syscall_sleep_until){
+    struct picoRTOS_task task;
+    picoRTOS_stack_t stack[CONFIG_DEFAULT_STACK_COUNT];
 
-      struct syscall_sleep_until sleep_until;
-    
-      /* reset */
-      picoRTOS_init();
+    struct syscall_sleep_until sleep_until;
 
-      picoRTOS_task_init(&task, dummy_fn0, NULL, stack, PICORTOS_STACK_COUNT(stack));
-      picoRTOS_add_task(&task, 0);
+    /* reset */
+    picoRTOS_init();
+
+    picoRTOS_task_init(&task, dummy_fn0, NULL, stack, PICORTOS_STACK_COUNT(stack));
+    picoRTOS_add_task(&task, 0);
 
 #ifdef TEST_PICORTOS_SMP
-      core = 0;
+    core = 0;
 #endif
 
-      /* simulate 1st tick */
-      PICORTOS_DOT_INDEX = 0;
-      picoRTOS.tick = 0;
-      
-      /* test #1 */
-      sleep_until.ref = 0;
-      sleep_until.period = 0;
-      syscall_sleep_until(&TASK_CURRENT(), &sleep_until);
-      u_assert_var_equals(TASK_CURRENT().state, PICORTOS_TASK_STATE_READY);
-      u_assert_var_equals(TASK_CURRENT().tick, 0);
-      u_assert_var_equals(TASK_CURRENT().deadline_miss_count, (size_t)1);
-      
-      /* test #2 */
-      sleep_until.ref = 0;
-      sleep_until.period = PICORTOS_DELAY_SEC(1);
-      syscall_sleep_until(&TASK_CURRENT(), &sleep_until);
-      u_assert_var_equals(TASK_CURRENT().state, PICORTOS_TASK_STATE_SLEEP);
-      u_assert_var_equals(TASK_CURRENT().tick, PICORTOS_DELAY_SEC(1));
-      u_assert_var_equals(TASK_CURRENT().deadline_miss_count, 0);
+    /* simulate 1st tick */
+    PICORTOS_DOT_INDEX = 0;
+    picoRTOS.tick = 0;
+
+    /* test #1 */
+    sleep_until.ref = 0;
+    sleep_until.period = 0;
+    syscall_sleep_until(&TASK_CURRENT(), &sleep_until);
+    u_assert_var_equals(TASK_CURRENT().state, PICORTOS_TASK_STATE_READY);
+    u_assert_var_equals(TASK_CURRENT().tick, 0);
+    u_assert_var_equals(TASK_CURRENT().deadline_miss_count, (size_t)1);
+
+    /* test #2 */
+    sleep_until.ref = 0;
+    sleep_until.period = PICORTOS_DELAY_SEC(1);
+    syscall_sleep_until(&TASK_CURRENT(), &sleep_until);
+    u_assert_var_equals(TASK_CURRENT().state, PICORTOS_TASK_STATE_SLEEP);
+    u_assert_var_equals(TASK_CURRENT().tick, PICORTOS_DELAY_SEC(1));
+    u_assert_var_equals(TASK_CURRENT().deadline_miss_count, 0);
 }
 
-UNIT_TEST(picoRTOS_tick)
-{
+UNIT_TEST(picoRTOS_tick){
     struct picoRTOS_task task;
     picoRTOS_stack_t stack[CONFIG_DEFAULT_STACK_COUNT];
     struct syscall_sleep sleep = { (picoRTOS_tick_t)3 };
-    
+
     /* reset */
     picoRTOS_init();
 
@@ -648,12 +629,12 @@ UNIT_TEST(picoRTOS_tick)
     picoRTOS_start();
 
     /* simulate tick */
-    for(int i = CORES_COUNT; i-- != 0; )
-      (void)picoRTOS_tick(TASK_CURRENT().sp);
+    for (int i = CORES_COUNT; i-- != 0; )
+        (void)picoRTOS_tick(TASK_CURRENT().sp);
     u_assert_var_equals(PICORTOS_DOT_INDEX, 0);
 
-    for(int i = CORES_COUNT; i-- != 0; )
-      (void)picoRTOS_tick(TASK_CURRENT().sp);
+    for (int i = CORES_COUNT; i-- != 0; )
+        (void)picoRTOS_tick(TASK_CURRENT().sp);
     u_assert_var_equals(PICORTOS_DOT_INDEX, 1);
 
     /* simulate sleep */
@@ -661,17 +642,16 @@ UNIT_TEST(picoRTOS_tick)
                      SYSCALL_SLEEP,
                      (void*)&sleep);
 
-    for(int i = CORES_COUNT; i-- != 0; )
-      (void)picoRTOS_tick(TASK_CURRENT().sp);
+    for (int i = CORES_COUNT; i-- != 0; )
+        (void)picoRTOS_tick(TASK_CURRENT().sp);
     u_assert_var_equals(PICORTOS_DOT_INDEX, 0);
 
-    for(int i = CORES_COUNT; i-- != 0; )
-      (void)picoRTOS_tick(TASK_CURRENT().sp);
+    for (int i = CORES_COUNT; i-- != 0; )
+        (void)picoRTOS_tick(TASK_CURRENT().sp);
     u_assert_var_equals(PICORTOS_DOT_INDEX, 2);
 }
 
-UNIT_TEST(syscall_switch_context)
-{
+UNIT_TEST(syscall_switch_context){
     struct picoRTOS_task task;
     picoRTOS_stack_t stack[CONFIG_DEFAULT_STACK_COUNT];
 
@@ -687,8 +667,8 @@ UNIT_TEST(syscall_switch_context)
     picoRTOS_start();
 
     /* simulate tick */
-    for(int i = CORES_COUNT; i-- != 0; )
-      (void)picoRTOS_tick(TASK_CURRENT().sp);
+    for (int i = CORES_COUNT; i-- != 0; )
+        (void)picoRTOS_tick(TASK_CURRENT().sp);
 
     /* simulate context switch */
     (void)syscall_switch_context(&TASK_CURRENT());
@@ -698,8 +678,8 @@ UNIT_TEST(syscall_switch_context)
     u_assert_var_equals(PICORTOS_DOT_INDEX, TASK_IDLE_PID);
 
     /* simulate 2nd tick */
-    for(int i = CORES_COUNT; i-- != 0; )
-      (void)picoRTOS_tick(TASK_CURRENT().sp);
+    for (int i = CORES_COUNT; i-- != 0; )
+        (void)picoRTOS_tick(TASK_CURRENT().sp);
 
     (void)syscall_switch_context(&TASK_CURRENT());
     u_assert_var_equals(PICORTOS_DOT_INDEX, 3);
@@ -708,9 +688,9 @@ UNIT_TEST(syscall_switch_context)
     u_assert_var_equals(PICORTOS_DOT_INDEX, TASK_IDLE_PID);
 
     /* simulate 3rd tick */
-    for(int i = CORES_COUNT; i-- != 0; )
-      (void)picoRTOS_tick(TASK_CURRENT().sp);
-    
+    for (int i = CORES_COUNT; i-- != 0; )
+        (void)picoRTOS_tick(TASK_CURRENT().sp);
+
     /* test for postoned tasks */
     picoRTOS_syscall(TASK_CURRENT().sp, SYSCALL_SWITCH_CONTEXT, NULL);
     u_assert_var_equals(PICORTOS_DOT_INDEX, 2);
@@ -722,8 +702,7 @@ UNIT_TEST(syscall_switch_context)
 }
 
 #ifdef TEST_PICORTOS_SMP
-UNIT_TEST(picoRTOS_SMP_add_task)
-{
+UNIT_TEST(picoRTOS_SMP_add_task){
     struct picoRTOS_task task;
     picoRTOS_stack_t stack[CONFIG_DEFAULT_STACK_COUNT];
 
@@ -735,18 +714,18 @@ UNIT_TEST(picoRTOS_SMP_add_task)
     /* test #1, must fail */
     RESET_STATE_MACHINE();
     picoRTOS_SMP_add_task(&task, 0, 0);
-    u_assert(halted);
+    u_assert(fatal);
 
     /* test #2, must fail */
     RESET_STATE_MACHINE();
     picoRTOS_SMP_add_task(&task, 0, (1 << CONFIG_SMP_CORES));
-    u_assert(halted);
+    u_assert(fatal);
 
     /* test #3 */
     RESET_STATE_MACHINE();
     picoRTOS_SMP_add_task(&task, 0, (1 << 0));
     picoRTOS_SMP_add_task(&task, 0, (1 << (CONFIG_SMP_CORES - 1)));
-    u_assert(!halted);
+    u_assert(!fatal);
     u_assert_ptr_equals(TASK_BY_PID(0).core_mask, (1 << 0));
     u_assert_ptr_equals(TASK_BY_PID(1).core_mask, (1 << (CONFIG_SMP_CORES - 1)));
 }
@@ -782,7 +761,7 @@ int main(void)
     RUN_TEST(syscall_sleep);
     RUN_TEST(syscall_kill);
     RUN_TEST(syscall_sleep_until);
-    
+
     /* more complex stuff */
     RUN_TEST(picoRTOS_tick);
     RUN_TEST(syscall_switch_context);

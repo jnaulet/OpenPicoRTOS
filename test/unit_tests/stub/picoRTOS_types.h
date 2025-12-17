@@ -20,6 +20,6 @@ typedef unsigned long picoRTOS_uintptr_t;
 #define ARCH_MIN_STACK_COUNT     ARCH_INITIAL_STACK_COUNT
 #define ARCH_SMP_MIN_STACK_COUNT ARCH_INITIAL_STACK_COUNT
 
-#define arch_break() ({ halted = true; })
+#define arch_break()
 
 #endif
