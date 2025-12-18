@@ -100,14 +100,14 @@ void arch_register_interrupt(picoRTOS_irq_t irq, arch_isr_fn fn, void *priv)
 
 void arch_enable_interrupt(picoRTOS_irq_t irq)
 {
-    arch_assert_void(irq > (picoRTOS_irq_t)0);
-    arch_assert_void(irq < (picoRTOS_irq_t)(DEVICE_INTERRUPT_VECTOR_COUNT + 1));
+    arch_assert(irq > (picoRTOS_irq_t)0, return );
+    arch_assert(irq < (picoRTOS_irq_t)(DEVICE_INTERRUPT_VECTOR_COUNT + 1), return );
     /* no effect */
 }
 
 void arch_disable_interrupt(picoRTOS_irq_t irq)
 {
-    arch_assert_void(irq > (picoRTOS_irq_t)0);
-    arch_assert_void(irq < (picoRTOS_irq_t)(DEVICE_INTERRUPT_VECTOR_COUNT + 1));
+    arch_assert(irq > (picoRTOS_irq_t)0, return );
+    arch_assert(irq < (picoRTOS_irq_t)(DEVICE_INTERRUPT_VECTOR_COUNT + 1), return );
     /* no effect */
 }
