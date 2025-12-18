@@ -55,7 +55,12 @@ Group: hw-specific  {
 
       Group: Spi  {
 
-         File: SPI  (no auto-title, drivers/spi/spi-avr.c)
+         Group: SPI  {
+
+            File: SPI-AVR  (no auto-title, drivers/spi/spi-avr.c)
+            File: SPI-LGT8  (no auto-title, drivers/spi/spi-lgt8fx8p.c)
+            }  # Group: SPI
+
          File: SPI &lparen;IRQ-driven&rparen;  (no auto-title, drivers/spi/spi-avr_irqdriven.c)
          File: SPI / USART  (no auto-title, drivers/spi/spi-avr_usart.c)
          }  # Group: Spi
@@ -100,7 +105,12 @@ Group: hw-specific  {
 
    Group: N76E003  {
 
-      File: Clocks  (no auto-title, drivers/clock/clock-n76e003.c)
+      Group: Clocks  {
+
+         File: n76e003  (no auto-title, drivers/clock/clock-n76e003.c)
+         File: Generic numicro  (no auto-title, drivers/clock/clock-numicro.c)
+         }  # Group: Clocks
+
       }  # Group: N76E003
 
    Group: MPC57xx  {
@@ -220,6 +230,15 @@ Group: hw-specific  {
 
    }  # Group: hw-specific
 
+Group: Level-2 drivers  {
+
+   Group: EEPROM  {
+
+      File: EEPROM-CY15B004J  (no auto-title, drivers/eeprom/eeprom-cy15b004j.c)
+      }  # Group: EEPROM
+
+   }  # Group: Level-2 drivers
+
 Group: picoRTOS-scheduler-API  {
 
    File: Macros  (no auto-title, picoRTOS.h)
@@ -258,6 +277,7 @@ Group: picoRTOS-Runtime-HAL  {
    File: SPI  (no auto-title, drivers/include/spi.h)
    File: TWI  (no auto-title, drivers/include/twi.h)
    File: UART  (no auto-title, drivers/include/uart.h)
+   File: 1-WIRE  (no auto-title, drivers/include/w1.h)
    File: Watchdog  (no auto-title, drivers/include/wd.h)
    }  # Group: picoRTOS-Runtime-HAL
 

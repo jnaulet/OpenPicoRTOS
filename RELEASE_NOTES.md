@@ -1,5 +1,14 @@
 # Release notes
 
+## picoRTOS v1.10.2
+### What's new ?
+
+Assert system has been made cleaner (hopefully) by adding picoRTOS_dbgbreak()
+and picoRTOS_fatal() calls & enforcing through splint the side-effect free
+nature of asserts.
+
+Usual minor fixes in drivers, especially stm32h7-related.
+
 ## picoRTOS v1.10.0
 ### What"s new ?
 
