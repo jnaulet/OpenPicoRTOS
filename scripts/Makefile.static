@@ -34,6 +34,7 @@ c_flags        = $(RTOSINCLUDE) \
 
 SPLINTFLAGS := -checks +unixlib $(c_flags) $(splintflags-y)
 CPPCHECKFLAGS := --enable=all --inline-suppr --std=c99 $(c_flags)
+CPPCHECKFLAGS += -UNDEBUG -US_SPLINT_S -U__ASSEMBLER__
 CPPCHECKFLAGS += --suppress=missingIncludeSystem --suppress=unusedFunction
 # drivers will spit a shit ton of errors without that option (reserved fields)
 CPPCHECKFLAGS += --suppress=unusedStructMember
