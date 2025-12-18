@@ -24,7 +24,7 @@ all: $(TARGETS)
 %.elf: FORCE
 	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) $(defconfig)
 	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) \
-	  CC=xc8-cc TARGET=$@
+	  CC=avr-gcc TARGET=$@
 
 %:
 	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) $@
