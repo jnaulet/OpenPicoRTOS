@@ -13,7 +13,7 @@ all: $(target)
 	@
 
 %.elf: FORCE
-	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) CC=xc8-cc
+	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) CC=avr-gcc
 
 %:
 	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) $@
