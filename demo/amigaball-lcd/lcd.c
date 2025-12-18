@@ -223,7 +223,7 @@ void lcd_zero(struct lcd *ctx)
 int lcd_refresh(struct lcd *ctx)
 {
     /* max 30 fps */
-#define LCD_REFRESH_TIMEOUT PICORTOS_DELAY_MSEC(34)
+#define LCD_REFRESH_TIMEOUT PICORTOS_DELAY_MSEC(34l)
 
     size_t xfered = 0;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
