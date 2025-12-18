@@ -86,6 +86,7 @@ int adc_setup(struct adc *ctx, const struct adc_settings *settings)
     return 0;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 int adc_read(struct adc *ctx, int *data)
 {
     if ((ADCCON0 & ADCCON0_ADCF) != (unsigned char)0) {

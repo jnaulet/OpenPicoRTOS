@@ -116,6 +116,7 @@ static int set_clkmode(spi_clock_mode_t clkmode)
     return 0;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 int spi_setup(struct spi *ctx, const struct spi_settings *settings)
 {
     int res;
