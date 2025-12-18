@@ -92,7 +92,7 @@ typedef void (*arch_isr_fn)(void*);             /* interrupt service routine */
 
 #else
 
-# define arch_assert(x, or_else)
+# define arch_assert(x, or_else) if (!(x)) { or_else; }
 # define arch_assert_void(x)
 
 #endif

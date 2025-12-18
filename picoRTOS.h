@@ -120,7 +120,13 @@ void picoRTOS_flush_dcache(void *addr, size_t n);
 void __side_effect_free(/*@sef@*/ bool pred);
 #endif
 
-#if !defined(NDEBUG)
+#ifndef NDEBUG
+/* Macro: picoRTOS_dbgbreak()
+ * Throws a debug exception, ignored if -DNDEBUG */
+# define picoRTOS_dbgbreak() arch_break()
+#else
+# define picoRTOS_dbgbreak()
+#endif
 
 /* Macro: picoRTOS_assert(x, or_else)
  * Returns x, throws a debug exception & executes or_else if x is false,
@@ -128,7 +134,7 @@ void __side_effect_free(/*@sef@*/ bool pred);
 # define picoRTOS_assert(x, or_else)            \
     if (!(x)) {                                 \
         __side_effect_free(x);                  \
-        arch_break();                           \
+        picoRTOS_dbgbreak();                    \
         { or_else; }                            \
     }
 
@@ -137,15 +143,8 @@ void __side_effect_free(/*@sef@*/ bool pred);
 # define picoRTOS_assert_void(x)                \
     if (!(x)){                                  \
         __side_effect_free(x);                  \
-        arch_break();                           \
+        picoRTOS_dbgbreak();                    \
     }
-
-#else
-
-# define picoRTOS_assert(x, or_else)
-# define picoRTOS_assert_void(x)
-
-#endif
 
 /* Macro: picoRTOS_assert_fatal(x, or_else)
  * Returns x, throws a debug exception & executes or_else if x is false,
