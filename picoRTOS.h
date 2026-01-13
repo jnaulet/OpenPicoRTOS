@@ -112,13 +112,6 @@ void picoRTOS_flush_dcache(void *addr, size_t n);
 
 /* Group: picoRTOS assert API */
 
-#ifndef S_SPLINT_S
-# define __side_effect_free(x)
-#else
-/*@external@*/
-void __side_effect_free(/*@sef@*/ bool pred);
-#endif
-
 #ifndef NDEBUG
 /* Macro: picoRTOS_dbgbreak()
  * Throws a debug exception, ignored if -DNDEBUG */
@@ -132,7 +125,7 @@ void __side_effect_free(/*@sef@*/ bool pred);
  * unless -DNDEBUG */
 # define picoRTOS_assert(x, or_else)            \
     if (!(x)) {                                 \
-        __side_effect_free(x);                  \
+        picoRTOS_core_sef(x);                   \
         picoRTOS_dbgbreak();                    \
         { or_else; }                            \
     }
@@ -141,7 +134,7 @@ void __side_effect_free(/*@sef@*/ bool pred);
  * Throws a debug exception if x is false, unless -DNDEBUG */
 # define picoRTOS_assert_void(x)                \
     if (!(x)){                                  \
-        __side_effect_free(x);                  \
+        picoRTOS_core_sef(x);                   \
         picoRTOS_dbgbreak();                    \
     }
 
@@ -150,7 +143,7 @@ void __side_effect_free(/*@sef@*/ bool pred);
  * stalls the system if -DNDEBUG */
 #define picoRTOS_assert_fatal(x, or_else)       \
     if (!(x)) {                                 \
-        __side_effect_free(x);                  \
+        picoRTOS_core_sef(x);                   \
         picoRTOS_fatal();                       \
         /*@notreached@*/ { or_else; }           \
     }
@@ -159,7 +152,7 @@ void __side_effect_free(/*@sef@*/ bool pred);
  * Throws a debug exception if x is false, stalls the system if -DNDEBUG */
 #define picoRTOS_assert_void_fatal(x)           \
     if (!(x)){                                  \
-        __side_effect_free(x);                  \
+        picoRTOS_core_sef(x);                   \
         picoRTOS_fatal();                       \
     }
 

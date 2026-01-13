@@ -1,6 +1,8 @@
 #ifndef PICORTOS_TYPES_H
 #define PICORTOS_TYPES_H
 
+#include "picoRTOS_core.h"
+
 typedef unsigned long picoRTOS_stack_t;
 typedef unsigned long picoRTOS_priority_t;
 typedef unsigned long picoRTOS_pid_t;
@@ -16,15 +18,7 @@ typedef unsigned long picoRTOS_uintptr_t;
 #define ARCH_MIN_STACK_COUNT ARCH_INITIAL_STACK_COUNT
 #define ARCH_L1_DCACHE_LINESIZE 4
 
-/* splint doesn't like inline assembly */
-#ifdef S_SPLINT_S
-# define ASM(x) {}
-#else
-# define ASM(x) { __asm__ volatile (x); }
-#endif
-
-#define arch_break() ASM("int3")
-
+#define arch_break()                 ASM("int3")
 /* CACHES: unsupported */
 #define arch_invalidate_dcache(x, y) /*@i@*/ (void)x
 #define arch_flush_dcache(x, y)      /*@i@*/ (void)x

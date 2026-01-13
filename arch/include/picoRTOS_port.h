@@ -80,7 +80,12 @@ typedef void (*arch_isr_fn)(void*);             /* interrupt service routine */
  * Returns:
  * The value of the predicate
  */
-# define arch_assert(x, or_else) if (!(x)) { arch_break(); /*@notreached@*/ { or_else; } }
+# define arch_assert(x, or_else)                \
+    if (!(x)) {                                 \
+        picoRTOS_core_sef(x);                   \
+        arch_break();                           \
+        /*@notreached@*/ { or_else; }           \
+    }
 
 /* Macro: arch_assert_void(x)
  * Throws a debug exception if x is false, unless -DNDEBUG
@@ -88,7 +93,11 @@ typedef void (*arch_isr_fn)(void*);             /* interrupt service routine */
  * Parameters:
  *  x - predicate
  */
-# define arch_assert_void(x) if (!(x)) arch_break()
+# define arch_assert_void(x)     \
+    if (!(x)) {                  \
+        picoRTOS_core_sef(x);    \
+        arch_break();            \
+    }
 
 #else
 

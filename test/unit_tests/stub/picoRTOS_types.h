@@ -1,6 +1,8 @@
 #ifndef PICORTOS_TYPES_H
 #define PICORTOS_TYPES_H
 
+#include "picoRTOS_core.h"
+
 typedef unsigned long picoRTOS_stack_t;
 typedef unsigned long picoRTOS_priority_t;
 typedef unsigned long picoRTOS_pid_t;

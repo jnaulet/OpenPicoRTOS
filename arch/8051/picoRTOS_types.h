@@ -2,6 +2,7 @@
 #define PICORTOS_TYPES_H
 
 #include <stdint.h>
+#include "picoRTOS_core.h"
 
 /* optimize for speed */
 typedef unsigned char picoRTOS_stack_t;
@@ -21,29 +22,18 @@ typedef unsigned int picoRTOS_uintptr_t;
 /* no cache */
 #define ARCH_L1_DCACHE_LINESIZE 1
 
-/* splint cannot check inline assembly */
-#ifdef S_SPLINT_S
-# define ASM(x) {}
-#else
-# define ASM(x) { __asm__ (x); }
-
+#ifndef S_SPLINT_S
 /*
  * Ugly hack to prevent SDCC from generating
  * the startup sequence for the main
  */
 # define main main_no_sdcc_init
-
-/*
- * Yet another SDCC hack for atttributes
- */
-# define __attribute__(x)
 #endif
-
-#define arch_break() ASM(" sjmp .") /* branch to self */
 
 /* very-specific */
 void arch_timer_ack(void);
 
+#define arch_break()                 ASM(" sjmp .") /* branch to self */
 /* STUB OPTIONAL API */
 #define arch_counter(x, y)           0
 #define arch_invalidate_dcache(x, y) /*@i@*/ (void)x

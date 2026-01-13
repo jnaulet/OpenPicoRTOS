@@ -1,6 +1,8 @@
 #ifndef PICORTOS_TYPES_H
 #define PICORTOS_TYPES_H
 
+#include "picoRTOS_core.h"
+
 typedef unsigned long picoRTOS_stack_t;
 typedef unsigned long picoRTOS_tick_t;
 typedef unsigned long picoRTOS_priority_t;
@@ -23,13 +25,6 @@ typedef unsigned long picoRTOS_mask_t;
 typedef unsigned long picoRTOS_core_t;
 
 #define ARCH_SMP_MIN_STACK_COUNT 128
-
-/* splint cannot check inline assembly */
-#ifdef S_SPLINT_S
-# define ASM(x) {}
-#else
-# define ASM(x) { __asm__ volatile (x); }
-#endif
 
 #define arch_break() ASM("se_illegal\n se_nop")
 
