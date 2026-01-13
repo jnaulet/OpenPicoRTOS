@@ -43,7 +43,7 @@ int twi_n76e003_init(struct twi *ctx, clock_id_t clkid, bool i2cpx)
     return 0;
 }
 
-static int set_bitrate(struct twi *ctx, unsigned long bitrate)
+static int set_bitrate(const struct twi *ctx, unsigned long bitrate)
 {
     picoRTOS_assert(bitrate > 0, return -EINVAL);
 
