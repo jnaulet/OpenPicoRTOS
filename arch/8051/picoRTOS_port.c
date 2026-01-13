@@ -49,6 +49,7 @@ picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
                                      void *priv)
 {
     arch_assert_void(stack_count >= (size_t)ARCH_MIN_STACK_COUNT);
+    /*@i@*/ (void)stack_count;
 
     /* 8051 has an incrementing stack */
     return arch_save_first_context(stack, fn, priv);
