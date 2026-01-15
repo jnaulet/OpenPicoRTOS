@@ -281,9 +281,10 @@ int adc_stm32h7xx_sar_init(struct adc_stm32h7xx_sar *ctx, int base,
     picoRTOS_assert(deadlock != -1, return -EBUSY);
 
     /* run calibration */
+    ctx->base->CR |= CR_ADCALLIN;
     ctx->base->CR |= CR_ADCAL;
     while ((ctx->base->CR & CR_ADCAL) != 0 && deadlock-- != 0)
-        arch_delay_us(1ul);
+        arch_delay_us(100ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
