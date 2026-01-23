@@ -79,7 +79,7 @@ static void uart_isr(void *priv)
                 ctx->tx_trig = true;
         }
         /* double-check */
-    } while((SCON & (SCON_TI | SCON_RI)) != 0);
+    } while ((SCON & (SCON_TI | SCON_RI)) != 0);
 }
 
 int uart_8051_init(struct uart *ctx, clock_id_t clkid)
