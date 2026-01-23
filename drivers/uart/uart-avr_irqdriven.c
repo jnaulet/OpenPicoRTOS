@@ -81,7 +81,7 @@ static void uart_udre_isr(void *priv)
             ctx->base->UCSRnB &= ~UCSRnB_UDRIE;
             break;
         }
-    } while((ctx->base->UCSRnA & UCSRnA_UDRE) != 0);
+    } while ((ctx->base->UCSRnA & UCSRnA_UDRE) != 0);
 }
 
 int uart_avr_init(struct uart *ctx, int base, clock_id_t clkid)
