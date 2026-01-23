@@ -45,9 +45,9 @@ static void arch_timer_handler(void *priv)
 
     arch_assert_void(priv == NULL);
 
-    ASM("mfsprg %r3, 0");         /* load task pointer from sprg0 */
+    ASM("mfsprg %r3, 0");       /* load task pointer from sprg0 */
     ASM("e_bl picoRTOS_tick");  /* call tick */
-    ASM("mtsprg 0, %r3");         /* store returned task stack pointer */
+    ASM("mtsprg 0, %r3");       /* store returned task stack pointer */
 
     /* reset flag */
     PIT->PIT[PIT_INDEX].TFLGn = (uint32_t)1;

@@ -188,7 +188,7 @@
         { 0x1480000ul, 0x14bfffful, 2ul, 13ul },    /* 256KB block */ \
         { 0x14c0000ul, 0x14ffffful, 2ul, 12ul },    /* 256KB block */ \
         { 0x1500000ul, 0x153fffful, 2ul, 11ul },    /* 256KB block */ \
-        { 0x1540000ul, 0x157fffful, 2ul, 10ul },    /* 256KB block */ }
+        { 0x1540000ul, 0x157fffful, 2ul, 10ul }, /* 256KB block */ }
 
 /* PIT */
 #define PIT_FREQ_HZ 40000000
