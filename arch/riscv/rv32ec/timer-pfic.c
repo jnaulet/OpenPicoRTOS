@@ -21,12 +21,12 @@ static int sysclk_hz = DEVICE_DEFAULT_SYSCLK_HZ;
 
 int arch_timer_init(void)
 {
-  /* SYSTICK */
-  *STK_CNTL = 0;
-  *STK_CMPLR = (unsigned long)((sysclk_hz / CONFIG_TICK_HZ) - 1);
-  /* start */
-  *STK_CTLR = (unsigned long)(STK_CTLR_STRE | STK_CTLR_STCLK |
-                              STK_CTLR_STIE | STK_CTLR_STE);
+    /* SYSTICK */
+    *STK_CNTL = 0;
+    *STK_CMPLR = (unsigned long)((sysclk_hz / CONFIG_TICK_HZ) - 1);
+    /* start */
+    *STK_CTLR = (unsigned long)(STK_CTLR_STRE | STK_CTLR_STCLK |
+                                STK_CTLR_STIE | STK_CTLR_STE);
 }
 
 /* STATS */
