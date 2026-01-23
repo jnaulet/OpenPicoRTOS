@@ -11,14 +11,14 @@
 
 static void init_clock(void)
 {
-  struct clock_settings CLOCK_settings = {
-    0, /* no xtal freq */
-    CLOCK_LGT8FX8P_MCLK_HFRC,
-    CLOCK_LGT8FX8P_PS_1,
-    CLOCK_LGT8FX8P_WDCLKS_LFRC
-  };
+    struct clock_settings CLOCK_settings = {
+        0, /* no xtal freq */
+        CLOCK_LGT8FX8P_MCLK_HFRC,
+        CLOCK_LGT8FX8P_PS_1,
+        CLOCK_LGT8FX8P_WDCLKS_LFRC
+    };
 
-  (void)clock_lgt8fx8p_init(&CLOCK_settings);
+    (void)clock_lgt8fx8p_init(&CLOCK_settings);
 }
 
 static void init_mux(void)
@@ -53,22 +53,22 @@ static void init_spi(/*@partial@*/ struct board *ctx)
 
     (void)spi_avr_init(&SPI, ADDR_SPI, CLOCK_LGT8FX8P_PERI_CLK);
     (void)spi_setup(&SPI, &SPI_settings);
-    
+
 #if CONFIG_SPI_AVR_IRQDRIVEN == 1
     static uint8_t rx_buf[32];
     static uint8_t tx_buf[32];
 
     /* IRQ mode */
     struct spi_avr_irqdriven_settings IRQ_settings = {
-      (picoRTOS_irq_t)IRQ_SPI_STC,
-      rx_buf,
-      tx_buf,
-      sizeof(rx_buf) - 1,
+        (picoRTOS_irq_t)IRQ_SPI_STC,
+        rx_buf,
+        tx_buf,
+        sizeof(rx_buf) - 1,
     };
-    
+
     (void)spi_avr_setup_irqdriven(&SPI, &IRQ_settings);
 #endif
-    
+
     /* physical layer */
     ctx->lcd_phys.spi = &SPI;
 }
@@ -122,9 +122,9 @@ static void init_wd(/*@partial@*/ struct board *ctx)
 
 int board_init(/*@out@*/ struct board *ctx)
 {
-  // init_clock();
+    // init_clock();
     init_mux();
-    
+
     init_spi(ctx);
     init_gpio(ctx);
     init_wd(ctx);

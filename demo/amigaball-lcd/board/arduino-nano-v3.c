@@ -41,22 +41,22 @@ static void init_spi(/*@partial@*/ struct board *ctx)
 
     (void)spi_avr_init(&SPI, ADDR_SPI, CLOCK_ATMEGA328P_CLKIO);
     (void)spi_setup(&SPI, &SPI_settings);
-    
+
 #if CONFIG_SPI_AVR_IRQDRIVEN == 1
     static uint8_t rx_buf[32];
     static uint8_t tx_buf[32];
 
     /* IRQ mode */
     struct spi_avr_irqdriven_settings IRQ_settings = {
-      (picoRTOS_irq_t)IRQ_SPI_STC,
-      rx_buf,
-      tx_buf,
-      sizeof(rx_buf) - 1,
+        (picoRTOS_irq_t)IRQ_SPI_STC,
+        rx_buf,
+        tx_buf,
+        sizeof(rx_buf) - 1,
     };
-    
+
     (void)spi_avr_setup_irqdriven(&SPI, &IRQ_settings);
 #endif
-    
+
     /* physical layer */
     ctx->lcd_phys.spi = &SPI;
 }
