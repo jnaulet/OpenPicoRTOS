@@ -66,7 +66,7 @@ static int pwm_init(/*@partial@*/ struct n76e003 *ctx)
 
     (void)pwm_n76e003_init(&PWM, CLOCK_N76E003_FSYS);
     (void)pwm_n76e003_set_period(&PWM, 148ul);
-    
+
     (void)pwm_n76e003_pwm_init(&ctx->PWM, &PWM, (size_t)1);
     (void)pwm_set_duty_cycle(&ctx->PWM, PWM_DUTY_CYCLE_PCENT(50));
 
