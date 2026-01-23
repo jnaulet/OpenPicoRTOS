@@ -16,9 +16,4 @@ config ADC_N76E003_SAR
        depends on 8051
        bool "Nuvoton N76E003 series ADC"
 
-config ADC_STM32H7XX_SAR
-       depends on ARM
-       select DMA_STM32H7XX
-       bool "STMicro STM32H7xx series ADC"
-
 endmenu

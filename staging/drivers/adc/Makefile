@@ -7,4 +7,3 @@ c_src-$(CONFIG_ADC_GD32VF103) += $(staging-drivers-adc)/adc-gd32vf103.c
 c_src-$(CONFIG_ADC_NXP_EQADC) += $(staging-drivers-adc)/adc-nxp_eqadc.c
 c_src-$(CONFIG_ADC_MC9S08PTXX) += $(staging-drivers-adc)/adc-mc9s08ptxx.c
 c_src-$(CONFIG_ADC_N76E003_SAR) += $(staging-drivers-adc)/adc-n76e003_sar.c
-c_src-$(CONFIG_ADC_STM32H7XX_SAR) += $(staging-drivers-adc)/adc-stm32h7xx_sar.c

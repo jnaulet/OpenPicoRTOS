@@ -242,6 +242,18 @@ struct ADC_STM32H7XX_SAR_COMMON {
 #define CCR_DUAL_M    0x1fu
 #define CCR_DUAL(x)   ((x) & CCR_DUAL_M)
 
+/* Function: adc_stm32h7xx_sar_init
+ * Initializes an ADC block
+ *
+ * Parameters:
+ *  ctx - The ADC to init
+ *  base - The ADC block base address
+ *  clkid - The clock id for this ADC
+ *  type - The ADC type (master or slave)
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int adc_stm32h7xx_sar_init(struct adc_stm32h7xx_sar *ctx, int base,
                            clock_id_t clkid, adc_stm32h7xx_sar_t type)
 {
@@ -346,6 +358,16 @@ static int adc_enable(struct adc_stm32h7xx_sar *ctx)
     return 0;
 }
 
+/* Function: adc_stm32h7xx_sar_setup
+ * Configures an ADC block
+ *
+ * Parameters:
+ *  ctx - The ADC to init
+ *  settings - The ADC block settings
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int adc_stm32h7xx_sar_setup(struct adc_stm32h7xx_sar *ctx,
                             const struct adc_stm32h7xx_sar_settings *settings)
 {
@@ -383,6 +405,17 @@ int adc_stm32h7xx_sar_setup(struct adc_stm32h7xx_sar *ctx,
     return adc_enable(ctx);
 }
 
+/* Function: adc_stm32h7xx_sar_adc_init
+ * Initializes an ADC channel
+ *
+ * Parameters:
+ *  ctx - The ADC channel to init
+ *  parent - The parent ADC block settings
+ *  channel - The ADC channel number
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int adc_stm32h7xx_sar_adc_init(struct adc *ctx,
                                struct adc_stm32h7xx_sar *parent,
                                size_t channel)
@@ -429,6 +462,16 @@ int adc_stm32h7xx_sar_adc_init(struct adc *ctx,
     return 0;
 }
 
+/* Function: adc_stm32h7xx_sar_adc_setup
+ * Configures an ADC channel
+ *
+ * Parameters:
+ *  ctx - The ADC channel to init
+ *  settings - The channel settings to apply
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int adc_stm32h7xx_sar_adc_setup(struct adc *ctx,
                                 const struct adc_stm32h7xx_sar_adc_settings *settings)
 {

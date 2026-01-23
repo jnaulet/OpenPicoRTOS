@@ -36,4 +36,9 @@ config ADC_NXP_SAR
        depends on POWERPC
        bool "NXP MPC56/57xx series SAR ADC"
 
+config ADC_STM32H7XX_SAR
+       depends on ARM
+       select DMA_STM32H7XX
+       bool "STMicro STM32H7xx series ADC"
+
 endmenu
