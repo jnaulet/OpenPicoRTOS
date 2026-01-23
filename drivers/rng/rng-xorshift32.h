@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 struct rng {
-  uint32_t pool;
+    uint32_t pool;
 };
 
 int rng_xorshift32_init(/*@out@*/ struct rng *ctx, uint32_t seed);
