@@ -120,7 +120,7 @@ static void uart0_isr(void *priv)
             SCON &= ~SCONx_RI; /* ack */
         }
         /* retry to save on context saving */
-    } while((SCON & (SCONx_RI | SCONx_TI)) != (unsigned char)0);
+    } while ((SCON & (SCONx_RI | SCONx_TI)) != (unsigned char)0);
 }
 
 static void uart1_isr(void *priv)
@@ -143,7 +143,7 @@ static void uart1_isr(void *priv)
             (void)uart_fifo_push(&ctx->rx_fifo, (char)SBUF_1);
             SCON_1 &= ~SCONx_RI;
         }
-    } while((SCON_1 & (SCONx_RI | SCONx_TI)) != (unsigned char)0);
+    } while ((SCON_1 & (SCONx_RI | SCONx_TI)) != (unsigned char)0);
 }
 
 int uart_n76e003_init(/*@out@*/ struct uart *ctx, uart_n76e003_t uart)
