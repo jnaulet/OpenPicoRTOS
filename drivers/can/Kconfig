@@ -12,4 +12,8 @@ config CAN_NXP_FLEXCAN
        depends on POWERPC || ARM
        bool "NXP FlexCAN CAN"
 
+config CAN_STM32H7XX_FDCAN
+       depends on ARM
+       bool "STM32H7xx series FDCAN"
+
 endmenu

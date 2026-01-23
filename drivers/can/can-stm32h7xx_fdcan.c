@@ -497,6 +497,19 @@ static void init_fdcan_filters(struct can *ctx)
     ctx->base->GFC |= (GFC_ANFS(0x3) | GFC_ANFE(0x3));
 }
 
+/* Function: can_stm32h7xx_fdcan_init
+ * Init a CAN interface
+ *
+ * Parameters:
+ *  ctx - The CAN interface to init
+ *  base - The CAN interface base address
+ *  clkid - The CAN interface inptu clock id
+ *  start_address - The CAN RAM buffer start address
+ *  n_words - The number of words to reserve in the CAN RAM
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
 int can_stm32h7xx_fdcan_init(struct can *ctx, int base, clock_id_t clkid,
                              uint32_t start_address, size_t n_words)
 {

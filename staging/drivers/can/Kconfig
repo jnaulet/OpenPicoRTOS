@@ -12,8 +12,4 @@ config CAN_ATSAME5X
        depends on ARM
        bool "ATSAME5X series CAN"
 
-config CAN_STM32H7XX_FDCAN
-       depends on ARM
-       bool "STM32H7xx series FDCAN"
-
 endmenu
