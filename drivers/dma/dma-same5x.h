@@ -21,8 +21,8 @@ struct DMA_SAME5X_TD {
 
 struct dma_same5x {
     /*@temp@*/ struct DMA_SAME5X *base;
-    struct DMA_SAME5X_TD TD[DMA_SAME5X_CHANNEL_COUNT] __attribute__ ((aligned(8)));
-    struct DMA_SAME5X_TD WB[DMA_SAME5X_CHANNEL_COUNT] __attribute__ ((aligned(8)));
+    struct DMA_SAME5X_TD TD[DMA_SAME5X_CHANNEL_COUNT] __attribute__ ((aligned (8)));
+    struct DMA_SAME5X_TD WB[DMA_SAME5X_CHANNEL_COUNT] __attribute__ ((aligned (8)));
 };
 
 int dma_same5x_init(/*@out@*/ struct dma_same5x *ctx, int base);
