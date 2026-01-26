@@ -787,16 +787,18 @@ int can_write(struct can *ctx, can_id_t id, const void *buf, size_t n)
 
     /* bus_off recovery */
     if (ctx->bus_off_recovery) {
-        if ((ctx->base->ECR & C99_ECR_REC(C99_ECR_REC_M)) != 0) return -EBUSY;
-        else ctx->bus_off_recovery = false;
+        if ((ctx->base->CCCR & CCCR_INIT) != 0) {
+            ctx->base->CCCR &= ~CCCR_INIT;
+            return -EBUSY;
+
+        }else
+            ctx->bus_off_recovery = false;
     }
 
     /* bus_off management */
     if ((ctx->base->PSR & PSR_BO) != 0) {
-        ctx->base->CCCR &= ~CCCR_INIT; /* hotfix */
-        /* recovery takes 129x11 idle bits */
         ctx->bus_off_recovery = true;
-        return -EIO; /* -ECOMM; */
+        return -EIO; /* signal something went wrong */
     }
 
     if ((txfqs & TXFQS_TFQF) != 0)
