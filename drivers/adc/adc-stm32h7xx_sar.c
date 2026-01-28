@@ -277,6 +277,7 @@ int adc_stm32h7xx_sar_init(struct adc_stm32h7xx_sar *ctx, int base,
 
     /* basics */
     ctx->channel_count = 0;
+    ctx->cal_running = false;
 
     ctx->base->CR &= ~CR_BOOST(CR_BOOST_M);
     if (freq > (clock_freq_t)25000000) ctx->base->CR |= CR_BOOST(3);
@@ -291,14 +292,33 @@ int adc_stm32h7xx_sar_init(struct adc_stm32h7xx_sar *ctx, int base,
         arch_delay_us(1ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
+    return 0;
+}
 
-    /* run calibration */
-    ctx->base->CR |= CR_ADCALLIN;
-    ctx->base->CR |= CR_ADCAL;
-    while ((ctx->base->CR & CR_ADCAL) != 0 && deadlock-- != 0)
-        arch_delay_us(100ul);
+/* Function: adc_stm32h7xx_sar_calibrate
+ * Starts an ADC block calibration procedure
+ *
+ * Parameters:
+ *  ctx - The ADC to init
+ *  linear_cal - Run normal + linear calibration
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
+int adc_stm32h7xx_sar_calibrate(struct adc_stm32h7xx_sar *ctx, bool linear_cal)
+{
+    if (!ctx->cal_running) {
+        ctx->base->CR |= (linear_cal ? CR_ADCALLIN : 0);
+        ctx->base->CR |= CR_ADCAL;
+        ctx->cal_running = true;
+        return -EBUSY;
+    }
 
-    picoRTOS_assert(deadlock != -1, return -EBUSY);
+    /* calibration is already running */
+    if ((ctx->base->CR & CR_ADCAL) != 0)
+        return -EBUSY;
+
+    ctx->cal_running = false;
     return 0;
 }
 

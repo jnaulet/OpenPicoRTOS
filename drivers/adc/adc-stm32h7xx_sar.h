@@ -35,6 +35,8 @@ struct adc_stm32h7xx_sar {
     /* deps */
     /*@temp@*/ struct dma *drain;
     struct dma_xfer drain_xfer;
+    /* calibration */
+    bool cal_running;
 };
 
 typedef enum {
@@ -96,6 +98,7 @@ struct adc_stm32h7xx_sar_settings {
 };
 
 int adc_stm32h7xx_sar_init(/*@out@*/ struct adc_stm32h7xx_sar *ctx, int base, clock_id_t clkid, adc_stm32h7xx_sar_t type);
+int adc_stm32h7xx_sar_calibrate(struct adc_stm32h7xx_sar *ctx, bool linear_cal);
 int adc_stm32h7xx_sar_setup(struct adc_stm32h7xx_sar *ctx, const struct adc_stm32h7xx_sar_settings *settings);
 
 /* channels */
