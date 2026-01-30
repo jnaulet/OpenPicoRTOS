@@ -1,4 +1,4 @@
-#include "can-stm32h7xx_fdcan.h"
+#include "can-bosch_mcan.h"
 
 #include "picoRTOS.h"
 #include "picoRTOS_port.h"
@@ -6,7 +6,7 @@
 
 #include <stdint.h>
 
-struct CAN_STM32H7XX_FDCAN {
+struct CAN_BOSCH_MCAN {
     volatile uint32_t CREL;
     volatile uint32_t ENDN;
     uint32_t RESERVED0;
@@ -497,7 +497,7 @@ static void init_fdcan_filters(struct can *ctx)
     ctx->base->GFC |= (GFC_ANFS(0x3) | GFC_ANFE(0x3));
 }
 
-/* Function: can_stm32h7xx_fdcan_init
+/* Function: can_bosch_mcan_init
  * Init a CAN interface
  *
  * Parameters:
@@ -510,8 +510,8 @@ static void init_fdcan_filters(struct can *ctx)
  * Returns:
  * 0 if success, -errno otherwise
  */
-int can_stm32h7xx_fdcan_init(struct can *ctx, int base, clock_id_t clkid,
-                             uint32_t start_address, size_t n_words)
+int can_bosch_mcan_init(struct can *ctx, int base, clock_id_t clkid,
+                        uint32_t start_address, size_t n_words)
 {
     picoRTOS_assert((start_address & 0x3u) == 0, return -EINVAL);
     picoRTOS_assert(n_words > 0, return -EINVAL);
@@ -519,7 +519,7 @@ int can_stm32h7xx_fdcan_init(struct can *ctx, int base, clock_id_t clkid,
 
     int res;
 
-    ctx->base = (struct CAN_STM32H7XX_FDCAN*)base;
+    ctx->base = (struct CAN_BOSCH_MCAN*)base;
     ctx->clkid = clkid;
     ctx->n_filter_11bit = 0;
     ctx->n_filter_29bit = 0;

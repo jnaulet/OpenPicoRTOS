@@ -12,8 +12,11 @@ config CAN_NXP_FLEXCAN
        depends on POWERPC || ARM
        bool "NXP FlexCAN CAN"
 
-config CAN_STM32H7XX_FDCAN
-       depends on ARM
-       bool "STM32H7xx series FDCAN"
+config CAN_BOSCH_MCAN
+       depends on POWERPC || ARM
+       bool "BOSCH M_CAN support"
+       help
+         Boscch M_CAN IP, used on various MCUs like STM32H7 series
+	 and Atmel SAMV70 series, among others
 
 endmenu

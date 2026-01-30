@@ -6,4 +6,4 @@ drivers-can := $(srctree)/drivers/can
 c_src-$(CONFIG_CAN_TI_DCAN) += $(drivers-can)/can-ti_dcan.c
 c_src-$(CONFIG_CAN_ATSAM3X) += $(drivers-can)/can-sam3x.c
 c_src-$(CONFIG_CAN_NXP_FLEXCAN) += $(drivers-can)/can-nxp_flexcan.c
-c_src-$(CONFIG_CAN_STM32H7XX_FDCAN) += $(drivers-can)/can-stm32h7xx_fdcan.c
+c_src-$(CONFIG_CAN_BOSCH_MCAN) += $(drivers-can)/can-bosch_mcan.c

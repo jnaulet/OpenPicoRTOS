@@ -1,8 +1,9 @@
-#ifndef CAN_STM32H7XX_FDCAN_H
-#define CAN_STM32H7XX_FDCAN_H
+#ifndef CAN_BOSCH_MCAN_H
+#define CAN_BOSCH_MCAN_H
 
 /*
- * Driver for STMicro FDCAN IP
+ * Driver for Bosch M_CAN IP
+ * Used on misc microcontrollers, like stm32h7 & Atmel SAMV70
  */
 
 #include "can.h"
@@ -12,10 +13,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-struct CAN_STM32H7XX_FDCAN;
+struct CAN_BOSCH_MCAN;
 
 struct can {
-    /*@temp@*/ struct CAN_STM32H7XX_FDCAN *base;
+    /*@temp@*/ struct CAN_BOSCH_MCAN *base;
     clock_id_t clkid;
     /* internals */
     /*@temp@*/ volatile void *filter_11bit;
@@ -35,8 +36,8 @@ struct can {
     bool bus_off_recovery;
 };
 
-int can_stm32h7xx_fdcan_init(/*@out@*/ struct can *ctx, int base, clock_id_t clkid,
-                             uint32_t start_address, size_t n_words);
+int can_bosch_mcan_init(/*@out@*/ struct can *ctx, int base, clock_id_t clkid,
+                        uint32_t start_address, size_t n_words);
 
 /* Runtime calls:
  * int can_register(struct can *ctx, can_id_t id, can_f_t f, unsigned long flags);
