@@ -647,8 +647,9 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
     /* store current sp */
     task->sp = sp;
 
-    /* advance tick */
+    /* advance tick & reset flags */
     picoRTOS.tick++;
+    picoRTOS.flags &= ~F_POSTPONED;
 
     /* quick pass on sleeping tasks + idle */
     picoRTOS_pid_t pid = (picoRTOS_pid_t)TASK_COUNT;

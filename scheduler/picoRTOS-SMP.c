@@ -630,8 +630,10 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
     task_core_stat_finish(task);
 
     /* 1st core to catch tick */
-    if (picoRTOS.core_counter++ == 0)
-        picoRTOS.tick++; /* advance tick */
+    if (picoRTOS.core_counter++ == 0) {
+        picoRTOS.tick++;                /* advance tick */
+        picoRTOS.flags &= ~F_POSTPONED; /* reset flags */
+    }
 
     /* quick pass on sleeping tasks + idle */
     picoRTOS_pid_t pid = (picoRTOS_pid_t)TASK_COUNT;
