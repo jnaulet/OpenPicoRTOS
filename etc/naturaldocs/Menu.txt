@@ -151,6 +151,7 @@ Group: hw-specific  {
 
    Group: STM32H7xx  {
 
+      File: ADC  (no auto-title, drivers/adc/adc-stm32h7xx_sar.c)
       File: Clocks  (no auto-title, drivers/clock/clock-stm32h7xx.c)
       File: DMA  (no auto-title, drivers/dma/dma-stm32h7xx.c)
       File: GPIO  (no auto-title, drivers/gpio/gpio-stm32h7xx.c)
@@ -227,6 +228,11 @@ Group: hw-specific  {
       File: UART  (no auto-title, drivers/uart/uart-atmel_sercom.c)
       File: Watchdog  (no auto-title, drivers/wd/wd-same5x.c)
       }  # Group: SAMD5x/E5x
+
+   Group: BOSCH  {
+
+      File: CAN  (no auto-title, drivers/can/can-bosch_mcan.c)
+      }  # Group: BOSCH
 
    }  # Group: hw-specific
 
