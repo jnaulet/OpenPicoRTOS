@@ -1,5 +1,14 @@
 # Release notes
 
+## picoRTOS v1.10.3
+### What's new ?
+
+A new top include file has been added to release some maintenace pressure on ports (arch/include/picoRTOS_core.h).
+
+Reset the F_POSTPONED flag on every tick to avoid the very unlikely case where a postponed task was preempted & the flag still being set for the next cycle (minor).
+
+The rest are mostly drivers for stm32h7xx & Bosch MCAN.
+
 ## picoRTOS v1.10.2
 ### What's new ?
 
