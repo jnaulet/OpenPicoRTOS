@@ -6,7 +6,7 @@
 #include "pwm-stm32h7xx_tim.h"
 #include "spi-stm32h7xx.h"
 #include "uart-stm32h7xx.h"
-#include "can-stm32h7xx_fdcan.h"
+#include "can-bosch_mcan.h"
 #include "rng-stm32h7xx_trng.h"
 
 struct stm32h7xx_m {
