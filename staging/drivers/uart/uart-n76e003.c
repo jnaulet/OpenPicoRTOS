@@ -196,9 +196,9 @@ int uart_write(struct uart *ctx, const char *buf, size_t n)
         /* according to ctx */
         switch (ctx->uart) {
         case UART_N76E003_UART0_T1: /*@fallthrough@*/
-        case UART_N76E003_UART0_T3: res = uart0_write(ctx, *buf); break;
+        case UART_N76E003_UART0_T3: res = uart0_write(ctx, buf[sent]); break;
 #ifdef CONFIG_UART_N76E003_UART1
-        case UART_N76E003_UART1_T3: res = uart1_write(ctx, *buf); break;
+        case UART_N76E003_UART1_T3: res = uart1_write(ctx, buf[sent]); break;
 #endif
         default:
             picoRTOS_assert_void(false);
@@ -253,9 +253,9 @@ int uart_read(struct uart *ctx, char *buf, size_t n)
         /* according to ctx */
         switch (ctx->uart) {
         case UART_N76E003_UART0_T1: /*@fallthrough@*/
-        case UART_N76E003_UART0_T3: res = uart0_read(buf); break;
+        case UART_N76E003_UART0_T3: res = uart0_read(&buf[recv]); break;
 #ifdef CONFIG_UART_N76E003_UART1
-        case UART_N76E003_UART1_T3: res = uart1_read(buf); break;
+        case UART_N76E003_UART1_T3: res = uart1_read(&buf[recv]); break;
 #endif
         default:
             picoRTOS_assert_void(false);
