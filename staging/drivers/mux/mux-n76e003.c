@@ -41,21 +41,27 @@ int mux_n76e003_mode(struct mux *ctx, size_t pin, mux_n76e003_mode_t mode)
 
     switch (ctx->port) {
     case 0:
-        P0M1 = PxM1;
-        P0M2 = PxM2;
+        P0M1 |= PxM1;
+        P0M2 |= PxM2;
+        P0M1 &= ~(PxM1 ^ mask);
+        P0M2 &= ~(PxM2 ^ mask);
         break;
 
     case 1:
-        P1M1 = PxM1;
-        P1M2 = PxM2;
+        P1M1 |= PxM1;
+        P1M2 |= PxM2;
+        P1M1 &= ~(PxM1 ^ mask);
+        P1M2 &= ~(PxM2 ^ mask);
         break;
 
     case 2:
         break;
 
     case 3:
-        P3M1 = PxM1;
-        P3M2 = PxM2;
+        P3M1 |= PxM1;
+        P3M2 |= PxM2;
+        P3M1 &= ~(PxM1 ^ mask);
+        P3M2 &= ~(PxM2 ^ mask);
         break;
 
     default:
