@@ -19,6 +19,9 @@ config MACH_CY7C6801xA
 
 config MACH_STC12C5AXX
        bool "STC MCU STC12CA5xx Series"
+       
+config MACH_CH552
+       bool "WCH CH552 Series"
 
 endchoice
 
