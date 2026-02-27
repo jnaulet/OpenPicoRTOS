@@ -512,7 +512,7 @@ picoRTOS_pid_t picoRTOS_self(void)
 /* Function: picoRTOS_get_tick
  * Returns the current system tick/timer
  */
-picoRTOS_tick_t picoRTOS_get_tick(void)
+picoRTOS_tick_t picoRTOS_get_tick(void) /*@modifies nothing@*/
 {
     picoRTOS_assert_fatal((picoRTOS.flags & F_RUNNING) != 0, return (picoRTOS_tick_t)-1);
     return picoRTOS.tick;

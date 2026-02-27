@@ -83,8 +83,8 @@ typedef void (*arch_isr_fn)(void*);             /* interrupt service routine */
 # define arch_assert(x, or_else)                \
     if (!(x)) {                                 \
         picoRTOS_core_sef(x);                   \
-        arch_break();                           \
-        /*@notreached@*/ { or_else; }           \
+        arch_break(); /*@notreached@*/          \
+        { or_else; }                            \
     }
 
 /* Macro: arch_assert_void(x)

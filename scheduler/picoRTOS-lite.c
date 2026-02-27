@@ -224,7 +224,7 @@ picoRTOS_pid_t picoRTOS_self(void)
     return (picoRTOS_pid_t)picoRTOS.index;
 }
 
-picoRTOS_tick_t picoRTOS_get_tick(void)
+picoRTOS_tick_t picoRTOS_get_tick(void) /*@modifies nothing@*/
 {
     picoRTOS_assert_fatal((picoRTOS.flags & F_RUNNING) != 0, return (picoRTOS_tick_t)-1);
     return picoRTOS.tick;

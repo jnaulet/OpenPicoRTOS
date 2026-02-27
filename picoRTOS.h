@@ -49,10 +49,10 @@ void picoRTOS_sleep(picoRTOS_tick_t delay);                             /* put c
 void picoRTOS_sleep_until(picoRTOS_tick_t *ref,                         /* put current task to sleep until */
                           picoRTOS_tick_t period);
 
-/*@noreturn@*/ void picoRTOS_kill(void);                            /* kills the current task */
+/*@noreturn@*/ void picoRTOS_kill(void);                    /* kills the current task */
 
-picoRTOS_pid_t picoRTOS_self(void);                                 /* gets the current thread priority */
-/*@unused@*/ picoRTOS_tick_t picoRTOS_get_tick(void)                /* get current tick */ /*@modifies nothing@*/;
+picoRTOS_pid_t picoRTOS_self(void);                         /* gets the current thread priority */
+/*@unused@*/ picoRTOS_tick_t picoRTOS_get_tick(void);       /* get current tick */
 
 /* Macro: picoRTOS_schedule()
  * Puts the current task to sleep until next tick
@@ -144,8 +144,8 @@ void picoRTOS_flush_dcache(void *addr, size_t n);
 #define picoRTOS_assert_fatal(x, or_else)       \
     if (!(x)) {                                 \
         picoRTOS_core_sef(x);                   \
-        picoRTOS_fatal();                       \
-        /*@notreached@*/ { or_else; }           \
+        picoRTOS_fatal(); /*@notreached@*/      \
+        { or_else; }                            \
     }
 
 /* Macro: picoRTOS_assert_void_fatal(x)

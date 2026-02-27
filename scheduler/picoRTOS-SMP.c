@@ -468,7 +468,7 @@ picoRTOS_priority_t picoRTOS_self(void)
     return (picoRTOS_priority_t)picoRTOS.index[arch_core()];
 }
 
-picoRTOS_tick_t picoRTOS_get_tick(void)
+picoRTOS_tick_t picoRTOS_get_tick(void) /*@modifies nothing@*/
 {
     picoRTOS_assert_fatal(TASK_CURRENT().state == PICORTOS_TASK_STATE_BUSY,
                           return (picoRTOS_tick_t)-1);
