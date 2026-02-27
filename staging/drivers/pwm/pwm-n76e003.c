@@ -26,6 +26,8 @@ __sfr __at(ADDR_PIOCON1) PIOCON1;   /* page 1 */
 __sfr __at(ADDR_PMEN)    PMEN;
 __sfr __at(ADDR_PMD)     PMD;
 __sfr __at(ADDR_PNP)     PNP;
+__sfr __at(ADDR_PDTEN)   PDTEN;
+__sfr __at(ADDR_PDTCNT)  PDTCNT;
 #else
 static unsigned char PWMCON0;
 /*@unused@*/ static unsigned char PWMCON1;
@@ -49,6 +51,8 @@ static unsigned char PWM5H;
 static unsigned char PMEN;
 static unsigned char PMD;
 /*@unused@*/ static unsigned char PNP;
+/*@unused@*/ static unsigned char PDTEN;
+/*@unused@*/ static unsigned char PDTCNT;
 #endif
 
 #define PWMCON0_PWMRUN (1u << 7)
@@ -75,6 +79,17 @@ static unsigned char PMD;
 #define PIOCON1_PIO13 (1 << 3)
 #define PIOCON1_PIO12 (1 << 2)
 #define PIOCON1_PIO11 (1 << 1)
+
+#define PDTEN_PDTCTN8 (1 << 4)
+#define PDTEN_PDT45EN (1 << 2)
+#define PDTEN_PDT23EN (1 << 1)
+#define PDTEN_PDT01EN (1 << 0)
+
+#define TA_UNPROTECT()                          \
+  do {                                          \
+    ASM(" mov 0xc7, #0xaa");                    \
+    ASM(" mov 0xc7, #0x55");                    \
+  } while(false)
 
 int pwm_n76e003_init(struct pwm_n76e003 *ctx, clock_id_t clkid)
 {
@@ -109,9 +124,52 @@ int pwm_n76e003_pwm_init(struct pwm *ctx, struct pwm_n76e003 *parent, size_t cha
 
     ctx->parent = parent;
     ctx->channel = (unsigned int)channel;
+    ctx->mask = (unsigned char)1;
 
     /* TODO: multiplexing */
     PIOCON0 |= (unsigned char)(1u << ctx->channel);
+    return 0;
+}
+
+int pwm_n76e003_pwm_setup(struct pwm *ctx, const struct pwm_n76e003_settings *settings)
+{
+    /* only PWMMOD yet */
+    picoRTOS_assert(settings->pwmmod < PWM_N76E003_PWMMOD_COUNT, return -EINVAL);
+
+    if (settings->dead_time != 0) {
+        switch (ctx->channel) {
+        case 0: /*@fallthrough@*/
+        case 1:
+            TA_UNPROTECT();
+            ASM(" orl 0xf9, #0x1");
+            break;
+        case 2: /*@fallthrough@*/
+        case 3:
+            TA_UNPROTECT();
+            ASM(" orl 0xf9, #0x2");
+            break;
+
+        case 4: /*@fallthrough@*/
+        case 5:
+            TA_UNPROTECT();
+            ASM(" orl 0xf9, #0x4");
+            break;
+
+        default:
+            picoRTOS_assert_void(false);
+            /*@notreached@*/ return -EIO;
+        }
+
+        /* set PDTCNT */
+        TA_UNPROTECT();
+        PDTCNT = (unsigned char)settings->dead_time;
+    }
+
+    PWMCON1 &= ~PWMCON1_PWMMOD(PWMCON1_PWMMOD_M);
+    PWMCON1 |= PWMCON1_PWMMOD(settings->pwmmod);
+
+    ctx->mask = (unsigned char)((settings->pwmmod == 0) ? 1 : 3);
+    PIOCON0 |= (unsigned char)(ctx->mask << ctx->channel);
     return 0;
 }
 
@@ -139,15 +197,13 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
 static void sfr_page1(void)
 {
     picoRTOS_suspend();
-    ASM(" mov 0xc7, #0xaa");
-    ASM(" mov 0xc7, #0x55");
+    TA_UNPROTECT();
     ASM(" orl 0x91, #0x1");
 }
 
 static void sfr_page0(void)
 {
-    ASM(" mov 0xc7, #0xaa");
-    ASM(" mov 0xc7, #0x55");
+    TA_UNPROTECT();
     ASM(" anl 0x91, #0xfe");
     picoRTOS_resume();
 }
@@ -204,7 +260,7 @@ int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle)
 /* cppcheck-suppress [constParameterPointer] */
 void pwm_start(struct pwm *ctx)
 {
-    PMEN &= ~(1u << ctx->channel);
+    PMEN &= ~(ctx->mask << ctx->channel);
     /* start counter */
     PWMCON0 |= PWMCON0_PWMRUN;
 }
@@ -212,5 +268,5 @@ void pwm_start(struct pwm *ctx)
 /* cppcheck-suppress [constParameterPointer] */
 void pwm_stop(struct pwm *ctx)
 {
-    PMEN |= (1u << ctx->channel);
+    PMEN |= (ctx->mask << ctx->channel);
 }

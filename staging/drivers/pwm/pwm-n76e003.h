@@ -15,12 +15,28 @@ struct pwm_n76e003 {
 int pwm_n76e003_init(/*@out@*/ struct pwm_n76e003 *ctx, clock_id_t clkid);
 int pwm_n76e003_set_period(struct pwm_n76e003 *ctx, unsigned long pwmp);
 
+
 struct pwm {
     /*@temp@*/ struct pwm_n76e003 *parent;
     unsigned int channel;
+    unsigned int mask;
 };
 
 int pwm_n76e003_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_n76e003 *parent, size_t channel);
+
+typedef enum {
+    PWM_N76E003_PWMMOD_INDEPENDENT      = 0,
+    PWM_N76E003_PWMMOD_COMPLEMENTARY    = 1,
+    PWM_N76E003_PWMMOD_SYNCHRONIZED     = 2,
+    PWM_N76E003_PWMMOD_COUNT
+} pwm_n76e003_pwmmod_t;
+
+struct pwm_n76e003_settings {
+    pwm_n76e003_pwmmod_t pwmmod;
+    unsigned int dead_time; /* 0 to disable */
+};
+
+int pwm_n76e003_pwm_setup(struct pwm *ctx, const struct pwm_n76e003_settings *settings);
 
 /*
  * Implements:
