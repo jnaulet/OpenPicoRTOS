@@ -17,7 +17,9 @@
 #endif
 
 #ifndef S_SPLINT_S
+# ifdef ADDR_P0
 __sfr __at(ADDR_P0) P0;
+# endif
 __sfr __at(ADDR_P1) P1;
 __sfr __at(ADDR_P2) P2;
 __sfr __at(ADDR_P3) P3;
@@ -28,7 +30,9 @@ __sfr __at(ADDR_P5) P5;
 # endif
 # endif
 #else
+# ifdef ADDR_P0
 static uint8_t P0;
+# endif
 static uint8_t P1;
 static uint8_t P2;
 static uint8_t P3;
@@ -74,11 +78,12 @@ int gpio_setup(struct gpio *ctx, const struct gpio_settings *settings)
 void gpio_write(struct gpio *ctx, bool value)
 {
     switch (ctx->port) {
+#ifdef ADDR_P0
     case 0:
         if (value ^ ctx->invert) P0 |= ctx->mask;
         else P0 &= ~ctx->mask;
         break;
-
+#endif
     case 1:
         if (value ^ ctx->invert) P1 |= ctx->mask;
         else P1 &= ~ctx->mask;
@@ -116,7 +121,9 @@ void gpio_write(struct gpio *ctx, bool value)
 bool gpio_read(struct gpio *ctx)
 {
     switch (ctx->port) {
+#ifdef ADDR_P0
     case 0: return ((P0 & ctx->mask) != 0) ^ ctx->invert;
+#endif
     case 1: return ((P1 & ctx->mask) != 0) ^ ctx->invert;
     case 2: return ((P2 & ctx->mask) != 0) ^ ctx->invert;
     case 3: return ((P3 & ctx->mask) != 0) ^ ctx->invert;
@@ -138,7 +145,9 @@ bool gpio_read(struct gpio *ctx)
 void gpio_toggle(struct gpio *ctx)
 {
     switch (ctx->port) {
+#ifdef ADDR_P0
     case 0: P0 ^= ctx->mask; break;
+#endif
     case 1: P1 ^= ctx->mask; break;
     case 2: P2 ^= ctx->mask; break;
     case 3: P3 ^= ctx->mask; break;
