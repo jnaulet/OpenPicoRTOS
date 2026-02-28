@@ -24,4 +24,8 @@ config MUX_STM8
        depends on STM8
        bool "STMicro STM8 series MUX"
 
+config MUX_CH552
+       depends on 8051
+       bool "WCH CH552 series MUX"
+
 endmenu
