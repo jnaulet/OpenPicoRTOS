@@ -68,32 +68,42 @@ int mux_8051_mode(struct mux *ctx, size_t pin, mux_8051_mode_t mode)
 
     switch (ctx->port) {
     case 0:
-        P0M1 = PxM1;
-        P0M0 = PxM0;
+        P0M1 |= PxM1;
+        P0M0 |= PxM0;
+        P0M1 &= ~(PxM1 ^ mask);
+        P0M0 &= ~(PxM0 ^ mask);
         break;
 
     case 1:
-        P1M1 = PxM1;
-        P1M0 = PxM0;
+        P1M1 |= PxM1;
+        P1M0 |= PxM0;
+        P1M1 &= ~(PxM1 ^ mask);
+        P1M0 &= ~(PxM0 ^ mask);
         break;
 
     case 2:
         break;
 
     case 3:
-        P3M1 = PxM1;
-        P3M0 = PxM0;
+        P3M1 |= PxM1;
+        P3M0 |= PxM0;
+        P3M1 &= ~(PxM1 ^ mask);
+        P3M0 &= ~(PxM0 ^ mask);
         break;
 #ifdef ADDR_P4
     case 4:
-        P4M1 = PxM1;
-        P4M0 = PxM0;
+        P4M1 |= PxM1;
+        P4M0 |= PxM0;
+        P4M1 &= ~(PxM1 ^ mask);
+        P4M0 &= ~(PxM0 ^ mask);
         break;
 #endif
 #ifdef ADDR_P5
     case 5:
-        P5M1 = PxM1;
-        P5M0 = PxM0;
+        P5M1 |= PxM1;
+        P5M0 |= PxM0;
+        P5M1 &= ~(PxM1 ^ mask);
+        P5M0 &= ~(PxM0 ^ mask);
         break;
 #endif
 
