@@ -15,5 +15,9 @@ config ADC_MC9S08PTXX
 config ADC_N76E003_SAR
        depends on 8051
        bool "Nuvoton N76E003 series ADC"
+       
+config ADC_CH552
+       depends on 8051
+       bool "WCH CH552 series ADC"
 
 endmenu
