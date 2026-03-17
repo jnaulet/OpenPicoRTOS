@@ -29,14 +29,14 @@ config L1_CACHE_LINESIZE
        int "Data cache line size"
        depends on ARMV7EM
        default 32 if (MACH_STM32H7XX || MACH_STM32L4X)
-       default 16 if (MACH_ATSAME5X || MACH_STM32F401X)
+       default 16 if (MACH_ATSAME5X || MACH_STM32F401X || MACH_ATSAMX7X)
        default 4 if MACH_RENESAS_RA4
 
 config CACHE_MAINTENANCE
        bool "Cache maintenance operations"
        depends on ARMV7EM
        default y if (MACH_STM32H7XX || MACH_STM32L4X)
-       default n if (MACH_ATSAME5X || MACH_RENESAS_RA4)
+       default n if (MACH_ATSAME5X || MACH_RENESAS_RA4 || MACH_ATSAMX7X)
 
 config STUB_NEWLIB_4_4_0
        bool "Stub newlib-4.4.0 I/O calls (recommended)"

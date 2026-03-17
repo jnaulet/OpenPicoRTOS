@@ -32,6 +32,8 @@
 
 	/* INIT_STACK */
 	.macro INIT_STACK base
+	movs r0, 0
+	msr control, r0
 	ldr r0, =\base
 	msr msp, r0
 	.endm

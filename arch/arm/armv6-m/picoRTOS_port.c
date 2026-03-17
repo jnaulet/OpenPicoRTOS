@@ -9,8 +9,9 @@
 #define SYSTICK_CVR ((volatile unsigned long*)0xe000e018)
 
 /* NVIC */
-#define NVIC_ISER         ((volatile unsigned long*)0xe000e100)
-#define NVIC_SHPR3        ((volatile unsigned long*)0xe000ed20)
+#define NVIC_ISER  ((volatile unsigned long*)0xe000e100)
+#define NVIC_SHPR2 ((volatile unsigned long*)0xe000ed1c)
+#define NVIC_SHPR3 ((volatile unsigned long*)0xe000ed20)
 
 /* VTOR */
 #define VTOR ((volatile unsigned long*)0xe000ed08)
@@ -34,13 +35,14 @@ void arch_init(void)
     /* disable interrupts */
     ASM("cpsid i");
 
-    /* set SYSTICK & PENDSV to min priority */
-    *NVIC_SHPR3 |= 0xffff0000ul;
+    /* set SYSTICK & SVC to max priority (no preempt) */
+    *NVIC_SHPR2 &= ~(0x3u << 30);
+    *NVIC_SHPR3 &= ~(0x3u << 30);
 
     /* SYSTICK */
     *SYSTICK_CSR = 0x6ul;                                               /* stop systick */
     *SYSTICK_CVR = 0;                                                   /* reset */
-    *SYSTICK_RVR = (unsigned long)((sysclk_hz / CONFIG_TICK_HZ) - 1);   /* set period */
+    *SYSTICK_RVR = (unsigned long)((sysclk_hz / CONFIG_TICK_HZ) - 1);   /* period */
 }
 
 void arch_suspend(void)

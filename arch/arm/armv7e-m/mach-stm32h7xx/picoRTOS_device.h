@@ -117,6 +117,7 @@
 /* DEVICE */
 
 #define DEVICE_INTERRUPT_VECTOR_COUNT 150
+#define DEVICE_MCAN_RAM_WORD_COUNT    2560
 
 /* The HSI block provides the default clock to the product */
 #define DEVICE_DEFAULT_SYSCLK_HZ 64000000

@@ -9,8 +9,9 @@
 #define SYSTICK_CVR ((volatile unsigned long*)0xe000e018)
 
 /* NVIC */
-#define NVIC_ISER         ((volatile unsigned long*)0xe000e100)
-#define NVIC_SHPR3        ((volatile unsigned long*)0xe000ed20)
+#define NVIC_ISER  ((volatile unsigned long*)0xe000e100)
+#define NVIC_SHPR2 ((volatile unsigned long*)0xe000ed1c)
+#define NVIC_SHPR3 ((volatile unsigned long*)0xe000ed20)
 
 /* VTOR */
 #define VTOR ((volatile unsigned long*)0xe000ed08)
@@ -37,8 +38,9 @@ void arch_init(void)
     /* disable interrupts */
     ASM("cpsid if");
 
-    /* set SYSTICK & PENDSV to min priority */
-    *NVIC_SHPR3 |= 0xffff0000ul;
+    /* set SYSTICK & SVC to max priority (no preempt) */
+    *NVIC_SHPR2 &= ~(0xffu << 24);
+    *NVIC_SHPR3 &= ~(0xffu << 24);
 
     /* SYSTICK */
     *SYSTICK_CSR = 0x6ul;                                               /* stop systick */
@@ -48,14 +50,14 @@ void arch_init(void)
 
 void arch_suspend(void)
 {
-    /* disable interrupts */
-    ASM("cpsid if");
+    *SYSTICK_CSR &= ~0x1ul; /* stop systick */
+    ASM("cpsid if");        /* disable interrupts */
 }
 
 void arch_resume(void)
 {
-    /* enable interrupts */
-    ASM("cpsie if");
+    ASM("cpsie if");        /* enable interrupts */
+    *SYSTICK_CSR |= 0x1ul;  /* restart systick */
 }
 
 picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,

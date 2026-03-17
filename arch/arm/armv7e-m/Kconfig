@@ -16,6 +16,9 @@ config MACH_STM32F401X
 
 config MACH_STM32L4X
        bool "STMicro STM32L4x Series"
+       
+config MACH_ATSAMX7X
+       bool "Atmel SAMx7x Series"
 
 endchoice
 

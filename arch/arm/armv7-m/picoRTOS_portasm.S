@@ -4,8 +4,6 @@
 	.extern picoRTOS_tick
 	.extern picoRTOS_syscall
 
-	.equ NVIC_ICSR, 0xe000ed04
-
 	.macro SAVE_CONTEXT rS
 	clrex				/* clear exclusive bit */
 	mrs \rS, psp			/* use r0 as psp stack */
@@ -61,7 +59,7 @@ arch_start_first_task:
 	orrs r1, r1, r3
 	str r1, [r2]
 
-	cpsie i		/* enable interrupts */
+	cpsie if		/* enable interrupts */
 	bx r4
 
 	.thumb_func
@@ -123,9 +121,7 @@ Default_Handler:
 	SAVE_CONTEXT r0
 	push {r0}
 	/* get active exception in r0 */
-	ldr r2, =NVIC_ICSR
-	ldr r0, [r2]
-	ubfx r0, r0, #0, #9
+	mrs r0, IPSR
 	subs r0, #16
 	ldr r3, =ISR_TABLE
 	lsls r0, r0, #3	/* x8 to get the right entry */

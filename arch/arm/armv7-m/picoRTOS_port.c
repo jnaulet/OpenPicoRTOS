@@ -9,8 +9,9 @@
 #define SYSTICK_CVR ((volatile unsigned long*)0xe000e018)
 
 /* NVIC */
-#define NVIC_ISER         ((volatile unsigned long*)0xe000e100)
-#define NVIC_SHPR3        ((volatile unsigned long*)0xe000ed20)
+#define NVIC_ISER  ((volatile unsigned long*)0xe000e100)
+#define NVIC_SHPR2 ((volatile unsigned long*)0xe000ed1c)
+#define NVIC_SHPR3 ((volatile unsigned long*)0xe000ed20)
 
 /* VTOR */
 #define VTOR ((volatile unsigned long*)0xe000ed08)
@@ -35,27 +36,28 @@ static int sysclk_hz = DEVICE_DEFAULT_SYSCLK_HZ;
 void arch_init(void)
 {
     /* disable interrupts */
-    ASM("cpsid i");
+    ASM("cpsid if");
 
-    /* set SYSTICK & PENDSV to min priority */
-    *NVIC_SHPR3 |= 0xffff0000ul;
+    /* set SYSTICK & SVC to max priority (no preempt) */
+    *NVIC_SHPR2 &= ~(0xffu << 24);
+    *NVIC_SHPR3 &= ~(0xffu << 24);
 
     /* SYSTICK */
     *SYSTICK_CSR = 0x6ul;                                               /* stop systick */
     *SYSTICK_CVR = 0;                                                   /* reset */
-    *SYSTICK_RVR = (unsigned long)((sysclk_hz / CONFIG_TICK_HZ) - 1);   /* set period */
+    *SYSTICK_RVR = (unsigned long)((sysclk_hz / CONFIG_TICK_HZ) - 1);   /* period */
 }
 
 void arch_suspend(void)
 {
     /* disable interrupts */
-    ASM("cpsid i");
+    ASM("cpsid if");
 }
 
 void arch_resume(void)
 {
     /* enable interrupts */
-    ASM("cpsie i");
+    ASM("cpsie if");
 }
 
 picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
