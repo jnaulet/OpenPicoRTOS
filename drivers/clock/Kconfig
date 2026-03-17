@@ -68,4 +68,8 @@ config CLOCK_NUMICRO
        depends on 8051
        bool "Nuvoton NuMicro Series clock"
 
+config CLOCK_ATMEL_PMC
+       depends on ARM
+       bool "ATMEL PMC clock (atsam3x, atsamx7x, ... series)"
+
 endmenu

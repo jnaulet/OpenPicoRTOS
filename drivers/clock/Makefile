@@ -20,3 +20,4 @@ c_src-$(CONFIG_CLOCK_NXP_SIU) += $(drivers-clock)/clock-nxp_siu.c
 c_src-$(CONFIG_CLOCK_N76E003) += $(drivers-clock)/clock-n76e003.c
 c_src-$(CONFIG_CLOCK_CY7C6801XA) += $(drivers-clock)/clock-cy7c6801xa.c
 c_src-$(CONFIG_CLOCK_NUMICRO) += $(drivers-clock)/clock-numicro.c
+c_src-$(CONFIG_CLOCK_ATMEL_PMC) += $(drivers-clock)/clock-atmel_pmc.c
