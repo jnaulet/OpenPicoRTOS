@@ -12,3 +12,4 @@ c_src-$(CONFIG_WD_ATSAME5X) += $(drivers-wd)/wd-same5x.c
 c_src-$(CONFIG_WD_STM32H7XX_IWDG) += $(drivers-wd)/wd-stm32h7xx_iwdg.c
 c_src-$(CONFIG_WD_TI_F28X) += $(drivers-wd)/wd-ti_f28x.c
 c_src-$(CONFIG_WD_TINYAVR) += $(drivers-wd)/wd-tinyavr.c
+c_src-$(CONFIG_WD_ATMEL_WDT) += $(drivers-wd)/wd-atmel_wdt.c
