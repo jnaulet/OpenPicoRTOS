@@ -50,4 +50,7 @@ config GPIO_NXP_SIU
        depends on POWERPC
        bool "NXP SIU GPIOs"
 
+config GPIO_ATMEL_PIO
+       depends on ARM
+       bool "ATMEL SAM series PIO GPIOs"
 endmenu

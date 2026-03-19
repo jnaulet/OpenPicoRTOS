@@ -16,6 +16,8 @@ typedef enum {
     MUX_ATMEL_PIO_GPIO,
     MUX_ATMEL_PIO_A,
     MUX_ATMEL_PIO_B,
+    MUX_ATMEL_PIO_C,
+    MUX_ATMEL_PIO_D,
     MUX_ATMEL_PIO_COUNT
 } mux_atmel_pio_t;
 
