@@ -11,5 +11,9 @@ config FLASH_PIC32MX
 config FLASH_SAME5X
        depends on ARM
        bool "SAME5x/D5x series flash"
+       
+config FLASH_ATMEL_EEFC
+       depends on ARM
+       bool "ATMEL EEFC flash support"
 
 endmenu
