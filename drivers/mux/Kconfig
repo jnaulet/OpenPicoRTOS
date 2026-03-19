@@ -48,4 +48,8 @@ config MUX_NXP_SIU
        depends on POWERPC
        bool "NXP SIU MUX"
 
+config MUX_ATMEL_PIO
+       depends on ARM
+       bool "ATMEL SAM series PIO MUX"
+
 endmenu
