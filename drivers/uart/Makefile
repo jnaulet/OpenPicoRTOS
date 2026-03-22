@@ -13,3 +13,4 @@ c_src-$(CONFIG_UART_STM32H7XX) += $(drivers-uart)/uart-stm32h7xx.c
 c_src-$(CONFIG_UART_TINYAVR_USART) += $(drivers-uart)/uart-tinyavr_usart.c
 c_src-$(CONFIG_UART_RENESAS_RA4_SCI) += $(drivers-uart)/uart-renesas_ra4_sci.c
 c_src-$(CONFIG_UART_NXP_LINFLEXD) += $(drivers-uart)/uart-nxp_linflexd.c
+c_src-$(CONFIG_UART_ATSAMX7X) += $(drivers-uart)/uart-atsamx7x.c

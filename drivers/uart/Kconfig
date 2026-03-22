@@ -43,5 +43,9 @@ config UART_RENESAS_RA4_SCI
 config UART_NXP_LINFLEXD
        depends on POWERPC
        bool "NXP LinFlexD UART"
+       
+config UART_ATSAMX7X
+       depends on ARM
+       bool "ATSAMx7x series UART"
 
 endmenu
