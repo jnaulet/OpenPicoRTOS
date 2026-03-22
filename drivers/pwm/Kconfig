@@ -47,5 +47,9 @@ config PWM_RENESAS_RA4_GPT
 config PWM_NXP_EMIOS
        depends on POWERPC
        bool "NXP eMIOS PWM"
+       
+config PWM_ATSAMX7X
+       depends on ARM
+       bool "ATSAMx7x series compatible PWM"
 
 endmenu

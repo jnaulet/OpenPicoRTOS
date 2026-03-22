@@ -15,3 +15,4 @@ c_src-$(CONFIG_PWM_TI_EPWM) += $(drivers-pwm)/pwm-ti_epwm.c
 c_src-$(CONFIG_PWM_TINYAVR) += $(drivers-pwm)/pwm-tinyavr_tca.c
 c_src-$(CONFIG_PWM_RENESAS_RA4_GPT) += $(drivers-pwm)/pwm-renesas_ra4_gpt.c
 c_src-$(CONFIG_PWM_NXP_EMIOS) += $(drivers-pwm)/pwm-nxp_emios.c
+c_src-$(CONFIG_PWM_ATSAMX7X) += $(drivers-pwm)/pwm-atsamx7x.c
