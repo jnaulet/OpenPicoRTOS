@@ -55,5 +55,9 @@ config SPI_RENESAS_RA4
 config SPI_NXP_DSPI
        depends on POWERPC
        bool "NXP dSPI"
+
+config SPI_ATSAMX7X
+       depends on ARM
+       bool "ATSAMx7x series SPI"
        
 endmenu
