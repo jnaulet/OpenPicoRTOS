@@ -51,5 +51,9 @@ config PWM_NXP_EMIOS
 config PWM_ATSAMX7X
        depends on ARM
        bool "ATSAMx7x series compatible PWM"
+       
+config PWM_ATSAMX7X_TC
+       depends on ARM
+       bool "ATSAMx7x series compatible PWM on TC"
 
 endmenu
