@@ -355,13 +355,6 @@ struct CAN_BOSCH_MCAN {
 #define TXEFA_EFA(x) ((x) & TXEFA_EFA_M)
 
 /*
- * Message RAM
- */
-// static uint32_t *CAN_MSG_RAM = (uint32_t)ADDR_CAN_MSG_RAM;
-
-#define MESSAGE_RAM_WORDS_COUNT 2560
-
-/*
  * buffer elements
  */
 struct rx_buf {
@@ -504,18 +497,18 @@ static void init_fdcan_filters(struct can *ctx)
  *  ctx - The CAN interface to init
  *  base - The CAN interface base address
  *  clkid - The CAN interface inptu clock id
- *  start_address - The CAN RAM buffer start address
+ *  start_address - The CAN RAM buffer start address (in words)
  *  n_words - The number of words to reserve in the CAN RAM
  *
  * Returns:
  * 0 if success, -errno otherwise
  */
 int can_bosch_mcan_init(struct can *ctx, int base, clock_id_t clkid,
-                        uint32_t start_address, size_t n_words)
+                        uint32_t *message_ram, uint32_t start_address,
+                        size_t n_words)
 {
-    picoRTOS_assert((start_address & 0x3u) == 0, return -EINVAL);
     picoRTOS_assert(n_words > 0, return -EINVAL);
-    picoRTOS_assert(n_words <= (size_t)MESSAGE_RAM_WORDS_COUNT, return -EINVAL);
+    picoRTOS_assert(n_words <= (size_t)DEVICE_MCAN_RAM_WORD_COUNT, return -EINVAL);
 
     int res;
 
@@ -540,30 +533,30 @@ int can_bosch_mcan_init(struct can *ctx, int base, clock_id_t clkid,
 
     /* set rx FIFO0 start address,
      * as we're pure CAN we can max the size, too */
-    ctx->rx_fifo0 = (void*)(ADDR_CAN_MSG_RAM + (start_address << 2));
+    ctx->rx_fifo0 = message_ram + (uintptr_t)start_address;
     ctx->base->RXF0C = (uint32_t)(RXFnC_FnS(RX_FIFOn_SIZE_COUNT) |
                                   RXFnC_FnSA(start_address));
     /* tx buffers start address follows */
     start_address += RX_FIFOn_SIZE_COUNT * 4; /* 4 32bit words per msg */
-    ctx->tx_buffers = (void*)(ADDR_CAN_MSG_RAM + (start_address << 2));
+    ctx->tx_buffers = message_ram + (uintptr_t)start_address;
     ctx->base->TXBC = (uint32_t)(TXBC_TFQS(TX_BUFFERS_SIZE_COUNT) |
                                  TXBC_TBSA(start_address));
     /* normal acceptance masks */
     start_address += TX_BUFFERS_SIZE_COUNT * 4; /* 4 32bit words per msg */
-    ctx->filter_11bit = (void*)(ADDR_CAN_MSG_RAM + (start_address << 2));
+    ctx->filter_11bit = message_ram + (uintptr_t)start_address;
     ctx->base->SIDFC = (uint32_t)(SIDFC_LSS(STD_FILTERS_SIZE_COUNT) |
                                   SIDFC_FLSSA(start_address));
     /* extended acceptance masks */
     start_address += STD_FILTERS_SIZE_COUNT; /* 1 32bit word per entry */
-    ctx->filter_29bit = (void*)(ADDR_CAN_MSG_RAM + (start_address << 2));
+    ctx->filter_29bit = message_ram + (uintptr_t)start_address;
     ctx->base->XIDFC = (uint32_t)(SIDFC_LSS(XTD_FILTERS_SIZE_COUNT) |
                                   SIDFC_FLSSA(start_address));
     /* future-use pointers init */
     start_address += STD_FILTERS_SIZE_COUNT * 2; /* 2 32bit word per entry */
-    ctx->rx_fifo1 = (void*)(ADDR_CAN_MSG_RAM + (start_address << 2));
-    ctx->rx_buffer = (void*)(ADDR_CAN_MSG_RAM + (start_address << 2));
-    ctx->tx_event_fifo = (void*)(ADDR_CAN_MSG_RAM + (start_address << 2));
-    ctx->trigger_memory = (void*)(ADDR_CAN_MSG_RAM + (start_address << 2));
+    ctx->rx_fifo1 = message_ram + (uintptr_t)start_address;
+    ctx->rx_buffer = message_ram + (uintptr_t)start_address;
+    ctx->tx_event_fifo = message_ram + (uintptr_t)start_address;
+    ctx->trigger_memory = message_ram + (uintptr_t)start_address;
 
     /* init memory */
     init_fdcan_filters(ctx);
@@ -669,9 +662,9 @@ static int set_tx_fifo(struct can *ctx,
     picoRTOS_assert(tx_mailbox_count <= (size_t)TX_BUFFERS_SIZE_COUNT, return -EINVAL);
     picoRTOS_assert(tx_auto_abort < CAN_TX_AUTO_ABORT_COUNT, return -EINVAL);
 
-    /* set flags */
-    if (tx_auto_abort == CAN_TX_AUTO_ABORT_ON) ctx->base->TXBC |= TXBC_TFQM;
-    else ctx->base->TXBC &= ~TXBC_TFQM;
+    /* fifo mode */
+    ctx->base->TXBC |= TXBC_TFQM;
+    /*@i@*/ (void)tx_auto_abort;  /* unused */
 
     /* set count */
     ctx->base->TXBC &= ~TXBC_TFQS(TXBC_TFQS_M);
@@ -771,18 +764,15 @@ static int buffer_write(struct tx_buf *txb, const void *buf, size_t n)
     txb->T3 = 0;
 
     switch (n) {
-    case 8: txb->T3 |= (uint32_t)buf8[7] << 24;         /*@fallthrough@*/
-    case 7: txb->T3 |= (uint32_t)buf8[6] << 16;         /*@fallthrough@*/
-    case 6: txb->T3 |= (uint32_t)buf8[5] << 8;          /*@fallthrough@*/
-    case 5: txb->T3 |= (uint32_t)buf8[4] << 0;          /*@fallthrough@*/
-    case 4: txb->T2 |= (uint32_t)buf8[3] << 24;         /*@fallthrough@*/
-    case 3: txb->T2 |= (uint32_t)buf8[2] << 16;         /*@fallthrough@*/
-    case 2: txb->T2 |= (uint32_t)buf8[1] << 8;          /*@fallthrough@*/
-    case 1: txb->T2 |= (uint32_t)buf8[0] << 0; break;
-    default:
-        picoRTOS_assert_void(false);
-        /*@notreached@*/
-        return -EIO;
+    case 8: txb->T3 |= (uint32_t)buf8[7] << 24; /*@fallthrough@*/
+    case 7: txb->T3 |= (uint32_t)buf8[6] << 16; /*@fallthrough@*/
+    case 6: txb->T3 |= (uint32_t)buf8[5] << 8;  /*@fallthrough@*/
+    case 5: txb->T3 |= (uint32_t)buf8[4] << 0;  /*@fallthrough@*/
+    case 4: txb->T2 |= (uint32_t)buf8[3] << 24; /*@fallthrough@*/
+    case 3: txb->T2 |= (uint32_t)buf8[2] << 16; /*@fallthrough@*/
+    case 2: txb->T2 |= (uint32_t)buf8[1] << 8;  /*@fallthrough@*/
+    case 1: txb->T2 |= (uint32_t)buf8[0] << 0;  /*@fallthrough@*/
+    default: break;
     }
 
     return (int)n;
@@ -827,30 +817,30 @@ int can_write(struct can *ctx, can_id_t id, const void *buf, size_t n)
     tx_buf[index].T1 = (uint32_t)T1_DLC(n);
     dlc = buffer_write(&tx_buf[index], buf, n);
 
+    /* cache */
+    arch_flush_dcache(tx_buf, sizeof(*tx_buf) * TX_BUFFERS_SIZE_COUNT);
+
     /* request xfer */
-    ctx->base->TXBAR |= (uint32_t)(1 << index);
+    ctx->base->TXBAR = (uint32_t)(1 << index);
     return dlc;
 }
 
 static int buffer_read(const struct rx_buf *rxb, void *buf, size_t n)
 {
-    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT, return -EINVAL);
 
     uint8_t *buf8 = (uint8_t*)buf;
 
     switch (n) {
-    case 8: buf8[7] = (uint8_t)(rxb->R3 >> 24);         /*@fallthrough@*/
-    case 7: buf8[6] = (uint8_t)(rxb->R3 >> 16);         /*@fallthrough@*/
-    case 6: buf8[5] = (uint8_t)(rxb->R3 >> 8);          /*@fallthrough@*/
-    case 5: buf8[4] = (uint8_t)(rxb->R3 >> 0);          /*@fallthrough@*/
-    case 4: buf8[3] = (uint8_t)(rxb->R2 >> 24);         /*@fallthrough@*/
-    case 3: buf8[2] = (uint8_t)(rxb->R2 >> 16);         /*@fallthrough@*/
-    case 2: buf8[1] = (uint8_t)(rxb->R2 >> 8);          /*@fallthrough@*/
-    case 1: buf8[0] = (uint8_t)(rxb->R2 >> 0); break;
-    default:
-        picoRTOS_assert_void(false);
-        /*@notreached@*/
-        return -EIO;
+    case 8: buf8[7] = (uint8_t)(rxb->R3 >> 24); /*@fallthrough@*/
+    case 7: buf8[6] = (uint8_t)(rxb->R3 >> 16); /*@fallthrough@*/
+    case 6: buf8[5] = (uint8_t)(rxb->R3 >> 8);  /*@fallthrough@*/
+    case 5: buf8[4] = (uint8_t)(rxb->R3 >> 0);  /*@fallthrough@*/
+    case 4: buf8[3] = (uint8_t)(rxb->R2 >> 24); /*@fallthrough@*/
+    case 3: buf8[2] = (uint8_t)(rxb->R2 >> 16); /*@fallthrough@*/
+    case 2: buf8[1] = (uint8_t)(rxb->R2 >> 8);  /*@fallthrough@*/
+    case 1: buf8[0] = (uint8_t)(rxb->R2 >> 0);  /*@fallthrough@*/
+    default: break;
     }
 
     return (int)n;
@@ -871,6 +861,9 @@ int can_read(struct can *ctx, can_id_t *id, void *buf, size_t n)
     struct rx_buf *rx_buf = (struct rx_buf*)ctx->rx_fifo0;
     unsigned index = (rxf0s & RXFnS_FnGI(RXFnS_FnGI_M)) >> 8;
 
+    /* cache */
+    arch_invalidate_dcache(&rx_buf[index], sizeof(struct rx_buf));
+    
     if ((rx_buf[index].R0 & R0_XTD) == 0)   /* standard */
         *id = (can_id_t)((rx_buf[index].R0 & R0_ID(R0_ID_M)) >> 18);
     else                                    /* extended */

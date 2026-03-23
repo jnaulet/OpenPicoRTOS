@@ -19,14 +19,14 @@ struct can {
     /*@temp@*/ struct CAN_BOSCH_MCAN *base;
     clock_id_t clkid;
     /* internals */
-    /*@temp@*/ volatile void *filter_11bit;
-    /*@temp@*/ volatile void *filter_29bit;
-    /*@temp@*/ volatile void *rx_fifo0;
-    /*@temp@*/ volatile void *rx_fifo1;
-    /*@temp@*/ volatile void *rx_buffer;
-    /*@temp@*/ volatile void *tx_event_fifo;
-    /*@temp@*/ volatile void *tx_buffers;
-    /*@temp@*/ volatile void *trigger_memory;
+    /*@temp@*/ volatile uint32_t *filter_11bit;
+    /*@temp@*/ volatile uint32_t *filter_29bit;
+    /*@temp@*/ volatile uint32_t *rx_fifo0;
+    /*@temp@*/ volatile uint32_t *rx_fifo1;
+    /*@temp@*/ volatile uint32_t *rx_buffer;
+    /*@temp@*/ volatile uint32_t *tx_event_fifo;
+    /*@temp@*/ volatile uint32_t *tx_buffers;
+    /*@temp@*/ volatile uint32_t *trigger_memory;
     /* counters */
     size_t n_filter_11bit;
     size_t n_filter_29bit;
@@ -37,7 +37,7 @@ struct can {
 };
 
 int can_bosch_mcan_init(/*@out@*/ struct can *ctx, int base, clock_id_t clkid,
-                        uint32_t start_address, size_t n_words);
+                        uint32_t *message_ram, uint32_t start_address, size_t n_words);
 
 /* Runtime calls:
  * int can_register(struct can *ctx, can_id_t id, can_f_t f, unsigned long flags);
