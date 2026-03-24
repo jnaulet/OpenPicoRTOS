@@ -11,5 +11,9 @@ config MISC_RP2040_RESET
 config MISC_STM32H7XX_DMAMUX
        depends on ARM
        bool "STM32H7XX DMAMUX support"
+       
+config MISC_ATSAMX7X_MATRIX
+       depends on ARM
+       bool "ATMEL ATSAMx7x MATRIX support"
 
 endmenu
