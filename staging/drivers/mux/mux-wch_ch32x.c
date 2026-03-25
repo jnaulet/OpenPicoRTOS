@@ -25,7 +25,7 @@ struct MUX_WCH_CH32X {
 
 int mux_wch_ch32x_init(struct mux *ctx, int base)
 {
-    ctx->base = (struct MUX_WCH_CH32X*)base;
+    ctx->base = (struct MUX_WCH_CH32X*)base; // NOLINT
     return 0;
 }
 

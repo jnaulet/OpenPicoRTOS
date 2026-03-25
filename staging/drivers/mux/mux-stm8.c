@@ -13,7 +13,7 @@ struct MUX_STM8 {
 
 int mux_stm8_init(struct mux *ctx, int base)
 {
-    ctx->base = (struct MUX_STM8*)base;
+    ctx->base = (struct MUX_STM8*)base; // NOLINT
     return 0;
 }
 

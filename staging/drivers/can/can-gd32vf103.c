@@ -149,7 +149,7 @@ struct CAN_GD32VF103 {
 
 int can_gd32vf103_init(struct can *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct CAN_GD32VF103*)base;
+    ctx->base = (struct CAN_GD32VF103*)base; // NOLINT
     ctx->clkid = clkid;
     /* filters */
     ctx->filter_count = 0;

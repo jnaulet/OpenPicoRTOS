@@ -121,7 +121,7 @@ int flash_sam3x_init(/*@out@*/ struct flash *ctx, int base)
 {
     int res;
 
-    ctx->base = (struct FLASH_SAM3X*)base;
+    ctx->base = (struct FLASH_SAM3X*)base; // NOLINT
     ctx->state = FLASH_SAM3X_STATE_IDLE;
 
     /* info */

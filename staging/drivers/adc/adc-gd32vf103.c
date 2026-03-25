@@ -61,7 +61,7 @@ int adc_gd32vf103_init(struct adc_gd32vf103 *ctx, int base)
     int delay = CONFIG_DEADLOCK_COUNT; /* FIXME */
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    ctx->base = (struct ADC_GD32VF103*)base;
+    ctx->base = (struct ADC_GD32VF103*)base; // NOLINT
 
     /* turn on */
     ctx->base->ADC_CTL1 |= ADC_CTL1_ADCON;

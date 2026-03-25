@@ -33,7 +33,7 @@ struct WD_RENESAS_RA4_WDT {
 
 int wd_renesas_ra4_wdt_init(struct wd *ctx, clock_id_t clkid)
 {
-    ctx->base = (struct WD_RENESAS_RA4_WDT*)base;
+    ctx->base = (struct WD_RENESAS_RA4_WDT*)base; // NOLINT
     ctx->clkid = clkid;
 
     return 0;

@@ -87,7 +87,7 @@ struct TWI_GD32VF103_I2C {
 
 int twi_gd32vf103_init(struct twi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct TWI_GD32VF103_I2C*)base;
+    ctx->base = (struct TWI_GD32VF103_I2C*)base; // NOLINT
     ctx->clkid = clkid;
 
     return 0;

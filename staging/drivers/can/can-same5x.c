@@ -313,7 +313,7 @@ int can_same5x_init(struct can *ctx, int base, clock_id_t clkid)
 
     int res;
 
-    ctx->base = (struct CAN_SAME5X*)base;
+    ctx->base = (struct CAN_SAME5X*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->sidf_count = 0;
 

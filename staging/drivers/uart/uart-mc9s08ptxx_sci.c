@@ -69,7 +69,7 @@ struct UART_MC9S08PTXX_SCI {
 
 int uart_mc9s08ptxx_sci_init(struct uart *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct UART_MC9S08PTXX_SCI*)base;
+    ctx->base = (struct UART_MC9S08PTXX_SCI*)base; // NOLINT
     ctx->clkid = clkid;
 
     /* turn on */

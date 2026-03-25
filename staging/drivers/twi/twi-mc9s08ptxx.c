@@ -67,7 +67,7 @@ struct TWI_MC9S08PTXX {
 
 int twi_mc9s08ptxx_init(struct twi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct TWI_MC9S08PTXX*)base;
+    ctx->base = (struct TWI_MC9S08PTXX*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->state = TWI_MC9S08PTXX_STATE_IDLE;
     ctx->last = 0;

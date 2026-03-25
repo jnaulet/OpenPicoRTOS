@@ -53,7 +53,7 @@ static const struct nxp_c55fmc_bit_mapping
 
 int flash_nxp_c55fmc_init(struct flash *ctx, int base)
 {
-    ctx->base = (struct FLASH_NXP_C55FMC*)base;
+    ctx->base = (struct FLASH_NXP_C55FMC*)base; // NOLINT
     return 0;
 }
 

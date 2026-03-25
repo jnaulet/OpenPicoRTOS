@@ -64,7 +64,7 @@ struct SPI_MC9S08PTXX {
 
 int spi_mc9s08ptxx_init(struct spi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct SPI_MC9S08PTXX*)base;
+    ctx->base = (struct SPI_MC9S08PTXX*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->frame_width = (size_t)1;
 

@@ -48,7 +48,7 @@ struct ADC_MC9S08PTXX {
 
 int adc_mc9s08ptxx_init(struct adc_mc9s08ptxx *ctx, int base)
 {
-    ctx->base = (struct ADC_MC9S08PTXX*)base;
+    ctx->base = (struct ADC_MC9S08PTXX*)base; // NOLINT
     return 0;
 }
 

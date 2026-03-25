@@ -17,7 +17,7 @@ int gpio_wch_ch32x_init(struct gpio *ctx, int base, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)GPIO_WCH_CH32X_PIN_COUNT, return -EINVAL);
 
-    ctx->base = (struct GPIO_WCH_CH32X*)base;
+    ctx->base = (struct GPIO_WCH_CH32X*)base; // NOLINT
     ctx->mask = (uint32_t)(1 << pin);
     return 0;
 }

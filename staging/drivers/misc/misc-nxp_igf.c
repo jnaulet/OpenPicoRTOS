@@ -62,7 +62,7 @@ int nxp_igf_init(struct nxp_igf *ctx, int base, size_t channel)
 
     uint32_t *MCR;
 
-    ctx->base = (struct NXP_IGF*)base;
+    ctx->base = (struct NXP_IGF*)base; // NOLINT
     ctx->channel = channel;
 
     /* default: bypass */

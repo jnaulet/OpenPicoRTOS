@@ -40,7 +40,7 @@ int rng_stm32h7xx_trng_init(struct rng *ctx, int base, clock_id_t clkid)
     unsigned int div_p2;
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    ctx->base = (struct RNG_STM32H7XX_TRNG*)base;
+    ctx->base = (struct RNG_STM32H7XX_TRNG*)base; // NOLINT
     if ((freq = clock_get_freq(clkid)) <= 0)
         return -EINVAL;
 

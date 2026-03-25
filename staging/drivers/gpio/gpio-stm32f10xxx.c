@@ -35,7 +35,7 @@ int gpio_stm32f10xxx_init(struct gpio *ctx, int base, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)GPIO_STM32F10XXX_PIN_COUNT, return -EINVAL);
 
-    ctx->base = (struct GPIO_STM32F10XXX*)base;
+    ctx->base = (struct GPIO_STM32F10XXX*)base; // NOLINT
     ctx->mask = (uint32_t)(1 << pin);
     return 0;
 }

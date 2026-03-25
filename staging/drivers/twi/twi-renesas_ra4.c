@@ -132,7 +132,7 @@ struct TWI_RENESAS_RA4 {
 
 int twi_renesas_ra4_init(struct twi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct TWI_RENESAS_RA4*)base;
+    ctx->base = (struct TWI_RENESAS_RA4*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->state = TWI_RENESAS_RA4_STATE_IDLE;
     ctx->last = 0;

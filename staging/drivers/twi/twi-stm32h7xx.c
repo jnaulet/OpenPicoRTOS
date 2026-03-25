@@ -104,7 +104,7 @@ struct TWI_STM32H7XX {
 
 int twi_stm32h7xx_init(struct twi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct TWI_STM32H7XX*)base;
+    ctx->base = (struct TWI_STM32H7XX*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->pending = false;
     ctx->state = TWI_STM32H7XX_STATE_IDLE;

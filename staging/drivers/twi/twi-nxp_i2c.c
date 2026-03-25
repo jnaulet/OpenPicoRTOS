@@ -42,7 +42,7 @@ struct TWI_NXP_I2C {
 
 int twi_nxp_i2c_init(struct twi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct TWI_NXP_I2C*)base;
+    ctx->base = (struct TWI_NXP_I2C*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->state = TWI_NXP_I2C_STATE_IDLE;
     ctx->last = 0;

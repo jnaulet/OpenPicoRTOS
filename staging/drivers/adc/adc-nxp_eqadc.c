@@ -107,7 +107,7 @@ int adc_nxp_eqadc_init(struct adc_nxp_eqadc *ctx, int base)
     int i;
     uint32_t cmd;
 
-    ctx->base = (struct ADC_NXP_EQADC*)base;
+    ctx->base = (struct ADC_NXP_EQADC*)base; // NOLINT
     ctx->channel_count = 0;
     ctx->fill = NULL;
     ctx->drain = NULL;

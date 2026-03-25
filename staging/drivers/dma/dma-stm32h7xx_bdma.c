@@ -40,7 +40,7 @@ int dma_stm32h7xx_bdma_init(struct dma *ctx, int base, size_t channel)
 {
     if (!picoRTOS_assert(channel < (size_t)DMA_STM32H7XX_BDMA_CHANNEL_COUNT)) return -EINVAL;
 
-    ctx->base = (struct DMA_STM32H7XX_BDMA*)base;
+    ctx->base = (struct DMA_STM32H7XX_BDMA*)base; // NOLINT
     ctx->channel = channel;
 
     return 0;

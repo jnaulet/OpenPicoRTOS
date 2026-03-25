@@ -86,7 +86,7 @@ struct MUX_STM32F10XXX_AFIO {
 
 int mux_stm32f10xxx_init(struct mux *ctx, int base)
 {
-    ctx->base = (struct MUX_STM32F10XXX*)base;
+    ctx->base = (struct MUX_STM32F10XXX*)base; // NOLINT
     return 0;
 }
 

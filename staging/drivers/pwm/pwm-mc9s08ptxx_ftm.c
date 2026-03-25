@@ -79,8 +79,8 @@ struct PWM_MC9S08PTXX_FTM {
 
 int pwm_mc9s08ptxx_ftm_init(struct pwm_mc9s08ptxx_ftm *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct PWM_MC9S08PTXX_FTM*)base;
-    ctx->freq = clock_get_freq(clkid) / (clock_freq_t)2; /* FIXME: FTMEN */
+    ctx->base = (struct PWM_MC9S08PTXX_FTM*)base;           // NOLINT
+    ctx->freq = clock_get_freq(clkid) / (clock_freq_t)2;    /* FIXME: FTMEN */
 
     picoRTOS_assert(ctx->freq > 0, return -EINVAL);
 

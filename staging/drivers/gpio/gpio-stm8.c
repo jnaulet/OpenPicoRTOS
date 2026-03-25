@@ -12,7 +12,7 @@ int gpio_stm8_init(struct gpio *ctx, int base, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)GPIO_STM8_PIN_COUNT, return -EINVAL);
 
-    ctx->base = (struct GPIO_STM8*)base;
+    ctx->base = (struct GPIO_STM8*)base; // NOLINT
     ctx->mask = (uint8_t)(1u << pin);
 
     return 0;
