@@ -29,7 +29,7 @@ struct C99_EEPROM_AVR {
  */
 int eeprom_avr_init(struct eeprom *ctx, int base, int SPMCSR_base)
 {
-    ctx->base = (struct C99_EEPROM_AVR*)base;
+    ctx->base = (struct C99_EEPROM_AVR*)base; // NOLINT
     ctx->SPMCSR = (uint8_t*)SPMCSR_base;
 
     return 0;

@@ -96,7 +96,7 @@ int uart_nxp_linflexd_init(struct uart *ctx, int base, clock_id_t clkid)
 {
     int res;
 
-    ctx->base = (struct UART_NXP_LINFLEXD*)base;
+    ctx->base = (struct UART_NXP_LINFLEXD*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->state = UART_NXP_LINFLEXD_STATE_START;
 

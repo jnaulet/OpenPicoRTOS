@@ -76,7 +76,7 @@ struct FLASH_ATMEL_EEFC {
  */
 int flash_atmel_eefc_init(struct flash *ctx, int base)
 {
-    ctx->base = (struct FLASH_ATMEL_EEFC*)base;
+    ctx->base = (struct FLASH_ATMEL_EEFC*)base; // NOLINT
     return 0;
 }
 

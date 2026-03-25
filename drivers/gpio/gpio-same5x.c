@@ -31,7 +31,7 @@ int gpio_same5x_init(struct gpio *ctx, int base, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)GPIO_SAME5X_PIN_COUNT, return -EINVAL);
 
-    ctx->base = (struct GPIO_SAME5X*)base;
+    ctx->base = (struct GPIO_SAME5X*)base; // NOLINT
     ctx->mask = (uint32_t)1 << pin;
     ctx->invert = false;
 

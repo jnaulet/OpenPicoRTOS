@@ -136,7 +136,7 @@ int spi_stm32h7xx_init(struct spi *ctx, int base, clock_id_t clkid)
 {
     int res;
 
-    ctx->base = (struct SPI_STM32H7XX*)base;
+    ctx->base = (struct SPI_STM32H7XX*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->frame_size = (size_t)8;
     ctx->frame_width = (size_t)1;

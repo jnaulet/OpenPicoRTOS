@@ -123,7 +123,7 @@ int flash_same5x_init(struct flash *ctx, int base)
 {
     uint32_t psz;
 
-    ctx->base = (struct FLASH_SAME5X*)base;
+    ctx->base = (struct FLASH_SAME5X*)base; // NOLINT
     ctx->state = FLASH_SAME5X_STATE_IDLE;
 
     /* extract info */

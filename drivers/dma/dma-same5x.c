@@ -147,7 +147,7 @@ struct DMA_SAME5X {
  */
 int dma_same5x_init(struct dma_same5x *ctx, int base)
 {
-    ctx->base = (struct DMA_SAME5X*)base;
+    ctx->base = (struct DMA_SAME5X*)base; // NOLINT
 
     /* config TDs & turn on */
     ctx->base->BASEADDR = (uint32_t)ctx->TD;

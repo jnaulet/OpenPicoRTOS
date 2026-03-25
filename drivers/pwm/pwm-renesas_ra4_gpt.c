@@ -127,7 +127,7 @@ static void lock(struct pwm_renesas_ra4_gpt *ctx)
  */
 int pwm_renesas_ra4_gpt_init(struct pwm_renesas_ra4_gpt *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct PWM_RENESAS_RA4_GPT*)base;
+    ctx->base = (struct PWM_RENESAS_RA4_GPT*)base; // NOLINT
     ctx->freq = clock_get_freq(clkid);
 
     unlock(ctx);

@@ -32,7 +32,7 @@ struct WDT_TINYAVR {
  */
 int wd_tinyavr_init(struct wd *ctx, int base)
 {
-    ctx->base = (struct WDT_TINYAVR*)base;
+    ctx->base = (struct WDT_TINYAVR*)base; // NOLINT
     ctx->ctrla = 0;
     return 0;
 }

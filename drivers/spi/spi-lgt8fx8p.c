@@ -47,7 +47,7 @@ struct SPI_LGT8FX8P {
 int spi_lgt8fx8p_init(struct spi *ctx, int base, clock_id_t clkid)
 {
     /* internals */
-    ctx->base = (struct SPI_LGT8FX8P*)base;
+    ctx->base = (struct SPI_LGT8FX8P*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->balance = 0;
 

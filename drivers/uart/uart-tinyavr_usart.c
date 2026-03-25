@@ -71,7 +71,7 @@ struct USART_TINYAVR_UART {
  */
 int uart_tinyavr_usart_init(struct uart *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct USART_TINYAVR_UART*)base;
+    ctx->base = (struct USART_TINYAVR_UART*)base; // NOLINT
     ctx->clkid = clkid;
 
     /* turn on (double-speed mode) */

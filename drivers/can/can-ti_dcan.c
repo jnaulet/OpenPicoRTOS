@@ -186,7 +186,7 @@ int can_ti_dcan_init(struct can * ctx, long base, clock_id_t clkid)
 {
     int res;
 
-    ctx->base = (struct CAN_REGS*)base;
+    ctx->base = (struct CAN_REGS*)base; // NOLINT
     ctx->clkid = clkid;
     /* mb allocation */
     ctx->rx_mailbox_index = 0;

@@ -40,7 +40,7 @@ struct WD_SAM3X {
  */
 int wd_sam3x_init(struct wd *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct WD_SAM3X*)base;
+    ctx->base = (struct WD_SAM3X*)base; // NOLINT
     ctx->clkid = clkid;
 
     /* disable & setup for external reset */

@@ -43,7 +43,7 @@ static struct TINYAVR_PORTMUX *PORTMUX =
  */
 int mux_tinyavr_init(struct mux *ctx, int base)
 {
-    ctx->base = (struct MUX_TINYAVR*)base;
+    ctx->base = (struct MUX_TINYAVR*)base; // NOLINT
     return 0;
 }
 

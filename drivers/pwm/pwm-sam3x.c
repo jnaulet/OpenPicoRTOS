@@ -124,7 +124,7 @@ struct PWM_SAM3X {
  */
 int pwm_sam3x_init(struct pwm_sam *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct PWM_SAM3X*)base;
+    ctx->base = (struct PWM_SAM3X*)base; // NOLINT
     ctx->freq = clock_get_freq(clkid);
 
     if (!picoRTOS_assert(ctx->freq > 0))

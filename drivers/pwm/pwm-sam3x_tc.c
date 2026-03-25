@@ -131,7 +131,7 @@ static clock_freq_t pwm_sam3x_tc_get_freq(clock_id_t clkid,
 
 int pwm_sam3x_tc_init(struct pwm *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct PWM_SAM3X_TC*)base;
+    ctx->base = (struct PWM_SAM3X_TC*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->tio = PWM_SAM3X_TC_TIOA;
     ctx->ncycles = 0;
@@ -211,7 +211,7 @@ void pwm_stop(struct pwm *ctx)
 
 int ipwm_sam3x_tc_init(struct ipwm *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct PWM_SAM3X_TC*)base;
+    ctx->base = (struct PWM_SAM3X_TC*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->state = IPWM_SAM3X_TC_STATE_IDLE;
     ctx->ldr = IPWM_SAM3X_TC_LDR_NONE;

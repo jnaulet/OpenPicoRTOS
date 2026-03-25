@@ -86,7 +86,7 @@ static void uart_udre_isr(void *priv)
 
 int uart_avr_init(struct uart *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct USART_AVR*)base;
+    ctx->base = (struct USART_AVR*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->mode = UART_AVR_MODE_NORMAL;
     ctx->rx_buf = NULL;

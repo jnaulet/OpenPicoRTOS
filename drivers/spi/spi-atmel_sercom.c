@@ -104,7 +104,7 @@ int spi_atmel_sercom_init(struct spi *ctx, int base, clock_id_t clkid)
 {
     int res;
 
-    ctx->base = (struct SPI_ATMEL_SERCOM*)base;
+    ctx->base = (struct SPI_ATMEL_SERCOM*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->balance = 0;
     ctx->frame_size = (size_t)8;

@@ -118,7 +118,7 @@ static int reset(struct twi *ctx)
  */
 int twi_ti_f28x_init(struct twi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct I2C_REGS*)base;
+    ctx->base = (struct I2C_REGS*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->mode = TWI_MODE_SLAVE;
     ctx->state = TWI_TI_F28X_STATE_IDLE;

@@ -118,7 +118,7 @@ struct TWI_ATMEL_SERCOM {
  */
 int twi_atmel_sercom_init(struct twi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct TWI_ATMEL_SERCOM*)base;
+    ctx->base = (struct TWI_ATMEL_SERCOM*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->state = TWI_ATMEL_SERCOM_STATE_IDLE;
     ctx->slave_addr = 0;

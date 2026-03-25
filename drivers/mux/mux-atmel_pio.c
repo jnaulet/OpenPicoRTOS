@@ -73,7 +73,7 @@ struct MUX_ATMEL_PIO {
  */
 int mux_atmel_pio_init(struct mux *ctx, int base)
 {
-    ctx->base = (struct MUX_ATMEL_PIO*)base;
+    ctx->base = (struct MUX_ATMEL_PIO*)base; // NOLINT
     return 0;
 }
 

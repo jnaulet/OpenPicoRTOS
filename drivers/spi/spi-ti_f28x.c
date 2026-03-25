@@ -90,7 +90,7 @@ static void init_fifos(struct spi *ctx)
  */
 int spi_ti_f28x_init(struct spi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct SPI_REGS*)base;
+    ctx->base = (struct SPI_REGS*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->balance = 0;
     ctx->lshift = 0;

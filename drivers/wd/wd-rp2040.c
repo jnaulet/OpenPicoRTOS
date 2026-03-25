@@ -31,7 +31,7 @@ struct WD_RP2040 {
  */
 int wd_rp2040_init(struct wd *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct WD_RP2040*)base;
+    ctx->base = (struct WD_RP2040*)base; // NOLINT
     ctx->load = (uint32_t)(WD_RP2040_LOAD_COUNT * 2 - 1);
 
     /* prepare cycles for 1us */

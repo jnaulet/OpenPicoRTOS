@@ -44,7 +44,7 @@ struct MUX_PIC32MX {
  */
 int mux_pic32mx_init(struct mux_pic32mx *ctx, int base)
 {
-    ctx->base = (struct MUX_PIC32MX*)base;
+    ctx->base = (struct MUX_PIC32MX*)base; // NOLINT
     return 0;
 }
 

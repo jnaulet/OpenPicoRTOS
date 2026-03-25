@@ -60,7 +60,7 @@ struct UART_PIC32MX {
  */
 int uart_pic32mx_init(struct uart *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct UART_PIC32MX*)base;
+    ctx->base = (struct UART_PIC32MX*)base; // NOLINT
     ctx->clkid = clkid;
 
     /* turn on */

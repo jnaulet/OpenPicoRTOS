@@ -66,7 +66,7 @@ struct SPI_ARM_PL022 {
  */
 int spi_arm_pl022_init(struct spi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct SPI_ARM_PL022*)base;
+    ctx->base = (struct SPI_ARM_PL022*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->balance = 0;
     ctx->frame_size = (size_t)8;

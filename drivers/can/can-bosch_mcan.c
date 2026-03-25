@@ -512,7 +512,7 @@ int can_bosch_mcan_init(struct can *ctx, int base, clock_id_t clkid,
 
     int res;
 
-    ctx->base = (struct CAN_BOSCH_MCAN*)base;
+    ctx->base = (struct CAN_BOSCH_MCAN*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->n_filter_11bit = 0;
     ctx->n_filter_29bit = 0;
@@ -863,7 +863,7 @@ int can_read(struct can *ctx, can_id_t *id, void *buf, size_t n)
 
     /* cache */
     arch_invalidate_dcache(&rx_buf[index], sizeof(struct rx_buf));
-    
+
     if ((rx_buf[index].R0 & R0_XTD) == 0)   /* standard */
         *id = (can_id_t)((rx_buf[index].R0 & R0_ID(R0_ID_M)) >> 18);
     else                                    /* extended */

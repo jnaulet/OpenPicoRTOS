@@ -43,7 +43,7 @@ struct MUX_STM32H7XX {
  */
 int mux_stm32h7xx_init(struct mux *ctx, int base)
 {
-    ctx->base = (struct MUX_STM32H7XX*)base;
+    ctx->base = (struct MUX_STM32H7XX*)base; // NOLINT
     return 0;
 }
 

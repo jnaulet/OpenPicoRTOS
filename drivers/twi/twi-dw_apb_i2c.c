@@ -131,7 +131,7 @@ struct TWI_DW_APB_I2C {
  */
 int twi_dw_apb_i2c_init(struct twi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct TWI_DW_APB_I2C*)base;
+    ctx->base = (struct TWI_DW_APB_I2C*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->mode = TWI_MODE_IGNORE;
     ctx->state = TWI_DW_APB_I2C_STATE_IDLE;

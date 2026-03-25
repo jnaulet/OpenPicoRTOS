@@ -125,7 +125,7 @@ int dma_ti_f28x_init(struct dma *ctx, int base, size_t channel, dma_ti_f28x_chsr
     size_t lshift = (channel & 0x3) * 8;
 
     ctx->channel = channel;
-    ctx->base = (struct DMA_REGS*)base;
+    ctx->base = (struct DMA_REGS*)base; // NOLINT
     ctx->ch = &ctx->base->CH[ctx->channel];
 
     ASM(" eallow");

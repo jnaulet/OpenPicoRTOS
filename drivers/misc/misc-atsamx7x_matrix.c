@@ -68,7 +68,7 @@ struct ATSAMX7X_MATRIX {
 
 int atsamx7x_matrix_init(struct atsamx7x_matrix *ctx, int base)
 {
-    ctx->base = (struct ATSAMX7X_MATRIX*)base;
+    ctx->base = (struct ATSAMX7X_MATRIX*)base; // NOLINT
     return 0;
 }
 

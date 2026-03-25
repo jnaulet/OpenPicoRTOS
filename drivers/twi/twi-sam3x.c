@@ -75,7 +75,7 @@ struct TWI_SAM3X {
  */
 int twi_sam3x_init(struct twi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct TWI_SAM3X*)base;
+    ctx->base = (struct TWI_SAM3X*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->state = TWI_SAM3X_STATE_IDLE;
     ctx->mode = TWI_MODE_COUNT;

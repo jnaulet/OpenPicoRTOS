@@ -126,7 +126,7 @@ int adc_same5x_init(struct adc *ctx, int base, adc_same5x_channel_t channel)
 {
     picoRTOS_assert(channel < ADC_SAME5X_CHANNEL_COUNT, return -EINVAL);
 
-    ctx->base = (struct ADC_SAME5X*)base;
+    ctx->base = (struct ADC_SAME5X*)base; // NOLINT
     ctx->channel = channel;
     ctx->state = ADC_SAME5X_STATE_IDLE;
     ctx->multiplier = 1;

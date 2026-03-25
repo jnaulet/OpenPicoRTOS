@@ -46,7 +46,7 @@ struct WD_STM32H7XX_IWDG {
  */
 int wd_stm32h7xx_iwdg_init(/*@out@*/ struct wd *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct WD_STM32H7XX_IWDG*)base;
+    ctx->base = (struct WD_STM32H7XX_IWDG*)base; // NOLINT
     ctx->clkid = clkid;
 
     return 0;

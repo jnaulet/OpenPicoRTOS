@@ -110,7 +110,7 @@ struct DMA_STM32H7XX {
  */
 int dma_stm32h7xx_init(struct dma *ctx, int base, size_t channel)
 {
-    ctx->base = (struct DMA_STM32H7XX*)base;
+    ctx->base = (struct DMA_STM32H7XX*)base; // NOLINT
     ctx->ch = &ctx->base->CH[channel];
     ctx->channel = channel;
 

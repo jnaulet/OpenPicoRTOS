@@ -75,7 +75,7 @@ struct FLASH_PIC32MX {
  */
 int flash_pic32mx_init(struct flash *ctx, int base, size_t block_count)
 {
-    ctx->base = (struct FLASH_PIC32MX*)base;
+    ctx->base = (struct FLASH_PIC32MX*)base; // NOLINT
     ctx->state = FLASH_PIC32MX_STATE_IDLE;
     ctx->block_count = block_count;
 

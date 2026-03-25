@@ -103,7 +103,7 @@ struct UART_RENESAS_RA4_SCI {
  */
 int uart_renesas_ra4_sci_init(struct uart *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct UART_RENESAS_RA4_SCI*)base;
+    ctx->base = (struct UART_RENESAS_RA4_SCI*)base; // NOLINT
     ctx->clkid = clkid;
 
     /* setup for uart */

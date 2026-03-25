@@ -31,7 +31,7 @@ int gpio_stm32h7xx_init(struct gpio *ctx, int base, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)GPIO_STM32H7XX_PIN_COUNT, return -EINVAL);
 
-    ctx->base = (struct GPIO_STM32H7XX*)base;
+    ctx->base = (struct GPIO_STM32H7XX*)base; // NOLINT
     ctx->mask = (uint32_t)(1 << pin);
     ctx->invert = false;
 

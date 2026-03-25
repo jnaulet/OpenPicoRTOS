@@ -58,7 +58,7 @@ static int set_mux(struct mux *ctx, size_t pin, mux_ti_f28x_t gmux, mux_ti_f28x_
  */
 int mux_ti_f28x_init(struct mux *ctx, int base)
 {
-    ctx->base = (struct GPIO_CTRL_REGS*)base;
+    ctx->base = (struct GPIO_CTRL_REGS*)base; // NOLINT
     return 0;
 }
 

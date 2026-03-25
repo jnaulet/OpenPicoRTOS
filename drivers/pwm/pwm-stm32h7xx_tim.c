@@ -224,7 +224,7 @@ int pwm_stm32h7xx_tim_init(struct pwm_stm32h7xx_tim *ctx, int base, clock_id_t c
     picoRTOS_assert(channel_count < (size_t)PWM_STM32H7XX_TIM_CHANNEL_MAX,
                     return -EINVAL);
 
-    ctx->base = (struct PWM_STM32H7XX_TIM*)base;
+    ctx->base = (struct PWM_STM32H7XX_TIM*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->channel_count = channel_count;
     ctx->freq = clock_get_freq(clkid);

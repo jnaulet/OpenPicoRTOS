@@ -65,7 +65,7 @@ struct TWI_PIC32MX {
  */
 int twi_pic32mx_init(struct twi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct TWI_PIC32MX*)base;
+    ctx->base = (struct TWI_PIC32MX*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->mode = TWI_MODE_SLAVE;
     ctx->state = TWI_PIC32MX_STATE_IDLE;

@@ -67,7 +67,7 @@ struct ADC_NXP_SAR {
  */
 int adc_nxp_sar_init(struct adc_nxp_sar *ctx, int base)
 {
-    ctx->base = (struct ADC_NXP_SAR*)base;
+    ctx->base = (struct ADC_NXP_SAR*)base; // NOLINT
 
     /* turn on */
     ctx->base->MCR &= ~MCR_PWDN;

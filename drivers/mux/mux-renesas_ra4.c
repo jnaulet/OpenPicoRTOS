@@ -59,7 +59,7 @@ int mux_renesas_ra4_init(struct mux *ctx, int base, size_t port)
 {
     picoRTOS_assert(port < (size_t)MUX_RENESAS_RA4_PORT_COUNT, return -EINVAL);
 
-    ctx->base = (struct MUX_RENESAS_RA4*)base;
+    ctx->base = (struct MUX_RENESAS_RA4*)base; // NOLINT
     ctx->port = port;
 
     return 0;

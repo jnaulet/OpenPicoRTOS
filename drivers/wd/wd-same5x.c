@@ -58,7 +58,7 @@ static int sync_busywait(const struct wd *ctx, uint32_t mask)
  */
 int wd_same5x_init(struct wd *ctx, int base)
 {
-    ctx->base = (struct WD_SAME5X*)base;
+    ctx->base = (struct WD_SAME5X*)base; // NOLINT
 
     /* disable wd & write protection */
     ctx->base->CTRLA = (uint8_t)0;

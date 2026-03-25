@@ -25,7 +25,7 @@ struct WDT_AVR {
  */
 int wd_avr_init(struct wd *ctx, int base)
 {
-    ctx->base = (struct WDT_AVR*)base;
+    ctx->base = (struct WDT_AVR*)base; // NOLINT
     return 0;
 }
 

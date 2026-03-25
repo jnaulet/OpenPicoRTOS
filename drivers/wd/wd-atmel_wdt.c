@@ -40,7 +40,7 @@ struct WD_ATMEL_WDT {
  */
 int wd_atmel_wdt_init(struct wd *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct WD_ATMEL_WDT*)base;
+    ctx->base = (struct WD_ATMEL_WDT*)base; // NOLINT
     ctx->clkid = clkid;
 
     return 0;

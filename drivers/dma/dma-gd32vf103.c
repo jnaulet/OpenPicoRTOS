@@ -57,7 +57,7 @@ int dma_gd32vf103_init(struct dma *ctx, int base, size_t channel)
     picoRTOS_assert(channel < (size_t)DMA_GD32VF103_MAX_CH_COUNT,
                     return -EINVAL);
 
-    ctx->base = (struct DMA_GD32VF103*)base;
+    ctx->base = (struct DMA_GD32VF103*)base; // NOLINT
     ctx->channel = channel;
     ctx->ch = &ctx->base->CH[channel];
 

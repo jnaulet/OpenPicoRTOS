@@ -23,7 +23,7 @@ int gpio_ti_f28x_init(struct gpio *ctx, int base, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)GPIO_TI_F28X_PIN_COUNT, return -EINVAL);
 
-    ctx->base = (struct GPIO_DATA_REGS*)base;
+    ctx->base = (struct GPIO_DATA_REGS*)base; // NOLINT
     /* compute pin mask */
     ctx->mask = (uint32_t)(1ul << pin);
     ctx->invert = false;

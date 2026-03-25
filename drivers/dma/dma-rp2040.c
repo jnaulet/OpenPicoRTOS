@@ -73,7 +73,7 @@ int dma_r2040_init(struct dma *ctx, int base, size_t channel,
     picoRTOS_assert(channel < (size_t)DMA_RP2040_CHANNEL_COUNT, return -EINVAL);
     picoRTOS_assert(treq_sel < DMA_RP2040_TREQ_SEL_COUNT, return -EINVAL);
 
-    ctx->base = (struct DMA_RP2040*)base;
+    ctx->base = (struct DMA_RP2040*)base; // NOLINT
     ctx->ch = &ctx->base->CH[channel];
     ctx->treq_sel = treq_sel;
     ctx->CTRL_TRIG = 0;

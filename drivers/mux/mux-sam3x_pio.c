@@ -72,7 +72,7 @@ struct MUX_SAM3X_PIO {
  */
 int mux_sam3x_pio_init(struct mux_sam3x_pio *ctx, int base)
 {
-    ctx->base = (struct MUX_SAM3X_PIO*)base;
+    ctx->base = (struct MUX_SAM3X_PIO*)base; // NOLINT
     return 0;
 }
 

@@ -45,7 +45,7 @@ struct SPI_TINYAVR {
  */
 int spi_tinyavr_init(struct spi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct SPI_TINYAVR*)base;
+    ctx->base = (struct SPI_TINYAVR*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->balance = 0;
 

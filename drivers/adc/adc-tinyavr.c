@@ -53,7 +53,7 @@ struct ADC_TINYAVR {
  */
 int adc_tinyavr_init(struct adc_tinyavr *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct ADC_TINYAVR*)base;
+    ctx->base = (struct ADC_TINYAVR*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->state = ADC_TINYAVR_STATE_IDLE;
 

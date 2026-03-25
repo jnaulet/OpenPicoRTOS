@@ -24,7 +24,7 @@ int gpio_avr_init(struct gpio *ctx, int base, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)8, return -EINVAL);
 
-    ctx->base = (struct GPIO_AVR*)base;
+    ctx->base = (struct GPIO_AVR*)base; // NOLINT
     ctx->mask = (uint8_t)(1 << pin);
     ctx->invert = false;
 

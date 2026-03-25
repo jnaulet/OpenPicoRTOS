@@ -37,7 +37,7 @@ int gpio_renesas_ra4_init(struct gpio *ctx, int base, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)GPIO_RENESAS_RA4_PIN_COUNT, return -EINVAL);
 
-    ctx->base = (struct GPIO_RENESAS_RA4*)base;
+    ctx->base = (struct GPIO_RENESAS_RA4*)base; // NOLINT
     ctx->mask = (uint32_t)(1 << pin);
     ctx->invert = false;
 

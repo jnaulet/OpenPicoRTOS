@@ -123,7 +123,7 @@ struct MUX_NXP_SIU {
  */
 int mux_nxp_siu_init(struct mux *ctx, int base)
 {
-    ctx->base = (struct MUX_NXP_SIU*)base;
+    ctx->base = (struct MUX_NXP_SIU*)base; // NOLINT
     return 0;
 }
 

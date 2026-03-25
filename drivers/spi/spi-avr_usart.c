@@ -56,7 +56,7 @@ static int set_baudrate(struct spi *ctx, unsigned long baud)
  */
 int spi_avr_usart_init(struct spi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct MSPIM_AVR_USART*)base;
+    ctx->base = (struct MSPIM_AVR_USART*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->state = SPI_AVR_USART_STATE_START;
 

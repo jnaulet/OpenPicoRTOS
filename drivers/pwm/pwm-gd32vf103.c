@@ -144,7 +144,7 @@ struct PWM_GD32VF103_TIMER {
  */
 int pwm_gd32vf103_init(struct pwm_gd32vf103 *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct PWM_GD32VF103_TIMER*)base;
+    ctx->base = (struct PWM_GD32VF103_TIMER*)base; // NOLINT
     ctx->clkid = clkid;
 
     /* turn off */

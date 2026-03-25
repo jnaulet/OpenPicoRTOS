@@ -182,7 +182,7 @@ int adc_ti_type4_init(struct adc_ti_type4 *ctx,
 {
     int res;
 
-    ctx->base = (struct ADC_REGS*)base;
+    ctx->base = (struct ADC_REGS*)base; // NOLINT
     ctx->result = (struct ADC_RESULT_REGS*)result_base;
     ctx->acqps_min = (size_t)ADC_TI_TYPE4_ACQPS_MIN_16BIT;
     ctx->sample_count = 0;

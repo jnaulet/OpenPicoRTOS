@@ -52,7 +52,7 @@ struct USART_AVR {
  */
 int uart_avr_init(struct uart *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct USART_AVR*)base;
+    ctx->base = (struct USART_AVR*)base; // NOLINT
     ctx->clkid = clkid;
 
     /* turn on */

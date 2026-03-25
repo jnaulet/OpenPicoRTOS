@@ -81,7 +81,7 @@ struct DMA_NXP_EDMA {
  */
 int dma_nxp_edma_init(struct dma_nxp_edma *ctx, int base)
 {
-    ctx->base = (struct DMA_NXP_EDMA*)base;
+    ctx->base = (struct DMA_NXP_EDMA*)base; // NOLINT
 
     /* round-robin */
     ctx->base->CR = (uint32_t)CR_ERCA;

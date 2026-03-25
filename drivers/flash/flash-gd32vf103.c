@@ -65,7 +65,7 @@ struct FLASH_GD32VF103 {
  */
 int flash_gd32vf103_init(struct flash *ctx, int base, size_t block_count)
 {
-    ctx->base = (struct FLASH_GD32VF103*)base;
+    ctx->base = (struct FLASH_GD32VF103*)base; // NOLINT
     ctx->block_count = block_count;
     ctx->state = FLASH_GD32VF103_STATE_IDLE;
 

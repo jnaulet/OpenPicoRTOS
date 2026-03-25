@@ -44,7 +44,7 @@ struct PWM_AVR {
  */
 int pwm_avr_init(struct pwm_avr *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct PWM_AVR*)base;
+    ctx->base = (struct PWM_AVR*)base; // NOLINT
     ctx->freq = clock_get_freq(clkid);
     ctx->prescale = (uint32_t)1;
     ctx->waveform = (pwm_avr_waveform_t)0;

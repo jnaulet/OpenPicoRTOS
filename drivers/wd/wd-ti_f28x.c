@@ -43,7 +43,7 @@ struct WD_REGS {
  */
 int wd_ti_f28x_init(struct wd *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct WD_REGS*)base;
+    ctx->base = (struct WD_REGS*)base; // NOLINT
     ctx->clkid = clkid;
     return 0;
 }

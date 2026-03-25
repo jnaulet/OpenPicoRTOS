@@ -96,7 +96,7 @@ struct UART_ARM_PL011 {
  */
 int uart_arm_pl011_init(struct uart *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct UART_ARM_PL011*)base;
+    ctx->base = (struct UART_ARM_PL011*)base; // NOLINT
     ctx->clkid = clkid;
 
     /* turn on fifos */

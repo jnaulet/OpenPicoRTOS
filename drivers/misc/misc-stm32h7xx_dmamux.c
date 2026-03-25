@@ -53,7 +53,7 @@ int dmamux_stm32h7xx_init(struct dmamux *ctx, int base, size_t channel)
 {
     picoRTOS_assert(channel < (size_t)DMAMUX_STM32H7XX_CHANNEL_MAX, return -EINVAL);
 
-    ctx->base = (struct DMAMUX_STM32H7XX*)base;
+    ctx->base = (struct DMAMUX_STM32H7XX*)base; // NOLINT
     ctx->channel = channel;
 
     return 0;

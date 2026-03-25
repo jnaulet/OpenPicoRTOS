@@ -93,7 +93,7 @@ struct SPI_RENESAS_RA4 {
  */
 int spi_renesas_ra4_init(struct spi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct SPI_RENESAS_RA4*)base;
+    ctx->base = (struct SPI_RENESAS_RA4*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->ssl = 0;
 

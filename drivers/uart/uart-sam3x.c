@@ -55,7 +55,7 @@ struct UART_SAM3X {
  */
 int uart_sam3x_init(struct uart *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct UART_SAM3X*)base;
+    ctx->base = (struct UART_SAM3X*)base; // NOLINT
     ctx->clkid = clkid;
 
     /* reset */

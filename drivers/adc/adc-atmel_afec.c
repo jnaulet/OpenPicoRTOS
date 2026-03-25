@@ -129,7 +129,7 @@ int adc_atmel_afec_init(struct adc_atmel_afec *ctx, int base, clock_id_t clkid)
 #define div_ceil(a, b) (((a) + ((b) - 1)) / (b))
 #define div_floor(a, b) ((a) / (b))
 
-    ctx->base = (struct ADC_ATMEL_AFEC*)base;
+    ctx->base = (struct ADC_ATMEL_AFEC*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->seq = 0;
 

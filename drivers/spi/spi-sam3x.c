@@ -74,7 +74,7 @@ struct SPI_SAM3X {
  */
 int spi_sam3x_init(struct spi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct SPI_SAM3X*)base;
+    ctx->base = (struct SPI_SAM3X*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->frame_size = (size_t)8;
     ctx->frame_width = (size_t)1;

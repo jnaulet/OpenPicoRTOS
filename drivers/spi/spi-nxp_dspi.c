@@ -119,7 +119,7 @@ struct SPI_NXP_DSPI {
  */
 int spi_nxp_dspi_init(struct spi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct SPI_NXP_DSPI*)base;
+    ctx->base = (struct SPI_NXP_DSPI*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->cs = 0;
     ctx->frame_size = (size_t)16;

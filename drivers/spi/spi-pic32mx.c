@@ -76,7 +76,7 @@ struct SPI_PIC32MX {
  */
 int spi_pic32mx_init(struct spi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct SPI_PIC32MX*)base;
+    ctx->base = (struct SPI_PIC32MX*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->frame_size = (size_t)8;
     ctx->frame_width = (size_t)1;

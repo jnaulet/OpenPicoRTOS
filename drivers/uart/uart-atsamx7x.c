@@ -73,7 +73,7 @@ struct UART_ATSAMX7X {
  */
 int uart_atsamx7x_init(struct uart *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct UART_ATSAMX7X*)base;
+    ctx->base = (struct UART_ATSAMX7X*)base; // NOLINT
     ctx->clkid = clkid;
 
     /* reset */

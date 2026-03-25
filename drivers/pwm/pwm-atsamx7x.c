@@ -103,7 +103,7 @@ struct PWM_ATSAMX7X {
  */
 int pwm_atsamx7x_init(struct pwm_sam *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct PWM_ATSAMX7X*)base;
+    ctx->base = (struct PWM_ATSAMX7X*)base; // NOLINT
     ctx->freq = clock_get_freq(clkid);
 
     if (!picoRTOS_assert(ctx->freq > 0))

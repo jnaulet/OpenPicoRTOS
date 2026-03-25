@@ -396,7 +396,7 @@ int can_nxp_flexcan_init(struct can *ctx, int base, clock_id_t clkid,
 
     int res;
 
-    ctx->base = (struct CAN_NXP_FLEXCAN*)base;
+    ctx->base = (struct CAN_NXP_FLEXCAN*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->mailbox_count = mailbox_count;
     /* mb allocation */

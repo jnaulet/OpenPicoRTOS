@@ -44,7 +44,7 @@ struct MUX_SAME5X {
  */
 int mux_same5x_init(struct mux_same5x *ctx, int base)
 {
-    ctx->base = (struct MUX_SAME5X*)base;
+    ctx->base = (struct MUX_SAME5X*)base; // NOLINT
     return 0;
 }
 

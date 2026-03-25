@@ -86,7 +86,7 @@ struct UART_GD32VF103_USART {
  */
 int uart_gd32vf103_init(struct uart *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct UART_GD32VF103_USART*)base;
+    ctx->base = (struct UART_GD32VF103_USART*)base; // NOLINT
     ctx->clkid = clkid;
 
     /* turn on */

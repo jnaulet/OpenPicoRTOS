@@ -80,7 +80,7 @@ typedef enum {
  */
 int twi_avr_init(struct twi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct TWI_AVR*)base;
+    ctx->base = (struct TWI_AVR*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->mode = TWI_MODE_IGNORE;
     ctx->state = TWI_AVR_STATE_IDLE;

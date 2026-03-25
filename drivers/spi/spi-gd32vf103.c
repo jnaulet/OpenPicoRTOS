@@ -65,7 +65,7 @@ struct SPI_GD32VF103 {
  */
 int spi_gd32vf103_init(struct spi *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct SPI_GD32VF103*)base;
+    ctx->base = (struct SPI_GD32VF103*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->frame_size = (size_t)8;
     ctx->frame_width = (size_t)1;

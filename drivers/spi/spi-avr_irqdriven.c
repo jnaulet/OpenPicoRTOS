@@ -59,7 +59,7 @@ static void spi_isr(void *priv)
 int spi_avr_init(struct spi *ctx, int base, clock_id_t clkid)
 {
     /* internals */
-    ctx->base = (struct SPI_AVR*)base;
+    ctx->base = (struct SPI_AVR*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->state = SPI_AVR_STATE_START;
     ctx->count = 0;

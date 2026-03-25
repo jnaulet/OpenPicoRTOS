@@ -128,7 +128,7 @@ static int sync_busywait(const struct uart *ctx, uint32_t mask)
  */
 int uart_atmel_sercom_init(struct uart *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct UART_ATMEL_SERCOM*)base;
+    ctx->base = (struct UART_ATMEL_SERCOM*)base; // NOLINT
     ctx->clkid = clkid;
 
     /* uart basic setup */

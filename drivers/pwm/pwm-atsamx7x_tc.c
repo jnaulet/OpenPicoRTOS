@@ -134,7 +134,7 @@ struct PWM_ATSAMX7X_TC {
  */
 int pwm_atsamx7x_tc_init(struct pwm_atsamx7x_tc *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct PWM_ATSAMX7X_TC*)base;
+    ctx->base = (struct PWM_ATSAMX7X_TC*)base; // NOLINT
     ctx->clkid = clkid;
 
     return 0;

@@ -168,7 +168,7 @@ struct UART_STM32H7XX {
  */
 int uart_stm32h7xx_init(struct uart *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct UART_STM32H7XX*)base;
+    ctx->base = (struct UART_STM32H7XX*)base; // NOLINT
     ctx->clkid = clkid;
 
     /* disable uart */

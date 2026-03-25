@@ -16,7 +16,7 @@ struct RP2040_RESET {
 
 int rp2040_reset_init(struct rp2040_reset *ctx, int base)
 {
-    ctx->base = (struct RP2040_RESET*)base;
+    ctx->base = (struct RP2040_RESET*)base; // NOLINT
     /* reset all non-essential peripherals to put the system in a known state */
     ctx->base->RESET = (uint32_t)RESET_RESET(~((1 << RP2040_RESET_IO_QSPI) |
                                                (1 << RP2040_RESET_PADS_QSPI) |

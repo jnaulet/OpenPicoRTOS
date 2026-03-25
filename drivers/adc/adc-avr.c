@@ -41,7 +41,7 @@ struct ADC_AVR {
  */
 int adc_avr_init(struct adc_avr *ctx, int base)
 {
-    ctx->base = (struct ADC_AVR*)base;
+    ctx->base = (struct ADC_AVR*)base; // NOLINT
     ctx->state = ADC_AVR_STATE_IDLE;
 
     /* enable */

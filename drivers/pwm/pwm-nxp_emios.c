@@ -51,7 +51,7 @@ struct PWM_NXP_EMIOS {
  */
 int pwm_nxp_emios_init(struct pwm_nxp_emios *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct PWM_NXP_EMIOS*)base;
+    ctx->base = (struct PWM_NXP_EMIOS*)base; // NOLINT
     ctx->gpre = (size_t)1;
     ctx->freq = clock_get_freq(clkid);
 

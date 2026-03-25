@@ -73,7 +73,7 @@ int gpio_sam3x_pio_init(struct gpio *ctx, int base, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)GPIO_SAM3X_PIO_PIN_COUNT, return -EINVAL);
 
-    ctx->base = (struct GPIO_SAM3X_PIO*)base;
+    ctx->base = (struct GPIO_SAM3X_PIO*)base; // NOLINT
     ctx->mask = (uint32_t)(1ul << pin);
     ctx->invert = false;
 

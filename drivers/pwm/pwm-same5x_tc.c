@@ -119,7 +119,7 @@ static int sync_busywait(const struct pwm_same5x_tc *ctx, uint32_t mask)
  */
 int pwm_same5x_tc_init(struct pwm_same5x_tc *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct PWM_SAME5X_TC*)base;
+    ctx->base = (struct PWM_SAME5X_TC*)base; // NOLINT
     ctx->freq = clock_get_freq(clkid);
     ctx->prescaler = 1ul;
     ctx->mode = PWM_SAME5X_TC_MODE_16;

@@ -55,7 +55,7 @@ struct ADC_RP2040 {
  */
 int adc_rp2040_init(struct adc_rp2040 *ctx, int base)
 {
-    ctx->base = (struct ADC_RP2040*)base;
+    ctx->base = (struct ADC_RP2040*)base; // NOLINT
 
     /* No support for DMA and FIFOs yet */
 

@@ -61,7 +61,7 @@ struct MUX_NXP_SIUL2 {
  */
 int mux_nxp_siul2_init(struct mux *ctx, int base)
 {
-    ctx->base = (struct MUX_NXP_SIUL2*)base;
+    ctx->base = (struct MUX_NXP_SIUL2*)base; // NOLINT
     return 0;
 }
 

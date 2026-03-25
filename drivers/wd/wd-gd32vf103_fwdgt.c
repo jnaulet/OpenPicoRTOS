@@ -33,7 +33,7 @@ struct WD_GD32VF103_FWDGT {
  */
 int wd_gd32vf103_fwdgt_init(struct wd *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct WD_GD32VF103_FWDGT*)base;
+    ctx->base = (struct WD_GD32VF103_FWDGT*)base; // NOLINT
     ctx->clkid = clkid;
 
     return 0;

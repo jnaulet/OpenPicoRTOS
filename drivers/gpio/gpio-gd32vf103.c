@@ -28,7 +28,7 @@ int gpio_gd32vf103_init(struct gpio *ctx, int base, size_t pin)
     picoRTOS_assert(pin < (size_t)GPIO_GD32VF103_PIN_COUNT,
                     return -EINVAL);
 
-    ctx->base = (struct GPIO_GD32VF103*)base;
+    ctx->base = (struct GPIO_GD32VF103*)base; // NOLINT
     ctx->mask = (uint32_t)(1 << pin);
     ctx->invert = false;
 

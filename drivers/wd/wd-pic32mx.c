@@ -27,7 +27,7 @@ struct WD_PIC32MX {
  */
 int wd_pic32mx_init(struct wd *ctx, int base)
 {
-    ctx->base = (struct WD_PIC32MX*)base;
+    ctx->base = (struct WD_PIC32MX*)base; // NOLINT
     return 0;
 }
 

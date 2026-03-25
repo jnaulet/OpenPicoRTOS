@@ -62,7 +62,7 @@ struct PWM_TINYAVR_TCA {
  */
 int pwm_tinyavr_tca_init(struct pwm_tinyavr_tca *ctx, int base, clock_id_t clkid)
 {
-    ctx->base = (struct PWM_TINYAVR_TCA*)base;
+    ctx->base = (struct PWM_TINYAVR_TCA*)base; // NOLINT
     ctx->freq = clock_get_freq(clkid);
     ctx->div = 1ul;
 

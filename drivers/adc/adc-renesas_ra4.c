@@ -149,7 +149,7 @@ int adc_renesas_ra4_init(struct adc_renesas_ra4 *ctx, int base)
 {
     int n = ADC_RENESAS_RA4_CHANNEL_COUNT;
 
-    ctx->base = (struct ADC_RENESAS_RA4*)base;
+    ctx->base = (struct ADC_RENESAS_RA4*)base; // NOLINT
     ctx->adcs = ADC_RENESAS_RA4_ADCS_SINGLE;
 
     while (n-- != 0)

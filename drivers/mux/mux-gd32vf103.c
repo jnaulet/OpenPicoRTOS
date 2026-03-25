@@ -39,7 +39,7 @@ static struct AFIO *AFIO = (struct AFIO*)ADDR_AFIO;
  */
 int mux_gd32vf103_init(struct mux *ctx, int base)
 {
-    ctx->base = (struct MUX_GD32VF103_GPIO*)base;
+    ctx->base = (struct MUX_GD32VF103_GPIO*)base; // NOLINT
     return 0;
 }
 

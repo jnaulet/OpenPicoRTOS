@@ -66,7 +66,7 @@ struct ADC_SAM3X {
  */
 int adc_sam3x_init(struct adc_sam3x *ctx, int base)
 {
-    ctx->base = (struct ADC_SAM3X*)base;
+    ctx->base = (struct ADC_SAM3X*)base; // NOLINT
 
     /* enable & freerun */
     ctx->base->ADC_CR |= ADC_CR_START;

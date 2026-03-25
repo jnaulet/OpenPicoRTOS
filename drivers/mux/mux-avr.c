@@ -25,7 +25,7 @@ struct MUX_AVR {
  */
 int mux_avr_init(struct mux *ctx, int base)
 {
-    ctx->base = (struct MUX_AVR*)base;
+    ctx->base = (struct MUX_AVR*)base; // NOLINT
     return 0;
 }
 
