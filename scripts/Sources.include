@@ -27,6 +27,7 @@ include drivers/dma/Makefile
 # include drivers/dmasg/Makefile
 include drivers/eeprom/Makefile
 include drivers/flash/Makefile
+include drivers/flash-ext/Makefile
 include drivers/gpio/Makefile
 include drivers/misc/Makefile
 include drivers/mux/Makefile

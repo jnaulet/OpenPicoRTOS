@@ -1,0 +1,9 @@
+menu "External flash drivers"
+       
+config FLASH_EXT_SQI
+       bool "SQI-compatible ext flash support"
+       
+config FLASH_EXT_S25FL1
+       bool "SPANSION S25FL1 ext flash support"
+
+endmenu

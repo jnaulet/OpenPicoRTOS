@@ -7,6 +7,7 @@ source drivers/dma/Kconfig
 # source drivers/dmasg/Kconfig
 source drivers/eeprom/Kconfig
 source drivers/flash/Kconfig
+source drivers/flash-ext/Kconfig
 source drivers/gpio/Kconfig
 source drivers/misc/Kconfig
 source drivers/mux/Kconfig
