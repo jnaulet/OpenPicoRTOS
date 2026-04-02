@@ -4,6 +4,7 @@
 #include "picoRTOS_device.h"
 
 #include <stdint.h>
+#include <string.h>
 
 #define FCMD_GETD  0x00 /* get flash descriptor */
 #define FCMD_WP    0x01 /* write page */
@@ -77,6 +78,9 @@ struct FLASH_ATMEL_EEFC {
 int flash_atmel_eefc_init(struct flash *ctx, int base)
 {
     ctx->base = (struct FLASH_ATMEL_EEFC*)base; // NOLINT
+    memset(&ctx->attr, 0, sizeof(ctx->attr));
+    ctx->pending = false;
+
     return 0;
 }
 
@@ -101,14 +105,153 @@ int flash_atmel_eefc_set_fws(struct flash *ctx, size_t fws)
     return 0;
 }
 
-/* FIXME: implement */
-/*@external@*/ extern int flash_get_nblocks(struct flash *ctx);
-/*@external@*/ extern int flash_get_erase_size(struct flash *ctx, size_t block);
-/*@external@*/ extern int flash_get_erase_size(struct flash *ctx, size_t block);
-/*@external@*/ extern int flash_get_write_size(struct flash *ctx, size_t block);
-/*@external@*/ extern int flash_get_block_addr(struct flash *ctx, size_t block);
-/*@external@*/ extern int flash_erase(struct flash *ctx, size_t block);
-/*@external@*/ extern int flash_blankcheck(struct flash *ctx, size_t block);
-/*@external@*/ extern int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n);
-/*@external@*/ extern int flash_lock(struct flash *ctx, size_t block);
-/*@external@*/ extern int flash_unlock(struct flash *ctx, size_t block);
+/* a safe erase unit len is 16 * page_size */
+#define SAFE_UNIT_PAGE_COUNT 16
+
+int flash_probe(struct flash *ctx)
+{
+    /* rough state machine */
+    if (!ctx->pending) {
+        ctx->base->EEFC_FCR = (uint32_t)(EEFC_FCR_FKEY(0x5a) |
+                                         EEFC_FCR_FCMD(FCMD_GETD));
+        ctx->pending = true;
+
+    }else{
+        if ((ctx->base->EEFC_FSR & EEFC_FSR_FRDY) != 0) {
+            /* cppcheck-suppress [duplicateAssignExpression] */
+            uint32_t fl_id = ctx->base->EEFC_FRR;
+            /* cppcheck-suppress [duplicateAssignExpression] */
+            uint32_t fl_size = ctx->base->EEFC_FRR;
+            uint32_t fl_page_size = ctx->base->EEFC_FRR;
+            /* TODO: variable-length parameters */
+
+            /*@i@*/ (void)fl_id;
+
+            /* a safe erase unit len is 16 * page_size */
+            ctx->attr.erase_unit_len = (size_t)fl_page_size * (size_t)SAFE_UNIT_PAGE_COUNT;
+            ctx->attr.erase_unit_count = (size_t)fl_size / ctx->attr.erase_unit_len;
+            ctx->attr.write_unit_len = (size_t)fl_page_size;
+            ctx->attr.lock_unit_len = (size_t)fl_page_size;
+            ctx->attr.total_size = fl_size;
+
+            /* back to normal */
+            ctx->pending = false;
+            return 0;
+        }
+    }
+
+    return -EAGAIN;
+}
+
+/* cppcheck-suppress [constParameterPointer] */
+int flash_get_attributes(struct flash *ctx, struct flash_attributes *attr)
+{
+    memcpy(attr, &ctx->attr, sizeof(*attr));
+    return 0;
+}
+
+int flash_erase(struct flash *ctx, size_t offset)
+{
+    picoRTOS_assert((offset % ctx->attr.erase_unit_len) == 0, return -EINVAL);
+    picoRTOS_assert(offset < ctx->attr.total_size, return -EINVAL);
+
+    if (!ctx->pending) {
+        ctx->base->EEFC_FCR = (uint32_t)(EEFC_FCR_FKEY(0x5a) |
+                                         EEFC_FCR_FARG(offset | 0x2u) |
+                                         EEFC_FCR_FCMD(FCMD_EPA));
+        ctx->pending = true;
+
+    }else{
+        /* clear on read */
+        uint32_t FSR = ctx->base->EEFC_FSR;
+
+        ctx->pending = false;
+        if ((FSR & EEFC_FSR_FLERR) != 0) return -EIO;
+        if ((FSR & EEFC_FSR_FLOCKE) != 0) return -EPERM;
+        if ((FSR & EEFC_FSR_FCMDE) != 0) return -EINVAL;
+        if ((FSR & EEFC_FSR_FRDY) != 0) return 0;
+    }
+
+    return -EAGAIN;
+}
+
+static uint8_t *latch_buffer = (uint8_t*)ADDR_INTERNAL_FLASH; // NOLINT
+
+int flash_write(struct flash *ctx, size_t offset, const void *data, size_t n)
+{
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+    picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert((offset % ctx->attr.write_unit_len) == 0, return -EINVAL);
+    picoRTOS_assert((offset + n) < ctx->attr.total_size, return -EINVAL);
+
+    n = MIN(n, ctx->attr.write_unit_len);
+
+    if (!ctx->pending) {
+        memcpy(&latch_buffer[offset], data, n);
+        ctx->base->EEFC_FCR = (uint32_t)(EEFC_FCR_FKEY(0x5a) |
+                                         EEFC_FCR_FCMD(FCMD_WP));
+        ctx->pending = true;
+
+    }else{
+        /* clear on read */
+        uint32_t FSR = ctx->base->EEFC_FSR;
+
+        ctx->pending = false;
+        if ((FSR & EEFC_FSR_FLERR) != 0) return -EIO;
+        if ((FSR & EEFC_FSR_FLOCKE) != 0) return -EPERM;
+        if ((FSR & EEFC_FSR_FCMDE) != 0) return -EINVAL;
+        if ((FSR & EEFC_FSR_FRDY) != 0) return 0;
+    }
+
+#undef MIN
+    return -EAGAIN;
+}
+
+int flash_lock(struct flash *ctx, size_t offset)
+{
+    picoRTOS_assert((offset % ctx->attr.lock_unit_len) == 0, return -EINVAL);
+
+    if (!ctx->pending) {
+        ctx->base->EEFC_FCR = (uint32_t)(EEFC_FCR_FKEY(0x5a) |
+                                         EEFC_FCR_FARG(offset / ctx->attr.lock_unit_len) |
+                                         EEFC_FCR_FCMD(FCMD_SLB));
+        ctx->pending = true;
+
+    }else{
+        /* clear on read */
+        uint32_t FSR = ctx->base->EEFC_FSR;
+
+        ctx->pending = false;
+        if ((FSR & EEFC_FSR_FLERR) != 0) return -EIO;
+        if ((FSR & EEFC_FSR_FLOCKE) != 0) return -EPERM;
+        if ((FSR & EEFC_FSR_FCMDE) != 0) return -EINVAL;
+        if ((FSR & EEFC_FSR_FRDY) != 0) return 0;
+    }
+
+    return -EAGAIN;
+}
+
+int flash_unlock(struct flash *ctx, size_t offset)
+{
+    picoRTOS_assert((offset % ctx->attr.lock_unit_len) == 0, return -EINVAL);
+
+    if (!ctx->pending) {
+        ctx->base->EEFC_FCR = (uint32_t)(EEFC_FCR_FKEY(0x5a) |
+                                         EEFC_FCR_FARG(offset / ctx->attr.lock_unit_len) |
+                                         EEFC_FCR_FCMD(FCMD_CLB));
+        ctx->pending = true;
+
+    }else{
+        /* clear on read */
+        uint32_t FSR = ctx->base->EEFC_FSR;
+
+        ctx->pending = false;
+        if ((FSR & EEFC_FSR_FLERR) != 0) return -EIO;
+        if ((FSR & EEFC_FSR_FLOCKE) != 0) return -EPERM;
+        if ((FSR & EEFC_FSR_FCMDE) != 0) return -EINVAL;
+        if ((FSR & EEFC_FSR_FRDY) != 0) return 0;
+    }
+
+    return -EAGAIN;
+}
+
