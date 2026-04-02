@@ -60,4 +60,8 @@ config SPI_ATSAMX7X
        depends on ARM
        bool "ATSAMx7x series SPI"
        
+config SPI_ATSAMX7X_QSPI
+       depends on ARM
+       bool "ATSAMx7x series QSPI"
+       
 endmenu
