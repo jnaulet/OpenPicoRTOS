@@ -66,36 +66,27 @@ struct FLASH_GD32VF103 {
 int flash_gd32vf103_init(struct flash *ctx, int base, size_t block_count)
 {
     ctx->base = (struct FLASH_GD32VF103*)base; // NOLINT
-    ctx->block_count = block_count;
     ctx->state = FLASH_GD32VF103_STATE_IDLE;
+    /* some attributes */
+    ctx->attr.erase_unit_len = (size_t)FLASH_GD32VF103_BLOCK_SIZE;
+    ctx->attr.erase_unit_count = block_count;
 
     return 0;
 }
 
-int flash_get_nblocks(struct flash *ctx)
+int flash_probe(struct flash *ctx)
 {
-    return (int)ctx->block_count;
+    ctx->attr.write_unit_len = sizeof(uint32_t);
+    ctx->attr.lock_unit_len = 0;
+    ctx->attr.total_size = ctx->attr.erase_unit_len * ctx->attr.erase_unit_count;
+
+    return 0;
 }
 
-/* cppcheck-suppress [constParameterPointer] */
-int flash_get_erase_size(struct flash *ctx, size_t block)
+int flash_get_attributes(struct flash *ctx, struct flash_attributes *attr)
 {
-    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
-    return FLASH_GD32VF103_BLOCK_SIZE;
-}
-
-/* cppcheck-suppress [constParameterPointer] */
-int flash_get_write_size(struct flash *ctx, size_t block)
-{
-    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
-    return (int)sizeof(uint32_t);
-}
-
-/* cppcheck-suppress [constParameterPointer] */
-int flash_get_block_addr(struct flash *ctx, size_t block)
-{
-    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
-    return FLASH_GD32VF103_ADDR_START + (int)block * FLASH_GD32VF103_BLOCK_SIZE;
+    *attr = ctx->attr;
+    return 0;
 }
 
 static void unlock_fmc_ctl(struct flash *ctx)
@@ -109,9 +100,10 @@ static void lock_fmc_ctl(struct flash *ctx)
     ctx->base->FMC_CTL |= FMC_CTL_LK;
 }
 
-static int flash_erase_idle(struct flash *ctx, size_t block)
+static int flash_erase_idle(struct flash *ctx, size_t offset)
 {
-    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
+    picoRTOS_assert(offset < ctx->attr.total_size, return -EINVAL);
+    picoRTOS_assert((offset % ctx->attr.erase_unit_len) == 0, return -EINVAL);
 
     if ((ctx->base->FMC_STAT & FMC_STAT_BUSY) != 0)
         return -EAGAIN;
@@ -120,7 +112,7 @@ static int flash_erase_idle(struct flash *ctx, size_t block)
 
     /* prepare erase */
     ctx->base->FMC_CTL |= FMC_CTL_PER;
-    ctx->base->FMC_ADDR = (uint32_t)flash_get_block_addr(ctx, block);
+    ctx->base->FMC_ADDR = (uint32_t)FLASH_GD32VF103_ADDR_START + (uint32_t)offset;
 
     /* start erase */
     ctx->base->FMC_CTL |= FMC_CTL_START;
@@ -140,12 +132,13 @@ static int flash_erase_busy(struct flash *ctx)
     return 0;
 }
 
-int flash_erase(struct flash *ctx, size_t block)
+int flash_erase(struct flash *ctx, size_t offset)
 {
-    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
+    picoRTOS_assert(offset < ctx->attr.total_size, return -EINVAL);
+    picoRTOS_assert((offset % ctx->attr.erase_unit_len) == 0, return -EINVAL);
 
     switch (ctx->state) {
-    case FLASH_GD32VF103_STATE_IDLE: return flash_erase_idle(ctx, block);
+    case FLASH_GD32VF103_STATE_IDLE: return flash_erase_idle(ctx, offset);
     case FLASH_GD32VF103_STATE_BUSY: return flash_erase_busy(ctx);
     default: break;
     }
@@ -154,30 +147,14 @@ int flash_erase(struct flash *ctx, size_t block)
     /*@notreached@*/ return -EIO;
 }
 
-int flash_blankcheck(struct flash *ctx, size_t block)
-{
-    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
-
-    const uint32_t *addr = (uint32_t*)flash_get_block_addr(ctx, block);
-    size_t n = (size_t)FLASH_GD32VF103_BLOCK_SIZE / sizeof(uint32_t);
-
-    if ((ctx->base->FMC_STAT & FMC_STAT_BUSY) != 0)
-        return -EAGAIN;
-
-    while (n-- != 0)
-        if (*addr != (uint32_t)-1)
-            return -EFAULT;
-
-    return 0;
-}
-
-int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n)
+int flash_write(struct flash *ctx, size_t offset, const void *data, size_t n)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
+    picoRTOS_assert(n < ctx->attr.total_size, return -EINVAL);
     picoRTOS_assert((n % sizeof(uint32_t)) == 0, return -EINVAL);
 
     int nwritten = 0;
-    uint8_t *dst8 = (uint8_t*)addr;
+    uint8_t *dst8 = (uint8_t*)offset;
     const uint8_t *data8 = (const uint8_t*)data;
 
     if ((ctx->base->FMC_STAT & FMC_STAT_BUSY) != 0)
@@ -204,15 +181,15 @@ int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n)
 }
 
 /* cppcheck-suppress [constParameterPointer] */
-int flash_lock(struct flash *ctx, size_t block)
+int flash_lock(struct flash *ctx, size_t offset)
 {
-    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
+    picoRTOS_assert(offset < ctx->attr.total_size, return -EINVAL);
     return -ENOSYS;
 }
 
 /* cppcheck-suppress [constParameterPointer] */
-int flash_unlock(struct flash *ctx, size_t block)
+int flash_unlock(struct flash *ctx, size_t offset)
 {
-    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
+    picoRTOS_assert(offset < ctx->attr.total_size, return -EINVAL);
     return -ENOSYS;
 }
