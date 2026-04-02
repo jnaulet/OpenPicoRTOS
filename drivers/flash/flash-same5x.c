@@ -3,6 +3,7 @@
 #include "picoRTOS_device.h"
 
 #include <stdint.h>
+#include <string.h>
 
 #define QWORD_SIZE      16
 #define PAGES_PER_BLOCK 16
@@ -121,51 +122,31 @@ struct FLASH_SAME5X {
  */
 int flash_same5x_init(struct flash *ctx, int base)
 {
-    uint32_t psz;
-
     ctx->base = (struct FLASH_SAME5X*)base; // NOLINT
     ctx->state = FLASH_SAME5X_STATE_IDLE;
-
-    /* extract info */
-    psz = ctx->base->PARAM >> 16;
-    ctx->page_size = (size_t)(0x8 << psz);
-    ctx->page_count = (size_t)(ctx->base->PARAM & PARAM_NVMP_M);
-
-    ctx->block_size = ctx->page_size * (size_t)PAGES_PER_BLOCK;
-    ctx->block_count = ctx->page_count / (size_t)PAGES_PER_BLOCK;
 
     return 0;
 }
 
-int flash_get_nblocks(struct flash *ctx)
+int flash_probe(struct flash *ctx)
 {
-    /* TODO: AUX ? */
-    return (int)ctx->block_count;
+    uint32_t psz;
+
+    /* extract info */
+    psz = ctx->base->PARAM >> 16;
+    ctx->attr.erase_unit_len = (size_t)(0x8 << psz);
+    ctx->attr.erase_unit_count = (size_t)(ctx->base->PARAM & PARAM_NVMP_M);
+    ctx->attr.write_unit_len = (size_t)QWORD_SIZE;
+    ctx->attr.lock_unit_len = ctx->attr.erase_unit_len;
+    ctx->attr.total_size = ctx->attr.erase_unit_len * ctx->attr.erase_unit_count;
+
+    return 0;
 }
 
-int flash_get_erase_size(struct flash *ctx, size_t block)
+int flash_get_attributes(struct flash *ctx, struct flash_attributes *attr)
 {
-    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
-
-    /* TODO: AUX ? */
-    return (int)ctx->block_size;
-}
-
-/* cppcheck-suppress [constParameterPointer] */
-int flash_get_write_size(struct flash *ctx, size_t block)
-{
-    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
-
-    /* TODO: AUX ? */
-    return (int)QWORD_SIZE;
-}
-
-/* cppcheck-suppress [constParameterPointer] */
-int flash_get_block_addr(struct flash *ctx, size_t block)
-{
-    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
-
-    return (int)(block * ctx->block_size);
+    memcpy(attr, &ctx->attr, sizeof(*attr));
+    return 0;
 }
 
 static int run_cmd_busy(struct flash *ctx, size_t n)
@@ -208,53 +189,38 @@ static int run_cmd(struct flash *ctx, int cmd, size_t addr)
     /*@notreached@*/ return -EIO;
 }
 
-int flash_erase(struct flash *ctx, size_t block)
+int flash_erase(struct flash *ctx, size_t offset)
 {
-    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
-
-    return run_cmd(ctx, CMD_EB, block * ctx->block_size);
+    picoRTOS_assert(offset < ctx->attr.total_size, return -EINVAL);
+    picoRTOS_assert((offset % ctx->attr.erase_unit_len) == 0, return -EINVAL);
+    return run_cmd(ctx, CMD_EB, offset);
 }
 
-/* cppcheck-suppress [constParameterPointer] */
-int flash_blankcheck(struct flash *ctx, size_t block)
-{
-    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
-
-    size_t n = ctx->block_size / sizeof(uint32_t);
-    uint32_t *addr = (uint32_t*)(block * ctx->block_size);
-
-    while (n-- != 0)
-        if (*addr++ != (uint32_t)-1)
-            return -EFAULT;
-
-    return 0;
-}
-
-static int flash_write_idle(struct flash *ctx, int cmd, size_t addr,
+static int flash_write_idle(struct flash *ctx, int cmd, size_t offset,
                             const void *data, size_t n)
 {
-    uint32_t *addr32 = (uint32_t*)addr;
+    uint32_t *addr32 = (uint32_t*)offset;
     const uint32_t *data32 = (uint32_t*)data;
     size_t count = n / sizeof(uint32_t);
 
     while (count-- != 0)
         *addr32++ = *data32++;
 
-    ctx->base->ADDR = (uint32_t)addr;
+    ctx->base->ADDR = (uint32_t)offset;
     ctx->base->CTRLB = (uint32_t)(CTRLB_CMDEX(CMDEX_KEY) | CTRLB_CMD(cmd));
 
     ctx->state = FLASH_SAME5X_STATE_BUSY;
     return -EAGAIN;
 }
 
-static int write_data(struct flash *ctx, int cmd, size_t addr,
+static int write_data(struct flash *ctx, int cmd, size_t offset,
                       const void *data, size_t n)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
 
     switch (ctx->state) {
     case FLASH_SAME5X_STATE_IDLE:
-        return flash_write_idle(ctx, cmd, addr, data, n);
+        return flash_write_idle(ctx, cmd, offset, data, n);
 
     case FLASH_SAME5X_STATE_BUSY:
         return run_cmd_busy(ctx, n);
@@ -267,7 +233,7 @@ static int write_data(struct flash *ctx, int cmd, size_t addr,
     /*@notreached@*/ return -EIO;
 }
 
-int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n)
+int flash_write(struct flash *ctx, size_t offset, const void *data, size_t n)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
     picoRTOS_assert((n % sizeof(uint32_t)) == 0, return -EINVAL);
@@ -278,12 +244,13 @@ int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n)
 
     while (n != 0) {
         /* complete page */
-        if ((addr % ctx->page_size) == 0 && n >= ctx->page_size)
-            res = write_data(ctx, CMD_WP, addr + (size_t)nwritten,
-                             &data8[nwritten], ctx->page_size);
+        if ((offset % ctx->attr.erase_unit_len) == 0 &&
+            n >= ctx->attr.erase_unit_len)
+            res = write_data(ctx, CMD_WP, offset + (size_t)nwritten,
+                             &data8[nwritten], ctx->attr.erase_unit_len);
         /* 128bit boundary */
-        else if ((addr % (size_t)QWORD_SIZE) == 0 && n >= (size_t)QWORD_SIZE)
-            res = write_data(ctx, CMD_WQW, addr + (size_t)nwritten,
+        else if ((offset % (size_t)QWORD_SIZE) == 0 && n >= (size_t)QWORD_SIZE)
+            res = write_data(ctx, CMD_WQW, offset + (size_t)nwritten,
                              &data8[nwritten], (size_t)QWORD_SIZE);
 
         else{
@@ -305,16 +272,14 @@ int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n)
     return nwritten;
 }
 
-int flash_lock(struct flash *ctx, size_t block)
+int flash_lock(struct flash *ctx, size_t offset)
 {
-    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
-
-    return run_cmd(ctx, CMD_LR, block * ctx->block_size);
+    picoRTOS_assert(offset < ctx->attr.total_size, return -EINVAL);
+    return run_cmd(ctx, CMD_LR, offset);
 }
 
-int flash_unlock(struct flash *ctx, size_t block)
+int flash_unlock(struct flash *ctx, size_t offset)
 {
-    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
-
-    return run_cmd(ctx, CMD_UR, block * ctx->block_size);
+    picoRTOS_assert(offset < ctx->attr.total_size, return -EINVAL);
+    return run_cmd(ctx, CMD_UR, offset);
 }
