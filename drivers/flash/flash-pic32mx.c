@@ -82,26 +82,16 @@ int flash_pic32mx_init(struct flash *ctx, int base, size_t block_count)
     return 0;
 }
 
-int flash_get_nblocks(struct flash *ctx)
+int flash_get_attributes(struct flash *ctx, struct flash_attributes *attr)
 {
-    return (int)ctx->block_count;
+    attr->blocks_count = ctx->block_count;
+    attr->erase_size = FLASH_PIC32MX_PAGE_SIZE;
+    attr->write_size = (size_t)QWORD_SIZE; /* FIXME: depends on ECC */
+
+    return 0;
 }
 
-int flash_get_erase_size(struct flash *ctx, size_t block)
-{
-    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
-    return FLASH_PIC32MX_PAGE_SIZE;
-}
-
-int flash_get_write_size(struct flash *ctx, size_t block)
-{
-    picoRTOS_assert(block < ctx->block_count, return -EINVAL);
-
-    /* FIXME: depends on ECC */
-    return QWORD_SIZE;
-}
-
-int flash_get_block_addr(struct flash *ctx, size_t block)
+int flash_get_pic32mx_block_addr(struct flash *ctx, size_t block)
 {
     picoRTOS_assert(block < ctx->block_count, return -EINVAL);
     return FLASH_PIC32MX_ADDR_START + (int)block * FLASH_PIC32MX_PAGE_SIZE;
@@ -168,7 +158,7 @@ int flash_erase(struct flash *ctx, size_t block)
     /*@notreached@*/ return -EIO;
 }
 
-int flash_blankcheck(struct flash *ctx, size_t block)
+int flash_pic32mx_blankcheck(struct flash *ctx, size_t block)
 {
     picoRTOS_assert(block < ctx->block_count, return -EINVAL);
 
