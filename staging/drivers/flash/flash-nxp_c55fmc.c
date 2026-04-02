@@ -3,6 +3,7 @@
 #include "picoRTOS_device.h"
 
 #include <stdint.h>
+#include <string.h>
 
 #define PGM_SIZE 128
 
@@ -57,29 +58,26 @@ int flash_nxp_c55fmc_init(struct flash *ctx, int base)
     return 0;
 }
 
-int flash_get_nblocks(/*@unused@*/ struct flash *ctx __attribute__ ((unused)))
+int flash_probe(struct flash *ctx)
 {
-    return (int)(sizeof(map) / sizeof(*map));
+    ctx->attr.erase_unit_count = sizeof(map) / sizeof(*map); /* ! */
+    ctx->attr.erase_unit_len = (size_t)(map[0].end_addr - map[0].start_addr) + 1;
+    ctx->attr.write_unit_len = sizeof(uint64_t);
+    ctx->attr.lock_unit_len = ctx->attr.erase_unit_len;
+    ctx->attr.total_size = (size_t)(map[FLASH_NXP_C55FMC_SECTOR_COUNT - 1].end_addr -
+                                    map[0].start_addr + 1);
+
+    return 0;
 }
 
-int flash_get_erase_size(/*@unused@*/ struct flash *ctx __attribute__ ((unused)),
-                         size_t block)
+int flash_get_attributes(struct flash *ctx, struct flash_attributes *attr)
 {
-    picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT, return -EINVAL);
-
-    return (int)(map[block].end_addr - map[block].start_addr) + 1;
+    memcpy(attr, &ctx->attr, sizeof(*attr));
+    return 0;
 }
 
-int flash_get_write_size(/*@unused@*/ struct flash *ctx __attribute__ ((unused)),
-                         size_t block)
-{
-    picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT, return -EINVAL);
-
-    return (int)sizeof(uint64_t);
-}
-
-int flash_get_block_addr(/*@unused@*/ struct flash *ctx __attribute__ ((unused)),
-                         size_t block)
+int flash_nxp_c55fmc_get_block_addr(/*@unused@*/ struct flash *ctx __attribute__ ((unused)),
+                                    size_t block)
 {
     picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT, return -EINVAL);
 
@@ -169,13 +167,13 @@ static int flash_erase_busy(struct flash *ctx, size_t block)
     return 0;
 }
 
-int flash_erase(struct flash *ctx, size_t block)
+int flash_erase(struct flash *ctx, size_t offset)
 {
-    picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT, return -EINVAL);
+    picoRTOS_assert(offset < ctx->attr.total_size, return -EINVAL);
 
     switch (ctx->state) {
-    case FLASH_NXP_C55FMC_STATE_IDLE: return flash_erase_idle(ctx, block);
-    case FLASH_NXP_C55FMC_STATE_BUSY: return flash_erase_busy(ctx, block);
+    case FLASH_NXP_C55FMC_STATE_IDLE: return flash_erase_idle(ctx, offset);
+    case FLASH_NXP_C55FMC_STATE_BUSY: return flash_erase_busy(ctx, offset);
     default: break;
     }
 
@@ -184,8 +182,8 @@ int flash_erase(struct flash *ctx, size_t block)
     return -EIO;
 }
 
-int flash_blankcheck(/*@unused@*/ struct flash *ctx __attribute__ ((unused)),
-                     size_t block)
+int flash_nxp_c55fmc_blankcheck(/*@unused@*/ struct flash *ctx __attribute__ ((unused)),
+                                size_t block)
 {
     picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT, return -EINVAL);
 
@@ -210,16 +208,16 @@ static int abort_write(struct flash *ctx)
     return 0;
 }
 
-static int flash_write_idle(struct flash *ctx, size_t addr, const void *data, size_t n)
+static int flash_write_idle(struct flash *ctx, size_t offset, const void *data, size_t n)
 {
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
-    picoRTOS_assert((addr % sizeof(uint64_t)) == 0, return -EINVAL);
+    picoRTOS_assert((offset % sizeof(uint64_t)) == 0, return -EINVAL);
     picoRTOS_assert(n > 0, return -EINVAL);
     picoRTOS_assert((n % sizeof(uint64_t)) == 0, return -EINVAL);
 
     int nwritten = 0;
-    uint32_t *dst32 = (uint32_t*)addr;
+    uint32_t *dst32 = (uint32_t*)offset;
     const uint32_t *src32 = (uint32_t*)data;
     size_t count = MIN(n, (size_t)PGM_SIZE) / sizeof(uint32_t);
 
@@ -265,14 +263,14 @@ static int flash_write_busy(struct flash *ctx)
     return ctx->last;
 }
 
-int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n)
+int flash_write(struct flash *ctx, size_t offset, const void *data, size_t n)
 {
-    picoRTOS_assert((addr % sizeof(uint64_t)) == 0, return -EINVAL);
+    picoRTOS_assert((offset % sizeof(uint64_t)) == 0, return -EINVAL);
     picoRTOS_assert(n > 0, return -EINVAL);
     picoRTOS_assert((n % sizeof(uint64_t)) == 0, return -EINVAL);
 
     switch (ctx->state) {
-    case FLASH_NXP_C55FMC_STATE_IDLE: return flash_write_idle(ctx, addr, data, n);
+    case FLASH_NXP_C55FMC_STATE_IDLE: return flash_write_idle(ctx, offset, data, n);
     case FLASH_NXP_C55FMC_STATE_BUSY: return flash_write_busy(ctx);
     default: break;
     }
@@ -282,15 +280,19 @@ int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n)
     return -EIO;
 }
 
-int flash_lock(struct flash *ctx, size_t block)
+int flash_lock(struct flash *ctx, size_t offset)
 {
-    picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT, return -EINVAL);
+    picoRTOS_assert(offset < ctx->attr.total_size, return -EINVAL);
+
+    /*
+     * FIXME: find block by offset
+     */
 
     int res;
     uint32_t *C55FMC_LOCKn = NULL;
-    uint32_t mask = (uint32_t)(0x80000000u >> map[block].bit);
+    uint32_t mask = (uint32_t)(0x80000000u >> map[offset].bit);
 
-    if ((res = flash_nxp_c55fmc_LOCKn(ctx, block, &C55FMC_LOCKn)) < 0 ||
+    if ((res = flash_nxp_c55fmc_LOCKn(ctx, offset, &C55FMC_LOCKn)) < 0 ||
         C55FMC_LOCKn == NULL)
         return res;
 
@@ -298,15 +300,15 @@ int flash_lock(struct flash *ctx, size_t block)
     return 0;
 }
 
-int flash_unlock(struct flash *ctx, size_t block)
+int flash_unlock(struct flash *ctx, size_t offset)
 {
-    picoRTOS_assert(block < (size_t)FLASH_NXP_C55FMC_SECTOR_COUNT, return -EINVAL);
+    picoRTOS_assert(offset < ctx->attr.total_size, return -EINVAL);
 
     int res;
     uint32_t *C55FMC_LOCKn = NULL;
-    uint32_t mask = (uint32_t)(0x80000000u >> map[block].bit);
+    uint32_t mask = (uint32_t)(0x80000000u >> map[offset].bit);
 
-    if ((res = flash_nxp_c55fmc_LOCKn(ctx, block, &C55FMC_LOCKn)) < 0 ||
+    if ((res = flash_nxp_c55fmc_LOCKn(ctx, offset, &C55FMC_LOCKn)) < 0 ||
         C55FMC_LOCKn == NULL)
         return res;
 
