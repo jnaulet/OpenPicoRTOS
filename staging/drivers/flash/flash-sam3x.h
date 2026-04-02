@@ -20,14 +20,15 @@ struct flash {
 };
 
 int flash_sam3x_init(/*@out@*/ struct flash *ctx, int base);
+int flash_sam3x_get_block_addr(struct flash *ctx, size_t block);
+int flash_sam3x_blankcheck(struct flash *ctx, size_t block);
 
 /* Implements:
- * int flash_erase_sector(struct flash *ctx, size_t sector);
- * int flash_blankcheck_sector(struct flash *ctx, size_t sector);
+ * int flash_get_attributes(struct flash *ctx, struct flash_attributes *attr);
+ * int flash_erase(struct flash *ctx, size_t block);
  * int flash_write(struct flash *ctx, size_t addr, const void *data, size_t n);
- * int flash_lock_sector(struct flash *ctx, size_t sector);
- * int flash_unlock_sector(struct flash *ctx, size_t sector);
+ * int flash_lock(struct flash *ctx, size_t block);
+ * int flash_unlock(struct flash *ctx, size_t block);
  */
-
 
 #endif

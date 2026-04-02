@@ -131,24 +131,16 @@ int flash_sam3x_init(/*@out@*/ struct flash *ctx, int base)
     return 0;
 }
 
-int flash_get_nblocks(struct flash *ctx)
+int flash_get_attributes(struct flash *ctx, struct flash_attributes *attr)
 {
-    return (int)ctx->page_count;
+    attr->blocks_count = ctx->page_count;
+    attr->erase_size = ctx->page_size;
+    attr->write_size = (size_t)QWORD_SIZE;
+
+    return 0;
 }
 
-int flash_get_erase_size(struct flash *ctx, size_t block)
-{
-    if (!picoRTOS_assert(block < ctx->page_count)) return -EINVAL;
-    return (int)ctx->page_size;
-}
-
-int flash_get_write_size(struct flash *ctx, size_t block)
-{
-    if (!picoRTOS_assert(block < ctx->page_count)) return -EINVAL;
-    return QWORD_SIZE;
-}
-
-int flash_get_block_addr(struct flash *ctx, size_t block)
+int flash_sam3x_get_block_addr(struct flash *ctx, size_t block)
 {
     if (!picoRTOS_assert(block < ctx->page_count)) return -EINVAL;
     return (int)(block * ctx->page_size);
@@ -161,7 +153,7 @@ int flash_erase(struct flash *ctx, size_t block)
     return run_cmd(ctx, FCMD_EWP, (int)block);
 }
 
-int flash_blankcheck(struct flash *ctx, size_t block)
+int flash_sam3x_blankcheck(struct flash *ctx, size_t block)
 {
     if (!picoRTOS_assert(block < ctx->page_count)) return -EINVAL;
 
