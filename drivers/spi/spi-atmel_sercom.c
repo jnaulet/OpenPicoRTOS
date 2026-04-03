@@ -107,7 +107,7 @@ int spi_atmel_sercom_init(struct spi *ctx, int base, clock_id_t clkid)
     ctx->base = (struct SPI_ATMEL_SERCOM*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->balance = 0;
-    ctx->frame_size = (size_t)8;
+    ctx->frame_nbits = (size_t)8;
     ctx->frame_width = (size_t)1;
     /* dma opt */
     ctx->state = SPI_ATMEL_SERCOM_STATE_DMA_START;
@@ -206,23 +206,23 @@ static int set_clkmode(struct spi *ctx, spi_clock_mode_t clkmode)
     return 0;
 }
 
-static int set_frame_size(struct spi *ctx, size_t frame_size)
+static int set_frame_nbits(struct spi *ctx, size_t frame_nbits)
 {
 #define div_ceil(x, y) (((x) + ((y) - 1)) / (y))
 
-    picoRTOS_assert(frame_size >= (size_t)SPI_ATMEL_SERCOM_FRAME_SIZE_MIN, return -EINVAL);
-    picoRTOS_assert(frame_size <= (size_t)SPI_ATMEL_SERCOM_FRAME_SIZE_MAX, return -EINVAL);
+    picoRTOS_assert(frame_nbits >= (size_t)SPI_ATMEL_SERCOM_FRAME_NBITS_MIN, return -EINVAL);
+    picoRTOS_assert(frame_nbits <= (size_t)SPI_ATMEL_SERCOM_FRAME_NBITS_MAX, return -EINVAL);
 
-    if (frame_size <= (size_t)8)
+    if (frame_nbits <= (size_t)8)
         ctx->base->CTRLC &= ~CTRLC_DATA32B;
     else{
-        size_t len = ((frame_size - 1) >> 3) + 1;
+        size_t len = ((frame_nbits - 1) >> 3) + 1;
         ctx->base->LENGTH = (uint16_t)(LENGTH_LENEN | LENGTH_LEN(len));
         ctx->base->CTRLC |= CTRLC_DATA32B;
     }
 
-    ctx->frame_size = frame_size;
-    ctx->frame_width = div_ceil(frame_size, (size_t)8);
+    ctx->frame_nbits = frame_nbits;
+    ctx->frame_width = div_ceil(frame_nbits, (size_t)8);
 
     return sync_busywait(ctx, (uint32_t)SYNCBUSY_LENGTH);
 }
@@ -241,8 +241,8 @@ int spi_setup(struct spi *ctx, const struct spi_settings *settings)
         (res = set_clkmode(ctx, settings->clkmode)) < 0)
         return res;
 
-    if (settings->frame_size != 0 &&
-        (res = set_frame_size(ctx, settings->frame_size)) < 0)
+    if (settings->frame_nbits != 0 &&
+        (res = set_frame_nbits(ctx, settings->frame_nbits)) < 0)
         return res;
 
     if (settings->mode != SPI_MODE_IGNORE &&

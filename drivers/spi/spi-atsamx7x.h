@@ -10,14 +10,14 @@
 struct SPI_ATSAMX7X;
 
 #define SPI_ATSAMX7X_CS_COUNT 4 /* TODO: move to device ? */
-#define SPI_ATSAMX7X_FRAME_SIZE_MIN 8
-#define SPI_ATSAMX7X_FRAME_SIZE_MAX 16
+#define SPI_ATSAMX7X_FRAME_NBITS_MIN 8
+#define SPI_ATSAMX7X_FRAME_NBITS_MAX 16
 
 struct spi {
     /*@temp@*/ struct SPI_ATSAMX7X *base;
     clock_id_t clkid;
     int balance;
-    size_t frame_size;
+    size_t frame_nbits;
     size_t frame_width;
     uint32_t pcs;
 };

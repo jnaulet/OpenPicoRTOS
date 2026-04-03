@@ -67,7 +67,7 @@ int spi_gd32vf103_init(struct spi *ctx, int base, clock_id_t clkid)
 {
     ctx->base = (struct SPI_GD32VF103*)base; // NOLINT
     ctx->clkid = clkid;
-    ctx->frame_size = (size_t)8;
+    ctx->frame_nbits = (size_t)8;
     ctx->frame_width = (size_t)1;
 
     /* dma opt */
@@ -157,13 +157,13 @@ static int set_clkmode(struct spi *ctx, spi_clock_mode_t clkmode)
     return 0;
 }
 
-static int set_frame_size(struct spi *ctx, size_t frame_size)
+static int set_frame_nbits(struct spi *ctx, size_t frame_nbits)
 {
 #define div_ceil(x, y) (((x) + ((y) - 1)) / (y))
 
-    picoRTOS_assert(frame_size > 0, return -EINVAL);
+    picoRTOS_assert(frame_nbits > 0, return -EINVAL);
 
-    switch (frame_size) {
+    switch (frame_nbits) {
     case 8: ctx->base->SPI_CTL0 &= ~SPI_CTL0_FF16; break;
     case 16: ctx->base->SPI_CTL0 |= SPI_CTL0_FF16; break;
     default:
@@ -171,8 +171,8 @@ static int set_frame_size(struct spi *ctx, size_t frame_size)
         /*@notreached@*/ return -EINVAL;
     }
 
-    ctx->frame_size = frame_size;
-    ctx->frame_width = div_ceil(frame_size, (size_t)8);
+    ctx->frame_nbits = frame_nbits;
+    ctx->frame_width = div_ceil(frame_nbits, (size_t)8);
 
     return 0;
 }
@@ -220,8 +220,8 @@ int spi_setup(struct spi *ctx, const struct spi_settings *settings)
         (res = set_clkmode(ctx, settings->clkmode)) < 0)
         return res;
 
-    if (settings->frame_size != 0 &&
-        (res = set_frame_size(ctx, settings->frame_size)) < 0)
+    if (settings->frame_nbits != 0 &&
+        (res = set_frame_nbits(ctx, settings->frame_nbits)) < 0)
         return res;
 
     if (settings->mode != SPI_MODE_IGNORE &&

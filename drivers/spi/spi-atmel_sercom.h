@@ -5,8 +5,8 @@
 #include "spi.h"
 #include "clock.h"
 
-#define SPI_ATMEL_SERCOM_FRAME_SIZE_MIN 8
-#define SPI_ATMEL_SERCOM_FRAME_SIZE_MAX 32
+#define SPI_ATMEL_SERCOM_FRAME_NBITS_MIN 8
+#define SPI_ATMEL_SERCOM_FRAME_NBITS_MAX 32
 
 struct SPI_ATMEL_SERCOM;
 
@@ -25,7 +25,7 @@ struct spi_atmel_sercom_dma_settings {
 struct spi {
     /*@temp@*/ struct SPI_ATMEL_SERCOM *base;
     clock_id_t clkid;
-    size_t frame_size;
+    size_t frame_nbits;
     size_t frame_width;
     int balance;
     /* dma opt. */

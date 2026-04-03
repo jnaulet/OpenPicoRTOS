@@ -8,8 +8,8 @@
 
 struct SPI_MC9S08PTXX;
 
-#define SPI_MC9S08PTXX_FRAME_SIZE_MIN 8
-#define SPI_MC9S08PTXX_FRAME_SIZE_MAX 16 /* only SPI1 */
+#define SPI_MC9S08PTXX_FRAME_NBITS_MIN 8
+#define SPI_MC9S08PTXX_FRAME_NBITS_MAX 16 /* only SPI1 */
 
 struct spi {
     /*@temp@*/ struct SPI_MC9S08PTXX *base;

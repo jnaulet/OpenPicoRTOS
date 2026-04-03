@@ -35,7 +35,7 @@ struct spi {
     clock_id_t clkid;
     size_t balance;
     size_t lshift;
-    size_t frame_size;
+    size_t frame_nbits;
     /* dma opt */
     spi_ti_f28x_state_t state;
     /*@temp@*/ /*@null@*/ struct dma *fill;

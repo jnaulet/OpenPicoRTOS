@@ -14,7 +14,7 @@ struct spi {
     /*@temp@*/ struct SPI_NXP_DSPI *base;
     clock_id_t clkid;
     size_t cs;
-    size_t frame_size;
+    size_t frame_nbits;
     size_t frame_width;
     int balance;
 };

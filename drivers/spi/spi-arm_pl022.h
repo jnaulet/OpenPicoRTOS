@@ -9,8 +9,8 @@
 
 struct SPI_ARM_PL022;
 
-#define SPI_ARM_PL022_FRAME_SIZE_MIN 4
-#define SPI_ARM_PL022_FRAME_SIZE_MAX 16
+#define SPI_ARM_PL022_FRAME_NBITS_MIN 4
+#define SPI_ARM_PL022_FRAME_NBITS_MAX 16
 
 typedef enum {
     SPI_ARM_PL022_STATE_DMA_START,
@@ -32,7 +32,7 @@ struct spi_arm_pl022_dma_settings {
 struct spi {
     /*@temp@*/ struct SPI_ARM_PL022 *base;
     clock_id_t clkid;
-    size_t frame_size;
+    size_t frame_nbits;
     size_t frame_width;
     int balance;
     /* dma opt. */

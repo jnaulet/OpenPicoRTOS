@@ -118,7 +118,7 @@ int spi_setup(struct spi *ctx, const struct spi_settings *settings)
         return res;
 
     /* mode: ignore */
-    /* frame_size: ignore */
+    /* frame_nbits: ignore */
     /* cs_pol: ignore */
     /* cs: ignore */
 

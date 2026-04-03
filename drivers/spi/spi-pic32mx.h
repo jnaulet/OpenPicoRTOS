@@ -9,7 +9,7 @@ struct SPI_PIC32MX;
 struct spi {
     /*@temp@*/ struct SPI_PIC32MX *base;
     clock_id_t clkid;
-    size_t frame_size;
+    size_t frame_nbits;
     size_t frame_width;
     int balance;
 };

@@ -25,7 +25,7 @@ struct spi_stm32h7xx_dma_settings {
 struct spi {
     /*@temp@*/ struct SPI_STM32H7XX *base;
     clock_id_t clkid;
-    size_t frame_size;
+    size_t frame_nbits;
     size_t frame_width;
     int balance;
     spi_stm32h7xx_state_t state;

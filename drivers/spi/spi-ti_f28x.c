@@ -94,7 +94,7 @@ int spi_ti_f28x_init(struct spi *ctx, int base, clock_id_t clkid)
     ctx->clkid = clkid;
     ctx->balance = 0;
     ctx->lshift = 0;
-    ctx->frame_size = (size_t)16;
+    ctx->frame_nbits = (size_t)16;
 
     /* dma opt */
     ctx->state = SPI_TI_F28X_STATE_DMA_START;
@@ -232,15 +232,15 @@ static int set_clkmode(struct spi *ctx, spi_clock_mode_t clkmode)
     return 0;
 }
 
-static int set_frame_size(struct spi *ctx, size_t frame_size)
+static int set_frame_nbits(struct spi *ctx, size_t frame_nbits)
 {
-    picoRTOS_assert(frame_size <= (size_t)16, return -EINVAL);
+    picoRTOS_assert(frame_nbits <= (size_t)16, return -EINVAL);
 
     ctx->base->SPICCR &= ~SPICCR_SPICHAR_M;
-    ctx->base->SPICCR |= SPICCR_SPICHAR(frame_size - 1);
+    ctx->base->SPICCR |= SPICCR_SPICHAR(frame_nbits - 1);
 
-    ctx->frame_size = frame_size;
-    ctx->lshift = (size_t)16 - frame_size;
+    ctx->frame_nbits = frame_nbits;
+    ctx->lshift = (size_t)16 - frame_nbits;
 
     return 0;
 }
@@ -267,8 +267,8 @@ int spi_setup(struct spi *ctx, const struct spi_settings *settings)
         return res;
 
     /* frame size */
-    if (settings->frame_size != 0 &&
-        ((res = set_frame_size(ctx, settings->frame_size)) < 0))
+    if (settings->frame_nbits != 0 &&
+        ((res = set_frame_nbits(ctx, settings->frame_nbits)) < 0))
         return res;
 
     /* cs_pol: ignore */

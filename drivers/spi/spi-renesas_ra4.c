@@ -179,19 +179,19 @@ static int set_clkmode(struct spi *ctx, spi_clock_mode_t clkmode)
     return 0;
 }
 
-static int set_frame_size(struct spi *ctx, size_t frame_size)
+static int set_frame_nbits(struct spi *ctx, size_t frame_nbits)
 {
 #define div_ceil(x, y) (((x) + ((y) - 1)) / (y))
 
-    picoRTOS_assert(frame_size >= (size_t)SPI_RENESAS_RA4_FRAME_SIZE_MIN, return -EINVAL);
-    picoRTOS_assert(frame_size <= (size_t)SPI_RENESAS_RA4_FRAME_SIZE_MAX, return -EINVAL);
+    picoRTOS_assert(frame_nbits >= (size_t)SPI_RENESAS_RA4_FRAME_NBITS_MIN, return -EINVAL);
+    picoRTOS_assert(frame_nbits <= (size_t)SPI_RENESAS_RA4_FRAME_NBITS_MAX, return -EINVAL);
 
     int spb = 15;
 
-    ctx->frame_size = frame_size;
-    ctx->frame_width = div_ceil(frame_size, (size_t)8);
+    ctx->frame_nbits = frame_nbits;
+    ctx->frame_width = div_ceil(frame_nbits, (size_t)8);
 
-    switch (frame_size) {
+    switch (frame_nbits) {
     case 8: spb = 4; break;
     case 9:     /*@fallthrough@*/
     case 10:    /*@fallthrough@*/
@@ -200,7 +200,7 @@ static int set_frame_size(struct spi *ctx, size_t frame_size)
     case 13:    /*@fallthrough@*/
     case 14:    /*@fallthrough@*/
     case 15:    /*@fallthrough@*/
-    case 16: spb = (int)frame_size - 1; break;
+    case 16: spb = (int)frame_nbits - 1; break;
     case 20: spb = 0; break;
     case 24: spb = 1; break;
     case 32: spb = 2; break;
@@ -256,8 +256,8 @@ int spi_setup(struct spi *ctx, const struct spi_settings *settings)
         (res = set_clkmode(ctx, settings->clkmode)) < 0)
         return res;
 
-    if (settings->frame_size != 0 &&
-        (res = set_frame_size(ctx, settings->frame_size)) < 0)
+    if (settings->frame_nbits != 0 &&
+        (res = set_frame_nbits(ctx, settings->frame_nbits)) < 0)
         return res;
 
     if (settings->mode != SPI_MODE_IGNORE &&

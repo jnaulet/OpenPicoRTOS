@@ -122,7 +122,7 @@ int spi_nxp_dspi_init(struct spi *ctx, int base, clock_id_t clkid)
     ctx->base = (struct SPI_NXP_DSPI*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->cs = 0;
-    ctx->frame_size = (size_t)16;
+    ctx->frame_nbits = (size_t)16;
     ctx->frame_width = (size_t)2;
     ctx->balance = 0;
 
@@ -214,7 +214,7 @@ static int set_clock_mode(struct spi *ctx, spi_clock_mode_t mode)
     return 0;
 }
 
-static int set_frame_size(struct spi *ctx, size_t nbits)
+static int set_frame_nbits(struct spi *ctx, size_t nbits)
 {
 #define div_ceil(x, y) (((x) + ((y) - 1)) / (y))
 
@@ -224,7 +224,7 @@ static int set_frame_size(struct spi *ctx, size_t nbits)
     ctx->base->CTAR[0] &= ~CTAR_FMSZ(CTAR_FMSZ_M);
     ctx->base->CTAR[0] |= CTAR_FMSZ(nbits - 1);
 
-    ctx->frame_size = nbits;
+    ctx->frame_nbits = nbits;
     ctx->frame_width = div_ceil(nbits, (size_t)8);
 
     return (int)nbits;
@@ -270,8 +270,8 @@ int spi_setup(struct spi *ctx, const struct spi_settings *settings)
         (res = set_clock_mode(ctx, settings->clkmode)) < 0)
         return res;
 
-    if (settings->frame_size != 0 &&
-        (res = set_frame_size(ctx, settings->frame_size)) < 0)
+    if (settings->frame_nbits != 0 &&
+        (res = set_frame_nbits(ctx, settings->frame_nbits)) < 0)
         return res;
 
     if (settings->mode != SPI_MODE_IGNORE &&

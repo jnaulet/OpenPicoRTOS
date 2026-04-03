@@ -8,8 +8,8 @@
 #include <stdbool.h>
 
 #define SPI_RENESAS_RA4_SSL_COUNT 4
-#define SPI_RENESAS_RA4_FRAME_SIZE_MIN 8
-#define SPI_RENESAS_RA4_FRAME_SIZE_MAX 32
+#define SPI_RENESAS_RA4_FRAME_NBITS_MIN 8
+#define SPI_RENESAS_RA4_FRAME_NBITS_MAX 32
 
 struct SPI_RENESAS_RA4;
 
@@ -21,7 +21,7 @@ struct spi_renesas_ra4_settings {
 struct spi {
     /*@temp@*/ struct SPI_RENESAS_RA4 *base;
     clock_id_t clkid;
-    size_t frame_size;
+    size_t frame_nbits;
     size_t frame_width;
     int balance;
     size_t ssl;

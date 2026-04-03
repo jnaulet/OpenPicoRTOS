@@ -76,7 +76,7 @@ int spi_sam3x_init(struct spi *ctx, int base, clock_id_t clkid)
 {
     ctx->base = (struct SPI_SAM3X*)base; // NOLINT
     ctx->clkid = clkid;
-    ctx->frame_size = (size_t)8;
+    ctx->frame_nbits = (size_t)8;
     ctx->frame_width = (size_t)1;
     ctx->balance = 0;
     ctx->pcs = 0;
@@ -163,21 +163,21 @@ static int set_clkmode(struct spi *ctx, size_t cs, spi_clock_mode_t clkmode)
     return 0;
 }
 
-static int set_frame_size(struct spi *ctx, size_t cs, size_t frame_size)
+static int set_frame_nbits(struct spi *ctx, size_t cs, size_t frame_nbits)
 {
 #define div_ceil(x, y) (((x) + ((y) - 1)) / (y))
 
     picoRTOS_assert(cs < (size_t)SPI_SAM3X_CS_COUNT, return -EINVAL);
-    picoRTOS_assert(frame_size >= (size_t)SPI_SAM3X_FRAME_SIZE_MIN, return -EINVAL);
-    picoRTOS_assert(frame_size <= (size_t)SPI_SAM3X_FRAME_SIZE_MAX, return -EINVAL);
+    picoRTOS_assert(frame_nbits >= (size_t)SPI_SAM3X_FRAME_NBITS_MIN, return -EINVAL);
+    picoRTOS_assert(frame_nbits <= (size_t)SPI_SAM3X_FRAME_NBITS_MAX, return -EINVAL);
 
-    size_t bits = frame_size - (size_t)SPI_SAM3X_FRAME_SIZE_MIN;
+    size_t bits = frame_nbits - (size_t)SPI_SAM3X_FRAME_NBITS_MIN;
 
     ctx->base->SPI_CSR[cs] &= ~SPI_CSRn_BITS(SPI_CSRn_BITS_M);
     ctx->base->SPI_CSR[cs] |= SPI_CSRn_BITS(bits);
 
-    ctx->frame_size = frame_size;
-    ctx->frame_width = div_ceil(frame_size, (size_t)8);
+    ctx->frame_nbits = frame_nbits;
+    ctx->frame_width = div_ceil(frame_nbits, (size_t)8);
 
     return 0;
 }
@@ -208,8 +208,8 @@ int spi_setup(struct spi *ctx, const struct spi_settings *settings)
         (res = set_clkmode(ctx, settings->cs, settings->clkmode)) < 0)
         return res;
 
-    if (settings->frame_size != 0 &&
-        (res = set_frame_size(ctx, settings->cs, settings->frame_size)) < 0)
+    if (settings->frame_nbits != 0 &&
+        (res = set_frame_nbits(ctx, settings->cs, settings->frame_nbits)) < 0)
         return res;
 
     if (settings->mode != SPI_MODE_IGNORE &&
@@ -236,7 +236,7 @@ static int receive_data(struct spi *ctx, uint8_t *data)
     if (SPI_RDR_PCS_GET(spi_rdr) == SPI_RDR_PCS_M)
         return -EAGAIN;
 
-    switch (ctx->frame_size) {
+    switch (ctx->frame_nbits) {
     case sizeof(uint8_t):
         *data = (uint8_t)spi_rdr;
         return (int)sizeof(uint8_t);
@@ -254,7 +254,7 @@ static int transmit_data(struct spi *ctx, const uint8_t *data)
     if ((ctx->base->SPI_SR & SPI_SR_TDRE) == 0)
         return -EAGAIN;
 
-    switch (ctx->frame_size) {
+    switch (ctx->frame_nbits) {
     case sizeof(uint8_t):
         ctx->base->SPI_TDR = (uint32_t)*data;
         return (int)sizeof(uint8_t);

@@ -155,16 +155,16 @@ static int set_clkmode(struct spi *ctx, spi_clock_mode_t clkmode)
     return 0;
 }
 
-static int set_frame_size(struct spi *ctx, size_t frame_size)
+static int set_frame_nbits(struct spi *ctx, size_t frame_nbits)
 {
-    switch (frame_size) {
+    switch (frame_nbits) {
     case 8: ctx->base->C2 &= ~C2_SPIMODE; break;
     case 16: ctx->base->C2 |= C2_SPIMODE; break;
     default:
         picoRTOS_assert(false, return -EINVAL);
     }
 
-    ctx->frame_width = frame_size / (size_t)8;
+    ctx->frame_width = frame_nbits / (size_t)8;
     return 0;
 }
 
@@ -184,8 +184,8 @@ int spi_setup(struct spi *ctx, const struct spi_settings *settings)
         (res = set_clkmode(ctx, settings->clkmode)) < 0)
         return res;
 
-    if (settings->frame_size != 0 &&
-        (res = set_frame_size(ctx, settings->frame_size)) < 0)
+    if (settings->frame_nbits != 0 &&
+        (res = set_frame_nbits(ctx, settings->frame_nbits)) < 0)
         return res;
 
     /* cs_pol: ignore */

@@ -198,7 +198,7 @@ int spi_setup(struct spi *ctx, const struct spi_settings *settings)
         (res = set_bitrate(ctx, settings->bitrate)) < 0)
         return res;
 
-    /* frame_size: ignore */
+    /* frame_nbits: ignore */
     /* cs_pol: ignore */
 
     /* cs: awful */
