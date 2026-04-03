@@ -71,7 +71,7 @@ struct spi_settings {
     unsigned long bitrate; /* 0 = ignore */
     spi_mode_t mode;
     spi_clock_mode_t clkmode;
-    size_t frame_size; /* 0 = ignore */
+    size_t frame_nbits; /* 0 = ignore */
     spi_cs_pol_t cs_pol;
     size_t cs;
 };
