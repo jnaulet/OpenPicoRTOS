@@ -168,7 +168,7 @@ int pwm_n76e003_pwm_setup(struct pwm *ctx, const struct pwm_n76e003_settings *se
     PWMCON1 &= ~PWMCON1_PWMMOD(PWMCON1_PWMMOD_M);
     PWMCON1 |= PWMCON1_PWMMOD(settings->pwmmod);
 
-    ctx->mask = (unsigned char)((settings->pwmmod == 0) ? 1 : 3);
+    ctx->mask = (unsigned char)((settings->pwmmod == PWM_N76E003_PWMMOD_INDEPENDENT) ? 1 : 3);
     PIOCON0 |= (unsigned char)(ctx->mask << ctx->channel);
     return 0;
 }

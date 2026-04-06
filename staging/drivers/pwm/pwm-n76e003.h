@@ -17,7 +17,7 @@ int pwm_n76e003_set_period(struct pwm_n76e003 *ctx, unsigned long pwmp);
 struct pwm {
     /*@temp@*/ struct pwm_n76e003 *parent;
     unsigned int channel;
-    unsigned int mask;
+    unsigned char mask;
 };
 
 int pwm_n76e003_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_n76e003 *parent, size_t channel);
