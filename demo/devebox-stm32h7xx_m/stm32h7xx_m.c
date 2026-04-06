@@ -163,6 +163,7 @@ static void can_init(/*@partial@*/ struct stm32h7xx_m *ctx)
 
     (void)can_bosch_mcan_init(&ctx->can.CAN, ADDR_FDCAN1,
 			      CLOCK_STM32H7XX_HSE_CK,
+			      (uint32_t*)ADDR_CAN_MSG_RAM,
 			      (uint32_t)0, (size_t)896);
 
     (void)can_setup(&ctx->can.CAN, &CAN_settings);

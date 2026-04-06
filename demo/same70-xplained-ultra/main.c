@@ -47,10 +47,34 @@ static void adc_main(void *priv)
         }
 
         /* PWM */
-        (void) pwm_set_duty_cycle(&ctx->PWM, PWM_DUTY_CYCLE_PCENT(data));
+        (void)pwm_set_duty_cycle(&ctx->PWM, PWM_DUTY_CYCLE_PCENT(data));
 
         picoRTOS_assert_void(deadlock != -1);
         picoRTOS_assert_void(data < 4096);
+    }
+}
+
+/*
+ * console_main is a thread that simply echoes characters
+ * On arduino Due, it can be checked by using the USB serial port
+ */
+static void console_main(void *priv)
+{
+    picoRTOS_assert_fatal(priv != NULL, return );
+
+    struct uart *UART = (struct uart*)priv;
+
+    for (;;) {
+
+        char c = (char)0;
+
+        /* just echo */
+        if (uart_read(UART, &c, sizeof(c)) == -EAGAIN) {
+            picoRTOS_schedule();
+            continue;
+        }
+
+        (void)uart_write(UART, &c, sizeof(c));
     }
 }
 
@@ -61,6 +85,7 @@ int main(void)
     struct picoRTOS_task task;
     static picoRTOS_stack_t stack0[CONFIG_DEFAULT_STACK_COUNT];
     static picoRTOS_stack_t stack1[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack2[CONFIG_DEFAULT_STACK_COUNT];
 
     (void)same70_xplained_ultra_init(&ultra);
     picoRTOS_init();
@@ -70,6 +95,9 @@ int main(void)
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
     /* ADC */
     picoRTOS_task_init(&task, adc_main, &ultra, stack1, PICORTOS_STACK_COUNT(stack1));
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+    /* UART */
+    picoRTOS_task_init(&task, console_main, &ultra.UART, stack2, PICORTOS_STACK_COUNT(stack2));
     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
 
     picoRTOS_start();

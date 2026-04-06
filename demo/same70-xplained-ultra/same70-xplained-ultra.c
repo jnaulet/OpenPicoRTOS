@@ -5,7 +5,6 @@
 #include "flash-atmel_eefc.h"
 #include "wd-atmel_wdt.h"
 #include "mux-atmel_pio.h"
-#include "uart-atsamx7x.h"
 #include "misc-atsamx7x_matrix.h"
 
 static int clock_init(void)
@@ -16,7 +15,7 @@ static int clock_init(void)
     struct clock_settings CLOCK_settings = {
         CLOCK_ATMEL_PMC_MAINCK_XTAL,
         12000000ul,
-        300000000ul,    /* plla */
+        150000000ul,    /* plla */
         CLOCK_ATMEL_PMC_UPLL_DIV2,
         CLOCK_ATMEL_PMC_MCKR_CSS_PLLACK,
         1ul,    /* prescaler */
@@ -32,6 +31,8 @@ static int clock_init(void)
 
     (void)clock_atmel_pmc_init(&CLOCK_settings);
 
+    // (void)clock_atmel_pmc_pck_enable((size_t)4, 130u, CLOCK_ATMEL_PMC_PCKR_CSS_UPLLCKDIV);
+    (void)clock_atmel_pmc_pck_enable((size_t)4, 82u, CLOCK_ATMEL_PMC_PCKR_CSS_PLLACK);
     (void)clock_atmel_pmc_pck_enable((size_t)5, 12u, CLOCK_ATMEL_PMC_PCKR_CSS_UPLLCKDIV);
     // (void)clock_atmel_pmc_pck_enable((size_t)6, 12u, CLOCK_ATMEL_PMC_PCKR_CSS_UPLLCKDIV);
     // (void)clock_atmel_pmc_pck_enable((size_t)7, 12u, CLOCK_ATMEL_PMC_PCKR_CSS_UPLLCKDIV);
@@ -41,6 +42,7 @@ static int clock_init(void)
     // (void)clock_atmel_pmc_periph_clk_enable(PID_TC1_CHANNEL0);
     // (void)clock_atmel_pmc_periph_clk_enable(PID_TC1_CHANNEL1);
     (void)clock_atmel_pmc_periph_clk_enable(PID_TC1_CHANNEL2);
+    (void)clock_atmel_pmc_periph_clk_enable(PID_USART1);
 
     return 0;
 }
@@ -48,10 +50,12 @@ static int clock_init(void)
 static int mux_init(void)
 {
     static struct mux PIOA;
+    static struct mux PIOB;
     static struct mux PIOC;
     static struct mux PIOD;
 
     (void)mux_atmel_pio_init(&PIOA, ADDR_PIOA);
+    (void)mux_atmel_pio_init(&PIOB, ADDR_PIOB);
     (void)mux_atmel_pio_init(&PIOC, ADDR_PIOC);
     (void)mux_atmel_pio_init(&PIOD, ADDR_PIOD);
 
@@ -61,6 +65,8 @@ static int mux_init(void)
     (void)mux_atmel_pio_output(&PIOD, (size_t)26, MUX_ATMEL_PIO_GPIO);      /* GND */
     (void)mux_atmel_pio_output(&PIOC, (size_t)31, MUX_ATMEL_PIO_GPIO);      /* VCC */
     (void)mux_atmel_pio_output(&PIOD, (size_t)30, MUX_ATMEL_PIO_DISABLE);   /* AFE0 AD0 */
+    (void)mux_atmel_pio_input(&PIOA, (size_t)21, MUX_ATMEL_PIO_A);          /* RXD1 */
+    (void)mux_atmel_pio_output(&PIOB, (size_t)4, MUX_ATMEL_PIO_D);          /* TXD1 */
 
     return 0;
 }
@@ -145,6 +151,23 @@ static int pwm_init(/*@partial@*/ struct same70_xplained_ultra *ctx)
     return 0;
 }
 
+static int uart_init(/*@partial@*/ struct same70_xplained_ultra *ctx)
+{
+    struct uart_settings UART_settings = {
+        115200ul,
+        (size_t)8,
+        UART_PAR_NONE,
+        UART_CSTOPB_1BIT
+    };
+
+    (void)uart_atsamx7x_usart_irqdriven_init(&ctx->UART, ADDR_USART1, CLOCK_ATMEL_PMC_PCK(4),
+                                             (picoRTOS_irq_t)IRQ(PID_USART1));
+    (void)uart_atsamx7x_usart_set_usclks(&ctx->UART, UART_ATSAMX7X_USART_USCLKS_PCK);
+    (void)uart_setup(&ctx->UART, &UART_settings);
+
+    return 0;
+}
+
 int same70_xplained_ultra_init(/*@out@*/ struct same70_xplained_ultra *ctx)
 {
     (void)clock_init();
@@ -154,6 +177,7 @@ int same70_xplained_ultra_init(/*@out@*/ struct same70_xplained_ultra *ctx)
     (void)can_init(ctx);
     (void)adc_init(ctx);
     (void)pwm_init(ctx);
+    (void)uart_init(ctx);
 
     return 0;
 }

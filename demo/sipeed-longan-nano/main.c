@@ -1,4 +1,5 @@
 #include "picoRTOS.h"
+#include "picoRTOS_device.h"
 #include "sipeed-longan-nano.h"
 
 #include "picoRTOS_mutex.h"
@@ -226,26 +227,29 @@ static void flash_main(void *priv)
 
     int deadlock = CONFIG_DEADLOCK_COUNT;
     struct flash *FLASH = (struct flash*)priv;
+    struct flash_attributes attr;
 
     /* test on last block of flash */
-    size_t block = (size_t)flash_get_nblocks(FLASH) - 1;
-    size_t addr = (size_t)flash_get_block_addr(FLASH, block);
-    const uint32_t *mem = (uint32_t*)addr;
+    (void)flash_probe(FLASH);
+    (void)flash_get_attributes(FLASH, &attr);
+
+    size_t offset = attr.total_size - attr.erase_unit_len;
+    const uint32_t *mem = (uint32_t*)((uintptr_t)FLASH_GD32VF103_ADDR_START + offset);
 
     /* init buffer */
     for (n = 0; n < (size_t)BUF_COUNT; n++)
         buf[n] = (uint32_t)n;
 
     /* erase sector */
-    while ((res = flash_erase(FLASH, block)) == -EAGAIN && deadlock-- != 0)
+    while ((res = flash_erase(FLASH, offset)) == -EAGAIN && deadlock-- != 0)
         picoRTOS_schedule();
 
     picoRTOS_assert_void_fatal(deadlock != -1);
     picoRTOS_assert_void_fatal(res == 0);
 
     /* blankcheck */
-    if (flash_blankcheck(FLASH, block) < 0)
-        picoRTOS_assert_void(false);
+    for (n = 0; n < (attr.erase_unit_len / 4); n++)
+        picoRTOS_assert_void_fatal(mem[n] == (uint32_t)-1);
 
     /* at last, write */
     n = sizeof(buf);
@@ -254,9 +258,9 @@ static void flash_main(void *priv)
         uint8_t *buf8 = (uint8_t*)buf;
         deadlock = CONFIG_DEADLOCK_COUNT;
 
-        while ((res = flash_write(FLASH, addr + (size_t)nwritten, &buf8[nwritten], n)) == -EAGAIN &&
-               deadlock-- != 0)
-            picoRTOS_schedule();
+        while ((res = flash_write(FLASH, offset + (size_t)nwritten,
+                                  &buf8[nwritten], n)) == -EAGAIN &&
+               deadlock-- != 0) picoRTOS_schedule();
 
         picoRTOS_assert_void_fatal(res > 0);
         picoRTOS_assert_void_fatal(deadlock != -1);
