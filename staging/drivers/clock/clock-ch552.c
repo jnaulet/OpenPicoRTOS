@@ -41,7 +41,7 @@ int clock_init(const struct clock_settings *settings)
         /* 5 reset bOSC_EN_INT with AND */
         CLOCK_CFG &= ~CLOCK_CFG_bOSC_EN_INT;
         /* 6 terminate safe mode */
-        SAFE_MOD++;
+        SAFE_MOD = (unsigned char)1;
     }
 
     unsigned char clock_cfg = CLOCK_CFG;
@@ -58,7 +58,7 @@ int clock_init(const struct clock_settings *settings)
     /* 2 write new value to CLOCK_XFG */
     CLOCK_CFG = clock_cfg;
     /* 3 terminate safe mode */
-    SAFE_MOD++;
+    SAFE_MOD = (unsigned char)1;
 
     switch (settings->sys_ck_sel) {
     case CLOCK_CH552_SYS_CK_SEL_000: clock_fsys = 187500ul; break;
