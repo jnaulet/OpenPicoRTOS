@@ -32,8 +32,8 @@ struct MUX_ATMEL_PIO {
     volatile uint32_t PIO_PUER;
     volatile uint32_t PIO_PUSR;
     uint32_t RESERVED4;
+    volatile uint32_t PIO_ABCDSR0;
     volatile uint32_t PIO_ABCDSR1;
-    volatile uint32_t PIO_ABCDSR2;
     uint32_t RESERVED5[2];
     volatile uint32_t PIO_SCIFSR;
     volatile uint32_t PIO_DIFSR;
@@ -92,26 +92,26 @@ static int mux_atmel_pio(struct mux *ctx, mux_atmel_pio_t mux, uint32_t mask)
 
     case MUX_ATMEL_PIO_A:
         ctx->base->PIO_PDR = mask;
+        ctx->base->PIO_ABCDSR0 &= ~mask;
         ctx->base->PIO_ABCDSR1 &= ~mask;
-        ctx->base->PIO_ABCDSR2 &= ~mask;
         break;
 
     case MUX_ATMEL_PIO_B:
         ctx->base->PIO_PDR = mask;
-        ctx->base->PIO_ABCDSR1 |= mask;
-        ctx->base->PIO_ABCDSR2 &= ~mask;
+        ctx->base->PIO_ABCDSR0 |= mask;
+        ctx->base->PIO_ABCDSR1 &= ~mask;
         break;
 
     case MUX_ATMEL_PIO_C:
         ctx->base->PIO_PDR = mask;
-        ctx->base->PIO_ABCDSR1 &= ~mask;
-        ctx->base->PIO_ABCDSR2 |= mask;
+        ctx->base->PIO_ABCDSR0 &= ~mask;
+        ctx->base->PIO_ABCDSR1 |= mask;
         break;
 
     case MUX_ATMEL_PIO_D:
         ctx->base->PIO_PDR = mask;
+        ctx->base->PIO_ABCDSR0 |= mask;
         ctx->base->PIO_ABCDSR1 |= mask;
-        ctx->base->PIO_ABCDSR2 |= mask;
         break;
 
     default:
