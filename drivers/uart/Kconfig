@@ -48,4 +48,12 @@ config UART_ATSAMX7X
        depends on ARM
        bool "ATSAMx7x series UART"
 
+config UART_ATSAMX7X_USART
+       depends on ARM
+       bool "ATSAMx7x series UART/USART"
+
+config UART_ATSAMX7X_USART_IRQDRIVEN
+       depends on UART_ATSAMX7X_USART
+       bool "Support for IRQ-driven driver"
+
 endmenu
