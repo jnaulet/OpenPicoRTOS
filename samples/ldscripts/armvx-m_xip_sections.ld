@@ -7,7 +7,6 @@ SECTIONS
 		__vectors = .;
                 KEEP(*(.vectors))
                 __vectors_end__ = .;
-                *(.text*)
 
                 KEEP(*(.init))
                 KEEP(*(.fini))
@@ -26,6 +25,7 @@ SECTIONS
                 *(SORT(.dtors.*))
                 *(.dtors)
 
+                *(.text*)
                 *(.rodata*)
                 *(.note.*)
 
