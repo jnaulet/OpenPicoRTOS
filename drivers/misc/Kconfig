@@ -15,5 +15,9 @@ config MISC_STM32H7XX_DMAMUX
 config MISC_ATSAMX7X_MATRIX
        depends on ARM
        bool "ATMEL ATSAMx7x MATRIX support"
+       
+config MISC_ATSAMX7X_RSTC
+       depends on ARM
+       bool "ATMEL ATSAMx7x RSTC support"
 
 endmenu
