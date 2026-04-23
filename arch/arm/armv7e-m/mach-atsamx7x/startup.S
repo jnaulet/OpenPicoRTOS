@@ -10,6 +10,7 @@
 	.type Reset_Handler, %function
 	.global Reset_Handler
 Reset_Handler:
+	DISABLE_MPU
 	/* ignore if __text_end__ < __etext */
 	ldr r1, =__relocate_text
 	cmp r1, #0
