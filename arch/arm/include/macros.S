@@ -156,6 +156,15 @@
 	isb
 	.endm
 
+	.equ MPU_CTRL, 0xe000ed94
+	
+	/* DISABLE_MPU */
+	.macro DISABLE_MPU
+	mov r0, #0
+	ldr r11, =MPU_CTRL
+	str r0, [r11]
+	.endm
+
 	/* def_irq_handler */
 	.macro def_irq_handler handler_name
 	.thumb_func
