@@ -166,6 +166,7 @@ at the following address: https://jnaulet.github.io/OpenPicoRTOS
  - Atmel ATtiny414
  - Atmel ATtiny88
  - Atmel ATtiny1607
+ - Atmel ATSAMV7x/E7x
  - Cypress CY7C6801xA / EZ-USB FX2
  - GigaDevice GD32VF103
  - LogicGreen LGT8F328P
@@ -306,6 +307,7 @@ Basic demo code is provided for the following boards:
   - DevEBox STC-C51
   - DevEBox STM32H7xx_M
   - Infineon EZ-USB FX2LP
+  - Microchip SAME70 XPlained Ultra
   - MH-Tiny / MH-Tiny88 (staging)
   - Nuvoton N76E003 / MCU-E003
   - NXP Devkit MPC5748G (dual-core SMP)

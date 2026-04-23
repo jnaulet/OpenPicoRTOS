@@ -1,5 +1,17 @@
 # Release notes
 
+## picoRTOS v1.10.4
+### What's new ?
+
+A lot of support has been added to Atmel SAMV7x & E7x series.
+
+A new type of peripheral (flash-ext) has been added to the HAL & shares the same structures as
+the basic embedded flash HAL.
+
+Added a NOLINT parameter in every init to allow clang-tidy static analysis (more to come)
+
+Some minor and not-so-minor bugfixes on the 8051 series.
+
 ## picoRTOS v1.10.3
 ### What's new ?
 
