@@ -51,7 +51,11 @@ Group: hw-specific  {
       File: EEPROM  (no auto-title, drivers/eeprom/eeprom-avr.c)
       File: GPIO  (no auto-title, drivers/gpio/gpio-avr.c)
       File: MUX  (no auto-title, drivers/mux/mux-avr.c)
-      File: PWM  (no auto-title, drivers/pwm/pwm-avr.c)
+
+      Group: Pwm  {
+
+         File: PWM  (no auto-title, drivers/pwm/pwm-avr.c)
+         }  # Group: Pwm
 
       Group: Spi  {
 
@@ -66,8 +70,13 @@ Group: hw-specific  {
          }  # Group: Spi
 
       File: TWI  (no auto-title, drivers/twi/twi-avr.c)
-      File: UART  (no auto-title, drivers/uart/uart-avr.c)
-      File: UART &lparen;IRQ-driven&rparen;  (no auto-title, drivers/uart/uart-avr_irqdriven.c)
+
+      Group: Uart  {
+
+         File: UART  (no auto-title, drivers/uart/uart-avr.c)
+         File: UART &lparen;IRQ-driven&rparen;  (no auto-title, drivers/uart/uart-avr_irqdriven.c)
+         }  # Group: Uart
+
       File: Watchdog  (no auto-title, drivers/wd/wd-avr.c)
       }  # Group: ATMega / AVR
 
@@ -125,10 +134,19 @@ Group: hw-specific  {
          }  # Group: Clock
 
       File: DMA &lparen;eDMA&rparen;  (no auto-title, drivers/dma/dma-nxp_edma.c)
-      File: GPIO &lparen;SIU&rparen;  (no auto-title, drivers/gpio/gpio-nxp_siu.c)
-      File: GPIO &lparen;SIUL2&rparen;  (no auto-title, drivers/gpio/gpio-nxp_siul2.c)
-      File: MUX &lparen;SIU&rparen;  (no auto-title, drivers/mux/mux-nxp_siu.c)
-      File: MUX &lparen;SIUL2&rparen;  (no auto-title, drivers/mux/mux-nxp_siul2.c)
+
+      Group: Gpio  {
+
+         File: GPIO &lparen;SIU&rparen;  (no auto-title, drivers/gpio/gpio-nxp_siu.c)
+         File: GPIO &lparen;SIUL2&rparen;  (no auto-title, drivers/gpio/gpio-nxp_siul2.c)
+         }  # Group: Gpio
+
+      Group: Mux  {
+
+         File: MUX &lparen;SIU&rparen;  (no auto-title, drivers/mux/mux-nxp_siu.c)
+         File: MUX &lparen;SIUL2&rparen;  (no auto-title, drivers/mux/mux-nxp_siul2.c)
+         }  # Group: Mux
+
       File: PWM &lparen;eMIOS&rparen;  (no auto-title, drivers/pwm/pwm-nxp_emios.c)
       File: SPI &lparen;DSPI&rparen;  (no auto-title, drivers/spi/spi-nxp_dspi.c)
       File: UART &lparen;LinFlexD&rparen;  (no auto-title, drivers/uart/uart-nxp_linflexd.c)
@@ -229,21 +247,38 @@ Group: hw-specific  {
       File: Watchdog  (no auto-title, drivers/wd/wd-same5x.c)
       }  # Group: SAMD5x/E5x
 
+   Group: SAMV7x/E7x  {
+
+      File: ADC  (no auto-title, drivers/adc/adc-atmel_afec.c)
+      File: Clocks  (no auto-title, drivers/clock/clock-atmel_pmc.c)
+      File: Flash  (no auto-title, drivers/flash/flash-atmel_eefc.c)
+      File: GPIO  (no auto-title, drivers/gpio/gpio-atmel_pio.c)
+      File: MUX  (no auto-title, drivers/mux/mux-atmel_pio.c)
+      File: PWM  (no auto-title, drivers/pwm/pwm-atsamx7x.c)
+      File: PWM &lparen;TC&rparen;  (no auto-title, drivers/pwm/pwm-atsamx7x_tc.c)
+
+      Group: Spi  {
+
+         File: SPI  (no auto-title, drivers/spi/spi-atsamx7x.c)
+         File: SPI &lparen;QSPI&rparen;  (no auto-title, drivers/spi/spi-atsamx7x_qspi.c)
+         }  # Group: Spi
+
+      Group: Uart  {
+
+         File: USART  (no auto-title, drivers/uart/uart-atsamx7x_usart.c)
+         File: USART &lparen;IRQ-driven&rparen;  (no auto-title, drivers/uart/uart-atsamx7x_usart_irqdriven.c)
+         File: UART  (no auto-title, drivers/uart/uart-atsamx7x.c)
+         }  # Group: Uart
+
+      File: Watchdog  (no auto-title, drivers/wd/wd-atmel_wdt.c)
+      }  # Group: SAMV7x/E7x
+
    Group: BOSCH  {
 
       File: CAN  (no auto-title, drivers/can/can-bosch_mcan.c)
       }  # Group: BOSCH
 
    }  # Group: hw-specific
-
-Group: Level-2 drivers  {
-
-   Group: EEPROM  {
-
-      File: EEPROM-CY15B004J  (no auto-title, drivers/eeprom/eeprom-cy15b004j.c)
-      }  # Group: EEPROM
-
-   }  # Group: Level-2 drivers
 
 Group: picoRTOS-scheduler-API  {
 
@@ -275,6 +310,7 @@ Group: picoRTOS-Runtime-HAL  {
    File: DMA-SG  (no auto-title, drivers/include/dmasg.h)
    File: EEPROM  (no auto-title, drivers/include/eeprom.h)
    File: Flash  (no auto-title, drivers/include/flash.h)
+   File: External Flash  (no auto-title, drivers/include/flash-ext.h)
    File: GPIO  (no auto-title, drivers/include/gpio.h)
    File: IPWM  (no auto-title, drivers/include/ipwm.h)
    File: LIN  (no auto-title, drivers/include/lin.h)
@@ -286,6 +322,11 @@ Group: picoRTOS-Runtime-HAL  {
    File: 1-WIRE  (no auto-title, drivers/include/w1.h)
    File: Watchdog  (no auto-title, drivers/include/wd.h)
    }  # Group: picoRTOS-Runtime-HAL
+
+Group: EEPROM  {
+
+   File: EEPROM-CY15B004J  (no auto-title, drivers/eeprom/eeprom-cy15b004j.c)
+   }  # Group: EEPROM
 
 Group: Index  {
 
