@@ -57,7 +57,7 @@ picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
     picoRTOS_stack_t *stack_top = stack + stack_count;
     picoRTOS_stack_t *sp = arch_save_first_context(stack_top, fn, priv);
 
-    arch_flush_dcache_opt(sp, (size_t)stack_top - (size_t)sp);
+    arch_flush_dcache(sp, (size_t)stack_top - (size_t)sp);
     return sp;
 }
 
@@ -94,8 +94,8 @@ void arch_delay_us(unsigned long n)
 
 /* CACHE OPS */
 
-#ifdef CONFIG_CACHE_MAINTENANCE
-void arch_invalidate_dcache_opt(void *addr, size_t n)
+#ifdef CONFIG_CACHE
+void arch_invalidate_dcache(void *addr, size_t n)
 {
     arch_assert_void(n > 0);
 
@@ -108,7 +108,7 @@ void arch_invalidate_dcache_opt(void *addr, size_t n)
     ASM("mbar");
 }
 
-void arch_flush_dcache_opt(void *addr, size_t n)
+void arch_flush_dcache(void *addr, size_t n)
 {
     arch_assert_void(n > 0);
 
@@ -119,17 +119,5 @@ void arch_flush_dcache_opt(void *addr, size_t n)
         arch_dcbf(base + (npages * ARCH_L1_DCACHE_LINESIZE));
 
     ASM("mbar");
-}
-#else
-void arch_invalidate_dcache_opt(/*@unused@*/ void *addr, /*@unused@*/ size_t n)
-{
-    /*@i@*/ (void)addr;
-    /*@i@*/ (void)n;
-}
-
-void arch_flush_dcache_opt(/*@unused@*/ void *addr, /*@unused@*/ size_t n)
-{
-    /*@i@*/ (void)addr;
-    /*@i@*/ (void)n;
 }
 #endif

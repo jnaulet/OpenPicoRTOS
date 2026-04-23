@@ -111,7 +111,7 @@ void arch_disable_interrupt(picoRTOS_irq_t irq)
 
 /* STATS */
 
-picoRTOS_cycles_t arch_counter_opt(arch_counter_t counter, picoRTOS_cycles_t t)
+picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
 {
     arch_assert_void(counter < ARCH_COUNTER_COUNT);
 
@@ -149,20 +149,4 @@ void arch_delay_us(unsigned long n)
 
     while (ncycles-- != 0)
         ASM("");
-}
-
-/* CACHES */
-
-void __attribute__((weak))
-arch_invalidate_dcache_opt(/*@unused@*/ void *addr, /*@unused@*/ size_t n)
-{
-    /*@i@*/ (void)addr;
-    /*@i@*/ (void)n;
-}
-
-void __attribute__((weak))
-arch_flush_dcache_opt(/*@unused@*/ void *addr, /*@unused@*/ size_t n)
-{
-    /*@i@*/ (void)addr;
-    /*@i@*/ (void)n;
 }

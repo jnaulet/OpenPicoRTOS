@@ -78,7 +78,7 @@ static struct {
 
 static struct MPU_PMSAV7 *MPU = (struct MPU_PMSAV7*)PMSAV7_BASE; // NOLINT
 
-void arch_mpu_init_opt(void)
+void arch_mpu_init(void)
 {
     size_t n;
 
@@ -137,7 +137,7 @@ static int parse_mode(/*@observer@*/ const char *mode)
     return (int)MPU_RASR;
 }
 
-void arch_mpu_add_region_opt(int pid, const void *addr, size_t n, const char *mode)
+void arch_mpu_add_region(int pid, const void *addr, size_t n, const char *mode)
 {
 #define MPU_RASR_SIZE_COUNT 16
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))

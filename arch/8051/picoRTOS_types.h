@@ -33,10 +33,6 @@ typedef unsigned int picoRTOS_uintptr_t;
 /* very-specific */
 void arch_timer_ack(void);
 
-#define arch_break()                 ASM(" sjmp .") /* branch to self */
-/* STUB OPTIONAL API */
-#define arch_counter(x, y)           0
-#define arch_invalidate_dcache(x, y) /*@i@*/ (void)x
-#define arch_flush_dcache(x, y)      /*@i@*/ (void)x
+#define arch_break() ASM(" sjmp .") /* branch to self */
 
 #endif

@@ -27,9 +27,6 @@ typedef unsigned long picoRTOS_uintptr_t;
 /* no cache */
 #define ARCH_L1_DCACHE_LINESIZE 2 /* 16bit aligned */
 
-#define arch_break()                 ASM("  estop0")
-/* STUB OPTIONAL API */
-#define arch_invalidate_dcache(x, y) /*@i@*/ (void)x
-#define arch_flush_dcache(x, y)      /*@i@*/ (void)x
+#define arch_break() ASM("  estop0")
 
 #endif

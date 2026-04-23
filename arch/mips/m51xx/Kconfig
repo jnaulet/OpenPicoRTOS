@@ -3,6 +3,7 @@ choice
 	depends on M51XX
 
 config MACH_PIC32MZ
+       select CACHE
        bool "PIC32MZ Family"
        
 endchoice

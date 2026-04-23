@@ -63,7 +63,7 @@ picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr)
 
 /* STATS */
 
-picoRTOS_cycles_t arch_counter_opt(arch_counter_t counter, picoRTOS_cycles_t t)
+picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
 {
     arch_assert_void(counter < ARCH_COUNTER_COUNT);
 
@@ -75,20 +75,6 @@ picoRTOS_cycles_t arch_counter_opt(arch_counter_t counter, picoRTOS_cycles_t t)
 
     arch_assert_void(false);
     return 0;
-}
-
-/* CACHES */
-
-void arch_invalidate_dcache_opt(/*@unused@*/ void *addr, /*@unused@*/ size_t n)
-{
-    /*@i@*/ (void)addr;
-    /*@i@*/ (void)n;
-}
-
-void arch_flush_dcache_opt(/*@unused@*/ void *addr, /*@unused@*/ size_t n)
-{
-    /*@i@*/ (void)addr;
-    /*@i@*/ (void)n;
 }
 
 /* CLOCK */

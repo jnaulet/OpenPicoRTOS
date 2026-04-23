@@ -30,10 +30,6 @@ typedef unsigned int picoRTOS_uintptr_t;
 # define main main_no_sdcc_init
 #endif
 
-#define arch_break()                 ASM("break")
-/* STUB OPTIONAL API */
-#define arch_counter(x, y)           0
-#define arch_invalidate_dcache(x, y) /*@i@*/ (void)x
-#define arch_flush_dcache(x, y)      /*@i@*/ (void)x
+#define arch_break() ASM("break")
 
 #endif

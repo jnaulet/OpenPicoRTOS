@@ -128,8 +128,8 @@ picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *var,
     return val;
 }
 
-picoRTOS_cycles_t arch_counter_opt(/*@unused@*/ arch_counter_t counter __attribute__((unused)),
-                                   /*@unused@*/ picoRTOS_cycles_t t __attribute__((unused)))
+picoRTOS_cycles_t arch_counter(/*@unused@*/ arch_counter_t counter __attribute__((unused)),
+                               /*@unused@*/ picoRTOS_cycles_t t __attribute__((unused)))
 {
     return 0;
 }
