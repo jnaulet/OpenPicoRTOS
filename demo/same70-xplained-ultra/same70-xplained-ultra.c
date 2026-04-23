@@ -1,17 +1,17 @@
 #include "same70-xplained-ultra.h"
+
+#include "picoRTOS.h"
+#include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
 #include "clock-atmel_pmc.h"
-#include "flash-atmel_eefc.h"
 #include "wd-atmel_wdt.h"
 #include "mux-atmel_pio.h"
 #include "misc-atsamx7x_matrix.h"
 
-static int clock_init(void)
+static int clock_init(/*@partial@*/ struct same70_xplained_ultra *ctx)
 {
     static struct wd WDT;
-    static struct flash FLASH;
-
     struct clock_settings CLOCK_settings = {
         CLOCK_ATMEL_PMC_MAINCK_XTAL,
         12000000ul,
@@ -26,23 +26,19 @@ static int clock_init(void)
     (void)wd_atmel_wdt_init(&WDT, ADDR_WDT0, CLOCK_ATMEL_PMC_SCLK);
     (void)wd_stop(&WDT); /* can only be done once */
 
-    (void)flash_atmel_eefc_init(&FLASH, ADDR_EFC);
-    (void)flash_atmel_eefc_set_fws(&FLASH, (size_t)7);  /* for 300mhz */
+    (void)flash_atmel_eefc_init(&ctx->FLASH, ADDR_EFC);
+    (void)flash_atmel_eefc_set_fws(&ctx->FLASH, (size_t)7);  /* for 150mhz */
 
     (void)clock_atmel_pmc_init(&CLOCK_settings);
 
-    // (void)clock_atmel_pmc_pck_enable((size_t)4, 130u, CLOCK_ATMEL_PMC_PCKR_CSS_UPLLCKDIV);
-    (void)clock_atmel_pmc_pck_enable((size_t)4, 82u, CLOCK_ATMEL_PMC_PCKR_CSS_PLLACK);
+    (void)clock_atmel_pmc_pck_enable((size_t)4, 130u, CLOCK_ATMEL_PMC_PCKR_CSS_UPLLCKDIV);
     (void)clock_atmel_pmc_pck_enable((size_t)5, 12u, CLOCK_ATMEL_PMC_PCKR_CSS_UPLLCKDIV);
-    // (void)clock_atmel_pmc_pck_enable((size_t)6, 12u, CLOCK_ATMEL_PMC_PCKR_CSS_UPLLCKDIV);
-    // (void)clock_atmel_pmc_pck_enable((size_t)7, 12u, CLOCK_ATMEL_PMC_PCKR_CSS_UPLLCKDIV);
 
     (void)clock_atmel_pmc_periph_clk_enable(PID_MCAN1);
     (void)clock_atmel_pmc_periph_clk_enable(PID_AFEC0);
-    // (void)clock_atmel_pmc_periph_clk_enable(PID_TC1_CHANNEL0);
-    // (void)clock_atmel_pmc_periph_clk_enable(PID_TC1_CHANNEL1);
     (void)clock_atmel_pmc_periph_clk_enable(PID_TC1_CHANNEL2);
     (void)clock_atmel_pmc_periph_clk_enable(PID_USART1);
+    (void)clock_atmel_pmc_periph_clk_enable(PID_QSPI);
 
     return 0;
 }
@@ -60,32 +56,34 @@ static int mux_init(void)
     (void)mux_atmel_pio_init(&PIOD, ADDR_PIOD);
 
     (void)mux_atmel_pio_output(&PIOA, (size_t)5, MUX_ATMEL_PIO_GPIO);       /* LED */
-    (void)mux_atmel_pio_output(&PIOA, (size_t)17, MUX_ATMEL_PIO_GPIO);      /* GND */
     (void)mux_atmel_pio_output(&PIOC, (size_t)30, MUX_ATMEL_PIO_B);         /* TIOB5 */
     (void)mux_atmel_pio_output(&PIOD, (size_t)26, MUX_ATMEL_PIO_GPIO);      /* GND */
     (void)mux_atmel_pio_output(&PIOC, (size_t)31, MUX_ATMEL_PIO_GPIO);      /* VCC */
     (void)mux_atmel_pio_output(&PIOD, (size_t)30, MUX_ATMEL_PIO_DISABLE);   /* AFE0 AD0 */
     (void)mux_atmel_pio_input(&PIOA, (size_t)21, MUX_ATMEL_PIO_A);          /* RXD1 */
     (void)mux_atmel_pio_output(&PIOB, (size_t)4, MUX_ATMEL_PIO_D);          /* TXD1 */
+    (void)mux_atmel_pio_output(&PIOA, (size_t)13, MUX_ATMEL_PIO_A);         /* QIO0 */
+    (void)mux_atmel_pio_output(&PIOA, (size_t)12, MUX_ATMEL_PIO_A);         /* QIO1 */
+    (void)mux_atmel_pio_output(&PIOA, (size_t)17, MUX_ATMEL_PIO_A);         /* QIO2 */
+    (void)mux_atmel_pio_output(&PIOD, (size_t)31, MUX_ATMEL_PIO_A);         /* QIO3 */
+    (void)mux_atmel_pio_output(&PIOA, (size_t)14, MUX_ATMEL_PIO_A);         /* QSCK */
+    (void)mux_atmel_pio_output(&PIOA, (size_t)11, MUX_ATMEL_PIO_A);         /* QCS */
 
     return 0;
 }
 
 static int gpio_init(/*@partial@*/ struct same70_xplained_ultra *ctx)
 {
-    static struct gpio GND;
     static struct gpio VCC;
-    static struct gpio GND2;
+    static struct gpio GND;
 
     (void)gpio_atmel_pio_init(&ctx->USER_LED0, ADDR_PIOA, (size_t)5);
-    (void)gpio_atmel_pio_init(&GND, ADDR_PIOD, (size_t)26);
     (void)gpio_atmel_pio_init(&VCC, ADDR_PIOC, (size_t)31);
-    (void)gpio_atmel_pio_init(&GND2, ADDR_PIOA, (size_t)17);
+    (void)gpio_atmel_pio_init(&GND, ADDR_PIOD, (size_t)26);
 
     /* setup */
-    gpio_write(&GND, false);
     gpio_write(&VCC, true);
-    gpio_write(&GND2, false);
+    gpio_write(&GND, false);
 
     return 0;
 }
@@ -93,6 +91,7 @@ static int gpio_init(/*@partial@*/ struct same70_xplained_ultra *ctx)
 static int can_init(/*@partial@*/ struct same70_xplained_ultra *ctx)
 {
     static struct atsamx7x_matrix MATRIX;
+    /* cppcheck-suppress [unassignedVariable] */
     static uint32_t mram[DEVICE_MCAN_RAM_WORD_COUNT]
     __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
 
@@ -160,17 +159,59 @@ static int uart_init(/*@partial@*/ struct same70_xplained_ultra *ctx)
         UART_CSTOPB_1BIT
     };
 
-    (void)uart_atsamx7x_usart_irqdriven_init(&ctx->UART, ADDR_USART1, CLOCK_ATMEL_PMC_PCK(4),
-                                             (picoRTOS_irq_t)IRQ(PID_USART1));
+    (void)uart_atsamx7x_usart_init(&ctx->UART, ADDR_USART1, CLOCK_ATMEL_PMC_PCK(4));
     (void)uart_atsamx7x_usart_set_usclks(&ctx->UART, UART_ATSAMX7X_USART_USCLKS_PCK);
     (void)uart_setup(&ctx->UART, &UART_settings);
 
     return 0;
 }
 
+static int flash_init(/*@partial@*/ struct same70_xplained_ultra *ctx)
+{
+    struct flash_attributes attr;
+    int deadlock = CONFIG_DEADLOCK_COUNT;
+
+    while (flash_probe(&ctx->FLASH) < 0 && deadlock-- != 0) arch_delay_us(100ul);
+    picoRTOS_assert_void_fatal(deadlock != -1);
+
+    (void)flash_get_attributes(&ctx->FLASH, &attr);
+    return 0;
+}
+
+static int qspi_init(/*@partial@*/ struct same70_xplained_ultra *ctx)
+{
+    struct spi_settings SPI_settings = {
+        75000000ul,
+        SPI_MODE_MASTER,
+        SPI_CLOCK_MODE_0,
+        (size_t)8,
+        SPI_CS_POL_ACTIVE_LOW,
+        0,
+    };
+
+    (void)spi_atsamx7x_qspi_init(&ctx->QSPI, ADDR_QSPI, CLOCK_ATMEL_PMC_MCK);
+    (void)spi_setup(&ctx->QSPI, &SPI_settings);
+
+    return 0;
+}
+
+static int flash_ext_init(/*@partial@*/ struct same70_xplained_ultra *ctx)
+{
+    struct flash_attributes attr;
+    int deadlock = CONFIG_DEADLOCK_COUNT;
+
+    (void)flash_ext_sst26vf_init(&ctx->FLASH_EXT, &ctx->QSPI);
+
+    while (flash_ext_probe(&ctx->FLASH_EXT) < 0 && deadlock-- != 0) arch_delay_us(100ul);
+    picoRTOS_assert_void_fatal(deadlock != -1);
+
+    (void)flash_ext_get_attributes(&ctx->FLASH_EXT, &attr);
+    return 0;
+}
+
 int same70_xplained_ultra_init(/*@out@*/ struct same70_xplained_ultra *ctx)
 {
-    (void)clock_init();
+    (void)clock_init(ctx);
     (void)mux_init();
 
     (void)gpio_init(ctx);
@@ -178,6 +219,9 @@ int same70_xplained_ultra_init(/*@out@*/ struct same70_xplained_ultra *ctx)
     (void)adc_init(ctx);
     (void)pwm_init(ctx);
     (void)uart_init(ctx);
+    (void)flash_init(ctx);
+    (void)qspi_init(ctx);
+    (void)flash_ext_init(ctx);
 
     return 0;
 }
