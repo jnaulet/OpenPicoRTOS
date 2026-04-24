@@ -169,5 +169,9 @@
 
 #define DEVICE_INTERRUPT_VECTOR_COUNT 18
 #define DEVICE_DEFAULT_SYSCLK_HZ      16000000ul
+#define DEVICE_CONTEXT_SAVE_SFRS      0
+
+#define SFRS_PAGE0() do { TA_UNPROTECT(); ASM(" mov 0x91, #0"); } while(false)
+#define SFRS_PAGE1() do { TA_UNPROTECT(); ASM(" mov 0x91, #1"); } while(false)
 
 #endif

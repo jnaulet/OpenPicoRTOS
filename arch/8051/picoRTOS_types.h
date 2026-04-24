@@ -16,7 +16,7 @@ typedef unsigned int picoRTOS_cycles_t;
 typedef int picoRTOS_intptr_t;
 typedef unsigned int picoRTOS_uintptr_t;
 
-#define ARCH_INTIAL_STACK_COUNT 17
+#define ARCH_INTIAL_STACK_COUNT 18 /* +1 for opt. SFRS */
 #define ARCH_MIN_STACK_COUNT    (ARCH_INTIAL_STACK_COUNT + 5)
 
 /* no cache */
@@ -34,5 +34,11 @@ typedef unsigned int picoRTOS_uintptr_t;
 void arch_timer_ack(void);
 
 #define arch_break() ASM(" sjmp .") /* branch to self */
+
+#define TA_UNPROTECT()                          \
+  do {                                          \
+    ASM(" mov 0xc7, #0xaa");                    \
+    ASM(" mov 0xc7, #0x55");                    \
+  } while(false)
 
 #endif

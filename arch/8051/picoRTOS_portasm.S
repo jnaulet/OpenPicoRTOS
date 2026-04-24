@@ -10,14 +10,15 @@
 	.globl _vn
 	.globl __start__stack
 
-	ar7 = 0x07
-	ar6 = 0x06
-	ar5 = 0x05
-	ar4 = 0x04
-	ar3 = 0x03
-	ar2 = 0x02
-	ar1 = 0x01
-	ar0 = 0x00
+	sfrs = 0x91
+	ar7  = 0x07
+	ar6  = 0x06
+	ar5  = 0x05
+	ar4  = 0x04
+	ar3  = 0x03
+	ar2  = 0x02
+	ar1  = 0x01
+	ar0  = 0x00
 
 	.macro SAVE_CONTEXT_STEP1
 	push a
@@ -33,6 +34,9 @@
 	push ar6
 	push ar7
 	push psw
+	.if DEVICE_CONTEXT_SAVE_SFRS != 0
+	push sfrs
+	.endif
 	mov  psw, #0
 	.endm
 
@@ -95,6 +99,9 @@ loop:
 	.endm
 
 	.macro RESTORE_CONTEXT_STEP2
+	.if DEVICE_CONTEXT_SAVE_SFRS != 0
+	pop sfrs
+	.endif
 	pop psw
 	pop ar7
 	pop ar6
@@ -200,6 +207,9 @@ _arch_save_first_context:
 	;; put stack addr on top
 	;; mov dpl, r5 -> already set
 	;; mov dph, r6 -> already set
+	.if DEVICE_CONTEXT_SAVE_SFRS != 0
+	MOVX_DPTRxx #0		; sfrs
+	.endif
 	MOVX_DPTRxx #0		; psw
 	MOVX_DPTRxx #7		; r7
 	MOVX_DPTRxx #6		; r6
@@ -245,7 +255,7 @@ _arch_syscall:
 	;; fish for caller params
 	;; priv on stack
 	mov a, sp
-	add a, #0xef
+	add a, #0xef - DEVICE_CONTEXT_SAVE_SFRS
 	mov r0, a
 	mov a, @r0		; priv
 	push a
@@ -300,7 +310,7 @@ _arch_compare_and_swap_exit:
 	;; r0-7
 	.area REG_BANK_0 (REL,OVR,DATA)
 	.ds 8
-	
+
 	.area DSEG (DATA)
 	.globl _vn
 _vn:
@@ -310,7 +320,7 @@ _vn:
 	.globl __start__stack
 __start__stack:
 	.ds	1
-	
+
 	.area XSEG (XDATA)
 	.globl _ISR_TABLE
 _ISR_TABLE:

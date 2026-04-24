@@ -11,16 +11,18 @@
 #define PERIOD       (LIRC_FREQ_HZ / U(CONFIG_TICK_HZ))
 
 #if CONFIG_TICK_HZ > LIRC_FREQ_HZ
-# error CONFIG_TICK_HZ is too high !
+# error CONFIG_TICK_HZ is too damn high !
 #endif
 
 #ifndef S_SPLINT_S
 __sfr __at(ADDR_WKCON) WKCON;
-__sfr __at(ADDR_RWK)   RWK;
+__sfr __at(ADDR_RWKL)  RWKL;
+__sfr __at(ADDR_RWKH)  RWKH; /* page 2 */
 __sfr __at(ADDR_EIE1)  C99_EIE1;
 #else
 static unsigned char WKCON;
-static unsigned char RWK;
+static unsigned char RWKL;
+static unsigned char RWKH;
 static unsigned char C99_EIE1;
 #endif
 
@@ -36,28 +38,11 @@ static unsigned long sysclk_hz = DEVICE_DEFAULT_SYSCLK_HZ;
 
 void arch_timer_init(void)
 {
-    /* set pre-scaler */
-    WKCON &= ~WKCON_WKPS(WKCON_WKPS_M);
-#if PERIOD > 4095
-    /* ~4-10Khz */
-    WKCON |= WKCON_WKPS(3);
-    RWK = (unsigned char)(256u - (PERIOD / 64u));
-#else
-#if PERIOD > 1023
-    /* ~1-4Khz */
-    WKCON |= WKCON_WKPS(2);
-    RWK = (unsigned char)(256u - (PERIOD / 16u));
-#else
-#if PERIOD > 255
-    /* 256-1023Hz */
-    WKCON |= WKCON_WKPS(1);
-    RWK = (unsigned char)(256u - (PERIOD / 4u));
-#else
-    /* 1-255Hz */
-    RWK = (unsigned char)(256u - PERIOD);
-#endif
-#endif
-#endif
+    unsigned int rwk = 65536u - PERIOD;
+
+    WKCON = (unsigned char)0;
+    RWKL = (unsigned char)rwk;
+    SFRS_PAGE2_EXEC(RWKH = (unsigned char)(rwk >> 8));
 
     /* start timer */
     WKCON |= WKCON_WKTR;
