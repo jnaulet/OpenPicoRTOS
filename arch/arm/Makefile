@@ -24,6 +24,7 @@ c_src-$(CONFIG_ARMV7EM) += $(arch-arm)/armv7e-m/picoRTOS_port.c
 c_src-$(CONFIG_ARMV7EM) += $(armv7em-cache-c_src-y)
 a_src-$(CONFIG_ARMV7EM) += $(arch-arm)/armv7e-m/picoRTOS_portasm.S
 
+c_src-$(CONFIG_MPU_PMSAV6) += $(arch-arm)/armv6-m/mpu_pmsa.c
 c_src-$(CONFIG_MPU_PMSAV7) += $(arch-arm)/armv7e-m/mpu_pmsa.c
 
 # march

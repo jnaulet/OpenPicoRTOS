@@ -6,3 +6,9 @@ config MACH_RP2040
        bool "Raspberry RP2040"
        
 endchoice
+
+config MPU_PMSAV6
+	bool "MPU support (EXPERIMENTAL)"
+	depends on ARMV6M
+        default n
+	select MPU
