@@ -66,7 +66,7 @@ picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *var,
     return val;
 }
 
-picoRTOS_cycles_t arch_counter_opt(arch_counter_t counter, picoRTOS_cycles_t t)
+picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
 {
     return 0;
 }
@@ -115,17 +115,5 @@ void arch_smp_enable_interrupt(picoRTOS_irq_t irq,
 
 void arch_smp_disable_interrupt(picoRTOS_irq_t irq,
                                 picoRTOS_mask_t core_mask)
-{
-}
-
-/* CACHES */
-
-void arch_invalidate_dcache_opt(void *addr __attribute__ ((unused)),
-                                size_t n __attribute__ ((unused)))
-{
-}
-
-void arch_flush_dcache_opt(void *addr __attribute__ ((unused)),
-                           size_t n __attribute__ ((unused)))
 {
 }
