@@ -33,3 +33,9 @@ config FPV5_SP_D16
        bool "fpv5-sp-d16"
 
 endchoice
+
+config MPU_PMSAV7
+	bool "MPU support (EXPERIMENTAL)"
+	depends on ARMV7EM
+        default n
+	select MPU

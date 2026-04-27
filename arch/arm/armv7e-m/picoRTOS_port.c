@@ -148,7 +148,7 @@ void arch_delay_us(unsigned long n)
     unsigned long ncycles = n * ((unsigned long)sysclk_hz / 1000000ul);
 
     while (ncycles-- != 0)
-        ASM("nop");
+        ASM("");
 }
 
 /* CACHES */

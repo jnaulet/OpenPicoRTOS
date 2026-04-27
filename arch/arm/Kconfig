@@ -37,6 +37,7 @@ config CACHE_MAINTENANCE
        depends on ARMV7EM
        default y if (MACH_STM32H7XX || MACH_STM32L4X)
        default n if (MACH_ATSAME5X || MACH_RENESAS_RA4 || MACH_ATSAMX7X)
+       select CACHE
 
 config STUB_NEWLIB_4_4_0
        bool "Stub newlib-4.4.0 I/O calls (recommended)"
