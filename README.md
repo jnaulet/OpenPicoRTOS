@@ -1,6 +1,6 @@
 ![picoRTOS](etc/images/banner.png)
 
-# OpenPicoRTOS [![Latest Release](https://img.shields.io/github/release-date/jnaulet/OpenPicoRTOS)](https://img.shields.io) [![Commits since](https://img.shields.io/github/commits-since/jnaulet/OpenPicoRTOS/latest/v1.10.x)](https://img.shields.io)
+# OpenPicoRTOS [![Latest Release](https://img.shields.io/github/release-date/jnaulet/OpenPicoRTOS)](https://img.shields.io) [![Commits since](https://img.shields.io/github/commits-since/jnaulet/OpenPicoRTOS/latest/v1.11.x)](https://img.shields.io)
 
 Very small, safe, lightning fast, yet portable preemptive RTOS with SMP support.
 
@@ -20,6 +20,7 @@ picoRTOS is a small hard RTOS with as little overhead as humanly possible.
   1. [Shared priorities](#shared-priorities)
   1. [FIFO scheduling](#fifo-scheduling)
   1. [Interrupt management](#interrupt-management)
+  1. [MPU support](#mpu-support)
   1. [Staging tree](#staging-tree)
   1. [Integration in your workflow](#integration-in-your-workflow)
   1. [Featured demos](#featured-demos)
@@ -258,6 +259,19 @@ All architectures are supported (at least partially) at the moment.
 
 This feature should be used with care, as interrupts tend to destroy the real-time part in
 "RTOS".
+
+## MPU support
+
+Version 1.11 introduces native support for MPUs (memory protection units).
+
+Protected regions can easily be added to the architectures that support it by the
+picoRTOS_mpu_add_region() call.
+
+Any use of this function between picoRTOS_init() & picoRTOS_start() will add a region
+for the entire system.
+
+Any call in a thread/task will add a region for this task only, allowing for a very
+precise memory mapping.
 
 ## Staging tree
 
