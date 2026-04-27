@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include "picoRTOS_types.h"
+#include <generated/autoconf.h>
 
 /* Enum: picoRTOS syscalls
  *
@@ -248,18 +249,19 @@ extern /*@unused@*/ void arch_disable_interrupt(picoRTOS_irq_t irq);
 
 /* STATS */
 
-#ifndef arch_counter
 typedef enum {
     ARCH_COUNTER_CURRENT,
     ARCH_COUNTER_SINCE,
     ARCH_COUNTER_COUNT
 } arch_counter_t;
 
-/* Function: arch_counter_opt
+/* Function: arch_counter
  * Provides the current cpu counter value (optional)
  *
  * This value should be between (0-PICORTOS_CYCLES_PER_TICK) and will
  * be used to populate the watermarks in picoRTOS_core::task[n]::stat
+ *
+ * This interface is not needed when using picoRTOS-lite
  *
  * Parameters:
  *  counter - The type of counter we want
@@ -268,35 +270,32 @@ typedef enum {
  * Returns:
  *  The value of the counter in picoRTOS_cycles_t
  */
-extern /*@external@*/ picoRTOS_cycles_t arch_counter_opt(arch_counter_t counter, picoRTOS_cycles_t t);
-# define arch_counter arch_counter_opt
-#endif
+extern /*@external@*/ picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t);
 
 /* CACHES */
 
-#ifndef arch_invalidate_dcache
-/* Function: arch_invalidate_dcache_opt
+#ifdef CONFIG_CACHE
+/* Function: arch_invalidate_dcache
  * Invalidates one or more cache lines (optional)
  *
  * Parameters:
  *  addr - A cacheable address in RAM
  *  n - The number of bytes to invalidate
  */
-extern /*@external@*/ void arch_invalidate_dcache_opt(void *addr, size_t n);
-# define arch_invalidate_dcache arch_invalidate_dcache_opt
-#endif
+extern void arch_invalidate_dcache(void *addr, size_t n);
 
-#ifndef arch_flush_dcache
-/* Function: arch_flush_dcache_opt
+/* Function: arch_flush_dcache
  * Flushes one or more cache lines (optional)
  *
  * Parameters:
  *  addr - A cacheable address in RAM
  *  n - The number of bytes to flush
  */
-extern /*@external@*/ void arch_flush_dcache_opt(void *addr, size_t n);
-# define arch_flush_dcache arch_flush_dcache_opt
-#endif
+extern void arch_flush_dcache(void *addr, size_t n);
+#else
+# define arch_invalidate_dcache(x, y) /*@i@*/ do { (void)x; (void)y; } while(false)
+# define arch_flush_dcache(x, y)      /*@i@*/ (void)x
+#endif /* CONFIG_CACHE */
 
 /* CLOCKS */
 
@@ -315,5 +314,49 @@ extern /*@external@*/ void arch_set_clock_frequency(unsigned long freq);
  *  n - The number of microseconds to wait
  */
 extern /*@external@*/ void arch_delay_us(unsigned long n);
+
+/* MPU */
+
+#ifdef CONFIG_MPU
+/* Function: arch_mpu_init
+ * Initializes the Memory Protection Unit
+ *
+ * This function is called during picoRTOS_init()
+ */
+extern void arch_mpu_init(void);
+
+/* Function: arch_mpu_add_region
+ * Adds a memory region to the MPU
+ *
+ * Parameters:
+ *  pid - The process id (-1 for general)
+ *  addr - An address accessible to the CPU
+ *  n - The size of the region in bytes
+ *  mode - The region mode (basics are rwx, more specific stuff by arch)
+ */
+extern void arch_mpu_add_region(int pid, const void *addr, size_t n, /*@observer@*/ const char *mode);
+
+/* Function: arch_mpu_restore_regions
+ * Restores MPU regions
+ *
+ * Called during context switches
+ *
+ * Parameters:
+ *  pid - The process pid to restore, or -1 for general mpu
+ */
+extern void arch_mpu_restore_regions(int pid);
+
+/* Function: arch_mpu_enable
+ * Enables the MPU
+ *
+ * Called by picoRTOS_start()
+ */
+extern void arch_mpu_enable(void);
+#else
+# define arch_mpu_init()
+# define arch_mpu_add_region(a, b, c, d) /*@i@*/ do { (void)a; (void)b; (void)c; (void)d; } while(false)
+# define arch_mpu_restore_regions(x)     /*@i@*/ (void)x
+# define arch_mpu_enable()
+#endif /* CONFIG_MPU */
 
 #endif

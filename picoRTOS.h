@@ -107,8 +107,12 @@ void picoRTOS_disable_interrupt(picoRTOS_irq_t irq);
 
 /* CACHE MANAGEMENT */
 
-void picoRTOS_invalidate_dcache(void *addr, size_t n);
-void picoRTOS_flush_dcache(void *addr, size_t n);
+void picoRTOS_invalidate_dcache(const void *addr, size_t n);
+void picoRTOS_flush_dcache(const void *addr, size_t n);
+
+/* Memory protection */
+
+void picoRTOS_mpu_add_region(const void *addr, size_t n, /*@observer@*/ const char *mode);
 
 /* Group: picoRTOS assert API */
 

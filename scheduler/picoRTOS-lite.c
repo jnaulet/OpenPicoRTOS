@@ -393,14 +393,21 @@ void picoRTOS_disable_interrupt(picoRTOS_irq_t irq)
     arch_disable_interrupt(irq);
 }
 
-void picoRTOS_invalidate_dcache(void *addr, size_t n)
+void picoRTOS_invalidate_dcache(const void *addr, size_t n)
 {
     picoRTOS_assert_void_fatal(n > 0);
     arch_invalidate_dcache(addr, n);
 }
 
-void picoRTOS_flush_dcache(void *addr, size_t n)
+void picoRTOS_flush_dcache(const void *addr, size_t n)
 {
     picoRTOS_assert_void_fatal(n > 0);
     arch_flush_dcache(addr, n);
+}
+
+void picoRTOS_mpu_add_region(const void *addr, size_t n, const char *mode)
+{
+    picoRTOS_assert_void_fatal(n > 0);
+    if ((picoRTOS.flags & F_RUNNING) == 0) arch_mpu_add_region(-1, addr, n, mode);
+    else arch_mpu_add_region((int)picoRTOS.index, addr, n, mode);
 }

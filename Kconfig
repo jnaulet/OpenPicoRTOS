@@ -115,6 +115,14 @@ config EXTRA_LDFLAGS
 
 endmenu
 
+config CACHE
+       bool
+       default n
+
+config MPU
+       bool
+       default n
+       
 source ipc/Kconfig # IPCs
 source drivers/Kconfig # Device drivers
 source staging/Kconfig # Staging tree

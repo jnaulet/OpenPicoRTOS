@@ -228,6 +228,9 @@ void picoRTOS_task_init(struct picoRTOS_task *task,
 
 void picoRTOS_init(void)
 {
+    /* MPU */
+    arch_mpu_init();
+
     /* reset pids */
     picoRTOS.pid_count = 0;
 
@@ -390,6 +393,7 @@ void picoRTOS_start(void)
     core_arrange_shared_priorities();
 
     arch_smp_init();
+    arch_mpu_enable();
     picoRTOS.flags |= F_RUNNING;
 
     /* start auxiliary cores first */
@@ -541,6 +545,7 @@ syscall_switch_context(struct picoRTOS_task_core *task)
 
         /* refresh current task pointer & state */
         task = &TASK_CURRENT_CORE(core);
+        arch_mpu_restore_regions((int)picoRTOS.index[core]);   /* mpu */
 
         /* postponed tasks management */
         if (picoRTOS.index[core] >= (picoRTOS_pid_t)TASK_IDLE_PID &&
@@ -663,6 +668,7 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
     /* refresh current task pointer */
     task = &TASK_CURRENT();
     task->state = PICORTOS_TASK_STATE_BUSY;
+    arch_mpu_restore_regions((int)picoRTOS.index[core]);
     task_core_stat_start(task);
 
     /* last core to leave tick */
@@ -725,14 +731,21 @@ void picoRTOS_SMP_disable_interrupt(picoRTOS_irq_t irq,
     arch_smp_disable_interrupt(irq, core_mask);
 }
 
-void picoRTOS_invalidate_dcache(/*@unused@*/ void *addr, size_t n)
+void picoRTOS_invalidate_dcache(const void *addr, size_t n)
 {
     picoRTOS_assert_void_fatal(n > 0);
     arch_invalidate_dcache(addr, n);
 }
 
-void picoRTOS_flush_dcache(/*@unused@*/ void *addr, size_t n)
+void picoRTOS_flush_dcache(const void *addr, size_t n)
 {
     picoRTOS_assert_void_fatal(n > 0);
     arch_flush_dcache(addr, n);
+}
+
+void picoRTOS_mpu_add_region(const void *addr, size_t n, const char *mode)
+{
+    picoRTOS_assert_void_fatal(n > 0);
+    if ((picoRTOS.flags & F_RUNNING) == 0) arch_mpu_add_region(-1, addr, n, mode);
+    else arch_mpu_add_region((int)picoRTOS.index[arch_core()], addr, n, mode);
 }

@@ -185,6 +185,9 @@ static void task_idle_init(void)
  */
 void picoRTOS_init(void)
 {
+    /* MPU */
+    arch_mpu_init();
+
     /* reset pids */
     picoRTOS.pid_count = 0;
 
@@ -405,6 +408,7 @@ void picoRTOS_start(void)
     core_arrange_shared_priorities();
 
     arch_init();
+    arch_mpu_enable();
     picoRTOS.flags |= F_RUNNING;
     arch_start_first_task(TASK_BY_PID(TASK_IDLE_PID).sp);
 }
@@ -577,6 +581,7 @@ syscall_switch_context(struct picoRTOS_task_core *task)
 
         /* refresh current task pointer */
         task = &TASK_CURRENT();
+        arch_mpu_restore_regions((int)picoRTOS.index);   /* mpu */
 
         /* postponed tasks management */
         if (picoRTOS.index == (picoRTOS_pid_t)TASK_IDLE_PID &&
@@ -673,6 +678,7 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
 
     /* refresh current task pointer */
     task = &TASK_CURRENT();
+    arch_mpu_restore_regions((int)picoRTOS.index);
 
     /* stats */
     task_core_stat_start(task);
@@ -728,7 +734,7 @@ void picoRTOS_disable_interrupt(picoRTOS_irq_t irq)
  *  addr - The base address to invalidate
  *  n    - The size of the data to invalidate (in bytes)
  */
-void picoRTOS_invalidate_dcache(/*@unused@*/ void *addr, size_t n)
+void picoRTOS_invalidate_dcache(const void *addr, size_t n)
 {
     picoRTOS_assert_void_fatal(n > 0);
     arch_invalidate_dcache(addr, n);
@@ -741,8 +747,25 @@ void picoRTOS_invalidate_dcache(/*@unused@*/ void *addr, size_t n)
  *  addr - The base address to flush
  *  n    - The size of the data to flush (in bytes)
  */
-void picoRTOS_flush_dcache(/*@unused@*/ void *addr, size_t n)
+void picoRTOS_flush_dcache(const void *addr, size_t n)
 {
     picoRTOS_assert_void_fatal(n > 0);
     arch_flush_dcache(addr, n);
+}
+
+/* Group: picoRTOS MPU API */
+
+/* Function: picoRTOS_mpu_add_region
+ * Adds a region to the MPU
+ *
+ * Parameters:
+ *  addr - The base address of the region
+ *  n    - The size of the regioln (in bytes)
+ *  mode - The region mode. ex: "r" for read-only, "rw" for read/write, "rx" for read-execute
+ */
+void picoRTOS_mpu_add_region(const void *addr, size_t n, const char *mode)
+{
+    picoRTOS_assert_void_fatal(n > 0);
+    if ((picoRTOS.flags & F_RUNNING) == 0) arch_mpu_add_region(-1, addr, n, mode);
+    else arch_mpu_add_region((int)picoRTOS.index, addr, n, mode);
 }
