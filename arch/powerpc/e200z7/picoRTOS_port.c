@@ -95,7 +95,7 @@ void arch_delay_us(unsigned long n)
 /* CACHE OPS */
 
 #ifdef CONFIG_CACHE
-void arch_invalidate_dcache(void *addr, size_t n)
+void arch_invalidate_dcache(const void *addr, size_t n)
 {
     arch_assert_void(n > 0);
 
@@ -108,7 +108,7 @@ void arch_invalidate_dcache(void *addr, size_t n)
     ASM("mbar");
 }
 
-void arch_flush_dcache(void *addr, size_t n)
+void arch_flush_dcache(const void *addr, size_t n)
 {
     arch_assert_void(n > 0);
 

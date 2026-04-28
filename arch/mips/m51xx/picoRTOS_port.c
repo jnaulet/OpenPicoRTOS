@@ -97,7 +97,7 @@ picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
 /* CACHE */
 
 /* cppcheck-suppress [unusedFunction,unmatchedSuppression] */
-void arch_invalidate_dcache(void *addr, size_t n)
+void arch_invalidate_dcache(const void *addr, size_t n)
 {
     arch_assert_void(n > 0);
 
@@ -111,7 +111,7 @@ void arch_invalidate_dcache(void *addr, size_t n)
 }
 
 /* cppcheck-suppress [unusedFunction,unmatchedSuppression] */
-void arch_flush_dcache(void *addr, size_t n)
+void arch_flush_dcache(const void *addr, size_t n)
 {
     arch_assert_void(n > 0);
 
