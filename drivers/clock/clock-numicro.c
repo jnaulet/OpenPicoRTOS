@@ -4,11 +4,7 @@
 #include "picoRTOS.h"
 #include "picoRTOS_port.h"
 
-#define TA_KEY     0xaa
-#define TA_KEY_INV 0x55
-
 #ifndef S_SPLINT_S
-__sfr __at(ADDR_TA)      TA;
 __sfr __at(ADDR_PCON)    PCON;
 __sfr __at(ADDR_RCTRIM0) RCTRIM0;
 __sfr __at(ADDR_RCTRIM1) RCTRIM1;
@@ -16,7 +12,6 @@ __sfr __at(ADDR_CKSWT)   CKSWT;
 __sfr __at(ADDR_CKEN)    CKEN;
 __sfr __at(ADDR_CKDIV)   CKDIV;
 #else
-static unsigned char TA;
 static unsigned char PCON;
 static unsigned char RCTRIM0;
 static unsigned char RCTRIM1;
@@ -74,8 +69,7 @@ static int ckswt_osc_fhirc(void)
     int res;
 
     /* enable */
-    TA = (unsigned char)TA_KEY;
-    TA = (unsigned char)TA_KEY_INV;
+    TA_UNPROTECT();
     CKEN = (unsigned char)CKEN_HIRCEN;
 
     /* check */
@@ -83,8 +77,7 @@ static int ckswt_osc_fhirc(void)
         return res;
 
     /* switch */
-    TA = (unsigned char)TA_KEY;
-    TA = (unsigned char)TA_KEY_INV;
+    TA_UNPROTECT();
     CKSWT = (unsigned char)CKSWT_OSC(0);
 
     /* clock */
@@ -100,8 +93,7 @@ static int ckswt_osc_feclk(unsigned long hz)
     int res;
 
     /* enable */
-    TA = (unsigned char)TA_KEY;
-    TA = (unsigned char)TA_KEY_INV;
+    TA_UNPROTECT();
     CKEN = (unsigned char)CKEN_EXTEN(3);
 
     /* check */
@@ -109,8 +101,7 @@ static int ckswt_osc_feclk(unsigned long hz)
         return res;
 
     /* switch */
-    TA = (unsigned char)TA_KEY;
-    TA = (unsigned char)TA_KEY_INV;
+    TA_UNPROTECT();
     CKSWT = (unsigned char)CKSWT_OSC(1);
 
     /* clocks */
@@ -128,8 +119,7 @@ static int ckswt_osc_flirc(void)
         return res;
 
     /* switch */
-    TA = (unsigned char)TA_KEY;
-    TA = (unsigned char)TA_KEY_INV;
+    TA_UNPROTECT();
     CKSWT = (unsigned char)CKSWT_OSC(2);
 
     /* clock */
@@ -155,12 +145,10 @@ static int setup_fhirc(clock_numicro_fhirc_t fhirc)
 
     if (fhirc == CLOCK_NUMICRO_FHIRC_16_6MHZ) {
         /* trim */
-        TA = (unsigned char)TA_KEY;
-        TA = (unsigned char)TA_KEY_INV;
+        TA_UNPROTECT();
         RCTRIM0 = rctrim0;
 
-        TA = (unsigned char)TA_KEY;
-        TA = (unsigned char)TA_KEY_INV;
+        TA_UNPROTECT();
         RCTRIM1 = rctrim1;
 
         /* clear POF */
@@ -170,8 +158,7 @@ static int setup_fhirc(clock_numicro_fhirc_t fhirc)
     }
 
     if (fhirc == CLOCK_NUMICRO_FHIRC_24_0MHZ) {
-        TA = (unsigned char)TA_KEY;
-        TA = (unsigned char)TA_KEY_INV;
+        TA_UNPROTECT();
         RCTRIM1 |= RCTRIM1_HIRC24;
 
         clocks.fhirc = (clock_freq_t)24000000ul;
