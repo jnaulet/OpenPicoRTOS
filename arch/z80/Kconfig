@@ -1,0 +1,13 @@
+menu "Z80 architecture"
+     depends on Z80
+
+choice
+        prompt "MCU series"
+        default MACH_ZXSPECTRUM
+
+config MACH_ZXSPECTRUM
+       bool "Sinclair ZX Spectrum series"
+       
+endchoice
+
+endmenu

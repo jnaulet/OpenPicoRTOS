@@ -1,5 +1,3 @@
-
-
 #include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
@@ -13,7 +11,7 @@ picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
 
 /*@external@*/ extern void arch_start_first_task(picoRTOS_stack_t *sp);
 
-/* 8051 is one of the rare CPUs that can switch contexts without an interrupt,
+/* z80 is one of the rare CPUs that can switch contexts without an interrupt,
  * so this is directly defined in assembly language */
 /*@external@*/ extern void arch_syscall(syscall_t syscall, void *priv);
 
@@ -29,20 +27,20 @@ picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
 void arch_init(void)
 {
     /* disable interrupts & setup timer */
-    ASM(" clr ea");
+    ASM(" di");
     arch_timer_init();
 }
 
 void arch_suspend(void)
 {
     /* disable tick */
-    ASM(" clr ea");
+    ASM(" di");
 }
 
 void arch_resume(void)
 {
     /* enable tick */
-    ASM(" setb ea");
+    ASM(" ei");
 }
 
 picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
@@ -51,10 +49,14 @@ picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
                                      void *priv)
 {
     arch_assert_void(stack_count >= (size_t)ARCH_MIN_STACK_COUNT);
-    /*@i@*/ (void)stack_count;
+    /* z80 has an pre-decrementing stack */
+    return arch_save_first_context(stack + stack_count, fn, priv);
+}
 
-    /* 8051 has an incrementing stack */
-    return arch_save_first_context(stack, fn, priv);
+void __attribute__((weak)) arch_idle(void)
+{
+    for (;;)
+        ASM(" halt");
 }
 
 /* ATOMIC OPS EMULATION */
@@ -79,4 +81,18 @@ void arch_register_interrupt(picoRTOS_irq_t irq, arch_isr_fn fn, void *priv)
 
     ISR_TABLE[irq].fn = fn;
     ISR_TABLE[irq].priv = priv;
+}
+
+void arch_enable_interrupt(picoRTOS_irq_t irq)
+{
+    arch_assert(irq > (picoRTOS_irq_t)0, return );
+    arch_assert(irq < (picoRTOS_irq_t)(DEVICE_INTERRUPT_VECTOR_COUNT + 1), return );
+    /* no effect */
+}
+
+void arch_disable_interrupt(picoRTOS_irq_t irq)
+{
+    arch_assert(irq > (picoRTOS_irq_t)0, return );
+    arch_assert(irq < (picoRTOS_irq_t)(DEVICE_INTERRUPT_VECTOR_COUNT + 1), return );
+    /* no effect */
 }
