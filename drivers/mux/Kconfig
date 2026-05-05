@@ -51,5 +51,9 @@ config MUX_NXP_SIU
 config MUX_ATMEL_PIO
        depends on ARM
        bool "ATMEL SAM series PIO MUX"
+       
+config MUX_NUMICRO
+       depends on 8051
+       bool "Nuvoton Numicro series MUX"
 
 endmenu
