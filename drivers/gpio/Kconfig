@@ -53,4 +53,9 @@ config GPIO_NXP_SIU
 config GPIO_ATMEL_PIO
        depends on ARM
        bool "ATMEL SAM series PIO GPIOs"
+       
+config GPIO_NUMICRO
+       depends on 8051
+       bool "Nuvoton Numicro series GPIOs"
+       
 endmenu

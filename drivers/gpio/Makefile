@@ -16,3 +16,4 @@ c_src-$(CONFIG_GPIO_RENESAS_RA4) += $(drivers-gpio)/gpio-renesas_ra4.c
 c_src-$(CONFIG_GPIO_NXP_SIUL2) += $(drivers-gpio)/gpio-nxp_siul2.c
 c_src-$(CONFIG_GPIO_NXP_SIU) += $(drivers-gpio)/gpio-nxp_siu.c
 c_src-$(CONFIG_GPIO_ATMEL_PIO) += $(drivers-gpio)/gpio-atmel_pio.c
+c_src-$(CONFIG_GPIO_NUMICRO) += $(drivers-gpio)/gpio-numicro.c
