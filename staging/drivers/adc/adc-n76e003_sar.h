@@ -3,7 +3,7 @@
 
 #include "adc.h"
 
-#define ADC_N76E003_SAR_CHANNEL_COUNT 8
+#define ADC_N76E003_SAR_CHANNEL_COUNT 12
 
 struct adc_n76e003 {
     int dummy;
