@@ -172,7 +172,7 @@ static int flash_init(/*@partial@*/ struct same70_xplained_ultra *ctx)
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
     while (flash_probe(&ctx->FLASH) < 0 && deadlock-- != 0) arch_delay_us(100ul);
-    picoRTOS_assert_void_fatal(deadlock != -1);
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
 
     (void)flash_get_attributes(&ctx->FLASH, &attr);
     return 0;
@@ -203,7 +203,7 @@ static int flash_ext_init(/*@partial@*/ struct same70_xplained_ultra *ctx)
     (void)flash_ext_sst26vf_init(&ctx->FLASH_EXT, &ctx->QSPI);
 
     while (flash_ext_probe(&ctx->FLASH_EXT) < 0 && deadlock-- != 0) arch_delay_us(100ul);
-    picoRTOS_assert_void_fatal(deadlock != -1);
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
 
     (void)flash_ext_get_attributes(&ctx->FLASH_EXT, &attr);
     return 0;

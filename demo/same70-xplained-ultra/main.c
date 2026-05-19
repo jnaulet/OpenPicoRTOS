@@ -6,7 +6,7 @@
  */
 static void led_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     picoRTOS_tick_t ref = picoRTOS_get_tick();
     struct gpio *LED = (struct gpio*)priv;
@@ -27,7 +27,7 @@ static void led_main(void *priv)
 
 static void adc_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct same70_xplained_ultra *ctx = (struct same70_xplained_ultra *)priv;
 
@@ -60,7 +60,7 @@ static void adc_main(void *priv)
  */
 static void console_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct uart *UART = (struct uart*)priv;
 
@@ -103,6 +103,6 @@ int main(void)
     picoRTOS_start();
 
     /* stop here */
-    picoRTOS_assert_void_fatal(false);
+    picoRTOS_assert_void(false);
     return 0;
 }
