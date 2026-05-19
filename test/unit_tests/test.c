@@ -509,7 +509,7 @@ UNIT_TEST(picoRTOS_kill){
     picoRTOS_init();
 
     RESET_STATE_MACHINE();
-    picoRTOS_kill();
+    picoRTOS_kill(0);
     u_assert(fatal);
 }
 
@@ -572,7 +572,7 @@ UNIT_TEST(syscall_kill){
     PICORTOS_DOT_INDEX = 0;
 
     /* test #1 */
-    syscall_kill(&TASK_CURRENT());
+    syscall_kill(&TASK_CURRENT(), 0);
     u_assert_var_equals(TASK_CURRENT().state, PICORTOS_TASK_STATE_EMPTY);
 }
 
