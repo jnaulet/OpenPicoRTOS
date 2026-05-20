@@ -13,8 +13,8 @@ typedef unsigned char picoRTOS_atomic_t;
 typedef uint8_t picoRTOS_irq_t;
 typedef unsigned int picoRTOS_cycles_t;
 
-typedef int picoRTOS_intptr_t;
-typedef unsigned int picoRTOS_uintptr_t;
+typedef long picoRTOS_intptr_t;
+typedef unsigned long picoRTOS_uintptr_t;
 
 #define ARCH_INTIAL_STACK_COUNT 18 /* +1 for opt. SFRS */
 #define ARCH_MIN_STACK_COUNT    (ARCH_INTIAL_STACK_COUNT + 5)
