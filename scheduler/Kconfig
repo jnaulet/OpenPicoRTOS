@@ -4,20 +4,21 @@ choice
 	prompt "Main scheduler"
 
 config SINGLE_CORE
-       bool "picoRTOS (single core)"
+       bool "picoRTOS (single core)" if !CC_SDCC
 
 config SMP
-       bool "picoRTOS-SMP (SMP)"
+       bool "picoRTOS-SMP (SMP)" if !CC_SDCC
 
 config LITE
        bool "picoRTOS-lite (single core, no round-robin)"
 
 endchoice
 
-config SMP_CORES
-       int "Number of SMP cores"
-       depends on SMP
-       default 2
+config CORE_COUNT
+       int
+       prompt "Number of cores (SMP)" if SMP
+       default 1 if SINGLE_CORE || LITE
+       default 2 if SMP
        help
           The numbers of cores on which the system will run
 
