@@ -11,7 +11,7 @@ static struct picoRTOS_cond cond = PICORTOS_COND_INITIALIZER;
 
 static void tick_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct gpio *TICK = (struct gpio*)priv;
 
@@ -23,7 +23,7 @@ static void tick_main(void *priv)
 
 static void led0_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct gpio *D2 = (struct gpio*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -48,7 +48,7 @@ static void led0_main(void *priv)
 
 static void led1_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct gpio *D2 = (struct gpio*)priv;
 
@@ -67,7 +67,7 @@ static void led1_main(void *priv)
 
 static void out_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct gpio *OUT = (struct gpio*)priv;
 
@@ -79,7 +79,7 @@ static void out_main(void *priv)
 
 static void uart_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     char c = (char)0;
     struct uart *UART = (struct uart*)priv;

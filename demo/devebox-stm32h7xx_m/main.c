@@ -10,7 +10,7 @@ static struct picoRTOS_cond cond = PICORTOS_COND_INITIALIZER;
 
 static void tick_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct gpio *TICK = (struct gpio*)priv;
 
@@ -22,7 +22,7 @@ static void tick_main(void *priv)
 
 static void led0_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct pwm *PWM = (struct pwm*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -54,7 +54,7 @@ static void led0_main(void *priv)
 
 static void led1_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct pwm *PWM = (struct pwm*)priv;
 
@@ -83,7 +83,7 @@ static void led1_main(void *priv)
  */
 static void spi_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     size_t xfered = 0;
     struct spi *SPI = (struct spi*)priv;
@@ -118,7 +118,7 @@ static void spi_main(void *priv)
  */
 static void uart_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     char tx = (char)0;
     struct uart *UART = (struct uart*)priv;
@@ -153,7 +153,7 @@ static void can_main(void *priv)
 #define CAN_TEST_ID 0x6
 #define CAN_TIMEOUT PICORTOS_DELAY_MSEC(500l)
 
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     int count = 0;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -210,7 +210,7 @@ static void can_main(void *priv)
 
 static void adc_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct adc *TEMP = (struct adc*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();

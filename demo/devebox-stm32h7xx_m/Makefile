@@ -9,23 +9,16 @@ ifeq ($(skip-makefile),)
 PWD := $(shell pwd)
 KBUILD_SRC := ../..
 
-TARGETS := devebox-stm32h7xx_m_ram.elf
-TARGETS += devebox-stm32h7xx_m_flash.elf
-
-defconfig = $(@:%.elf=%_defconfig)
+TARGETS := devebox-stm32h7xx_m.elf
 
 all: $(TARGETS)
 	@
 
 %.elf: FORCE
-	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) $(defconfig)
 	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) TARGET=$@
 
 %:
 	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) $@
-
-current-config: FORCE
-	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) TARGET=devebox-stm32h7xx_m.elf
 
 PHONY += FORCE
 FORCE:

@@ -5,7 +5,7 @@ c_src-y += n76e003.c
 
 #ccflags-y += --out-fmt-elf
 #ldflags-y += --out-fmt-elf
-NUVOPROG := ~/go/bin/nuvoprog
+NUVOPROG := nuvoprog-c
 
 ifneq ($(skip-makefile),1)
 PWD := $(shell pwd)
@@ -21,7 +21,7 @@ $(target): FORCE
 	$(Q)$(MAKE) -C $(PICORTOS_SRC) O=$(PWD) $@
 
 upload: $(target)
-	$(NUVOPROG) program -i $< -t n76e003 -c @config.json
+	$(NUVOPROG) --program $<
 
 PHONY += FORCE
 FORCE:

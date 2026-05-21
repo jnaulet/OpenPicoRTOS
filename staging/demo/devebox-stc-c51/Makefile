@@ -2,6 +2,7 @@ target := devebox-stc-c51.hex
 
 c_src-y += main.c
 c_src-y += devebox-stc-c51.c
+STCGAL := ~/.venv/bin/stcgal
 
 ifneq ($(skip-makefile),1)
 PWD := $(shell pwd)
@@ -14,7 +15,7 @@ $(target): FORCE
 	$(Q)$(MAKE) -C $(PICORTOS_SRC) O=$(PWD)
 
 upload: $(target)
-	stcgal -P stc12 $(target)
+	$(STCGAL) -P stc12 $(target)
 
 %:
 	$(Q)$(MAKE) -C $(PICORTOS_SRC) O=$(PWD) $@
