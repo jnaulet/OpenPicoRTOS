@@ -82,8 +82,7 @@ void arch_timer_init(void)
 
 void arch_set_clock_frequency(unsigned long freq)
 {
-    arch_assert_void(freq != 0);
-    /* FIXME */
+    arch_assert(freq != 0, return );
 }
 
 void arch_delay_us(unsigned long n)
