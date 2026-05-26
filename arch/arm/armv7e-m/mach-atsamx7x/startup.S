@@ -26,8 +26,9 @@ Reset_Handler:
 	INIT_STACK __StackTop
 	/* copy .data section */
 	COPY_TO_RAM __etext, __data_start__, __data_end__
-	/* zero .bss section */
+	/* zero .bss sections */
 	ZERO_RAM __bss_start__, __bss_end__
+	ZERO_RAM __pbss_start__, __pbss_end__
 
 	/* data cache */
 	INVALIDATE_DCACHE
