@@ -1,5 +1,7 @@
 #include "pwm-stm32h7xx_tim.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 #include <stdint.h>
 
@@ -228,6 +230,7 @@ int pwm_stm32h7xx_tim_init(struct pwm_stm32h7xx_tim *ctx, int base, clock_id_t c
     ctx->clkid = clkid;
     ctx->channel_count = channel_count;
     ctx->freq = clock_get_freq(clkid);
+    ctx->is_already_claimed = false;
 
     picoRTOS_assert(ctx->freq > 0, return (int)ctx->freq);
     return 0;
@@ -437,4 +440,12 @@ void pwm_stop(struct pwm *ctx)
 
     parent->base->CCER &= ~(1 << lshift);
     parent->base->CR1 &= ~CR1_CEN;
+}
+
+struct pwm *pwm_claim(struct pwm *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->parent, sizeof(*ctx->parent), MM_URW);
+    picoRTOS_mpu_add_region(ctx->parent->base, sizeof(*ctx->parent->base),
+                            MM_URW | MM_NON_CACHEABLE);
+    return ctx;
 }

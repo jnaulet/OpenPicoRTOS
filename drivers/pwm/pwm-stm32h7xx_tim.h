@@ -4,6 +4,8 @@
 #include "pwm.h"
 #include "clock.h"
 
+#include <stdbool.h>
+
 #define PWM_STM32H7XX_TIM_CHANNEL_MAX 6
 
 struct PWM_STM32H7XX_TIM;
@@ -13,6 +15,7 @@ struct pwm_stm32h7xx_tim {
     clock_id_t clkid;
     size_t channel_count;
     clock_freq_t freq;
+    bool is_already_claimed;
 };
 
 typedef enum {
