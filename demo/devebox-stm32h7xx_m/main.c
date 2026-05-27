@@ -5,14 +5,16 @@
 #include "ipc/picoRTOS_cond.h"
 
 /* IPCs */
-static struct picoRTOS_mutex mutex = PICORTOS_MUTEX_INITIALIZER;
-static struct picoRTOS_cond cond = PICORTOS_COND_INITIALIZER;
+static struct picoRTOS_mutex UNPRIVILEGED_DATA mutex = PICORTOS_MUTEX_INITIALIZER;
+static struct picoRTOS_cond UNPRIVILEGED_DATA cond = PICORTOS_COND_INITIALIZER;
 
 static void tick_main(void *priv)
 {
     picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
+    /* add context as urw */
+    picoRTOS_mpu_add_region(priv, sizeof(struct gpio), MM_URW);
 
-    struct gpio *TICK = (struct gpio*)priv;
+    struct gpio *TICK = gpio_claim((struct gpio*)priv);
 
     for (;;) {
         gpio_toggle(TICK);
@@ -23,9 +25,11 @@ static void tick_main(void *priv)
 static void led0_main(void *priv)
 {
     picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
+    /* add context as urw */
+    picoRTOS_mpu_add_region(priv, sizeof(struct pwm), MM_URW);
 
-    struct pwm *PWM = (struct pwm*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
+    struct pwm *PWM = pwm_claim((struct pwm*)priv);
 
     (void)pwm_set_period(PWM, (pwm_period_us_t)200);
     pwm_start(PWM);
@@ -55,8 +59,10 @@ static void led0_main(void *priv)
 static void led1_main(void *priv)
 {
     picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
+    /* add context as urw */
+    picoRTOS_mpu_add_region(priv, sizeof(struct pwm), MM_URW);
 
-    struct pwm *PWM = (struct pwm*)priv;
+    struct pwm *PWM = pwm_claim((struct pwm*)priv);
 
     for (;;) {
 
@@ -84,9 +90,11 @@ static void led1_main(void *priv)
 static void spi_main(void *priv)
 {
     picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
+    /* add context as urw */
+    picoRTOS_mpu_add_region(priv, sizeof(struct spi), MM_URW);
 
     size_t xfered = 0;
-    struct spi *SPI = (struct spi*)priv;
+    struct spi *SPI = spi_claim((struct spi*)priv);
     char rx[6] = { (char)0, (char)0, (char)0, (char)0, (char)0, (char)0 };
     char tx[6] = { (char)0xa5, (char)0x55, (char)0x5a, (char)0x55, (char)0x4d, (char)0x4e };
 
@@ -104,8 +112,8 @@ static void spi_main(void *priv)
         xfered += (size_t)res;
 
         if (xfered == sizeof(tx)) {
-            picoRTOS_assert_void(rx[0] == (char)0xa5);
-            picoRTOS_assert_void(rx[4] == (char)0x4d);
+            picoRTOS_assert(rx[0] == (char)0xa5, picoRTOS_kill(EIO));
+            picoRTOS_assert(rx[4] == (char)0x4d, picoRTOS_kill(EIO));
             /* start again */
             xfered = 0;
         }
@@ -119,9 +127,11 @@ static void spi_main(void *priv)
 static void uart_main(void *priv)
 {
     picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
+    /* add context as urw */
+    picoRTOS_mpu_add_region(priv, sizeof(struct uart), MM_URW);
 
     char tx = (char)0;
-    struct uart *UART = (struct uart*)priv;
+    struct uart *UART = uart_claim((struct uart*)priv);
 
     for (;;) {
 
@@ -136,8 +146,8 @@ static void uart_main(void *priv)
         while (uart_read(UART, &rx, sizeof(rx)) == -EAGAIN && timeout-- != 0)
             picoRTOS_schedule();
 
-        picoRTOS_assert_void(timeout != -1);
-        picoRTOS_assert_void(tx == rx);
+        picoRTOS_assert(timeout != -1, picoRTOS_kill(ETIMEDOUT));
+        picoRTOS_assert(tx == rx, picoRTOS_kill(EIO));
 
         /* increment data */
         tx = (char)((int)tx + 1);
@@ -154,12 +164,14 @@ static void can_main(void *priv)
 #define CAN_TIMEOUT PICORTOS_DELAY_MSEC(500l)
 
     picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
+    /* add context as urw */
+    picoRTOS_mpu_add_region(priv, sizeof(struct can_test), MM_URW);
 
     int count = 0;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
 
-    struct can *CAN = &((struct can_test*)priv)->CAN;
-    struct rng *TRNG = &((struct can_test*)priv)->TRNG;
+    struct can *CAN = can_claim(&((struct can_test*)priv)->CAN);
+    struct rng *TRNG = rng_claim(&((struct can_test*)priv)->TRNG);
 
     (void)can_accept(CAN, (can_id_t)CAN_TEST_ID, 0);
 
@@ -169,7 +181,8 @@ static void can_main(void *priv)
         can_id_t id = 0;
         int deadlock = CONFIG_DEADLOCK_COUNT;
 
-        static char tx[CAN_DATA_COUNT];
+        char tx[CAN_DATA_COUNT] = { (char)0, (char)0, (char)0, (char)0,
+                                    (char)0, (char)0, (char)0, (char)0 };
         char rx[CAN_DATA_COUNT] = { (char)0, (char)0, (char)0, (char)0,
                                     (char)0, (char)0, (char)0, (char)0 };
 
@@ -211,8 +224,10 @@ static void can_main(void *priv)
 static void adc_main(void *priv)
 {
     picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
+    /* add context as urw */
+    picoRTOS_mpu_add_region(priv, sizeof(struct adc), MM_URW);
 
-    struct adc *TEMP = (struct adc*)priv;
+    struct adc *TEMP = adc_claim((struct adc*)priv);
     picoRTOS_tick_t ref = picoRTOS_get_tick();
 
     for (;;) {

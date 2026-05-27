@@ -1,5 +1,6 @@
 #include "stm32h7xx_m.h"
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
 #include "clock-stm32h7xx.h"
@@ -25,7 +26,7 @@ static void clock_init(void)
             {
                 72000000ul, /* pll2 vco */
                 2ul,        /* pll2_p */
-                0,          /* pll2_q */
+                7ul,        /* pll2_q */
                 0           /* pll2_r */
             },
             {
@@ -100,7 +101,10 @@ static void mux_init(void)
 
 static void gpio_init(/*@partial@*/ struct stm32h7xx_m *ctx)
 {
-    (void)gpio_stm32h7xx_init(&ctx->TICK, ADDR_GPIOB, (size_t)12);
+    static struct gpio_stm32h7xx GPIOB;
+
+    (void)gpio_stm32h7xx_init(&GPIOB, ADDR_GPIOB);
+    (void)gpio_stm32h7xx_gpio_init(&ctx->TICK, &GPIOB, (size_t)12);
     // (void)gpio_stm32h7xx_init(&ctx->LED, ADDR_GPIOA, (size_t)1);
 }
 
@@ -179,13 +183,23 @@ static void adc_init(/*@partial@*/ struct stm32h7xx_m *ctx)
     static struct adc_stm32h7xx_sar ADC3;
     static struct dmamux DMAMUX1_0;
 
+    int deadlock = CONFIG_DEADLOCK_COUNT;
+
     /* ADC & DMA */
     (void)adc_stm32h7xx_sar_init(&ADC3, ADDR_ADC3, CLOCK_STM32H7XX_PLL2_Q_CK,
                                  ADC_STM32H7XX_SAR_MASTER);
+
+    while (adc_stm32h7xx_sar_calibrate(&ADC3, false) < 0 &&
+           deadlock-- != 0) arch_delay_us(100ul);
+
+    picoRTOS_assert(deadlock != -1, return );
+
     (void)dmamux_stm32h7xx_init(&DMAMUX1_0, ADDR_DMAMUX1, (size_t)0);
     (void)dmamux_stm32h7xx_set_dmareq_id(&DMAMUX1_0, 115ul); /* adc3_dma */
 
-    static struct dma DMA_ADC3;
+    /* We consider DMA as a global shared resource here.
+       We might be in the wrong */
+    static struct dma UNPRIVILEGED_DATA DMA_ADC3;
     struct dma *DMA_ADC3_runtime = &DMA_ADC3;
 
     (void)dma_stm32h7xx_init(&DMA_ADC3, ADDR_DMA1, (size_t)0);
