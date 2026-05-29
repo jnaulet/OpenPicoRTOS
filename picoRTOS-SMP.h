@@ -15,9 +15,28 @@
 
 /* INTERRUPT MANAGEMENT (optional) */
 
-void picoRTOS_SMP_enable_interrupt(picoRTOS_irq_t irq,
-                                   picoRTOS_mask_t core_mask);
-void picoRTOS_SMP_disable_interrupt(picoRTOS_irq_t irq,
-                                    picoRTOS_mask_t core_mask);
+void picoRTOS_SMP_set_interrupt(picoRTOS_irq_t irq,
+                                picoRTOS_mask_t core_mask,
+                                bool active);
+
+/* Macro: picoRTOS_SMP_enable_interrupt
+ * Enables an interrupt on the system
+ *
+ * Parameters:
+ *  irq - The irq number to enable
+ *  mask - The core mask to apply
+ */
+#define picoRTOS_SMP_enable_interrupt(irq, mask) \
+  picoRTOS_SMP_set_interrupt(irq, mask, true);
+
+/* Macro: picoRTOS_SMP_disable_interrupt
+ * Disables an interrupt on the system
+ *
+ * Parameters:
+ *  irq - The irq number to disable
+ *  mask - The core mask to apply
+ */
+#define picoRTOS_SMP_disable_interrupt(irq, mask) \
+  picoRTOS_SMP_set_interrupt(irq, mask, false);
 
 #endif
