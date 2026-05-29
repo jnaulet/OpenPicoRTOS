@@ -115,6 +115,10 @@ config EXTRA_LDFLAGS
 
 endmenu
 
+config FPU
+       bool
+       default n
+
 config CACHE
        bool
        default n

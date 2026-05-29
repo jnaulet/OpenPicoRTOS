@@ -26,11 +26,16 @@ choice
 	depends on ARMV7EM
 	prompt "FPU support"
 
+config FP_NONE
+       bool "none"
+
 config FPV4_SP_D16
        bool "fpv4-sp-d16"
+       select FPU
 
 config FPV5_SP_D16
        bool "fpv5-sp-d16"
+       select FPU
 
 endchoice
 
