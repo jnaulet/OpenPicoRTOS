@@ -12,7 +12,9 @@ struct picoRTOS_mutex {
 
 #define PICORTOS_MUTEX_NOOWNER -1
 
-/* macro for static init */
+/* Macro: PICORTOS_MUTEX_INITIALIZER
+ * Statically initializes a mutex
+ */
 #define PICORTOS_MUTEX_INITIALIZER              \
     { (picoRTOS_atomic_t)PICORTOS_MUTEX_NOOWNER, (size_t)0 }
 

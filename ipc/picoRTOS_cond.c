@@ -82,7 +82,7 @@ void picoRTOS_cond_broadcast(struct picoRTOS_cond *cond)
 void picoRTOS_cond_wait(struct picoRTOS_cond *cond, struct picoRTOS_mutex *mutex)
 {
     picoRTOS_invalidate_dcache(cond, sizeof(*cond));
-    picoRTOS_assert_fatal(cond->count < (size_t)CONFIG_TASK_COUNT, return );
+    picoRTOS_assert(cond->count < (size_t)CONFIG_TASK_COUNT, picoRTOS_kill(EINVAL));
 
     /* we already own the mutex */
     cond->count++;

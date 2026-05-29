@@ -6,7 +6,9 @@
 
 typedef picoRTOS_atomic_t picoRTOS_futex_t;
 
-/* macro for static init */
+/* Macro: PICORTOS_FUTEX_INITIALIZER
+ * Statically initializes a futex
+ */
 #define PICORTOS_FUTEX_INITIALIZER (picoRTOS_futex_t)0
 
 void picoRTOS_futex_init(/*@out@*/ picoRTOS_futex_t *futex);        /* init futex */

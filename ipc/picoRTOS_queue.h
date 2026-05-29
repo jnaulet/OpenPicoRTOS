@@ -6,7 +6,7 @@
 #include "picoRTOS_futex.h"
 
 /*
- * Don' use directly, use PICORTOS_QUEUE(type, count)
+ * Don't use directly, use PICORTOS_QUEUE(type, count)
  */
 struct picoRTOS_queue_head {
     picoRTOS_futex_t lock;

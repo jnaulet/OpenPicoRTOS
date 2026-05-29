@@ -15,7 +15,9 @@ struct picoRTOS_cond {
     size_t count;
 } __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
 
-/* macro for static init */
+/* Macro: PICORTOS_COND_INITIALIZER
+ * Statically initializes a condition
+ */
 #define PICORTOS_COND_INITIALIZER               \
     { PICORTOS_COND_NONE, (size_t)0 }
 

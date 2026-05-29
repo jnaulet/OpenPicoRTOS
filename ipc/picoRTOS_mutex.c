@@ -73,7 +73,7 @@ void picoRTOS_mutex_lock(struct picoRTOS_mutex *mutex)
         picoRTOS_schedule();
 
     /* deadlock ? */
-    picoRTOS_assert_void_fatal(loop != -1);
+    picoRTOS_assert(loop != -1, picoRTOS_kill(EDEADLK));
 }
 
 /* Function: picoRTOS_mutex_unlock
@@ -93,8 +93,8 @@ void picoRTOS_mutex_unlock(struct picoRTOS_mutex *mutex)
     picoRTOS_atomic_t owner = (picoRTOS_atomic_t)picoRTOS_self();
 
     picoRTOS_invalidate_dcache(mutex, sizeof(*mutex));
-    picoRTOS_assert_fatal(mutex->owner == owner, return );
-    picoRTOS_assert_fatal(mutex->count > 0, return );
+    picoRTOS_assert(mutex->owner == owner, picoRTOS_kill(EPERM));
+    picoRTOS_assert(mutex->count > 0, picoRTOS_kill(EINVAL));
 
     if (--mutex->count == 0)
         mutex->owner = nobody;
