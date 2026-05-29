@@ -38,7 +38,7 @@ endif
 # linker script
 ldscript  := $(subst ",,$(CONFIG_LDSCRIPT))
 ifneq ($(ldscript),)
-ldflags-y += -L$(dir $(ldscript)) -T$(ldscript)
+ldflags-y := -L$(dir $(ldscript)) -T$(ldscript) $(ldflags-y)
 endif # $(ldscript)
 
 # The filename Kbuild has precedence over Makefile

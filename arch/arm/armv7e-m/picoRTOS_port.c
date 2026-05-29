@@ -10,8 +10,16 @@
 
 /* NVIC */
 #define NVIC_ISER  ((volatile unsigned long*)0xe000e100)
-#define NVIC_SHPR2 ((volatile unsigned long*)0xe000ed1c)
-#define NVIC_SHPR3 ((volatile unsigned long*)0xe000ed20)
+
+/* SCB */
+#define SCB_SHPR2 ((volatile unsigned long*)0xe000ed1c)
+#define SCB_SHPR3 ((volatile unsigned long*)0xe000ed20)
+#define SCB_SHCSR ((volatile unsigned long*)0xe000ed24)
+#define SCB_CFSR  ((volatile unsigned long*)0xe000ed28)
+
+#define SHCSR_USGFAULTENA (1 << 18)
+#define SHCSR_BUSFAULTENA (1 << 17)
+#define SHCSR_MEMFAULTENA (1 << 16)
 
 /* VTOR */
 #define VTOR ((volatile unsigned long*)0xe000ed08)
@@ -36,27 +44,27 @@ static int sysclk_hz = DEVICE_DEFAULT_SYSCLK_HZ;
 void arch_init(void)
 {
     /* disable interrupts */
-    ASM("cpsid if");
+    ASM("cpsid i");
 
     /* set SYSTICK & SVC to max priority (no preempt) */
-    *NVIC_SHPR2 &= ~(0xffu << 24);
-    *NVIC_SHPR3 &= ~(0xffu << 24);
+    *SCB_SHPR2 &= ~(0xffu << 24);
+    *SCB_SHPR3 &= ~(0xffu << 24);
+    /* enable all faults */
+    *SCB_SHCSR |= (0x7u << 16);
 
     /* SYSTICK */
-    *SYSTICK_CSR = 0x6ul;                                               /* stop systick */
     *SYSTICK_CVR = 0;                                                   /* reset */
     *SYSTICK_RVR = (unsigned long)((sysclk_hz / CONFIG_TICK_HZ) - 1);   /* period */
+    *SYSTICK_CSR = 0x7ul;                                               /* systick */
 }
 
 void arch_suspend(void)
 {
     *SYSTICK_CSR &= ~0x1ul; /* stop systick */
-    ASM("cpsid if");        /* disable interrupts */
 }
 
 void arch_resume(void)
 {
-    ASM("cpsie if");        /* enable interrupts */
     *SYSTICK_CSR |= 0x1ul;  /* restart systick */
 }
 
@@ -67,19 +75,6 @@ picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
 {
     /* ARMs have a decrementing stack */
     return arch_save_first_context(stack + stack_count, fn, priv);
-}
-
-void __attribute__((weak)) arch_idle(void)
-{
-    for (;;)
-        ASM("wfe");
-}
-
-/* ATOMIC OPS */
-
-picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr)
-{
-    return arch_compare_and_swap(ptr, 0, (picoRTOS_atomic_t)1);
 }
 
 /* INTERRUPT MANAGEMENT */

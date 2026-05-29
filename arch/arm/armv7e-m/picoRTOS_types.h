@@ -18,6 +18,7 @@ typedef unsigned long picoRTOS_uintptr_t;
 #define ARCH_L1_DCACHE_LINESIZE    CONFIG_L1_CACHE_LINESIZE
 #define ARCH_L1_DCACHE_STACK_COUNT (CONFIG_L1_CACHE_LINESIZE / 4)
 
+#define ARCH_SYS_STACK_COUNT     128                            /* arbitrary */
 #define ARCH_INITIAL_STACK_COUNT (50 + 1)                       /* +1 for aligner */
 #define ARCH_MIN_STACK_COUNT     (ARCH_INITIAL_STACK_COUNT +   \
                                   ARCH_L1_DCACHE_STACK_COUNT + \

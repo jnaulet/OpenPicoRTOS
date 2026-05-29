@@ -21,8 +21,10 @@ armv7em-cache-c_src-$(CONFIG_CACHE_MAINTENANCE) += $(arch-arm)/armv7e-m/cache_mv
 endif
 
 c_src-$(CONFIG_ARMV7EM) += $(arch-arm)/armv7e-m/picoRTOS_port.c
+c_src-$(CONFIG_ARMV7EM) += $(arch-arm)/armv7e-m/picoRTOS_port_u.c
 c_src-$(CONFIG_ARMV7EM) += $(armv7em-cache-c_src-y)
 a_src-$(CONFIG_ARMV7EM) += $(arch-arm)/armv7e-m/picoRTOS_portasm.S
+a_src-$(CONFIG_ARMV7EM) += $(arch-arm)/armv7e-m/picoRTOS_portasm_u.S
 
 c_src-$(CONFIG_MPU_PMSAV6) += $(arch-arm)/armv6-m/mpu_pmsa.c
 c_src-$(CONFIG_MPU_PMSAV7) += $(arch-arm)/armv7e-m/mpu_pmsa.c
@@ -48,7 +50,8 @@ a_src-$(CONFIG_MACH_ATSAMX7X) += $(arch-arm)/armv7e-m/mach-atsamx7x/startup.S
 
 ccflags-$(CONFIG_ARM) += -mthumb $(arch-y) $(fpu-y)
 asflags-$(CONFIG_ARM) += -mthumb $(arch-y) $(fpu-y)
-ldflags-$(CONFIG_ARM) += $(arch-y) $(fpu-y) --specs=nano.specs --specs=nosys.specs
+ldflags-$(CONFIG_ARM) += $(arch-y) $(fpu-y) --specs=nosys.specs
+ldflags-$(CONFIG_ARM) += -L$(arch-arm)/include -Tsections.ld
 
 # newlib-4.4.0
 a_src-$(CONFIG_STUB_NEWLIB_4_4_0) += $(arch-arm)/stub-newlib-4.4.0.S
