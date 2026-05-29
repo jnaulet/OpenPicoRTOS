@@ -138,7 +138,7 @@ static void __attribute__((naked)) core1_start_first_task(void)
     arch_mpu_restore_regions(-1);
     arch_mpu_enable();
 #endif
-    
+
     ASM("pop {r0}");
     ASM("ldr r1, =arch_start_first_task");
     ASM("bx r1");

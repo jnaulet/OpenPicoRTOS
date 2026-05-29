@@ -1,8 +1,13 @@
 #include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
+#include <errno.h>
 #include <stdint.h>
 #include <generated/autoconf.h>
+
+/* system control space */
+#define SCS_BASE    0xe000e000
+#define SCS_LEN     0x1000
 
 #define PMSAV6_BASE 0xe000ed90
 
@@ -57,24 +62,29 @@ struct MPU_PMSAV6 {
 #define MPU_RASR_ENABLE  (1 << 0)
 
 #define MPU_PMSAV6_DREGION_COUNT 8
+#define TASK_COUNT (CONFIG_TASK_COUNT + CONFIG_CORE_COUNT)
+
+struct mpu_entry {
+    volatile uint32_t MPU_RBAR;
+    volatile uint32_t MPU_RASR;
+    struct {
+        uintptr_t addr;
+        mpu_mode_t mode;
+        size_t n;
+    } match;
+};
 
 static struct {
     /* global (pre-sheduler) */
-    size_t count;
     size_t dregion;
-    struct {
-        volatile uint32_t MPU_RBAR;
-        volatile uint32_t MPU_RASR;
-    } MPU[MPU_PMSAV6_DREGION_COUNT];
+    struct mpu_entry MPU[MPU_PMSAV7_DREGION_COUNT];
+    size_t count;
     /* by process */
     struct mpu_pid {
-        struct {
-            volatile uint32_t MPU_RBAR;
-            volatile uint32_t MPU_RASR;
-        } MPU[MPU_PMSAV6_DREGION_COUNT];
+        struct mpu_entry MPU[MPU_PMSAV7_DREGION_COUNT];
         size_t count;
-    } pid[CONFIG_TASK_COUNT];
-} ctx;
+    } pid[TASK_COUNT];
+} mpu;
 
 static struct MPU_PMSAV6 *MPU = (struct MPU_PMSAV6*)PMSAV6_BASE; // NOLINT
 
@@ -82,132 +92,168 @@ void arch_mpu_init(void)
 {
     size_t n;
 
-    ctx.dregion = (size_t)((MPU->MPU_TYPE >> MPU_TYPE_DREGION_S) & MPU_TYPE_DREGION_M);
-    ctx.count = 0;
+    mpu.dregion = (size_t)((MPU->MPU_TYPE >> MPU_TYPE_DREGION_S) & MPU_TYPE_DREGION_M);
+    mpu.count = 0;
 
-    arch_assert(ctx.dregion == (size_t)MPU_PMSAV6_DREGION_COUNT, return );
+    arch_assert(mpu.dregion == (size_t)MPU_PMSAV6_DREGION_COUNT, return );
 
     /* force reset */
-    for (n = 0; n < ctx.dregion; n++) {
+    for (n = 0; n < mpu.dregion; n++) {
         MPU->MPU_RNR = (uint32_t)MPU_RNR_REGION(n);
         MPU->MPU_RASR = 0;
         /* init processes */
-        int m = CONFIG_TASK_COUNT;
+        int m = TASK_COUNT;
         while (m-- != 0) {
-            ctx.pid[m].MPU[n].MPU_RBAR = (uint32_t)(MPU_RBAR_VALID | MPU_RBAR_REGION(n));
-            ctx.pid[m].MPU[n].MPU_RASR = 0;
+            mpu.pid[m].MPU[n].MPU_RBAR = (uint32_t)(MPU_RBAR_VALID | MPU_RBAR_REGION(n));
+            mpu.pid[m].MPU[n].MPU_RASR = 0;
         }
     }
+
+    /* add system region to the memory map, prw
+     * FIXME: might want to put that somewhere else */
+    arch_mpu_add_region(PID_KERNEL, (void*)SCS_BASE, (size_t)SCS_LEN, 0xeu);
 }
 
-static int parse_mode(/*@observer@*/ const char *mode)
+static int parse_mode(mpu_mode_t mode)
 {
-    char c;
-    /* non-executable, read-only, normal cacheable */
-    uint32_t MPU_RASR = (uint32_t)(MPU_RASR_XN | MPU_RASR_AP(7) | MPU_RASR_TEX(5) | MPU_RASR_B);
+    /* defaults: non-executable, privileged read-only, normal cacheable */
+    uint32_t MPU_RASR = (uint32_t)(MPU_RASR_XN | MPU_RASR_AP(5) |
+                                   MPU_RASR_TEX(5) | MPU_RASR_B);
 
-    while ((c = *mode++) != '\0') {
-        switch (c) {
-        case 'r': break;
-        case 'w': MPU_RASR &= ~MPU_RASR_AP(4); break;
-        case 'x': MPU_RASR &= ~MPU_RASR_XN; break;
-        case 'o': MPU_RASR &= ~(MPU_RASR_TEX(MPU_RASR_TEX_M) | MPU_RASR_C | MPU_RASR_B);  break;
-        case 'd':
-            if (*mode != '-') {
-                /* shared device */
-                MPU_RASR &= ~(MPU_RASR_TEX(MPU_RASR_TEX_M) | MPU_RASR_C);
-                MPU_RASR |= MPU_RASR_B;
-            }else{
-                MPU_RASR &= ~(MPU_RASR_TEX(MPU_RASR_TEX_M) | MPU_RASR_C | MPU_RASR_B);
-                MPU_RASR |= MPU_RASR_TEX(2);
-                mode++; /* consume '-' */
-            }
-            break;
+    /* anyway */
+    if ((mode & MM_EXECUTE) != 0)
+        MPU_RASR &= ~MPU_RASR_XN;
 
-        case '-':
-            /* non-cacheable */
-            MPU_RASR &= ~(MPU_RASR_TEX(3) | MPU_RASR_B | MPU_RASR_C);
-            break;
-
-        default:
-            break; /* ignore */
-        }
+    if ((mode & MM_PRIVILEGED) != 0) {
+        /* Privileged read-only */
+        if ((mode & MM_WRITE) != 0)
+            /* Privileged access only */
+            MPU_RASR &= ~MPU_RASR_AP(4);
+    }else{
+        /* Any unprivileged write generates a permission fault */
+        MPU_RASR &= ~MPU_RASR_AP(MPU_RASR_AP_M);
+        MPU_RASR |= MPU_RASR_AP(2);
+        if ((mode & MM_WRITE) != 0)
+            /* Full access */
+            MPU_RASR |= MPU_RASR_AP(1);
     }
 
     return (int)MPU_RASR;
 }
 
-void arch_mpu_add_region(int pid, const void *addr, size_t n, const char *mode)
+#define MPU_ENTRY_MATCH(entry, addr, n, mode)                           \
+  ((uintptr_t)addr >= (entry)->match.addr &&                            \
+   (uintptr_t)addr + n <= (entry)->match.addr + n &&                    \
+   (mode) == (entry)->match.mode) /* FIXME, some mode should be compatible */
+
+static int region_already_exists(int pid, const void *addr, size_t n, mpu_mode_t mode)
+{
+    arch_assert(pid < TASK_COUNT, return -EINVAL);
+    arch_assert(pid >= PID_KERNEL, return -EINVAL);
+    arch_assert(n > 0, return -EINVAL);
+
+    size_t i;
+
+    /* try to match global */
+    for (i = 0; i < mpu.count; i++)
+        if (MPU_ENTRY_MATCH(&mpu.MPU[i], addr, n, mode)) return (int)i;
+    /* try to match pid */
+    for (; i < mpu.pid[pid].count; i++)
+        if (MPU_ENTRY_MATCH(&mpu.pid[pid].MPU[i], addr, n, mode)) return (int)i;
+
+    return -ENOENT;
+}
+
+void arch_mpu_add_region(int pid, const void *addr, size_t n, mpu_mode_t mode)
 {
 #define MPU_RASR_SIZE_COUNT 31 /* 32 is supported but unrealistic */
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
     arch_assert(n > 0, return );
-    arch_assert(pid < CONFIG_TASK_COUNT, return );
+    arch_assert(pid < TASK_COUNT, return );
+    arch_assert(pid >= PID_KERNEL, return );
 
-    bool is_general = (pid < 0);
+    /* jump out asap */
+    if (region_already_exists(pid, addr, n, mode) > -1)
+        return;
+
+    bool is_kernel = (pid < 0);
+    uintptr_t MPU_RBAR = (uintptr_t)addr;
     uint32_t MPU_RASR = (uint32_t)parse_mode(mode);
-    /* align & fix len */
-    uintptr_t ptr = (uintptr_t)((int)addr & ~(MPU_RBAR_VALID | MPU_RBAR_REGION(MPU_RBAR_REGION_M)));
-    n += (size_t)((uintptr_t)addr - ptr);
 
     while (n != 0) {
 
         size_t size = 0;
         uint32_t SIZE = 0;
-        size_t index = ctx.count + (is_general ? 0 : ctx.pid[pid].count);
+        struct mpu_entry *mpu_entry;
+        size_t index = mpu.count + (is_kernel ? 0 : mpu.pid[pid].count);
 
         arch_assert(index < (size_t)MPU_PMSAV6_DREGION_COUNT, return );
 
         /* find closest power of 2 */
         for (SIZE = (uint32_t)7; SIZE < (uint32_t)MPU_RASR_SIZE_COUNT; SIZE++) {
             size = (size_t)(1u << (SIZE + 1));
-            if (n <= size) /*@innerbreak@*/ break;
+            /* align addr & fix len */
+            MPU_RBAR = (uintptr_t)((size_t)MPU_RBAR & ~(size - 1));
+            size_t n1 = n + (size_t)((uintptr_t)addr - MPU_RBAR);
+            if (n1 <= size) /*@innerbreak@*/ break;
         }
 
         /* fine-tune with SRD */
         size_t sr_size = size >> 3;
-        uint32_t SRD = (uint32_t)0xff00u >> ((MAX(size, n) - n) / sr_size);
+        size_t pre = (size_t)((uintptr_t)addr - MPU_RBAR);
+        size_t post = (size_t)((MPU_RBAR + (uintptr_t)size) - ((uintptr_t)addr + (uintptr_t)n));
+        uint32_t SRD = ((uint32_t)0xff00u >> (post / sr_size) |
+                        (uint32_t)0x00ffu >> (8u - (pre / sr_size)));
+
+        /* for regions < 256 bytes */
+        if (size < (size_t)256)
+            SRD = 0;
 
         /* set reg */
         MPU->MPU_RNR = (uint32_t)MPU_RNR_REGION(index);
-        MPU->MPU_RBAR = (uint32_t)ptr;
+        MPU->MPU_RBAR = (uint32_t)MPU_RBAR;
         MPU->MPU_RASR = (uint32_t)(MPU_RASR | MPU_RASR_SRD(SRD) |
                                    MPU_RASR_SIZE(SIZE) | MPU_RASR_ENABLE);
 
+        if (is_kernel) {
+            mpu_entry = &mpu.MPU[index];
+            mpu.count++;
+        }else{
+            mpu_entry = &mpu.pid[pid].MPU[index];
+            mpu.pid[pid].count++;
+        }
+
+        /* fill-up entry */
+        mpu_entry->MPU_RBAR = MPU->MPU_RBAR | MPU_RBAR_VALID;
+        mpu_entry->MPU_RASR = MPU->MPU_RASR;
+        /* cache values */
+        mpu_entry->match.addr = MPU_RBAR;
+        mpu_entry->match.n = size;
+        mpu_entry->match.mode = mode;
+
         /* prepare next round */
         n -= MIN(n, size);
-        ptr += (uintptr_t)size;
-
-        if (is_general) {
-            ctx.MPU[index].MPU_RBAR = MPU->MPU_RBAR | MPU_RBAR_VALID;
-            ctx.MPU[index].MPU_RASR = MPU->MPU_RASR;
-            ctx.count++;
-        }else{
-            ctx.pid[pid].MPU[index].MPU_RBAR = MPU->MPU_RBAR | MPU_RBAR_VALID;
-            ctx.pid[pid].MPU[index].MPU_RASR = MPU->MPU_RASR;
-            ctx.pid[pid].count++;
-        }
+        MPU_RBAR += (uintptr_t)size;
     }
 }
 
 void arch_mpu_restore_regions(int pid)
 {
-    /* ignore idle */
-    if (pid >= CONFIG_TASK_COUNT) return;
+    size_t n;
+
+    arch_assert(pid < TASK_COUNT, return );
+    arch_assert(pid >= PID_KERNEL, return );
 
     if (pid < 0) {
-        size_t n = 0;
-
-        for (; n < ctx.count; n++) {
-            MPU->MPU_RBAR = ctx.MPU[n].MPU_RBAR;
-            MPU->MPU_RASR = ctx.MPU[n].MPU_RASR;
+        /* only used for SMP */
+        for (n = 0; n < (size_t)MPU_PMSAV6_DREGION_COUNT; n++) {
+            MPU->MPU_RBAR = mpu.MPU[n].MPU_RBAR;
+            MPU->MPU_RASR = mpu.MPU[n].MPU_RASR;
         }
-    } else {
-        size_t n = ctx.count;
-        struct mpu_pid *p = &ctx.pid[pid];
-
-        for (; n < (size_t)MPU_PMSAV6_DREGION_COUNT; n++) {
+    }else{
+        struct mpu_pid *p = &mpu.pid[pid];
+        for (n = mpu.count; n < (size_t)MPU_PMSAV6_DREGION_COUNT; n++) {
             MPU->MPU_RBAR = p->MPU[n].MPU_RBAR;
             MPU->MPU_RASR = p->MPU[n].MPU_RASR;
         }

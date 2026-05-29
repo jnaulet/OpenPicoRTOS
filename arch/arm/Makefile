@@ -4,7 +4,9 @@
 arch-arm := $(srctree)/arch/arm
 
 c_src-$(CONFIG_ARMV6M) += $(arch-arm)/armv6-m/picoRTOS_port.c
+c_src-$(CONFIG_ARMV6M) += $(arch-arm)/armv6-m/picoRTOS_port_u.c
 a_src-$(CONFIG_ARMV6M) += $(arch-arm)/armv6-m/picoRTOS_portasm.S
+a_src-$(CONFIG_ARMV6M) += $(arch-arm)/armv6-m/picoRTOS_portasm_u.S
 
 ifeq ($(CONFIG_SMP),y)
 c_src-$(CONFIG_MACH_RP2040) += $(arch-arm)/armv6-m/mach-rp2040/picoRTOS-SMP_port.c

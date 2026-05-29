@@ -10,8 +10,14 @@
 
 /* NVIC */
 #define NVIC_ISER  ((volatile unsigned long*)0xe000e100)
-#define NVIC_SHPR2 ((volatile unsigned long*)0xe000ed1c)
-#define NVIC_SHPR3 ((volatile unsigned long*)0xe000ed20)
+
+/* SCB */
+#define SCB_SHPR2 ((volatile unsigned long*)0xe000ed1c)
+#define SCB_SHPR3 ((volatile unsigned long*)0xe000ed20)
+
+#define SHCSR_USGFAULTENA (1 << 18)
+#define SHCSR_BUSFAULTENA (1 << 17)
+#define SHCSR_MEMFAULTENA (1 << 16)
 
 /* VTOR */
 #define VTOR ((volatile unsigned long*)0xe000ed08)
@@ -36,25 +42,24 @@ void arch_init(void)
     ASM("cpsid i");
 
     /* set SYSTICK & SVC to max priority (no preempt) */
-    *NVIC_SHPR2 &= ~(0x3u << 30);
-    *NVIC_SHPR3 &= ~(0x3u << 30);
+    *SCB_SHPR2 &= ~(0x3u << 30);
+    *SCB_SHPR3 &= ~(0x3u << 30);
+    /* all faults are escalated to hardfault */
 
     /* SYSTICK */
-    *SYSTICK_CSR = 0x6ul;                                               /* stop systick */
     *SYSTICK_CVR = 0;                                                   /* reset */
     *SYSTICK_RVR = (unsigned long)((sysclk_hz / CONFIG_TICK_HZ) - 1);   /* period */
+    *SYSTICK_CSR = 0x7ul;                                               /* systick */
 }
 
 void arch_suspend(void)
 {
-    /* disable interrupts */
-    ASM("cpsid i");
+    *SYSTICK_CSR &= ~0x1ul; /* stop systick */
 }
 
 void arch_resume(void)
 {
-    /* enable interrupts */
-    ASM("cpsie i");
+    *SYSTICK_CSR |= 0x1ul;  /* restart systick */
 }
 
 picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
@@ -64,35 +69,6 @@ picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
 {
     /* ARMs have a decrementing stack */
     return arch_save_first_context(stack + stack_count, fn, priv);
-}
-
-void __attribute__((weak)) arch_idle(void)
-{
-    for (;;)
-        ASM("wfe");
-}
-
-/* ATOMIC OPS EMULATION */
-
-picoRTOS_atomic_t __attribute__((weak))
-arch_compare_and_swap(picoRTOS_atomic_t *var,
-                      picoRTOS_atomic_t old,
-                      picoRTOS_atomic_t val)
-{
-    ASM("cpsid i");
-
-    if (*var == old) {
-        *var = val;
-        val = old;
-    }
-
-    ASM("cpsie i");
-    return val;
-}
-
-picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr)
-{
-    return arch_compare_and_swap(ptr, 0, (picoRTOS_atomic_t)1);
 }
 
 /* INTERRUPT MANAGEMENT */

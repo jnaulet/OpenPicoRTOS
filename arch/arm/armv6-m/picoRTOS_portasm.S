@@ -70,23 +70,14 @@ arch_start_first_task:
 	mov r12, r4
 	mov lr, r5
 
-	/* start systick */
-	movs r1, #1
-	ldr r2, =SYSTICK_CSR
-	ldr r3, [r2]
-	orrs r1, r1, r3
-	str r1, [r2]
-
 	cpsie i		/* enable interrupts */
-	bx r6
 
-	.thumb_func
-	.type arch_syscall, %function
-	.global arch_syscall
-arch_syscall:
-	push {lr}
-	svc #0
-	pop {pc}
+	/* nPRIV, bit[0] Thread mode has unprivileged access */
+	movs r0, #7
+	msr CONTROL, r0
+	
+	/* to idle */
+	bx r6
 
 	.thumb_func
 	.type SysTick_Handler, %function
@@ -109,7 +100,7 @@ SVC_Handler:
 	bl picoRTOS_syscall
 	RESTORE_CONTEXT r0
 	pop {pc}	/* return */
-
+	
 	.thumb_func
 	.type Default_Handler, %function
 	.global Default_Handler
