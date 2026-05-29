@@ -23,6 +23,9 @@ cc-files-y := $(filter $(srctree)%,$(all-files-y))
 all-files-y += $(sort $(call cmd_dep_S,$(a_src-y)))
 # sdcc can't solve assembly includes, hotfix
 all-files-y += $(foreach i,$(subst -I,,$(include-y)),$(wildcard $i/macros.S))
+# add ld files if provided by the port
+ld_files-y += $(foreach i,$(subst -L,,$(ldflags-y)),$(wildcard $i/sections.ld))
+all-files-y += $(ld_files-y)
 
 os-files-y := $(filter $(srctree)%,$(all-files-y))
 PHONY += $(os-files-y)
@@ -51,5 +54,7 @@ $(deploy-dir)/Makefile.in: FORCE
 	$(Q)echo $(subst $(srctree)/,'a_src-y += $$(path)',$(call cmd_lf,$(filter %.asm,$(cc-files-y)))) >> $@
 	$(Q)echo '' >> $@
 	$(Q)echo $(subst $(srctree)/,'include-y += -I$$(path)',$(call cmd_lf,$(sort $(dir $(cc-files-y))))) >> $@
+	$(Q)echo '' >> $@
+	$(Q)echo $(subst $(srctree)/,'ldflags-y += -T$$(path)',$(call cmd_lf,$(sort $(ld_files-y)))) >> $@
 
 .PHONY: $(PHONY)
