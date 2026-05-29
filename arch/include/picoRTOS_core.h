@@ -18,4 +18,23 @@
 # endif
 #endif
 
+/* Macro: PRIVILEGED_DATA
+ * Put the following data in the privileged/kernel section
+ */
+#define PRIVILEGED_DATA   __attribute__((section(".pdata")))
+/* Macro: UNPRIVILEGED_DATA
+ * Put the following daa in the unprivileged/shared section
+ * Typical use:
+ * (start code)
+ * static struct picoRTOS_mutex UNPRIVILEGED_DATA mutex = PICORTOS_MUTEX_INITIALIZER;
+ * static struct picoRTOS_cond UNPRIVILEGED_DATA cond = PICORTOS_COND_INITIALIZER;
+ * (end)
+ */
+#define UNPRIVILEGED_DATA __attribute__((section(".udata")))
+#define PRIVILEGED_STACK  __attribute__((section(".stack")))
+#define PRIVILEGED_BSS    __attribute__((section(".pbss")))
+#define UNPRIVILEGED_BSS  __attribute__((section(".ubss")))
+#define PRIVILEGED_TEXT   __attribute__((section(".ptext")))
+#define UNPRIVILEGED_TEXT __attribute__((section(".utext")))
+
 #endif

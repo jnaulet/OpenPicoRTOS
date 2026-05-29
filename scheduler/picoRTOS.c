@@ -10,16 +10,28 @@
 /* SCHEDULER main structures */
 
 typedef enum {
-    PICORTOS_TASK_STATE_EMPTY,
-    PICORTOS_TASK_STATE_READY,
-    PICORTOS_TASK_STATE_SLEEP
+    TASK_STATE_DISABLED,
+    TASK_STATE_READY,
+    TASK_STATE_SLEEP,
+    TASK_STATE_COUNT
 } picoRTOS_task_state_t;
+
+/* picoRTOS internal faults
+ * These are negative to distinguish them from user faults
+ */
+#define FNONE      0
+#define FINVALID  -1
+#define FDEADLOCK -2 /* task starvation */
+#define FNULLPTR  -3
+#define FSTACKOVF -4
+#define FSEGFAULT -5 /* access violation */
 
 struct picoRTOS_task_core {
     /* state machine */
     /*@temp@*/ picoRTOS_stack_t *sp;
     picoRTOS_task_state_t state;
     picoRTOS_tick_t tick;
+    int fault;
     /* checks */
     /*@temp@*/ picoRTOS_stack_t *stack_bottom;
     /*@temp@*/ picoRTOS_stack_t *stack_top;
@@ -44,7 +56,7 @@ struct picoRTOS_task_sub {
 };
 
 /* user-defined tasks + idle */
-#define TASK_COUNT     (CONFIG_TASK_COUNT + 1)
+#define TASK_COUNT     (CONFIG_TASK_COUNT + CONFIG_CORE_COUNT)
 #define TASK_IDLE_PRIO (TASK_COUNT - 1)
 #define TASK_IDLE_PID  (TASK_COUNT - 1)
 /* shortcut for current task */
@@ -55,7 +67,7 @@ struct picoRTOS_task_sub {
 
 /* cache alignment */
 #define L1_CACHE_ALIGN_MASK(x, mask) (((x) + (mask)) & ~(mask))
-/* make this compliant with clang-tidy-18 */
+/* compliant with clang-tidy-18 */
 static void *L1_CACHE_ALIGN(/*@returned@*/ const char *ptr, int align)
 {
     picoRTOS_uintptr_t uintptr = (picoRTOS_uintptr_t)ptr;
@@ -74,18 +86,19 @@ struct picoRTOS_core {
     picoRTOS_pid_t pid_count;
     struct picoRTOS_task_core task[TASK_COUNT];
     struct picoRTOS_task_sub sub[TASK_COUNT];
-    picoRTOS_stack_t idle_stack[ARCH_MIN_STACK_COUNT];
 } __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
 
 /* main core component */
 static struct picoRTOS_core picoRTOS;
+static picoRTOS_stack_t PRIVILEGED_STACK pstack[ARCH_SYS_STACK_COUNT];
 
 static void task_core_init(/*@out@*/ struct picoRTOS_task_core *task)
 {
     /* state machine */
     task->sp = NULL;
-    task->state = PICORTOS_TASK_STATE_EMPTY;
+    task->state = TASK_STATE_DISABLED;
     task->tick = 0;
+    task->fault = FNONE;
     /* checks */
     task->stack_bottom = NULL;
     task->stack_top = NULL;
@@ -105,7 +118,7 @@ static void task_core_init(/*@out@*/ struct picoRTOS_task_core *task)
 static bool task_core_is_available(const struct picoRTOS_task_core *task)
 {
     /* task is ready and it's its turn */
-    return task->state == PICORTOS_TASK_STATE_READY &&
+    return task->state == TASK_STATE_READY &&
            ((picoRTOS_priority_t)picoRTOS.tick %
             SUB_BY_PRIO(task->prio).count) == task->sub_prio;
 }
@@ -156,37 +169,69 @@ static void task_sub_init(/*@out@*/ struct picoRTOS_task_sub *sub)
     sub->count = (picoRTOS_priority_t)1;
 }
 
-/* Group: picoRTOS scheduler API */
+static void task_append(picoRTOS_pid_t pid,
+                        struct picoRTOS_task *task,
+                        picoRTOS_priority_t prio)
+{
+    picoRTOS_assert(pid < (picoRTOS_pid_t)TASK_COUNT, return );
+    picoRTOS_assert(prio < (picoRTOS_priority_t)TASK_COUNT, return );
+    picoRTOS_assert(TASK_BY_PID(pid).state == TASK_STATE_DISABLED, return );
+
+    /* state machine */
+    TASK_BY_PID(pid).state = TASK_STATE_READY;
+    TASK_BY_PID(pid).sp = arch_prepare_stack(task->stack, task->stack_count,
+                                             task->fn, task->priv);
+    /* checks */
+    TASK_BY_PID(pid).stack_bottom = task->stack;
+    TASK_BY_PID(pid).stack_top = task->stack + task->stack_count;
+    TASK_BY_PID(pid).stack_count = task->stack_count;
+    /* shared priorities */
+    TASK_BY_PID(pid).prio = prio;
+}
 
 static void task_idle_init(void)
 {
     /* IDLE */
-    static struct picoRTOS_task idle;
+    struct picoRTOS_task idle;
+    static picoRTOS_stack_t stack[ARCH_MIN_STACK_COUNT];
 
     /* ensure proper stack alignment */
-    picoRTOS_task_init(&idle, (picoRTOS_task_fn)arch_idle,
-                       NULL, picoRTOS.idle_stack,
+    picoRTOS_task_init(&idle, (picoRTOS_task_fn)arch_idle, NULL, stack,
                        (size_t)ARCH_MIN_STACK_COUNT);
 
     /* similar to picoRTOS_add_task, but without count limit */
-    TASK_BY_PID(TASK_IDLE_PID).state = PICORTOS_TASK_STATE_READY;
-    TASK_BY_PID(TASK_IDLE_PID).sp = arch_prepare_stack(idle.stack, idle.stack_count,
-                                                       idle.fn, idle.priv);
-    /* checks */
-    TASK_BY_PID(TASK_IDLE_PID).stack_bottom = idle.stack;
-    TASK_BY_PID(TASK_IDLE_PID).stack_top = idle.stack + idle.stack_count;
-    TASK_BY_PID(TASK_IDLE_PID).stack_count = idle.stack_count;
-    /* shared priorities, ignored by sort anyway */
-    TASK_BY_PID(TASK_IDLE_PID).prio = (picoRTOS_priority_t)TASK_IDLE_PRIO;
+    task_append((picoRTOS_pid_t)TASK_IDLE_PID, &idle,
+                (picoRTOS_priority_t)TASK_IDLE_PRIO);
 }
+
+/* linker mandatory sections */
+/*@external@*/ extern const void* __pdata_start__[];
+/*@external@*/ extern const size_t __pdata_len__[];
+/*@external@*/ extern const void* __udata_start__[];
+/*@external@*/ extern const size_t __udata_len__[];
+/*@external@*/ extern const void* __ptext_start__[];
+/*@external@*/ extern const size_t __ptext_len__[];
+/* FIXME: partition even more */
+/*@external@*/ extern const void* __utext_start__[];
+/*@external@*/ extern const size_t __utext_len__[];
+
+/* Group: picoRTOS scheduler privileged API */
 
 /* Function: picoRTOS_init
  * Initialises picoRTOS (mandatory)
  */
 void picoRTOS_init(void)
 {
+    /* necessary evil for now (FIXME) */
+    /*@i@*/ (void)pstack;
+
     /* MPU */
     arch_mpu_init();
+    arch_mpu_add_region(PID_KERNEL, (void*)__pdata_start__, (size_t)__pdata_len__, 0xeu);   /* privileged rw */
+    arch_mpu_add_region(PID_KERNEL, (void*)__udata_start__, (size_t)__udata_len__, 0x6u);   /* unprivileged rw */
+    arch_mpu_add_region(PID_KERNEL, (void*)__ptext_start__, (size_t)__ptext_len__, 0xdu);   /* privileged rx */
+    /* TODO: improve code partitioning */
+    arch_mpu_add_region(PID_KERNEL, (void*)__utext_start__, (size_t)__utext_len__, 0x5u);   /* unprivileged rx */
 
     /* reset pids */
     picoRTOS.pid_count = 0;
@@ -234,9 +279,7 @@ void picoRTOS_task_init(struct picoRTOS_task *task,
                         size_t stack_count)
 {
 #define STACK_COUNT_MASK ((ARCH_L1_DCACHE_LINESIZE / sizeof(picoRTOS_stack_t)) - 1)
-
-    picoRTOS_assert_fatal(stack_count >= (size_t)ARCH_MIN_STACK_COUNT,
-                          return );
+    picoRTOS_assert(stack_count >= (size_t)ARCH_MIN_STACK_COUNT, return );
 
     task->fn = fn;
     task->priv = priv;
@@ -263,27 +306,9 @@ void picoRTOS_task_init(struct picoRTOS_task *task,
  */
 void picoRTOS_add_task(struct picoRTOS_task *task, picoRTOS_priority_t prio)
 {
-    picoRTOS_assert_fatal(prio < (picoRTOS_priority_t)CONFIG_TASK_COUNT,
-                          return );
-
-    picoRTOS_pid_t pid = picoRTOS.pid_count;
-
-    picoRTOS_assert_fatal(pid < (picoRTOS_pid_t)CONFIG_TASK_COUNT, return );
-    picoRTOS_assert_fatal(TASK_BY_PID(pid).state == PICORTOS_TASK_STATE_EMPTY, return );
-
-    /* state machine */
-    TASK_BY_PID(pid).state = PICORTOS_TASK_STATE_READY;
-    TASK_BY_PID(pid).sp = arch_prepare_stack(task->stack, task->stack_count,
-                                             task->fn, task->priv);
-    /* checks */
-    TASK_BY_PID(pid).stack_bottom = task->stack;
-    TASK_BY_PID(pid).stack_top = task->stack + task->stack_count;
-    TASK_BY_PID(pid).stack_count = task->stack_count;
-    /* shared priorities */
-    TASK_BY_PID(pid).prio = prio;
-
-    /* increment */
-    picoRTOS.pid_count++;
+    picoRTOS_assert(prio < (picoRTOS_priority_t)CONFIG_TASK_COUNT, return );
+    picoRTOS_assert(picoRTOS.pid_count < (picoRTOS_pid_t)CONFIG_TASK_COUNT, return );
+    task_append(picoRTOS.pid_count++, task, prio);
 }
 
 /* Function: picoRTOS_get_next_available_priority
@@ -318,8 +343,8 @@ picoRTOS_priority_t picoRTOS_get_next_available_priority(void)
         }
 
     /* no slot available */
-    picoRTOS_assert_fatal(prio < (picoRTOS_priority_t)TASK_IDLE_PRIO,
-                          return (picoRTOS_priority_t)-1);
+    picoRTOS_assert(prio < (picoRTOS_priority_t)TASK_IDLE_PRIO,
+                    return (picoRTOS_priority_t)-1);
 
     return prio;
 }
@@ -358,8 +383,8 @@ picoRTOS_priority_t picoRTOS_get_last_available_priority(void)
         }
 
     /* no slot available: overflow */
-    picoRTOS_assert_fatal(prio < (picoRTOS_priority_t)TASK_IDLE_PRIO,
-                          return (picoRTOS_priority_t)-1);
+    picoRTOS_assert(prio < (picoRTOS_priority_t)TASK_IDLE_PRIO,
+                    return (picoRTOS_priority_t)-1);
 
     return prio;
 }
@@ -404,178 +429,52 @@ static void core_arrange_shared_priorities(void)
  */
 void picoRTOS_start(void)
 {
+    picoRTOS_pid_t pid = (picoRTOS_pid_t)TASK_COUNT;
+
     core_sort_tasks();
     core_arrange_shared_priorities();
 
+    /* mpu configuration */
+    while (pid-- != 0) {
+        if (TASK_BY_PID(pid).state == TASK_STATE_DISABLED)
+            continue;
+        /* new region from stack */
+        arch_mpu_add_region((int)pid, TASK_BY_PID(pid).stack_bottom,
+                            TASK_BY_PID(pid).stack_count * sizeof(picoRTOS_stack_t),
+                            0x6u); /* rw unprivileged */
+    }
+
     arch_init();
-    arch_mpu_enable();
     picoRTOS.flags |= F_RUNNING;
+
+    arch_mpu_enable();
+    arch_mpu_restore_regions(TASK_IDLE_PID);
     arch_start_first_task(TASK_BY_PID(TASK_IDLE_PID).sp);
 }
 
-/* Function: picoRTOS_suspend
- * Suspends the scheduling. Typical use is critical sections
- */
-void picoRTOS_suspend(void)
-{
-    picoRTOS_assert_fatal((picoRTOS.flags & F_RUNNING) != 0, return );
-    arch_suspend();
-}
+/* KERNEL PANIC */
 
-/* Function: picoRTOS_resume
- * Resumes the scheduling. Typical use is critical sections
- */
-void picoRTOS_resume(void)
+/*@noreturn@*/ static void fatal(void)
 {
-    picoRTOS_assert_fatal((picoRTOS.flags & F_RUNNING) != 0, return );
-    arch_resume();
-}
-
-/* Function: picoRTOS_fatal
- * Stalls picoRTOS
- */
-void picoRTOS_fatal(void)
-{
-    arch_suspend();
     for (;;)
         arch_break();
 }
 
-/* Function: picoRTOS_postpone
- * Puts the current task back in the scheduler's FIFO (don't wait for next tick)
- */
-void picoRTOS_postpone(void)
-{
-    picoRTOS_assert_fatal((picoRTOS.flags & F_RUNNING) != 0, return );
-    arch_syscall(SYSCALL_SWITCH_CONTEXT, NULL);
-}
-
-/* Function: picoRTOS_sleep
- * Puts the current task to sleep for the specified number of ticks
- *
- * Parameters:
- *  delay - A delay in picoRTOS_tick_t (ticks)
- *
- */
-void picoRTOS_sleep(picoRTOS_tick_t delay)
-{
-    picoRTOS_assert_fatal((picoRTOS.flags & F_RUNNING) != 0, return );
-    arch_syscall(SYSCALL_SLEEP, (struct syscall_sleep*)&delay);
-}
-
-/* Function: picoRTOS_sleep_until
- * Puts the current task to sleep until *ref + period is elapsed.
- *
- * Parameters:
- *  ref - A pointer to a reference time in ticks (will be overwritten)
- *  period - A period in ticks
- *
- * Example:
- * (start code)
- * picoRTOS_tick_t ref = picoRTOS_get_tick();
- *
- * for(;;){
- *   my_periodic_function();
- *   picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
- * }
- * (end)
- *
- * Remarks:
- * If the period is already elapsed (aka we're late), picoRTOS will throw a debug
- * exception, update *ref to current tick and continue anyway
- */
-void picoRTOS_sleep_until(picoRTOS_tick_t *ref, picoRTOS_tick_t period)
-{
-    picoRTOS_assert_fatal(period > 0, return );
-    picoRTOS_assert_fatal((picoRTOS.flags & F_RUNNING) != 0, return );
-
-    struct syscall_sleep_until sc = { *ref, period };
-
-    arch_syscall(SYSCALL_SLEEP_UNTIL, &sc);
-    *ref = sc.ref; /* update ref */
-}
-
-/* Function: picoRTOS_kill
- * Kills the current task (suicide)
- */
-void picoRTOS_kill(void)
-{
-    picoRTOS_assert_fatal((picoRTOS.flags & F_RUNNING) != 0, return );
-    arch_syscall(SYSCALL_KILL, NULL);
-}
-
-/* Function: picoRTOS_self
- * Returns the current task's priority/identitifer
- */
-picoRTOS_pid_t picoRTOS_self(void)
-{
-    picoRTOS_assert_fatal((picoRTOS.flags & F_RUNNING) != 0, return (picoRTOS_pid_t)-1);
-    return (picoRTOS_pid_t)picoRTOS.index;
-}
-
-/* Function: picoRTOS_get_tick
- * Returns the current system tick/timer
- */
-picoRTOS_tick_t picoRTOS_get_tick(void) /*@modifies nothing@*/
-{
-    picoRTOS_assert_fatal((picoRTOS.flags & F_RUNNING) != 0, return (picoRTOS_tick_t)-1);
-    return picoRTOS.tick;
-}
-
 /* SYSCALLS */
 
-static void syscall_sleep(struct picoRTOS_task_core *task,
-                          const struct syscall_sleep *sc)
-{
-    if (sc->delay > 0) {
-        task->tick = picoRTOS.tick + sc->delay;
-        task->state = PICORTOS_TASK_STATE_SLEEP;
-    }
-}
-
-static void syscall_sleep_until(struct picoRTOS_task_core *task,
-                                struct syscall_sleep_until *sc)
-{
-    picoRTOS_tick_t elapsed = picoRTOS.tick - sc->ref;
-
-    if (elapsed < sc->period) {
-        task->tick = sc->ref + sc->period;
-        sc->ref = task->tick;
-        task->state = PICORTOS_TASK_STATE_SLEEP;
-        /* error management */
-        task->deadline_miss_count = 0;
-        return;
-    }
-
-    /* missed the clock: retry until deadlock */
-    if (++task->deadline_miss_count > (size_t)CONFIG_DEADLOCK_COUNT) {
-        picoRTOS_assert_void(false); /* force break */
-        sc->ref = picoRTOS.tick;
-    }
-
-    /* stats */
-    task->stat.deadline_miss_count++;
-}
-
-static void syscall_kill(struct picoRTOS_task_core *task)
-{
-    task->state = PICORTOS_TASK_STATE_EMPTY;
-}
-
-/*@exposed@*/
-static struct picoRTOS_task_core *
+/*@exposed@*/ static struct picoRTOS_task_core *
 syscall_switch_context(struct picoRTOS_task_core *task)
 {
-    int count = 2;
+    int deadlock = CONFIG_DEADLOCK_COUNT;
 
     /* stats */
     task_core_stat_finish(task);
 
-    while (count-- != 0) {
+    while (deadlock-- != 0) {
         /* choose next task to run */
         do {
             picoRTOS.index++;
-            picoRTOS_assert_void_fatal(picoRTOS.index < (picoRTOS_pid_t)TASK_COUNT);
+            picoRTOS_assert(picoRTOS.index < (picoRTOS_pid_t)TASK_COUNT, fatal());
             /* ignore sleeping, empty tasks & out-of-round sub-tasks */
         } while (!task_core_is_available(&TASK_CURRENT()));
 
@@ -594,47 +493,132 @@ syscall_switch_context(struct picoRTOS_task_core *task)
             break;
     }
 
-    picoRTOS_assert_void_fatal(count != -1);    /* check */
-    task_core_stat_start(task);                 /* stats */
+    picoRTOS_assert(deadlock != -1, fatal());
+    task_core_stat_start(task); /* stats */
+    return task;
+}
 
+static void tick_fault(struct picoRTOS_task_core *task, int fault)
+{
+    task->state = TASK_STATE_DISABLED;
+    task->fault = fault;
+}
+
+/*@exposed@*/ static struct picoRTOS_task_core *
+syscall_kill(struct picoRTOS_task_core *task, int fault)
+{
+    tick_fault(task, fault);
+    return syscall_switch_context(task);
+}
+
+/*@exposed@*/ static struct picoRTOS_task_core *
+syscall_sleep(struct picoRTOS_task_core *task, picoRTOS_tick_t delay)
+{
+    if (delay > 0) {
+        task->tick = picoRTOS.tick + delay;
+        task->state = TASK_STATE_SLEEP;
+    }else
+        picoRTOS.flags |= F_POSTPONED;
+
+    return syscall_switch_context(task);
+}
+
+/*@exposed@*/ static struct picoRTOS_task_core *
+syscall_sleep_until(/*@returned@*/ struct picoRTOS_task_core *task,
+                    struct syscall_sleep_until *sc)
+{
+    picoRTOS_tick_t elapsed = picoRTOS.tick - sc->ref;
+
+    if (elapsed < sc->period) {
+        task->tick = sc->ref + sc->period;
+        sc->ref = task->tick;
+        task->state = TASK_STATE_SLEEP;
+        /* error management */
+        task->deadline_miss_count = 0;
+        return syscall_switch_context(task);
+    }
+
+    /* missed the clock: retry until deadlock */
+    if (++task->deadline_miss_count > (size_t)CONFIG_DEADLOCK_COUNT) {
+        picoRTOS_assert_void(false);            /* force break in debug */
+        return syscall_kill(task, FDEADLOCK);   /* kill out-of-control task */
+    }
+
+    /* stats */
+    task->stat.deadline_miss_count++;
+    return task; /* don't switch */
+}
+
+/*@exposed@*/ static struct picoRTOS_task_core *
+syscall_run(/*@returned@*/ struct picoRTOS_task_core *task, const bool *run)
+{
+    if (*run) arch_resume();
+    else arch_suspend();
+    /* don't switch context */
+    return task;
+}
+
+/*@exposed@*/ static struct picoRTOS_task_core *
+syscall_get_tick(/*@returned@*/ struct picoRTOS_task_core *task, picoRTOS_tick_t *tick)
+{
+    *tick = picoRTOS.tick;
+    return task;
+}
+
+/*@exposed@*/ static struct picoRTOS_task_core *
+syscall_get_pid(/*@returned@*/ struct picoRTOS_task_core *task, picoRTOS_pid_t *pid)
+{
+    *pid = picoRTOS.index;
+    return task;
+}
+
+/*@exposed@*/ static struct picoRTOS_task_core *
+syscall_cacheop(/*@returned@*/ struct picoRTOS_task_core *task,
+                const struct syscall_cacheop *op)
+{
+    if (op->invalidate) arch_invalidate_dcache(op->addr, op->n);
+    if (op->flush) arch_flush_dcache(op->addr, op->n);
+    return task;
+}
+
+/*@exposed@*/ static struct picoRTOS_task_core *
+syscall_mpu(/*@returned@*/ struct picoRTOS_task_core *task,
+            const struct syscall_mpu *mpu)
+{
+    arch_mpu_add_region((int)picoRTOS.index, mpu->addr, mpu->n, mpu->mode);
     return task;
 }
 
 picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, syscall_t syscall, void *priv)
 {
-    picoRTOS_assert_fatal(syscall < SYSCALL_COUNT, return NULL);
-
     struct picoRTOS_task_core *task = &TASK_CURRENT();
 
-    picoRTOS_assert_fatal(sp >= task->stack_bottom, return NULL);
-    picoRTOS_assert_fatal(sp < task->stack_top, return NULL);
+    picoRTOS_assert((picoRTOS.flags & F_RUNNING) != 0, fatal());
+    picoRTOS_assert(sp >= task->stack_bottom, return syscall_kill(task, FSTACKOVF)->sp);
+    picoRTOS_assert(sp < task->stack_top, return syscall_kill(task, FSTACKOVF)->sp);
+    picoRTOS_assert(priv != NULL, return syscall_kill(task, FNULLPTR)->sp);
 
     /* store current sp */
     task->sp = sp;
 
     switch (syscall) {
-    case SYSCALL_SLEEP:
-        picoRTOS_assert_fatal(priv != NULL, return NULL);
-        syscall_sleep(task, (struct syscall_sleep*)priv);
-        break;
-
-    case SYSCALL_SLEEP_UNTIL:
-        picoRTOS_assert_fatal(priv != NULL, return NULL);
-        syscall_sleep_until(task, (struct syscall_sleep_until*)priv);
-        break;
-
-    case SYSCALL_KILL:
-        syscall_kill(task);
-        break;
-
-    default:
-        /* SYSCALL_SWITCH_CONTEXT */
-        picoRTOS.flags |= F_POSTPONED;
-        break;
+    /* OS-related syscalls */
+    case SYSCALL_RUN: return syscall_run(task, (bool*)priv)->sp;
+    case SYSCALL_GETTICK: return syscall_get_tick(task, (picoRTOS_tick_t*)priv)->sp;
+    case SYSCALL_CACHEOP: return syscall_cacheop(task, (struct syscall_cacheop*)priv)->sp;
+    /* task-related syscalls */
+    case SYSCALL_SLEEP:  return syscall_sleep(task, *(picoRTOS_tick_t*)priv)->sp;
+    case SYSCALL_SLEEP_UNTIL: return syscall_sleep_until(task, (struct syscall_sleep_until*)priv)->sp;
+    case SYSCALL_GETPID: return syscall_get_pid(task, (picoRTOS_pid_t*)priv)->sp;
+    case SYSCALL_MPU: return syscall_mpu(task, (struct syscall_mpu*)priv)->sp;
+    case SYSCALL_KILL: return syscall_kill(task, *(int*)priv)->sp;
+    case SYSCALL_SEGFAULT: return syscall_kill(task, FSEGFAULT)->sp;
+    default: break;
     }
 
-    task = syscall_switch_context(task);
-    return task->sp;
+    /* unhandled syscall */
+    picoRTOS_assert_void(false);
+    return syscall_kill(task, FINVALID)->sp;
 }
 
 /* TICK */
@@ -643,8 +627,8 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
 {
     struct picoRTOS_task_core *task = &TASK_CURRENT();
 
-    picoRTOS_assert_fatal(sp >= task->stack_bottom, return NULL);
-    picoRTOS_assert_fatal(sp < task->stack_top, return NULL);
+    picoRTOS_assert(sp >= task->stack_bottom, tick_fault(task, FSTACKOVF));
+    picoRTOS_assert(sp < task->stack_top, tick_fault(task, FSTACKOVF));
 
     /* stats */
     task_core_stat_finish(task);
@@ -663,10 +647,10 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
 
         task = &TASK_BY_PID(pid);
 
-        if (task->state == PICORTOS_TASK_STATE_SLEEP &&
+        if (task->state == TASK_STATE_SLEEP &&
             task->tick == picoRTOS.tick)
             /* task is ready to rumble */
-            task->state = PICORTOS_TASK_STATE_READY;
+            task->state = TASK_STATE_READY;
 
         /* select highest priority ready task */
         if (task_core_is_available(task))
@@ -686,7 +670,7 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
     return task->sp;
 }
 
-/* Group: picoRTOS interrupt API */
+/* Group: picoRTOS interrupt privileged API */
 
 /* Function: picoRTOS_register_interrupt
  * Registers an interrupt/irq to the system
@@ -700,72 +684,20 @@ void picoRTOS_register_interrupt(picoRTOS_irq_t irq,
                                  picoRTOS_isr_fn fn,
                                  void *priv)
 {
+    /* supervisor only (no syscall needed) */
     arch_register_interrupt(irq, fn, priv);
 }
 
-/* Function: picoRTOS_enable_interrupt
- * Enables an interrupt on the system
+/* Function: picoRTOS_set_interrupt
+ * Enables/disabled an interrupt on the system
  *
  * Parameters:
  *  irq - The irq number to enable
+ *  active - true of false to enable/disable the irq
  */
-void picoRTOS_enable_interrupt(picoRTOS_irq_t irq)
+void picoRTOS_set_interrupt(picoRTOS_irq_t irq, bool active)
 {
-    arch_enable_interrupt(irq);
-}
-
-/* Function: picoRTOS_disable_interrupt
- * Disables an interrupt on the system
- *
- * Parameters:
- *  irq - The irq number to disable
- */
-void picoRTOS_disable_interrupt(picoRTOS_irq_t irq)
-{
-    arch_disable_interrupt(irq);
-}
-
-/* Group: picoRTOS cache maintenance API */
-
-/* Function: picoRTOS_invalidate_dcache
- * Invalidates the data cache by address(es)
- *
- * Parameters:
- *  addr - The base address to invalidate
- *  n    - The size of the data to invalidate (in bytes)
- */
-void picoRTOS_invalidate_dcache(const void *addr, size_t n)
-{
-    picoRTOS_assert_void_fatal(n > 0);
-    arch_invalidate_dcache(addr, n);
-}
-
-/* Function: picoRTOS_flush_dcache
- * Flushes the data cache by address(es)
- *
- * Parameters:
- *  addr - The base address to flush
- *  n    - The size of the data to flush (in bytes)
- */
-void picoRTOS_flush_dcache(const void *addr, size_t n)
-{
-    picoRTOS_assert_void_fatal(n > 0);
-    arch_flush_dcache(addr, n);
-}
-
-/* Group: picoRTOS MPU API */
-
-/* Function: picoRTOS_mpu_add_region
- * Adds a region to the MPU
- *
- * Parameters:
- *  addr - The base address of the region
- *  n    - The size of the regioln (in bytes)
- *  mode - The region mode. ex: "r" for read-only, "rw" for read/write, "rx" for read-execute
- */
-void picoRTOS_mpu_add_region(const void *addr, size_t n, const char *mode)
-{
-    picoRTOS_assert_void_fatal(n > 0);
-    if ((picoRTOS.flags & F_RUNNING) == 0) arch_mpu_add_region(-1, addr, n, mode);
-    else arch_mpu_add_region((int)picoRTOS.index, addr, n, mode);
+    /* supervisor only (no syscall needed) */
+    if (active) arch_enable_interrupt(irq);
+    else arch_disable_interrupt(irq);
 }

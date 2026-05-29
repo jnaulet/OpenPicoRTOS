@@ -32,32 +32,44 @@ void picoRTOS_task_init(/*@out@*/ struct picoRTOS_task *task,
  */
 #define PICORTOS_STACK_COUNT(x) (sizeof(x) / sizeof(picoRTOS_stack_t))
 
-/* SCHEDULER */
+/* PRE-SCHEDULER */
+
 void picoRTOS_init(void);
 void picoRTOS_add_task(struct picoRTOS_task *task,
                        picoRTOS_priority_t prio);                       /* register task */
 picoRTOS_priority_t picoRTOS_get_next_available_priority(void);         /* get next free priority slot */
 picoRTOS_priority_t picoRTOS_get_last_available_priority(void);         /* get last free priority slot */
-
 /*@maynotreturn@*/ void picoRTOS_start(void);                           /* starts picoRTOS */
-void picoRTOS_suspend(void);                                            /* suspends the scheduling */
-void picoRTOS_resume(void);                                             /* resumes the scheduling */
-/*@unused@*/ /*@noreturn@*/ void picoRTOS_fatal(void);                  /* stalls picoRTOS */
+void picoRTOS_run(bool run);                                            /* suspends/resumes picoRTOS */
 
-void picoRTOS_postpone(void);                                           /* move to next task, put back in FIFO */
+/* POST-SCHEDULER */
 void picoRTOS_sleep(picoRTOS_tick_t delay);                             /* put current task to sleep */
 void picoRTOS_sleep_until(picoRTOS_tick_t *ref,                         /* put current task to sleep until */
                           picoRTOS_tick_t period);
-
-/*@noreturn@*/ void picoRTOS_kill(void);                    /* kills the current task */
-
-picoRTOS_pid_t picoRTOS_self(void);                         /* gets the current thread priority */
-/*@unused@*/ picoRTOS_tick_t picoRTOS_get_tick(void);       /* get current tick */
 
 /* Macro: picoRTOS_schedule()
  * Puts the current task to sleep until next tick
  */
 #define picoRTOS_schedule() picoRTOS_sleep((picoRTOS_tick_t)1)
+
+/* Macro: picoRTOS_postpone()
+ * Puts the current task back in the scheduler's FIFO (don't wait for next tick)
+ */
+#define picoRTOS_postpone() picoRTOS_sleep((picoRTOS_tick_t)0)
+
+/* Macro: picoRTOS_suspend()
+ * Suspends the scheduling. Typical use is critical sections
+ */
+#define picoRTOS_suspend() picoRTOS_run(false)
+
+/* Macro: picoRTOS_resume()
+ * Resumes the scheduling. Typical use is critical sections
+ */
+#define picoRTOS_resume() picoRTOS_run(true)
+
+/*@noreturn@*/ void picoRTOS_kill(int errnum);              /* kills the current task */
+picoRTOS_pid_t picoRTOS_self(void);                         /* gets the current thread pid */
+/*@unused@*/ picoRTOS_tick_t picoRTOS_get_tick(void) /*@*/; /* get current tick */
 
 /* TIME MANAGEMENT */
 
@@ -102,17 +114,32 @@ void picoRTOS_register_interrupt(picoRTOS_irq_t irq,
                                  picoRTOS_isr_fn fn,
                                  /*@null@*/ void *priv);
 
-void picoRTOS_enable_interrupt(picoRTOS_irq_t irq);
-void picoRTOS_disable_interrupt(picoRTOS_irq_t irq);
+void picoRTOS_set_interrupt(picoRTOS_irq_t irq, bool active);
+
+/* Macro: picoRTOS_enable_interrupt
+ * Enables an interrupt on the system
+ *
+ * Parameters:
+ *  irq - The irq number to enable
+ */
+#define picoRTOS_enable_interrupt(irq) picoRTOS_set_interrupt(irq, true);
+
+/* Macro: picoRTOS_disable_interrupt
+ * Disables an interrupt on the system
+ *
+ * Parameters:
+ *  irq - The irq number to enable
+ */
+#define picoRTOS_disable_interrupt(irq) picoRTOS_set_interrupt(irq, false);
 
 /* CACHE MANAGEMENT */
 
 void picoRTOS_invalidate_dcache(const void *addr, size_t n);
 void picoRTOS_flush_dcache(const void *addr, size_t n);
 
-/* Memory protection */
+/* MEMORY PROTECTION */
 
-void picoRTOS_mpu_add_region(const void *addr, size_t n, /*@observer@*/ const char *mode);
+void picoRTOS_mpu_add_region(const void *addr, size_t n, unsigned mode);
 
 /* Group: picoRTOS assert API */
 
@@ -140,24 +167,6 @@ void picoRTOS_mpu_add_region(const void *addr, size_t n, /*@observer@*/ const ch
     if (!(x)){                                  \
         picoRTOS_core_sef(x);                   \
         picoRTOS_dbgbreak();                    \
-    }
-
-/* Macro: picoRTOS_assert_fatal(x, or_else)
- * Returns x, throws a debug exception & executes or_else if x is false,
- * stalls the system if -DNDEBUG */
-#define picoRTOS_assert_fatal(x, or_else)       \
-    if (!(x)) {                                 \
-        picoRTOS_core_sef(x);                   \
-        picoRTOS_fatal(); /*@notreached@*/      \
-        { or_else; }                            \
-    }
-
-/* Macro: picoRTOS_assert_void_fatal(x)
- * Throws a debug exception if x is false, stalls the system if -DNDEBUG */
-#define picoRTOS_assert_void_fatal(x)           \
-    if (!(x)){                                  \
-        picoRTOS_core_sef(x);                   \
-        picoRTOS_fatal();                       \
     }
 
 #endif

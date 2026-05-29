@@ -15,15 +15,25 @@
  * SYSCALL_SWITCH_CONTEXT - A task asked to be postponed to the next tick
  */
 typedef enum {
-    SYSCALL_SLEEP,
-    SYSCALL_SLEEP_UNTIL,
-    SYSCALL_KILL,
-    SYSCALL_SWITCH_CONTEXT,
+    /* OS-related */
+    SYSCALL_RUN         = 0,    /* W */
+    SYSCALL_GETTICK     = 1,    /* R */
+    SYSCALL_CACHEOP     = 2,    /* W */
+    /* task-related */
+    SYSCALL_SLEEP       = 3,    /* W */
+    SYSCALL_SLEEP_UNTIL = 4,    /* RW */
+    SYSCALL_GETPID      = 5,    /* R */
+    SYSCALL_MPU         = 6,    /* W */
+    SYSCALL_KILL        = 7,    /* W */
+    SYSCALL_SEGFAULT    = 8,    /* W */
     SYSCALL_COUNT
 } syscall_t;
 
-struct syscall_sleep {
-    picoRTOS_tick_t delay;
+struct syscall_cacheop {
+    bool invalidate;
+    bool flush;
+    /*@temp@*/ const void *addr;
+    size_t n;
 };
 
 struct syscall_sleep_until {
@@ -31,14 +41,18 @@ struct syscall_sleep_until {
     picoRTOS_tick_t period;
 };
 
-struct syscall_kill {
-    picoRTOS_pid_t pid;
+struct syscall_mpu {
+    /*@temp@*/ const void *addr;
+    size_t n;
+    unsigned mode;
 };
+
+typedef unsigned mpu_mode_t;
 
 /* Function: picoRTOS_syscall
  * Executes a syscall
  *
- * This MUST be called from arch_syscall
+ * This MUST be called from a syscall interrupt or equivalent
  *
  * Parameters:
  *  sp - The current task's stack pointer
@@ -48,7 +62,7 @@ struct syscall_kill {
  * Returns:
  *  The task stack you have to switch to (context restoration)
  */
-extern /*@exposed@*/ /*@null@*/
+extern /*@exposed@*/
 picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp,
                                    syscall_t syscall,
                                    /*@null@*/ void *priv);
@@ -63,7 +77,7 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp,
  * Returns:
  *  The task stack pointer you have to switch to (context restoration)
  */
-extern /*@exposed@*/ /*@null@*/
+extern /*@exposed@*/
 picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp);
 
 typedef void (*arch_entry_point_fn)(void*);     /* entry point */
@@ -317,6 +331,13 @@ extern /*@external@*/ void arch_delay_us(unsigned long n);
 
 /* MPU */
 
+#define PID_KERNEL -1
+
+#define MM_PRIVILEGED (1u << 3)
+#define MM_READ       (1u << 2)
+#define MM_WRITE      (1u << 1)
+#define MM_EXECUTE    (1u << 0)
+
 #ifdef CONFIG_MPU
 /* Function: arch_mpu_init
  * Initializes the Memory Protection Unit
@@ -332,9 +353,9 @@ extern void arch_mpu_init(void);
  *  pid - The process id (-1 for general)
  *  addr - An address accessible to the CPU
  *  n - The size of the region in bytes
- *  mode - The region mode (basics are rwx, more specific stuff by arch)
+ *  mode - The region mode (MM_ mask)
  */
-extern void arch_mpu_add_region(int pid, const void *addr, size_t n, /*@observer@*/ const char *mode);
+extern void arch_mpu_add_region(int pid, const void *addr, size_t n, mpu_mode_t mode);
 
 /* Function: arch_mpu_restore_regions
  * Restores MPU regions
@@ -354,7 +375,7 @@ extern void arch_mpu_restore_regions(int pid);
 extern void arch_mpu_enable(void);
 #else
 # define arch_mpu_init()
-# define arch_mpu_add_region(a, b, c, d) /*@i@*/ do { (void)a; (void)b; (void)c; (void)d; } while(false)
+# define arch_mpu_add_region(a, b, c, d) /*@ignore@*/ do { (void)(a); (void)(b); (void)(c); (void)(d); } while(false) /*@end@*/
 # define arch_mpu_restore_regions(x)     /*@i@*/ (void)x
 # define arch_mpu_enable()
 #endif /* CONFIG_MPU */
