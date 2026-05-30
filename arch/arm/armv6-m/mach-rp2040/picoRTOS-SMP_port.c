@@ -22,8 +22,12 @@
 
 /* NVIC */
 #define NVIC_ISER  ((volatile unsigned long*)0xe000e100)
+#define NVIC_ICER  ((volatile unsigned long*)0xe000e180)
 #define NVIC_ICPR  ((volatile unsigned long*)0xe000e280)
-#define NVIC_SHPR3 ((volatile unsigned long*)0xe000ed20)
+
+/* SCB */
+#define SCB_SHPR2 ((volatile unsigned long*)0xe000ed1c)
+#define SCB_SHPR3 ((volatile unsigned long*)0xe000ed20)
 
 /* SIO */
 #define SIO_CPUID     ((volatile unsigned long*)(ADDR_SIO + 0))
@@ -43,14 +47,19 @@
 /*@external@*/ extern void PwmWrap_Handler(void*);
 /*@external@*/ extern void arch_start_first_task(picoRTOS_stack_t *sp);
 
-/*@external@*/ extern picoRTOS_stack_t __Stack1Top[];
-/*@external@*/ extern picoRTOS_stack_t __Stack1Bottom[];
-
 /* CLOCK */
 static unsigned long sysclk_hz = (unsigned long)DEVICE_DEFAULT_SYSCLK_HZ;
 
+/*@-redecl@*/
+/* We redeclare arch_init() as unused as we don't wanna use SYSTICK. FIXME ? */
+/*@unused@*/ extern void arch_init(void);
+/*@=redecl@*/
+
 void arch_smp_init(void)
 {
+    /* disable interrupts */
+    ASM("cpsid i");
+
     /* PWM as system clock */
     unsigned long pwm_div = 1ul;
     unsigned long pwm_top = (sysclk_hz / (unsigned long)CONFIG_TICK_HZ);
@@ -60,7 +69,10 @@ void arch_smp_init(void)
         pwm_top = (sysclk_hz / (unsigned long)CONFIG_TICK_HZ) / (++pwm_div);
 
     /* basic cm0+ init */
-    arch_init();
+    /* set SYSTICK & SVC to max priority (no preempt) */
+    *SCB_SHPR2 &= ~(0x3u << 30);
+    *SCB_SHPR3 &= ~(0x3u << 30);
+    /* all faults are escalated to hardfault */
 
     /* un-reset */
     *RESET &= ~(1ul << 14); /* PWM */
@@ -73,7 +85,23 @@ void arch_smp_init(void)
 
     /* NVIC */
     *NVIC_ICPR = (1ul << IRQ_PWM_WRAP);
-    *NVIC_ISER |= (1ul << IRQ_PWM_WRAP);
+    *NVIC_ISER = (1ul << IRQ_PWM_WRAP);
+
+    /* This is a compromise, we won't have enough regions to
+     * split between unprivileged & privileged here otherwise */
+    arch_mpu_add_region(PID_KERNEL, (void*)SIO_CPUID,
+                        (size_t)(SIO_SPINLOCK1 - SIO_CPUID),
+                        0x6u); /* unprivileged rw */
+}
+
+void arch_suspend(void)
+{
+    *NVIC_ICER = (1ul << IRQ_PWM_WRAP); /* stop wrap */
+}
+
+void arch_resume(void)
+{
+    *NVIC_ISER = (1ul << IRQ_PWM_WRAP); /* restart wrap */
 }
 
 /* STATS */
@@ -126,16 +154,13 @@ static void __attribute__((naked)) core1_start_first_task(void)
     /* clear FIFO flags */
     *SIO_FIFO_ST = 0xfful;
 
-    /* set SVC to max priority */
-    *NVIC_SHPR3 &= ~(0x3u << 30);
-
     /* enable PwmWrap irq */
     *NVIC_ICPR = (1ul << IRQ_PWM_WRAP);
     *NVIC_ISER |= (1ul << IRQ_PWM_WRAP);
 
 #ifdef CONFIG_MPU
     /* mpu */
-    arch_mpu_restore_regions(-1);
+    arch_mpu_restore_regions(PID_KERNEL);
     arch_mpu_enable();
 #endif
 
@@ -186,10 +211,11 @@ static int arch_xfer_to_core1(unsigned long value)
     return 0;
 }
 
+/*@external@*/ extern int arch_core1_is_idling(void);
+
 void arch_core_init(picoRTOS_core_t core,
                     picoRTOS_stack_t *stack,
-                    /*@unused@*/
-                    size_t stack_count __attribute__((unused)),
+                    size_t stack_count,
                     picoRTOS_stack_t *sp)
 {
     /* only 1 auxiliary core */
@@ -200,14 +226,8 @@ void arch_core_init(picoRTOS_core_t core,
     /* setup core1 init protection */
     arch_spin_lock();
 
-    /* prepare core1 stack.
-     * this complex computation is to avoid compiler warnings
-     */
-    picoRTOS_uintptr_t Stack1Top = (picoRTOS_uintptr_t)__Stack1Top;
-    picoRTOS_uintptr_t Stack1Bottom = (picoRTOS_uintptr_t)__Stack1Bottom;
-    picoRTOS_uintptr_t bias = ((Stack1Top - Stack1Bottom) >> 2);
-
-    stack = (picoRTOS_stack_t*)__Stack1Bottom + bias - 1;
+    /* prepare core1 stack */
+    stack += (stack_count - 1);
     *stack = (picoRTOS_stack_t)sp;
 
     /* send sequence */
@@ -228,25 +248,13 @@ void arch_core_init(picoRTOS_core_t core,
     }
 
     arch_assert_void(deadlock != -1);
+    deadlock = CONFIG_DEADLOCK_COUNT;
 
     /* wait until core1 is idling */
-    arch_spin_lock();
-    arch_spin_unlock();
-}
+    while (arch_core1_is_idling() < 0 && deadlock-- != 0)
+        arch_delay_us(10ul);
 
-void arch_idle(void)
-{
-    /* unlock core0 init */
-    if (arch_core() != 0)
-        arch_spin_unlock();
-
-    for (;;)
-        ASM("wfe");
-}
-
-picoRTOS_core_t arch_core(void)
-{
-    return (picoRTOS_core_t)*SIO_CPUID;
+    arch_assert_void(deadlock != -1);
 }
 
 void arch_spin_lock(void)
@@ -264,25 +272,6 @@ void arch_spin_lock(void)
 void arch_spin_unlock(void)
 {
     *SIO_SPINLOCK0 = 1ul;
-}
-
-/* ATOMIC ops */
-
-picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *var,
-                                        picoRTOS_atomic_t old,
-                                        picoRTOS_atomic_t val)
-{
-    picoRTOS_atomic_t res = val;
-
-    if (*SIO_SPINLOCK1 != 0) {
-        res = *var;
-        if (res == old)
-            *var = val;
-
-        *SIO_SPINLOCK1 = 1ul;
-    }
-
-    return res;
 }
 
 /* INTERRUPT MANAGEMENT */

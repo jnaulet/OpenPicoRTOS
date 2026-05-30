@@ -52,12 +52,12 @@ void arch_init(void)
     *SYSTICK_CSR = 0x7ul;                                               /* systick */
 }
 
-void arch_suspend(void)
+void __attribute__((weak)) arch_suspend(void)
 {
     *SYSTICK_CSR &= ~0x1ul; /* stop systick */
 }
 
-void arch_resume(void)
+void __attribute__((weak)) arch_resume(void)
 {
     *SYSTICK_CSR |= 0x1ul;  /* restart systick */
 }
