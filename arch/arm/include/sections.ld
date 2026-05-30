@@ -38,6 +38,12 @@ SECTIONS
 		*mpu_*.o (.text)
 		*cache_*.o (.text)
 
+		*picoRTOS-SMP.o (.text)
+		*picoRTOS-SMP_port.o (.text)
+		*picoRTOS-SMP_portasm.o (.text)
+
+		*(.ptext)
+
 		. = ALIGN(128);
 		__runtime_vectors_start__ = .;
 		/* vectors in ram (if needed) */
@@ -69,6 +75,12 @@ SECTIONS
 		*mpu_*.o (.data)
 		*cache_*.o (.data)
 
+		*picoRTOS-SMP.o (.data)
+		*picoRTOS-SMP_port.o (.data)
+		*picoRTOS-SMP_portasm.o (.data)
+
+		*(.pdata)
+
 		. = ALIGN(128);
 		/* join pdata & pbss to save 1 mpu entry
 		 * FIXME: very inefficient at startup */
@@ -83,7 +95,13 @@ SECTIONS
 		*picoRTOS_portasm.o (.bss)
 		*mpu_*.o (.bss)
 		*cache_*.o (.bss)
-		
+
+		*picoRTOS-SMP.o (.bss)
+		*picoRTOS-SMP_port.o (.bss)
+		*picoRTOS-SMP_portasm.o (.bss)
+
+		*(.pbss)
+
 		. = ALIGN(128);
 		__pbss_end__ = .;
 		__pdata_end__ = .;
