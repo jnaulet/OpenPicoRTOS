@@ -1,5 +1,7 @@
 #include "gpio-stm32h7xx.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 #include <stdint.h>
 
@@ -17,21 +19,39 @@ struct GPIO_STM32H7XX {
 };
 
 /* Function: gpio_stm32h7xx_init
- * Initializes a GPIO
+ * Initializes a gpio PORT block
  *
  * Parameters:
  *  ctx - The GPIO to init
  *  base - The GPIO PORT base address
+ *
+ * Returns:
+ * Always 0
+ */
+int gpio_stm32h7xx_init(/*@out@*/ struct gpio_stm32h7xx *ctx, int base)
+{
+    ctx->base = (struct GPIO_STM32H7XX*)base; // NOLINT
+    ctx->already_claimed = false;
+
+    return 0;
+}
+
+/* Function: gpio_stm32h7xx_gpio_init
+ * Initializes a GPIO
+ *
+ * Parameters:
+ *  ctx - The GPIO to init
+ *  parent - The GPIO PORT parent object
  *  pin - The GPIO pin number on that PORT
  *
  * Returns:
  * 0 if success, -errno otherwise
  */
-int gpio_stm32h7xx_init(struct gpio *ctx, int base, size_t pin)
+int gpio_stm32h7xx_gpio_init(struct gpio *ctx, struct gpio_stm32h7xx *parent, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)GPIO_STM32H7XX_PIN_COUNT, return -EINVAL);
 
-    ctx->base = (struct GPIO_STM32H7XX*)base; // NOLINT
+    ctx->parent = parent;
     ctx->mask = (uint32_t)(1 << pin);
     ctx->invert = false;
 
@@ -60,16 +80,24 @@ int gpio_setup(struct gpio *ctx, const struct gpio_settings *settings)
 
 void gpio_write(struct gpio *ctx, bool value)
 {
-    if (value ^ ctx->invert) ctx->base->BSRR = ctx->mask;
-    else ctx->base->BSRR = ctx->mask << 16;
+    if (value ^ ctx->invert) ctx->parent->base->BSRR = ctx->mask;
+    else ctx->parent->base->BSRR = ctx->mask << 16;
 }
 
 bool gpio_read(struct gpio *ctx)
 {
-    return ((ctx->base->IDR & ctx->mask) != 0) ^ ctx->invert;
+    return ((ctx->parent->base->IDR & ctx->mask) != 0) ^ ctx->invert;
 }
 
 void gpio_toggle(struct gpio *ctx)
 {
-    ctx->base->ODR ^= ctx->mask;
+    ctx->parent->base->ODR ^= ctx->mask;
+}
+
+struct gpio *gpio_claim(struct gpio *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->parent, sizeof(*ctx->parent), MM_URW);
+    picoRTOS_mpu_add_region(ctx->parent->base, sizeof(*ctx->parent->base),
+                            MM_URW | MM_NON_CACHEABLE);
+    return ctx;
 }
