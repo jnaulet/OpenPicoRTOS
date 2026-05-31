@@ -1,5 +1,7 @@
 #include "spi-stm32h7xx.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 #include <stdint.h>
 
@@ -522,4 +524,10 @@ int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
 
     /* NO DMA */
     return spi_xfer_nodma(ctx, rx, tx, n);
+}
+
+struct spi *spi_claim(struct spi *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->base, sizeof(*ctx->base), MM_URW | MM_NON_CACHEABLE);
+    return ctx;
 }

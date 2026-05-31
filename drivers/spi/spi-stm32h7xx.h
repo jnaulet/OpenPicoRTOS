@@ -42,6 +42,7 @@ int spi_stm32h7xx_setup_dma(struct spi *ctx, struct spi_stm32h7xx_dma_settings *
 /* Runtime calls:
  * int spi_setup(struct spi *ctx, const struct spi_settings *settings);
  * int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n);
+ * struct spi *spi_claim(struct spi *ctx);
  */
 
 #endif
