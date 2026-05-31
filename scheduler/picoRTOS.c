@@ -90,7 +90,7 @@ struct picoRTOS_core {
 
 /* main core component */
 static struct picoRTOS_core picoRTOS;
-static picoRTOS_stack_t PRIVILEGED_STACK pstack[ARCH_SYS_STACK_COUNT];
+/*@unused@*/ static picoRTOS_stack_t PRIVILEGED_STACK pstack[ARCH_SYS_STACK_COUNT];
 
 static void task_core_init(/*@out@*/ struct picoRTOS_task_core *task)
 {
@@ -222,16 +222,13 @@ static void task_idle_init(void)
  */
 void picoRTOS_init(void)
 {
-    /* necessary evil for now (FIXME) */
-    /*@i@*/ (void)pstack;
-
     /* MPU */
     arch_mpu_init();
-    arch_mpu_add_region(PID_KERNEL, (void*)__pdata_start__, (size_t)__pdata_len__, 0xeu);   /* privileged rw */
-    arch_mpu_add_region(PID_KERNEL, (void*)__udata_start__, (size_t)__udata_len__, 0x6u);   /* unprivileged rw */
-    arch_mpu_add_region(PID_KERNEL, (void*)__ptext_start__, (size_t)__ptext_len__, 0xdu);   /* privileged rx */
+    arch_mpu_add_region(PID_KERNEL, (void*)__pdata_start__, (size_t)__pdata_len__, MM_PRW);
+    arch_mpu_add_region(PID_KERNEL, (void*)__udata_start__, (size_t)__udata_len__, MM_URW);
+    arch_mpu_add_region(PID_KERNEL, (void*)__ptext_start__, (size_t)__ptext_len__, MM_PRX);
     /* TODO: improve code partitioning */
-    arch_mpu_add_region(PID_KERNEL, (void*)__utext_start__, (size_t)__utext_len__, 0x5u);   /* unprivileged rx */
+    arch_mpu_add_region(PID_KERNEL, (void*)__utext_start__, (size_t)__utext_len__, MM_URX);
 
     /* reset pids */
     picoRTOS.pid_count = 0;
@@ -441,7 +438,7 @@ void picoRTOS_start(void)
         /* new region from stack */
         arch_mpu_add_region((int)pid, TASK_BY_PID(pid).stack_bottom,
                             TASK_BY_PID(pid).stack_count * sizeof(picoRTOS_stack_t),
-                            0x6u); /* rw unprivileged */
+                            MM_URW);
     }
 
     arch_init();
