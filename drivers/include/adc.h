@@ -50,4 +50,12 @@ int adc_read(struct adc *ctx, int *data);
  */
 int adc_read_multiple(struct adc *ctx, int *data, size_t n);
 
+/* Function: adc_claim
+ * Claims the adc for this process/thread (opt. MPU-related feature)
+ *
+ * Parameters:
+ *  adc - A adc instance
+ */
+/*@external@*/ struct adc *adc_claim(/*@returned@*/ struct adc *ctx);
+
 #endif

@@ -17,4 +17,12 @@ struct rng;
  */
 int rng_read(struct rng *ctx, void *buf, size_t n);
 
+/* Function: rng_claim
+ * Claims the rng for this process/thread (MPU-related feature)
+ *
+ * Parameters:
+ *  rng - A rng instance
+ */
+/*@unused@*/ struct rng *rng_claim(/*@returned@*/ struct rng *ctx);
+
 #endif

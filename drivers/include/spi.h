@@ -102,4 +102,12 @@ int spi_setup(struct spi *ctx, const struct spi_settings *settings);
  */
 int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n);
 
+/* Function: spi_claim
+ * Claims the spi for this process/thread (opt. MPU-related feature)
+ *
+ * Parameters:
+ *  spi - A spi instance
+ */
+/*@external@*/ struct spi *spi_claim(/*@returned@*/ struct spi *ctx);
+
 #endif

@@ -59,4 +59,12 @@ int dma_xfer(struct dma *ctx, const struct dma_xfer *xfer);
  */
 int dma_xfer_done(struct dma *ctx);
 
+/* Function: dma_claim
+ * Claims the dma for this process/thread (opt. MPU-related feature)
+ *
+ * Parameters:
+ *  dma - A dma instance
+ */
+/*@external@*/ struct dma *dma_claim(/*@returned@*/ struct dma *ctx);
+
 #endif

@@ -68,4 +68,12 @@ void pwm_start(struct pwm *ctx);
  */
 void pwm_stop(struct pwm *ctx);
 
+/* Function: pwm_claim
+ * Claims the pwm for this process/thread (opt. MPU-related feature)
+ *
+ * Parameters:
+ *  pwm - A pwm instance
+ */
+/*@external@*/ struct pwm *pwm_claim(/*@returned@*/ struct pwm *ctx);
+
 #endif
