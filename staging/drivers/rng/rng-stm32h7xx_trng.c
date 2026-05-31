@@ -108,3 +108,9 @@ int rng_read(struct rng *ctx, void *buf, size_t n)
 
     return (int)(n - count);
 }
+
+struct rng *rng_claim(struct rng *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->base, sizeof(*ctx->base), MM_URW | MM_NON_CACHEABLE);
+    return ctx;
+}
