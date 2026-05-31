@@ -307,8 +307,8 @@ extern void arch_invalidate_dcache(const void *addr, size_t n);
  */
 extern void arch_flush_dcache(const void *addr, size_t n);
 #else
-# define arch_invalidate_dcache(x, y) /*@i@*/ do { (void)x; (void)y; } while(false)
-# define arch_flush_dcache(x, y)      /*@i@*/ (void)x
+# define arch_invalidate_dcache(x, y) /*@ignore@*/ do { (void)(x); (void)(y); } while(false) /*@end@*/
+# define arch_flush_dcache(x, y)      /*@i@*/ (void)(x)
 #endif /* CONFIG_CACHE */
 
 /* CLOCKS */
@@ -384,7 +384,7 @@ extern void arch_mpu_enable(void);
 #else
 # define arch_mpu_init()
 # define arch_mpu_add_region(a, b, c, d) /*@ignore@*/ do { (void)(a); (void)(b); (void)(c); (void)(d); } while(false) /*@end@*/
-# define arch_mpu_restore_regions(x)     /*@i@*/ (void)x
+# define arch_mpu_restore_regions(x)     /*@i@*/ (void)(x)
 # define arch_mpu_enable()
 #endif /* CONFIG_MPU */
 

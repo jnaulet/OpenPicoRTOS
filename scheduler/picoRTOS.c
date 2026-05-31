@@ -90,7 +90,8 @@ struct picoRTOS_core {
 
 /* main core component */
 static struct picoRTOS_core picoRTOS;
-/*@unused@*/ static picoRTOS_stack_t PRIVILEGED_STACK pstack[ARCH_SYS_STACK_COUNT];
+/*@unused@*/ static picoRTOS_stack_t PRIVILEGED_STACK pstack[ARCH_SYS_STACK_COUNT]
+__attribute__((unused));
 
 static void task_core_init(/*@out@*/ struct picoRTOS_task_core *task)
 {
