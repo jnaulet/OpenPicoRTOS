@@ -37,6 +37,7 @@ struct adc_stm32h7xx_sar {
     struct dma_xfer drain_xfer;
     /* calibration */
     bool cal_running;
+    bool is_already_claimed;
 };
 
 typedef enum {

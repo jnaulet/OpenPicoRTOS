@@ -278,6 +278,7 @@ int adc_stm32h7xx_sar_init(struct adc_stm32h7xx_sar *ctx, int base,
     /* basics */
     ctx->channel_count = 0;
     ctx->cal_running = false;
+    ctx->is_already_claimed = false;
 
     ctx->base->CR &= ~CR_BOOST(CR_BOOST_M);
     if (freq > (clock_freq_t)25000000) ctx->base->CR |= CR_BOOST(3);
@@ -543,7 +544,7 @@ int adc_read(struct adc *ctx, int *data)
         (void)dma_setup(parent->drain, &parent->drain_xfer);
         parent->base->CR |= CR_ADSTART;
         /* invalidate cache */
-        arch_invalidate_dcache(parent->DR, sizeof(parent->DR));
+        picoRTOS_invalidate_dcache(parent->DR, sizeof(parent->DR));
         return -EAGAIN;
     }
 
@@ -563,4 +564,13 @@ int adc_read_multiple(struct adc *ctx, int *data, size_t n)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
     return adc_read(ctx, data);
+}
+
+struct adc *adc_claim(struct adc *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->parent, sizeof(*ctx->parent), MM_URW);
+    (void)dma_claim(ctx->parent->drain);
+    picoRTOS_mpu_add_region(ctx->parent->base, sizeof(*ctx->parent->base),
+                            MM_URW | MM_NON_CACHEABLE);
+    return ctx;
 }
