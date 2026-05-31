@@ -333,10 +333,18 @@ extern /*@external@*/ void arch_delay_us(unsigned long n);
 
 #define PID_KERNEL -1
 
-#define MM_PRIVILEGED (1u << 3)
-#define MM_READ       (1u << 2)
-#define MM_WRITE      (1u << 1)
-#define MM_EXECUTE    (1u << 0)
+#define MM_NON_CACHEABLE (1u << 4)
+#define MM_PRIVILEGED    (1u << 3)
+#define MM_READ          (1u << 2)
+#define MM_WRITE         (1u << 1)
+#define MM_EXECUTE       (1u << 0)
+
+#define MM_PRX (MM_PRIVILEGED|MM_READ|MM_EXECUTE)
+#define MM_PRW (MM_PRIVILEGED|MM_READ|MM_WRITE)
+#define MM_PRO (MM_PRIVILEGED|MM_READ)
+#define MM_URX (MM_READ|MM_EXECUTE)
+#define MM_URW (MM_READ|MM_WRITE)
+#define MM_URO (MM_READ)
 
 #ifdef CONFIG_MPU
 /* Function: arch_mpu_init
