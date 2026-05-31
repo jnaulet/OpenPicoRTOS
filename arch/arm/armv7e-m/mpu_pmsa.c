@@ -124,6 +124,9 @@ static int parse_mode(mpu_mode_t mode)
     if ((mode & MM_EXECUTE) != 0)
         MPU_RASR &= ~MPU_RASR_XN;
 
+    if ((mode & MM_NON_CACHEABLE) != 0)
+        MPU_RASR &= ~(MPU_RASR_TEX(3) | MPU_RASR_C | MPU_RASR_B);
+
     if ((mode & MM_PRIVILEGED) != 0) {
         /* Privileged read-only */
         if ((mode & MM_WRITE) != 0)
