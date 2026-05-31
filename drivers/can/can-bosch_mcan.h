@@ -34,6 +34,9 @@ struct can {
     size_t n_words;
     /* bus off */
     bool bus_off_recovery;
+    /* mpu-related */
+    /*@temp@*/ void *mram;
+    size_t mram_size;
 };
 
 int can_bosch_mcan_init(/*@out@*/ struct can *ctx, int base, clock_id_t clkid,
@@ -44,6 +47,7 @@ int can_bosch_mcan_init(/*@out@*/ struct can *ctx, int base, clock_id_t clkid,
  * int can_send(struct can *ctx, can_id_t id, const void *data, size_t n);
  * int can_recv(struct can *ctx, can_id_t *id, void *data, size_t n);
  * int can_abort(struct can *ctx, can_id_t id);
+ * struct cam *can_claim(struct can *ctx);
  */
 
 #endif

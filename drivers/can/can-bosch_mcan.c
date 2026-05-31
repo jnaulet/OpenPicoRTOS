@@ -531,6 +531,10 @@ int can_bosch_mcan_init(struct can *ctx, int base, clock_id_t clkid,
      * TODO: organize RAM according to n_words
      */
 
+    /* mpu-related */
+    ctx->mram = (void*)(message_ram + (uintptr_t)start_address);
+    ctx->mram_size = n_words * sizeof(uint32_t);
+
     /* set rx FIFO0 start address,
      * as we're pure CAN we can max the size, too */
     ctx->rx_fifo0 = message_ram + (uintptr_t)start_address;
@@ -818,7 +822,7 @@ int can_write(struct can *ctx, can_id_t id, const void *buf, size_t n)
     dlc = buffer_write(&tx_buf[index], buf, n);
 
     /* cache */
-    arch_flush_dcache(tx_buf, sizeof(*tx_buf) * TX_BUFFERS_SIZE_COUNT);
+    picoRTOS_flush_dcache(tx_buf, sizeof(*tx_buf) * TX_BUFFERS_SIZE_COUNT);
 
     /* request xfer */
     ctx->base->TXBAR = (uint32_t)(1 << index);
@@ -862,7 +866,7 @@ int can_read(struct can *ctx, can_id_t *id, void *buf, size_t n)
     unsigned index = (rxf0s & RXFnS_FnGI(RXFnS_FnGI_M)) >> 8;
 
     /* cache */
-    arch_invalidate_dcache(&rx_buf[index], sizeof(struct rx_buf));
+    picoRTOS_invalidate_dcache(&rx_buf[index], sizeof(struct rx_buf));
 
     if ((rx_buf[index].R0 & R0_XTD) == 0)   /* standard */
         *id = (can_id_t)((rx_buf[index].R0 & R0_ID(R0_ID_M)) >> 18);
@@ -884,4 +888,11 @@ int can_request_frame(/*@unused@*/ struct can *ctx __attribute__((unused)),
                       /*@unused@*/ can_id_t id __attribute__((unused)))
 {
     return -ENOSYS;
+}
+
+struct can *can_claim(struct can *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->base, sizeof(*ctx->base), MM_URW | MM_NON_CACHEABLE);
+    picoRTOS_mpu_add_region(ctx->mram, ctx->mram_size, MM_URW | MM_NON_CACHEABLE);
+    return ctx;
 }
