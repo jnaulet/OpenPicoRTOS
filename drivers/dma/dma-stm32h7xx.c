@@ -1,5 +1,7 @@
 #include "dma-stm32h7xx.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
 #include <stdint.h>
@@ -206,4 +208,10 @@ int dma_xfer_done(struct dma *ctx)
         return 0;
 
     return -EAGAIN;
+}
+
+struct dma *dma_claim(struct dma *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->base, sizeof(*ctx->base), MM_URW | MM_NON_CACHEABLE);
+    return ctx;
 }
