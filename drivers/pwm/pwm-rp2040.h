@@ -45,6 +45,8 @@ int pwm_rp2040_pwm_init(/*@out@*/ struct pwm *ctx, struct pwm_rp2040 *parent, si
  * void pwm_stop(struct pwm *ctx);
  */
 
+struct pwm *pwm_claim(/*@returned@*/ struct pwm *ctx);
+
 typedef enum {
     PWM_RP2040_IPWM_STATE_IDLE,
     PWM_RP2040_IPWM_STATE_ACQ,
@@ -72,5 +74,7 @@ int pwm_rp2040_ipwm_setup(struct ipwm *ctx, const struct pwm_rp2040_ipwm_setting
  * int ipwm_get_period(struct ipwm *ctx, pwm_period_us_t *period);
  * int ipwm_get_duty_cycle(struct ipwm *ctx, pwm_duty_cycle_t *duty_cycle);
  */
+
+struct ipwm *ipwm_claim(/*@returned@*/ struct ipwm *ctx);
 
 #endif

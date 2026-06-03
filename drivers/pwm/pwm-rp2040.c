@@ -1,5 +1,7 @@
 #include "pwm-rp2040.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 #include <stdint.h>
 
@@ -130,6 +132,14 @@ void pwm_start(struct pwm *ctx)
 void pwm_stop(struct pwm *ctx)
 {
     ctx->ch->CSR &= ~CHn_CSR_EN;
+}
+
+struct pwm *pwm_claim(struct pwm *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->parent, sizeof(*ctx->parent), MM_URW);
+    picoRTOS_mpu_add_region(ctx->parent->base, sizeof(*ctx->parent->base),
+                            MM_URW | MM_NON_CACHEABLE);
+    return ctx;
 }
 
 #define IPWM_DIVMODE_FREE    0x0
@@ -299,4 +309,12 @@ int ipwm_get_duty_cycle(struct ipwm *ctx, pwm_duty_cycle_t *duty_cycle)
     picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
+}
+
+struct ipwm *ipwm_claim(struct ipwm *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->parent, sizeof(*ctx->parent), MM_URW);
+    picoRTOS_mpu_add_region(ctx->parent->base, sizeof(*ctx->parent->base),
+                            MM_URW | MM_NON_CACHEABLE);
+    return ctx;
 }
