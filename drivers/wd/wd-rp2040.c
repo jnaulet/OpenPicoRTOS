@@ -1,5 +1,7 @@
 #include "wd-rp2040.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 #define WD_RP2040_LOAD_COUNT   0x1000000ul
 #define WD_RP2040_CYCLES_COUNT 512u
@@ -83,4 +85,11 @@ int wd_stop(struct wd *ctx)
 void wd_refresh(struct wd *ctx)
 {
     ctx->base->LOAD = ctx->load;
+}
+
+struct wd *wd_claim(struct wd *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->base, sizeof(*ctx->base),
+                            MM_URW | MM_NON_CACHEABLE);
+    return ctx;
 }

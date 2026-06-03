@@ -27,4 +27,6 @@ int wd_rp2040_setup(struct wd *ctx, const struct wd_rp2040_settings *settings);
  * void wd_refresh(struct wd *ctx);
  */
 
+struct wd *wd_claim(/*@returned@*/ struct wd *ctx);
+
 #endif
