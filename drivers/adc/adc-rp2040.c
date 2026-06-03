@@ -1,5 +1,7 @@
 #include "adc-rp2040.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 struct ADC_RP2040 {
     volatile uint32_t CS;
@@ -150,4 +152,12 @@ int adc_read_multiple(struct adc *ctx, int *data, size_t n)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
     return adc_read(ctx, data);
+}
+
+struct adc *adc_claim(struct adc *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->parent, sizeof(*ctx->parent), MM_URW);
+    picoRTOS_mpu_add_region(ctx->parent->base, sizeof(*ctx->parent->base),
+                            MM_URW | MM_NON_CACHEABLE);
+    return ctx;
 }

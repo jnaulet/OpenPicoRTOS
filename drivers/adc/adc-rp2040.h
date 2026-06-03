@@ -39,4 +39,6 @@ int adc_rp2040_adc_init(/*@out@*/ struct adc *ctx, struct adc_rp2040 *parent, si
  * int adc_read_multiple(struct adc *ctx, adc_sample_t *data, size_t n);
  */
 
+struct adc *adc_claim(/*@returned@*/ struct adc *ctx);
+
 #endif
