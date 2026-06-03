@@ -20,7 +20,7 @@ SECTIONS
                 KEEP(*(.fini))
                 KEEP(*(.eh_frame*))
 
-		. = ALIGN(128);
+		. = ALIGN(4096);
 		__init_end__ = .;
 	}
 
@@ -49,13 +49,21 @@ SECTIONS
 		/* vectors in ram (if needed) */
 		. = . + (__vectors_end__ - __vectors_start__);
 
-		. = ALIGN(128);
+		. = ALIGN(4096);
 		__runtime_vectors_end__ = .;
 		__ptext_end__ = .;
 		__utext_start__ = .;
 		*(.text*)
 
-		. = ALIGN(128);
+		/* We won't be using a mpu region for rodata so we have to
+		 * put it somewhere. The least dangerous place seems to in be .text,
+		 * where it can't be overwritten but we unfortunately cannot eliminate
+		 * the (small) risk of it being executed by the cpu
+		 */
+		. = ALIGN(4);
+		KEEP(*(.rodata*))
+
+		. = ALIGN(4096);
 		__utext_end__ = .;
 		__text_end__ = .;
 	} > REGION_TEXT
@@ -86,7 +94,8 @@ SECTIONS
 		 * FIXME: very inefficient at startup */
 		__pbss_start__ = .;
 		__pstack_start__ = .;
-		*picoRTOS.o (.stack)
+		*picoRTOS.o (.pstack)
+		*picoRTOS-SMP.o (.pstack)
 
 		. = ALIGN(128);
 		__pstack_end__ = .;
@@ -102,19 +111,18 @@ SECTIONS
 
 		*(.pbss)
 
-		. = ALIGN(128);
+		. = ALIGN(4096);
 		__pbss_end__ = .;
 		__pdata_end__ = .;
 		KEEP(*(.init_array))
 		KEEP(*(.fini_array))
                 KEEP(*(.data*))
 
-                . = ALIGN(128);
+                . = ALIGN(4096);
 		__udata_start__ = .;
-		KEEP(*(.rodata*)) /* FIXME */
 		KEEP(*(.udata*))
 		
-		. = ALIGN(128);
+		. = ALIGN(4096);
 		__udata_end__ = .;
                 __data_end__ = .;
 	}
@@ -126,6 +134,9 @@ SECTIONS
 	.bss :
 	{
 		__bss_start__ = .;
+		. = ALIGN(512);
+		*(.ustack)
+		
                 *(.bss*)
                 *(COMMON)
 
