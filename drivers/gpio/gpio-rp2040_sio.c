@@ -1,5 +1,7 @@
 #include "gpio-rp2040_sio.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 struct GPIO_RP2040_SIO {
     volatile uint32_t GPIO_IN;
@@ -87,4 +89,11 @@ bool gpio_read(struct gpio *ctx)
 void gpio_toggle(struct gpio *ctx)
 {
     ctx->base->GPIO_OUT_XOR = ctx->mask;
+}
+
+struct gpio *gpio_claim(struct gpio *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->base, sizeof(*ctx->base),
+                            MM_URW | MM_NON_CACHEABLE);
+    return ctx;
 }

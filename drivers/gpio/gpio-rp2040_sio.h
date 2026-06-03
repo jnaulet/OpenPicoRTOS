@@ -31,4 +31,6 @@ int gpio_rp2040_sio_init(/*@out@*/ struct gpio *ctx, int base,
  * void gpio_toggle(struct gpio *ctx);
  */
 
+struct gpio *gpio_claim(/*@returned@*/ struct gpio *ctx);
+
 #endif
