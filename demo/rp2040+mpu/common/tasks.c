@@ -1,12 +1,4 @@
-#include "adc.h"
-#include "gpio.h"
-#include "pwm.h"
-#include "ipwm.h"
-#include "spi.h"
-#include "twi.h"
-#include "uart.h"
-#include "wd.h"
-
+#include "raspberry-pico.h"
 #include "ipc/picoRTOS_mutex.h"
 #include "ipc/picoRTOS_cond.h"
 
@@ -17,8 +9,9 @@ static struct picoRTOS_cond UNPRIVILEGED_DATA cond = PICORTOS_COND_INITIALIZER;
 void tick_main(void *priv)
 {
     picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
+    picoRTOS_mpu_add_region(priv, sizeof(struct gpio), MM_URW);
 
-    struct gpio *TICK = (struct gpio*)priv;
+    struct gpio *TICK = gpio_claim((struct gpio*)priv);
 
     for (;;) {
         gpio_toggle(TICK);
@@ -29,9 +22,10 @@ void tick_main(void *priv)
 void led0_main(void *priv)
 {
     picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
+    picoRTOS_mpu_add_region(priv, sizeof(struct pwm), MM_URW);
 
-    struct pwm *PWM = (struct pwm*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
+    struct pwm *PWM = pwm_claim((struct pwm*)priv);
 
     (void)pwm_set_period(PWM, (pwm_period_us_t)200);
     pwm_start(PWM);
@@ -61,8 +55,9 @@ void led0_main(void *priv)
 void led1_main(void *priv)
 {
     picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
+    picoRTOS_mpu_add_region(priv, sizeof(struct pwm), MM_URW);
 
-    struct pwm *PWM = (struct pwm*)priv;
+    struct pwm *PWM = pwm_claim((struct pwm*)priv);
 
     for (;;) {
 
@@ -86,9 +81,10 @@ void led1_main(void *priv)
 void spi_main(void *priv)
 {
     picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
+    picoRTOS_mpu_add_region(priv, sizeof(struct spi), MM_URW);
 
     size_t xfered = 0;
-    struct spi *SPI = (struct spi*)priv;
+    struct spi *SPI = spi_claim((struct spi*)priv);
     char rx[6] = { (char)0, (char)0, (char)0, (char)0, (char)0, (char)0 };
     char tx[6] = { (char)0xa5, (char)0x55, (char)0x5a, (char)0x55, (char)0x4d, (char)0xff };
 
@@ -120,8 +116,9 @@ void spi_main(void *priv)
 void adc_main(void *priv)
 {
     picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
+    picoRTOS_mpu_add_region(priv, sizeof(struct adc), MM_URW);
 
-    struct adc *ADC = (struct adc*)priv;
+    struct adc *ADC = adc_claim((struct adc*)priv);
     picoRTOS_tick_t ref = picoRTOS_get_tick();
 
     for (;;) {
@@ -145,9 +142,10 @@ void adc_main(void *priv)
 void twi_master_main(void *priv)
 {
     picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
+    picoRTOS_mpu_add_region(priv, sizeof(struct twi), MM_URW);
 
-    struct twi *TWI = (struct twi*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
+    struct twi *TWI = twi_claim((struct twi*)priv);
 
     for (;;) {
         char c = (char)0xa5;
@@ -174,8 +172,9 @@ void twi_master_main(void *priv)
 void twi_slave_main(void *priv)
 {
     picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
+    picoRTOS_mpu_add_region(priv, sizeof(struct twi), MM_URW);
 
-    struct twi *TWI = (struct twi*)priv;
+    struct twi *TWI = twi_claim((struct twi*)priv);
 
     for (;;) {
         int res;
@@ -212,9 +211,10 @@ void twi_slave_main(void *priv)
 void pwm_main(void *priv)
 {
     picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
+    picoRTOS_mpu_add_region(priv, sizeof(struct pwm), MM_URW);
 
     pwm_duty_cycle_t duty_cycle = 0;
-    struct pwm *PWM = (struct pwm*)priv;
+    struct pwm *PWM = pwm_claim((struct pwm*)priv);
 
     /* init */
     (void)pwm_set_period(PWM, (pwm_period_us_t)100);
@@ -238,8 +238,9 @@ void pwm_main(void *priv)
 void ipwm_main(void *priv)
 {
     picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
+    picoRTOS_mpu_add_region(priv, sizeof(struct ipwm), MM_URW);
 
-    struct ipwm *IPWM = (struct ipwm*)priv;
+    struct ipwm *IPWM = ipwm_claim((struct ipwm*)priv);
 
     /* wait for hw to init properly */
     picoRTOS_sleep(PICORTOS_DELAY_MSEC(10));
@@ -276,8 +277,9 @@ void ipwm_main(void *priv)
 void wd_main(void *priv)
 {
     picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
+    picoRTOS_mpu_add_region(priv, sizeof(struct wd), MM_URW);
 
-    struct wd *WD = (struct wd*)priv;
+    struct wd *WD = wd_claim((struct wd*)priv);
 
     for (;;) {
         wd_refresh(WD);
