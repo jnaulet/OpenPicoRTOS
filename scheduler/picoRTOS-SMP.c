@@ -214,7 +214,7 @@ static void task_idle_init(void)
     size_t core = (size_t)CONFIG_CORE_COUNT;
 
     static struct { picoRTOS_stack_t array[ARCH_MIN_STACK_COUNT]; }
-    stack[CONFIG_CORE_COUNT];
+    stack[CONFIG_CORE_COUNT] UNPRIVILEGED_STACK;
 
     while (core-- != 0) {
         /* ensure proper stack alignment */
@@ -243,16 +243,16 @@ void picoRTOS_init(void)
 {
     /* MPU */
     arch_mpu_init();
-    arch_mpu_add_region(PID_KERNEL, (void*)__pdata_start__, (size_t)__pdata_len__, 0xeu);   /* privileged rw */
-    arch_mpu_add_region(PID_KERNEL, (void*)__udata_start__, (size_t)__udata_len__, 0x6u);   /* unprivileged rw */
-    arch_mpu_add_region(PID_KERNEL, (void*)__ptext_start__, (size_t)__ptext_len__, 0xdu);   /* privileged rx */
+    arch_mpu_add_region(PID_KERNEL, (void*)__pdata_start__, (size_t)__pdata_len__, MM_PRW);
+    arch_mpu_add_region(PID_KERNEL, (void*)__udata_start__, (size_t)__udata_len__, MM_URW);
+    arch_mpu_add_region(PID_KERNEL, (void*)__ptext_start__, (size_t)__ptext_len__, MM_PRX);
     /* TODO: improve code partitioning */
-    arch_mpu_add_region(PID_KERNEL, (void*)__utext_start__, (size_t)__utext_len__, 0x5u);   /* unprivileged rx */
+    arch_mpu_add_region(PID_KERNEL, (void*)__utext_start__, (size_t)__utext_len__, MM_URX);
 
     /* reset pids */
     picoRTOS.pid_count = 0;
 
-    /* zero all tasks with no memset */
+    /* zero all tasks */
     size_t n = (size_t)TASK_COUNT;
 
     while (n-- != 0) {
@@ -400,6 +400,7 @@ static void core_arrange_shared_priorities(void)
 
 void picoRTOS_start(void)
 {
+#define CORE_MAX (CONFIG_CORE_COUNT - 1)
     picoRTOS_pid_t pid = (picoRTOS_pid_t)TASK_COUNT;
     picoRTOS_core_t core = (picoRTOS_core_t)CONFIG_CORE_COUNT;
 
@@ -421,14 +422,17 @@ void picoRTOS_start(void)
 
     /* start auxiliary cores first */
     while (core-- != (picoRTOS_core_t)1) {
-        /* allocate a master stack & idle */
-        arch_core_init(core, pstack[core].array, PICORTOS_STACK_COUNT(pstack[core].array),
+        /* allocate a master stack & idle
+         * HINT: stacks are allocated in reverse to keep compatibility
+         * with linker-provided __StackTop */
+        struct picoRTOS_SMP_stack *stack = &pstack[CORE_MAX - (int)core];
+        arch_core_init(core, stack->array, PICORTOS_STACK_COUNT(stack->array),
                        TASK_BY_PID(TASK_IDLE_PID + core).sp);
     }
 
     /* start scheduler on core #0 */
+    arch_flush_dcache(&picoRTOS, sizeof(picoRTOS));
     arch_mpu_enable();
-    picoRTOS_flush_dcache(&picoRTOS, sizeof(picoRTOS));
     arch_mpu_restore_regions(TASK_IDLE_PID); /* FIXME */
     arch_start_first_task(TASK_BY_PID(TASK_IDLE_PID).sp);
 }
@@ -484,8 +488,8 @@ syscall_switch_context(struct picoRTOS_task_core *task)
     picoRTOS_assert(deadlock != -1, fatal());
     task_core_stat_start(task); /* stats */
 
-    picoRTOS_flush_dcache(&picoRTOS, sizeof(picoRTOS));
-    picoRTOS_invalidate_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);
+    arch_flush_dcache(&picoRTOS, sizeof(picoRTOS));
+    arch_invalidate_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);
     arch_spin_unlock();
 
     return task;
@@ -600,7 +604,7 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, syscall_t syscall, void
      * - syscall_mpu()
      */
     arch_spin_lock();
-    picoRTOS_invalidate_dcache(&picoRTOS, sizeof(picoRTOS));
+    arch_invalidate_dcache(&picoRTOS, sizeof(picoRTOS));
 
     struct picoRTOS_task_core *task = &TASK_CURRENT();
 
@@ -611,7 +615,7 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, syscall_t syscall, void
 
     /* store current sp & flush */
     task->sp = sp;
-    picoRTOS_flush_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);
+    arch_flush_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);
 
     switch (syscall) {
     /* OS-related syscalls */
@@ -638,7 +642,7 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, syscall_t syscall, void
 picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
 {
     arch_spin_lock();
-    picoRTOS_invalidate_dcache(&picoRTOS, sizeof(picoRTOS));
+    arch_invalidate_dcache(&picoRTOS, sizeof(picoRTOS));
 
     picoRTOS_core_t core = arch_core();
     struct picoRTOS_task_core *task = &TASK_CURRENT_CORE(core);
@@ -648,7 +652,7 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
 
     /* store current sp & flush */
     task->sp = sp;
-    picoRTOS_flush_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);
+    arch_flush_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);
 
     /* mask task as immediately ready */
     task->state = TASK_STATE_READY;
@@ -695,8 +699,8 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
     if (picoRTOS.core_counter == (picoRTOS_core_t)CONFIG_CORE_COUNT)
         picoRTOS.core_counter = 0;
 
-    picoRTOS_flush_dcache(&picoRTOS, sizeof(picoRTOS));
-    picoRTOS_invalidate_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);
+    arch_flush_dcache(&picoRTOS, sizeof(picoRTOS));
+    arch_invalidate_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);
     arch_spin_unlock();
 
     return task->sp;
