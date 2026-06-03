@@ -1,5 +1,7 @@
 #include "twi-dw_apb_i2c.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 #include <stdint.h>
 
@@ -580,4 +582,11 @@ int twi_read(struct twi *ctx, void *buf, size_t n, int flags)
     picoRTOS_assert_void(false);
     /*@notreached@*/
     return -EIO;
+}
+
+struct twi *twi_claim(struct twi *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->base, sizeof(*ctx->base),
+                            MM_URW | MM_NON_CACHEABLE);
+    return ctx;
 }

@@ -36,4 +36,6 @@ int twi_dw_apb_i2c_init(/*@out@*/ struct twi *ctx, int base, clock_id_t clkid);
  * int twi_read(struct twi *ctx, void *buf, size_t n);
  */
 
+struct twi *twi_claim(/*@returned@*/ struct twi *ctx);
+
 #endif
