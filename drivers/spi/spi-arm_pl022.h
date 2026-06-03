@@ -51,4 +51,6 @@ int spi_arm_pl022_setup_dma(struct spi *ctx, const struct spi_arm_pl022_dma_sett
  * int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n);
  */
 
+struct spi *spi_claim(/*@returned@*/ struct spi *ctx);
+
 #endif
