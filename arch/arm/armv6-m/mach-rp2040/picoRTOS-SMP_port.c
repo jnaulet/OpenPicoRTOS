@@ -158,11 +158,9 @@ static void __attribute__((naked)) core1_start_first_task(void)
     *NVIC_ICPR = (1ul << IRQ_PWM_WRAP);
     *NVIC_ISER |= (1ul << IRQ_PWM_WRAP);
 
-#ifdef CONFIG_MPU
     /* mpu */
     arch_mpu_restore_regions(PID_KERNEL);
     arch_mpu_enable();
-#endif
 
     ASM("pop {r0}");
     ASM("ldr r1, =arch_start_first_task");
@@ -223,7 +221,6 @@ void arch_core_init(picoRTOS_core_t core,
 
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
-    /* setup core1 init protection */
     arch_spin_lock();
 
     /* prepare core1 stack */
@@ -247,6 +244,7 @@ void arch_core_init(picoRTOS_core_t core,
         break;
     }
 
+    arch_spin_unlock();
     arch_assert_void(deadlock != -1);
     deadlock = CONFIG_DEADLOCK_COUNT;
 

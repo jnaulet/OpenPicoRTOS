@@ -56,6 +56,12 @@ arch_start_first_task:
 	mov lr, r5
 
 	cpsie i		/* enable interrupts */
+
+	/* nPRIV, bit[0] Thread mode has unprivileged access */
+	movs r0, #7
+	msr CONTROL, r0
+
+	/* to idle */
 	bx r6
 
 	.thumb_func
