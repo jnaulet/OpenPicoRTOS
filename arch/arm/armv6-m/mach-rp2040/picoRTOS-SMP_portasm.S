@@ -45,11 +45,6 @@ arch_start_first_task:
 	msr CONTROL, r0
 	isb
 
-	/* start pwm */
-	movs r0, #1
-	ldr r3, =PWM_CSR
-	str r0, [r3]
-
 	/* pop auto-save by hand */
 	pop {r0-r7}
 	mov r12, r4

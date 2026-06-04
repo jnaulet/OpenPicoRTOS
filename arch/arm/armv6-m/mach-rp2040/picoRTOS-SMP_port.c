@@ -91,7 +91,7 @@ void arch_smp_init(void)
      * split between unprivileged & privileged here otherwise */
     arch_mpu_add_region(PID_KERNEL, (void*)SIO_CPUID,
                         (size_t)(SIO_SPINLOCK1 - SIO_CPUID),
-                        0x6u); /* unprivileged rw */
+                        MM_URW);
 }
 
 void arch_suspend(void)
@@ -158,8 +158,12 @@ static void __attribute__((naked)) core1_start_first_task(void)
     *NVIC_ICPR = (1ul << IRQ_PWM_WRAP);
     *NVIC_ISER |= (1ul << IRQ_PWM_WRAP);
 
+    /* start pwm */
+    *PWM_CSR = 0x1ul;
+
     /* mpu */
     arch_mpu_restore_regions(PID_KERNEL);
+    arch_mpu_restore_regions(CONFIG_TASK_COUNT + 1);
     arch_mpu_enable();
 
     ASM("pop {r0}");
@@ -210,22 +214,18 @@ static int arch_xfer_to_core1(unsigned long value)
 }
 
 /*@external@*/ extern int arch_core1_is_idling(void);
+/*@external@*/ extern picoRTOS_stack_t __StackTop1[];
 
-void arch_core_init(picoRTOS_core_t core,
-                    picoRTOS_stack_t *stack,
-                    size_t stack_count,
-                    picoRTOS_stack_t *sp)
+void arch_core_init(picoRTOS_core_t core, picoRTOS_stack_t *sp)
 {
     /* only 1 auxiliary core */
     arch_assert_void(core == (picoRTOS_core_t)1);
 
     int deadlock = CONFIG_DEADLOCK_COUNT;
+    picoRTOS_stack_t *stack = __StackTop1;
 
     arch_spin_lock();
-
-    /* prepare core1 stack */
-    stack += (stack_count - 1);
-    *stack = (picoRTOS_stack_t)sp;
+    *--stack = (picoRTOS_stack_t)sp;
 
     /* send sequence */
     while (deadlock-- != 0) {

@@ -35,8 +35,8 @@ SECTIONS
 		*picoRTOS.o (.text)
 		*picoRTOS_port.o (.text)
 		*picoRTOS_portasm.o (.text)
-		*mpu_*.o (.text)
-		*cache_*.o (.text)
+		*mpu-*.o (.text)
+		*cache-*.o (.text)
 
 		*picoRTOS-SMP.o (.text)
 		*picoRTOS-SMP_port.o (.text)
@@ -80,8 +80,8 @@ SECTIONS
 		*picoRTOS.o (.data)
 		*picoRTOS_port.o (.data)
 		*picoRTOS_portasm.o (.data)
-		*mpu_*.o (.data)
-		*cache_*.o (.data)
+		*mpu-*.o (.data)
+		*cache-*.o (.data)
 
 		*picoRTOS-SMP.o (.data)
 		*picoRTOS-SMP_port.o (.data)
@@ -101,8 +101,8 @@ SECTIONS
 		*picoRTOS.o (.bss)
 		*picoRTOS_port.o (.bss)
 		*picoRTOS_portasm.o (.bss)
-		*mpu_*.o (.bss)
-		*cache_*.o (.bss)
+		*mpu-*.o (.bss)
+		*cache-*.o (.bss)
 
 		*picoRTOS-SMP.o (.bss)
 		*picoRTOS-SMP_port.o (.bss)
