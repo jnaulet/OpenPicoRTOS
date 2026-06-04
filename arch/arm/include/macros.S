@@ -160,9 +160,9 @@
 	
 	/* DISABLE_MPU */
 	.macro DISABLE_MPU
-	mov r0, #0
-	ldr r11, =MPU_CTRL
-	str r0, [r11]
+	movs r0, #0
+	ldr r1, =MPU_CTRL
+	str r0, [r1]
 	.endm
 
 	/* def_irq_handler */

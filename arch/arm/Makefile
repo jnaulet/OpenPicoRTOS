@@ -8,29 +8,33 @@ c_src-$(CONFIG_ARMV6M) += $(arch-arm)/armv6-m/picoRTOS_port_u.c
 a_src-$(CONFIG_ARMV6M) += $(arch-arm)/armv6-m/picoRTOS_portasm.S
 a_src-$(CONFIG_ARMV6M) += $(arch-arm)/armv6-m/picoRTOS_portasm_u.S
 
+c_src-$(CONFIG_MPU_PMSAV6) += $(arch-arm)/armv6-m/mpu_pmsa.c
+
 ifeq ($(CONFIG_SMP),y)
 c_src-$(CONFIG_MACH_RP2040) += $(arch-arm)/armv6-m/mach-rp2040/picoRTOS-SMP_port.c
 c_src-$(CONFIG_MACH_RP2040) += $(arch-arm)/armv6-m/mach-rp2040/picoRTOS-SMP_port_u.c
 a_src-$(CONFIG_MACH_RP2040) += $(arch-arm)/armv6-m/mach-rp2040/picoRTOS-SMP_portasm.S
 endif
 
-c_src-$(CONFIG_ARMV7M) += $(arch-arm)/armv7-m/picoRTOS_port.c
-a_src-$(CONFIG_ARMV7M) += $(arch-arm)/armv7-m/picoRTOS_portasm.S
+c_src-armv7x-m += $(arch-arm)/armv7e-m/picoRTOS_port.c
+c_src-armv7x-m += $(arch-arm)/armv7e-m/picoRTOS_port_u.c
+a_src-armv7x-m += $(arch-arm)/armv7e-m/picoRTOS_portasm.S
+a_src-armv7x-m += $(arch-arm)/armv7e-m/picoRTOS_portasm_u.S
+
+c_src-$(CONFIG_ARMV7M) += $(c_src-armv7x-m)
+a_src-$(CONFIG_ARMV7M) += $(a_src-armv7x-m)
 
 ifeq ($(CONFIG_MACH_ATSAME5X),y)
-armv7em-cache-c_src-$(CONFIG_CACHE_MAINTENANCE) += $(arch-arm)/armv7e-m/cache_cmcc.c
+armv7em-cache-c_src-$(CONFIG_CACHE_MAINTENANCE) += $(arch-arm)/armv7e-m/cache-cmcc.c
 else
-armv7em-cache-c_src-$(CONFIG_CACHE_MAINTENANCE) += $(arch-arm)/armv7e-m/cache_mvsa.c
+armv7em-cache-c_src-$(CONFIG_CACHE_MAINTENANCE) += $(arch-arm)/armv7e-m/cache-mvsa.c
 endif
 
-c_src-$(CONFIG_ARMV7EM) += $(arch-arm)/armv7e-m/picoRTOS_port.c
-c_src-$(CONFIG_ARMV7EM) += $(arch-arm)/armv7e-m/picoRTOS_port_u.c
+c_src-$(CONFIG_ARMV7EM) += $(c_src-armv7x-m)
+a_src-$(CONFIG_ARMV7EM) += $(a_src-armv7x-m)
 c_src-$(CONFIG_ARMV7EM) += $(armv7em-cache-c_src-y)
-a_src-$(CONFIG_ARMV7EM) += $(arch-arm)/armv7e-m/picoRTOS_portasm.S
-a_src-$(CONFIG_ARMV7EM) += $(arch-arm)/armv7e-m/picoRTOS_portasm_u.S
 
-c_src-$(CONFIG_MPU_PMSAV6) += $(arch-arm)/armv6-m/mpu_pmsa.c
-c_src-$(CONFIG_MPU_PMSAV7) += $(arch-arm)/armv7e-m/mpu_pmsa.c
+c_src-$(CONFIG_MPU_PMSAV7) += $(arch-arm)/armv7e-m/mpu-pmsa.c
 
 # march
 arch-$(CONFIG_ARMV6M) := -march=armv6-m -mfloat-abi=soft

@@ -4,14 +4,20 @@
 	.extern picoRTOS_tick
 	.extern picoRTOS_syscall
 
+	#include <generated/autoconf.h>
+
 	.macro SAVE_CONTEXT rS
 	mrs \rS, psp		/* use rS as psp stack */
 	stmdb \rS!, {r4-r11}	/* save registers r4-r11 */
+#ifdef CONFIG_FPU
 	vstmdb \rS!, {s16-s31}	/* save fpu high registers */
+#endif
 	.endm
 
 	.macro RESTORE_CONTEXT rS
+#ifdef CONFIG_FPU
 	vldmia \rS!, {s16-s31}	/* restore fpu high registers */
+#endif
 	ldmia \rS!, {r4-r11}	/* restore registers r4-11 */
 	msr psp, \rS		/* reclaim stack space */
 	.endm
@@ -24,8 +30,10 @@
 arch_save_first_context:
 	push {r4-r11, lr}
 	/* auto-save */
+#ifdef CONFIG_FPU
 	subs r0, r0, #8	/* blank + fpscr */
 	vstmdb r0!, {s0-s15}	/* fpu low registers */
+#endif
 	mov r4, r2		/* r0 (priv) */
 	mov r5, #0		/* r1 */
 	mov r6, #0		/* r2 */
@@ -56,10 +64,12 @@ arch_start_first_task:
 	pop {r0-r3, r12, lr}	/* pop auto-save */
 	pop {r4-r5}		/* return addr and xspr */
 	/* fpu */
+#ifdef CONFIG_FPU
 	mrs r0, psp
 	vldmia r0!, {s0-s15}	/* pop auto-save */
 	add r0, r0, #8		/* fpscr + blank */
 	msr psp, r0
+#endif
 	/* interrupts */
 	cpsie if
 
