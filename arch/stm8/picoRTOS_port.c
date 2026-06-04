@@ -57,12 +57,12 @@ picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
     sp[0] = (picoRTOS_stack_t)0;
     sp[1] = (picoRTOS_stack_t)0;
     sp[2] = (picoRTOS_stack_t)((unsigned)priv >> 8);
-    sp[3] = (picoRTOS_stack_t)priv;
+    sp[3] = (picoRTOS_stack_t)(unsigned)priv;
     sp[4] = (picoRTOS_stack_t)0;
     sp[5] = (picoRTOS_stack_t)0;
     sp[6] = (picoRTOS_stack_t)0;
     sp[7] = (picoRTOS_stack_t)((unsigned)fn >> 8);
-    sp[8] = (picoRTOS_stack_t)fn;
+    sp[8] = (picoRTOS_stack_t)(unsigned)fn;
 
     return sp - 1;
 }
