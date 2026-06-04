@@ -27,6 +27,7 @@
 	.type Reset_Handler, %function
 	.global Reset_Handler
 Reset_Handler:
+	DISABLE_MPU
 	/* All SRAM available */
 	TURN_AUX_SRAM_ON
 	DISABLE_FMC_BANK1

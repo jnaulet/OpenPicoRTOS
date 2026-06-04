@@ -10,23 +10,27 @@
 	.type Reset_Handler, %function
 	.global Reset_Handler
 Reset_Handler:
+	DISABLE_MPU
+	INIT_STACK __StackTop
+	INIT_VTOR __vectors_start__
+
 	/* ignore if __text_end__ < __etext */
-	ldr r1, =__relocate_text
-	cmp r1, #0
+	ldr r0, =__text_start__
+	ldr r1, =__text_load__
+	cmp r1, r0
 	beq .ignore_text_relocation
 
 	/* copy .text to ram */
-	COPY_TO_RAM __edata, __text_start__, __text_end__
-	COPY_TO_RAM __vectors, __vectors_start__, __vectors_end__
+	COPY_TO_RAM __einit, __text_start__, __text_end__
+	COPY_TO_RAM __vectors, __runtime_vectors_start__, __runtime_vectors_end__
+	INIT_VTOR __runtime_vectors_start__
 
 .ignore_text_relocation:
-	/* init vectors & stack */
-	INIT_VTOR __vectors_start__
-	INIT_STACK __StackTop
 	/* copy .data section */
 	COPY_TO_RAM __etext, __data_start__, __data_end__
 	/* zero .bss section */
 	ZERO_RAM __bss_start__, __bss_end__
+	ZERO_RAM __pbss_start__, __pbss_end__
 
 	/* data cache */
 	INVALIDATE_DCACHE

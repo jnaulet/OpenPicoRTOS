@@ -43,6 +43,7 @@
 	.type Reset_Handler, %function
 	.global Reset_Handler
 Reset_Handler:
+	DISABLE_MPU
 	HOLD_CORE1_IN_BOOTROM
 	INIT_STACK __StackTop
 	INIT_VTOR __vectors_start__
