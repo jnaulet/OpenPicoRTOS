@@ -45,3 +45,8 @@ Reset_Handler:
 _exit:
 	bkpt #0
 	b _exit
+
+	.section .pstack, "w"
+	.global __StackTop
+	.fill 256, 4
+__StackTop:

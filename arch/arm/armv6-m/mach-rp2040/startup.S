@@ -45,7 +45,7 @@
 Reset_Handler:
 	DISABLE_MPU
 	HOLD_CORE1_IN_BOOTROM
-	INIT_STACK __StackTop
+	INIT_STACK __StackTop0
 	INIT_VTOR __vectors_start__
 
 	/* relocate text section if needed */
@@ -82,7 +82,7 @@ _exit:
 
 	.section .vectors, "ax"
 
-	.word __StackTop
+	.word __StackTop0
 	.word Reset_Handler
 	.word NMI_Handler
 	.word HardFault_Handler
@@ -133,3 +133,18 @@ _exit:
 	def_irq_handler NMI_Handler
 	def_irq_handler HardFault_Handler
 	def_irq_handler PendSV_Handler
+
+	.section .pstack, "w"
+	.altmacro
+	
+	.macro LABEL l, n
+	.global \l\n
+\l\n :
+	.endm
+
+	.set i, 0
+	.rept CONFIG_CORE_COUNT
+	.fill 256, 4
+	LABEL __StackTop, %i
+	.set i, i+1
+	.endr

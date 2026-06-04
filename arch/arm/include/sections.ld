@@ -94,8 +94,7 @@ SECTIONS
 		 * FIXME: very inefficient at startup */
 		__pbss_start__ = .;
 		__pstack_start__ = .;
-		*picoRTOS.o (.pstack)
-		*picoRTOS-SMP.o (.pstack)
+		*(.pstack)
 
 		. = ALIGN(128);
 		__pstack_end__ = .;
@@ -157,8 +156,4 @@ SECTIONS
 	PROVIDE(__udata_len__ = __udata_end__ - __udata_start__);
 	PROVIDE(__ptext_len__ = __ptext_end__ - __ptext_start__);
 	PROVIDE(__utext_len__ = __utext_end__ - __utext_start__);
-	
-	/* for startup.S */
-	PROVIDE(__StackTop = __pstack_end__);
-	PROVIDE(__StackBottom = __pstack_start__);
 }
