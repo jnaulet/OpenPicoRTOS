@@ -235,7 +235,7 @@ static int setup_pll(struct clock_settings *settings)
 
     /* turn on PWR & set scale 2 mode */
     (void)clock_stm32f401x_enable(CLOCK_STM32F401X_CLK_PWR);
-    PWR->PWR_CR = (uint32_t)(PWR->PWR_CR & PWR_CR_VOS(PWR_CR_VOS_M) |
+    PWR->PWR_CR = (uint32_t)((PWR->PWR_CR & PWR_CR_VOS(PWR_CR_VOS_M)) |
                              PWR_CR_VOS(2));
 
     /* input clk frequency */
