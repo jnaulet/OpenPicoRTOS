@@ -38,6 +38,7 @@
 #define EPIPE           32      /* Broken pipe */
 #define EDOM            33      /* Math argument out of domain of func */
 #define ERANGE          34      /* Math result not representable */
+#define EDEADLK         35      /* Resource deadlock avoided (POSIX.1-2001) */
 #define ENOSYS          38      /* Invalid system call number */
 
 #endif
