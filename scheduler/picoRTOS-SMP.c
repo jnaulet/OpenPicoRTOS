@@ -7,7 +7,7 @@
 # error Default stack is too small
 #endif
 
-#define PICORTOS_SMP_CORE_ANY ((1u << CONFIG_CORE_COUNT) - 1u)
+#define SMP_CORE_ANY ((1u << CONFIG_CORE_COUNT) - 1u)
 
 /* SMP SCHEDULER main structures */
 
@@ -65,8 +65,8 @@ struct picoRTOS_task_sub {
 #define TASK_IDLE_PRIO CONFIG_TASK_COUNT
 #define TASK_IDLE_PID  CONFIG_TASK_COUNT
 /* shortcut for current task */
-#define TASK_CURRENT()       (picoRTOS.task[picoRTOS.index[arch_core()]])
 #define TASK_CURRENT_CORE(x) (picoRTOS.task[picoRTOS.index[x]])
+#define TASK_CURRENT()       TASK_CURRENT_CORE(arch_core())
 #define TASK_BY_PID(x)       (picoRTOS.task[(x)])
 /* shortcut for current sub */
 #define SUB_BY_PRIO(x) (picoRTOS.sub[(x)])
@@ -95,13 +95,9 @@ struct picoRTOS_SMP_core {
     struct picoRTOS_task_sub sub[TASK_COUNT];
 } __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
 
-struct picoRTOS_SMP_stack {
-    picoRTOS_stack_t array[ARCH_SYS_STACK_COUNT];
-};
-
 /* main core component */
 static struct picoRTOS_SMP_core picoRTOS;
-static struct picoRTOS_SMP_stack PRIVILEGED_STACK pstack[CONFIG_CORE_COUNT];
+/* stacks *SHOULD* be provided by arch startup.S */
 
 static void task_core_init(/*@out@*/ struct picoRTOS_task_core *task)
 {
@@ -293,7 +289,7 @@ void picoRTOS_add_task(struct picoRTOS_task *task, picoRTOS_priority_t prio)
     /* check params */
     picoRTOS_assert(prio < (picoRTOS_priority_t)CONFIG_TASK_COUNT, return );
     picoRTOS_assert(picoRTOS.pid_count < (picoRTOS_pid_t)CONFIG_TASK_COUNT, return );
-    task_append(picoRTOS.pid_count++, task, prio, (picoRTOS_mask_t)PICORTOS_SMP_CORE_ANY);
+    task_append(picoRTOS.pid_count++, task, prio, (picoRTOS_mask_t)SMP_CORE_ANY);
 }
 
 picoRTOS_priority_t picoRTOS_get_next_available_priority(void)
@@ -414,21 +410,15 @@ void picoRTOS_start(void)
         /* new region from stack */
         arch_mpu_add_region((int)pid, TASK_BY_PID(pid).stack_bottom,
                             TASK_BY_PID(pid).stack_count * sizeof(picoRTOS_stack_t),
-                            0x6u); /* rw unprivileged */
+                            MM_URW);
     }
 
     arch_smp_init();
     picoRTOS.flags |= F_RUNNING;
 
     /* start auxiliary cores first */
-    while (core-- != (picoRTOS_core_t)1) {
-        /* allocate a master stack & idle
-         * HINT: stacks are allocated in reverse to keep compatibility
-         * with linker-provided __StackTop */
-        struct picoRTOS_SMP_stack *stack = &pstack[CORE_MAX - (int)core];
-        arch_core_init(core, stack->array, PICORTOS_STACK_COUNT(stack->array),
-                       TASK_BY_PID(TASK_IDLE_PID + core).sp);
-    }
+    while (core-- != (picoRTOS_core_t)1)
+        arch_core_init(core, TASK_BY_PID(TASK_IDLE_PID + core).sp);
 
     /* start scheduler on core #0 */
     arch_flush_dcache(&picoRTOS, sizeof(picoRTOS));
@@ -479,10 +469,11 @@ syscall_switch_context(struct picoRTOS_task_core *task)
             /* reset flags & index */
             picoRTOS.flags &= ~F_POSTPONED;
             picoRTOS.index[core] = (picoRTOS_pid_t)-1;
-        }else
+        }else{
             /* next task or idle */
             task->state = TASK_STATE_BUSY;
-        break;
+            break;
+        }
     }
 
     picoRTOS_assert(deadlock != -1, fatal());
@@ -587,7 +578,8 @@ syscall_cacheop(/*@returned@*/ struct picoRTOS_task_core *task,
 syscall_mpu(/*@returned@*/ struct picoRTOS_task_core *task,
             const struct syscall_mpu *mpu)
 {
-    arch_mpu_add_region((int)picoRTOS.index, mpu->addr, mpu->n, mpu->mode);
+    arch_mpu_add_region((int)picoRTOS.index[arch_core()],
+                        mpu->addr, mpu->n, mpu->mode);
     arch_spin_unlock();
     return task;
 }

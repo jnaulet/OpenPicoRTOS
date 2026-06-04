@@ -23,14 +23,9 @@ extern void arch_smp_init(void);
  *
  * Parameters:
  *  core - The core number to start (1 -> CONFIG_SMP_CORES-1)
- *  stack - A pointer to the top of the auxiliary core main stack
- *  stack_count - The auxiliary core main stack size in picoRTOS_stack_t elements
  *  sp - The auxiliary core 'idle' task prepared stack (ready for context restoration)
  */
-extern void arch_core_init(picoRTOS_core_t core,
-                           /*@notnull@*/ picoRTOS_stack_t *stack,
-                           size_t stack_count,
-                           picoRTOS_stack_t *sp);
+extern void arch_core_init(picoRTOS_core_t core, picoRTOS_stack_t *sp);
 
 /* Function: arch_core
  * Provides the current running core identifier/index
