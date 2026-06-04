@@ -5,7 +5,7 @@
 
 static void led_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct gpio *D1 = (struct gpio*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();

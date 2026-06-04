@@ -24,7 +24,7 @@ static unsigned char OEB;
 
 static void tick_main(const void *priv)
 {
-    picoRTOS_assert_fatal(priv == NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     for (;;) {
         /* PB0 */
@@ -35,7 +35,7 @@ static void tick_main(const void *priv)
 
 static void d1_main(const void *priv)
 {
-    picoRTOS_assert_fatal(priv == NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     picoRTOS_tick_t ref = picoRTOS_get_tick();
 
@@ -62,7 +62,7 @@ static void d1_main(const void *priv)
 
 static void d2_main(const void *priv)
 {
-    picoRTOS_assert_fatal(priv == NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     for (;;) {
 

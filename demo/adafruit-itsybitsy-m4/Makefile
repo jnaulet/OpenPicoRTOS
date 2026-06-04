@@ -1,5 +1,5 @@
 # 1st: sources & targets
-target := $(TARGET)
+target := adafruit-itsybitsy.elf
 
 c_src-y += main.c
 c_src-y += adafruit-itsybitsy-m4.c
@@ -9,17 +9,8 @@ ifeq ($(skip-makefile),)
 PWD := $(shell pwd)
 KBUILD_SRC := ../..
 
-TARGETS := adafruit-itsybitsy_ram.elf
-TARGETS += adafruit-itsybitsy_flash.elf
-
-defconfig = $(@:%.elf=%_defconfig)
-
-all: $(TARGETS)
-	@
-
-%.elf: FORCE
-	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) $(defconfig)
-	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) TARGET=$@
+all:
+	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD)
 
 %:
 	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) $@

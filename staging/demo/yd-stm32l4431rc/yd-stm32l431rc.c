@@ -38,8 +38,13 @@ static int mux_init(void)
 
 static int gpio_init(/*@partial@*/ struct yd_stm32l431rc *ctx)
 {
-    (void)gpio_stm32h7xx_init(&ctx->TICK, ADDR_GPIOB, (size_t)15);
-    (void)gpio_stm32h7xx_init(&ctx->LED, ADDR_GPIOB, (size_t)4);
+    static struct gpio_stm32h7xx GPIOB;
+
+    (void)gpio_stm32h7xx_init(&GPIOB, ADDR_GPIOB);
+
+    (void)gpio_stm32h7xx_gpio_init(&ctx->TICK, &GPIOB, (size_t)15);
+    (void)gpio_stm32h7xx_gpio_init(&ctx->LED, &GPIOB, (size_t)4);
+
     return 0;
 }
 

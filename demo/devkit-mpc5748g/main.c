@@ -17,7 +17,7 @@
 
 static void tick_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct gpio *TICK = (struct gpio*)priv;
 
@@ -40,7 +40,7 @@ static void gpio_write_sleep(struct gpio *gpio, bool enabled, picoRTOS_tick_t de
 
 static void led0_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct gpio *LED = (struct gpio*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -78,7 +78,7 @@ static void led0_main(void *priv)
 
 static void led1_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct gpio *LED = (struct gpio*)priv;
 
@@ -106,7 +106,7 @@ static void led1_main(void *priv)
 
 static void adc_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct adc_pwm *ADC_PWM = (struct adc_pwm*)priv;
     struct adc *ADC = &ADC_PWM->ADC1_P0;
@@ -139,7 +139,7 @@ static void adc_main(void *priv)
  */
 static void spi_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     size_t xfered = 0;
     struct spi *SPI = (struct spi*)priv;
@@ -178,7 +178,7 @@ static void can_main(void *priv)
 {
 #define CAN_TEST_ID 0x6
 
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct can *CAN = (struct can*)priv;
 
@@ -216,7 +216,7 @@ static void can_main(void *priv)
  */
 static void console_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct uart *UART = (struct uart*)priv;
 
@@ -243,8 +243,8 @@ int main(void)
     static struct devkit_mpc5748g board;
 
     if (devkit_mpc5748g_init(&board) < 0) {
-        picoRTOS_assert_void_fatal(false);
-        /*@notreached@*/ return -1;
+        picoRTOS_assert_void(false);
+        return -1;
     }
 
     picoRTOS_init();

@@ -55,7 +55,7 @@ static void amigaBall_render_n(uint16_t *pfb, long px, long py, long ph, size_t 
 
 static void lcd_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     picoRTOS_tick_t ref;
     static struct lcd lcd;
@@ -123,7 +123,7 @@ static void lcd_main(void *priv)
 
 static void led_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct gpio *LED = (struct gpio*)priv;
 
@@ -142,7 +142,7 @@ static void led_main(void *priv)
 
 static void wd_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct wd *WD = (struct wd*)priv;
 

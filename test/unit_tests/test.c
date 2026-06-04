@@ -5,7 +5,6 @@
 #include "picoRTOS_types.h"
 
 /* global state machine */
-static bool fatal;
 static picoRTOS_core_t core;
 
 #define RESET_STATE_MACHINE()                   \
@@ -18,12 +17,6 @@ static inline picoRTOS_core_t arch_core(void)
     return core;
 }
 
-#undef picoRTOS_assert_fatal
-#undef picoRTOS_assert_fatal_void
-
-#define picoRTOS_assert_fatal(x, or_else) if(!(x)){ fatal = true; { or_else; }}
-#define picoRTOS_assert_fatal_void(x) if(!(x)){ fatal = true; }
-
 /*
  * These unit tests will ensure picoRTOS & picoRTOS-SMP get the same
  * expected basic behaviour
@@ -32,11 +25,11 @@ static inline picoRTOS_core_t arch_core(void)
 #ifndef TEST_PICORTOS_SMP
 # include "../../scheduler/picoRTOS.c"
 # define PICORTOS_DOT_INDEX picoRTOS.index
-# define CORES_COUNT 1
+# define CONFIG_CORE_COUNT 1
 #else
 # include "../../scheduler/picoRTOS-SMP.c"
 # define PICORTOS_DOT_INDEX picoRTOS.index[0]
-# define CORES_COUNT CONFIG_SMP_CORES
+# define CONFIG_CORE_COUNT 2
 #endif
 
 /* Dummy functions */
@@ -629,11 +622,11 @@ UNIT_TEST(picoRTOS_tick){
     picoRTOS_start();
 
     /* simulate tick */
-    for (int i = CORES_COUNT; i-- != 0; )
+    for (int i = CONFIG_CORE_COUNT; i-- != 0; )
         (void)picoRTOS_tick(TASK_CURRENT().sp);
     u_assert_var_equals(PICORTOS_DOT_INDEX, 0);
 
-    for (int i = CORES_COUNT; i-- != 0; )
+    for (int i = CONFIG_CORE_COUNT; i-- != 0; )
         (void)picoRTOS_tick(TASK_CURRENT().sp);
     u_assert_var_equals(PICORTOS_DOT_INDEX, 1);
 
@@ -642,11 +635,11 @@ UNIT_TEST(picoRTOS_tick){
                      SYSCALL_SLEEP,
                      (void*)&sleep);
 
-    for (int i = CORES_COUNT; i-- != 0; )
+    for (int i = CONFIG_CORE_COUNT; i-- != 0; )
         (void)picoRTOS_tick(TASK_CURRENT().sp);
     u_assert_var_equals(PICORTOS_DOT_INDEX, 0);
 
-    for (int i = CORES_COUNT; i-- != 0; )
+    for (int i = CONFIG_CORE_COUNT; i-- != 0; )
         (void)picoRTOS_tick(TASK_CURRENT().sp);
     u_assert_var_equals(PICORTOS_DOT_INDEX, 2);
 }
@@ -667,7 +660,7 @@ UNIT_TEST(syscall_switch_context){
     picoRTOS_start();
 
     /* simulate tick */
-    for (int i = CORES_COUNT; i-- != 0; )
+    for (int i = CONFIG_CORE_COUNT; i-- != 0; )
         (void)picoRTOS_tick(TASK_CURRENT().sp);
 
     /* simulate context switch */
@@ -678,7 +671,7 @@ UNIT_TEST(syscall_switch_context){
     u_assert_var_equals(PICORTOS_DOT_INDEX, TASK_IDLE_PID);
 
     /* simulate 2nd tick */
-    for (int i = CORES_COUNT; i-- != 0; )
+    for (int i = CONFIG_CORE_COUNT; i-- != 0; )
         (void)picoRTOS_tick(TASK_CURRENT().sp);
 
     (void)syscall_switch_context(&TASK_CURRENT());
@@ -688,7 +681,7 @@ UNIT_TEST(syscall_switch_context){
     u_assert_var_equals(PICORTOS_DOT_INDEX, TASK_IDLE_PID);
 
     /* simulate 3rd tick */
-    for (int i = CORES_COUNT; i-- != 0; )
+    for (int i = CONFIG_CORE_COUNT; i-- != 0; )
         (void)picoRTOS_tick(TASK_CURRENT().sp);
 
     /* test for postoned tasks */

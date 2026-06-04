@@ -13,7 +13,7 @@
  */
 static void tick_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct gpio *TICK = (struct gpio*)priv;
 
@@ -35,7 +35,7 @@ static struct picoRTOS_cond cond = PICORTOS_COND_INITIALIZER;
 
 static void blink_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct gpio *LED = (struct gpio*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -63,7 +63,7 @@ static void blink_main(void *priv)
 
 static void blink_again_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct gpio *LED = (struct gpio*)priv;
 
@@ -91,7 +91,7 @@ static void blink_again_main(void *priv)
  */
 static void spi_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     size_t xfered = 0;
     struct spi *SPI = (struct spi*)priv;
@@ -127,7 +127,7 @@ static void spi_main(void *priv)
  */
 static void pwm_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     pwm_duty_cycle_t dc = 0;
     struct pwm *PWM = (struct pwm*)priv;
@@ -146,7 +146,7 @@ static void pwm_main(void *priv)
  */
 static void adc_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     int deg_x10[3] = { 0, 0, 0 };
     struct adc *TS = (struct adc*)priv;
@@ -172,7 +172,7 @@ static void can_main(void *priv)
 {
 #define CAN_TEST_ID 0x6
 
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct can *CAN = (struct can*)priv;
 
@@ -211,7 +211,7 @@ static void can_main(void *priv)
  */
 static void twi_master_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct twi *TWI = (struct twi*)priv;
     picoRTOS_tick_t ref = picoRTOS_get_tick();
@@ -242,7 +242,7 @@ static void twi_master_main(void *priv)
  */
 static void twi_slave_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct twi *TWI = (struct twi*)priv;
 
@@ -279,7 +279,7 @@ static void twi_slave_main(void *priv)
  */
 static void wd_main(void *priv)
 {
-    picoRTOS_assert_fatal(priv != NULL, return );
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
 
     struct wd *WDT = (struct wd*)priv;
 
@@ -299,7 +299,7 @@ int main(void)
 
     /* this has to be done first cause of the watchdog */
     if (launchxl_f28379d_init(&launchxl) < 0) {
-        picoRTOS_assert_void_fatal(false);
+        picoRTOS_assert_void(false);
         return -1; /* fatal crash */
     }
 
@@ -345,6 +345,6 @@ int main(void)
     picoRTOS_start();
 
     /* we're not supposed to end here */
-    picoRTOS_assert_void_fatal(false);
+    picoRTOS_assert_void(false);
     return -1;
 }

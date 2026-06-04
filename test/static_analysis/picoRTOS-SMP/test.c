@@ -66,7 +66,7 @@ int main(void)
     (void)picoRTOS_syscall(stack, SYSCALL_SLEEP, NULL);
     (void)picoRTOS_tick(stack);
 
-    picoRTOS_kill();
+    picoRTOS_kill(0);
     /*@notreached@*/
     return 0;
 }

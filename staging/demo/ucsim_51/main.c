@@ -1,6 +1,8 @@
 #include "picoRTOS.h"
 #include "picoRTOS_device.h"
 
+#include <errno.h>
+
 #ifndef S_SPLINT_S
 __sfr __at(ADDR_P1)   P1;
 __sfr __at(ADDR_P1M1) P1M1;
@@ -13,7 +15,7 @@ static unsigned char P1M2;
 
 static void tick_main(const void *priv)
 {
-    picoRTOS_assert_fatal(priv == (void*)0xf00d, return );
+    picoRTOS_assert(priv == (void*)0xf00d, picoRTOS_kill(EINVAL));
 
     for (;;) {
         P1 ^= 0x1;
@@ -23,7 +25,7 @@ static void tick_main(const void *priv)
 
 static void led_main(const void *priv)
 {
-    picoRTOS_assert_fatal(priv == (void*)0xcafe, return );
+    picoRTOS_assert(priv == (void*)0xcafe, picoRTOS_kill(EINVAL));
 
     picoRTOS_tick_t ref = picoRTOS_get_tick();
 
