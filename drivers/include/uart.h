@@ -79,12 +79,4 @@ int uart_write(struct uart *ctx, const char *buf, size_t n);
  */
 int uart_read(struct uart *ctx, char *buf, size_t n);
 
-/* Function: uart_claim
- * Claims the uart for this process/thread (opt. MPU-related feature)
- *
- * Parameters:
- *  uart - A uart instance
- */
-/*@external@*/ struct uart *uart_claim(/*@returned@*/ struct uart *ctx);
-
 #endif

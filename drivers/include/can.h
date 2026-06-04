@@ -1,5 +1,5 @@
-#ifndef CAN_H
-#define CAN_H
+#ifndef HAL_CAN_H
+#define HAL_CAN_H
 
 #include <errno.h>
 
@@ -123,13 +123,5 @@ int can_read(struct can *ctx, can_id_t *id, void *buf, size_t n);
  * 0 if success, -errno otherwise
  */
 int can_request_frame(struct can *ctx, can_id_t id);
-
-/* Function: can_claim
- * Claims the can for this process/thread (MPU-related feature)
- *
- * Parameters:
- *  can - A can instance
- */
-/*@unused@*/ struct can *can_claim(/*@returned@*/ struct can *ctx);
 
 #endif

@@ -63,12 +63,4 @@ bool gpio_read(struct gpio *ctx);
  */
 void gpio_toggle(struct gpio *ctx);
 
-/* Function: gpio_claim
- * Claims the gpio for this process/thread (opt. MPU-related feature)
- *
- * Parameters:
- *  gpio - A gpio instance
- */
-/*@external@*/ struct gpio *gpio_claim(/*@returned@*/ struct gpio *ctx);
-
 #endif
