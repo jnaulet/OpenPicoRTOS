@@ -6,7 +6,7 @@
  * Used on misc microcontrollers, like stm32h7 & Atmel SAMV70
  */
 
-#include "can.h"
+#include "can+safety.h"
 #include "clock.h"
 
 #include <stddef.h>

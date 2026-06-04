@@ -1,8 +1,8 @@
 #ifndef ADC_STM32H7XX_SAR_H
 #define ADC_STM32H7XX_SAR_H
 
-#include "adc.h"
-#include "dma.h"
+#include "adc+safety.h"
+#include "dma+safety.h"
 #include "clock.h"
 #include "picoRTOS_types.h"
 

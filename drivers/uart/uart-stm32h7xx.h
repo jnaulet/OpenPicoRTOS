@@ -1,7 +1,7 @@
 #ifndef UART_STM32H7XX_H
 #define UART_STM32H7XX_H
 
-#include "uart.h"
+#include "uart+safety.h"
 #include "clock.h"
 
 #define UART_STM32H7XX_CS_MIN 7

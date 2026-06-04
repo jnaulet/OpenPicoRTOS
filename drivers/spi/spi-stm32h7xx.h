@@ -1,8 +1,8 @@
 #ifndef SPI_STM32H7XX_H
 #define SPI_STM32H7XX_H
 
-#include "dma.h"
-#include "spi.h"
+#include "dma+safety.h"
+#include "spi+safety.h"
 #include "clock.h"
 
 struct SPI_STM32H7XX;

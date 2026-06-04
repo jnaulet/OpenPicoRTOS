@@ -1,7 +1,7 @@
 #ifndef PWM_STM32H7XX_TIM_H
 #define PWM_STM32H7XX_TIM_H
 
-#include "pwm.h"
+#include "pwm+safety.h"
 #include "clock.h"
 
 #include <stdbool.h>

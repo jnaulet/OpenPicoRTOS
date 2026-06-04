@@ -1,7 +1,7 @@
 #ifndef GPIO_STM32H7XX_H
 #define GPIO_STM32H7XX_H
 
-#include "gpio.h"
+#include "gpio+safety.h"
 #include <stddef.h>
 #include <stdint.h>
 
