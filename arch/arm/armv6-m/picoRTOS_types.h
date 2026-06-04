@@ -16,7 +16,6 @@ typedef unsigned long picoRTOS_cycles_t;
 typedef long picoRTOS_intptr_t;
 typedef unsigned long picoRTOS_uintptr_t;
 
-#define ARCH_SYS_STACK_COUNT     512
 #define ARCH_INITIAL_STACK_COUNT (16 + 1)                       /* +1 for aligner */
 #define ARCH_MIN_STACK_COUNT     (ARCH_INITIAL_STACK_COUNT + 4) /* in -O0 */
 #define ARCH_SMP_MIN_STACK_COUNT 1                              /* can't be 0 (ISO-C) */
