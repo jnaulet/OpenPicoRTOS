@@ -26,6 +26,9 @@
 #define ADDR_DSPI2      0xffe74000
 #define ADDR_DSPI3      0xfbe74000
 
+#define ADDR_SMPU0      0xfc010000
+#define ADDR_SMPU1      0xfc014000
+
 #define ADDR_SWT0       0xfc050000
 #define ADDR_SWT1       0xfc054000
 #define ADDR_SWT2       0xfc058000

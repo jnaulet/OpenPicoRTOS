@@ -6,16 +6,32 @@
 	#include "include/macros.S"
 	#include <generated/autoconf.h>
 
-	.macro ARCH_INIT_CORE_STACK
-	E_LIW r1, arch_core_sp
-	mfpir r0
-	e_sub16i r0, r0, 1
-	se_slwi r0, 2
-	add r1, r1, r0
-	se_lwz r1, 0 (r1)
+	.section .rodata, "a"
+	.altmacro
+
+	.macro CORE_STACKTOP l, n
+	.long \l\n
 	.endm
 
+	.global __StackTop
+__StackTop:
+	.set i, 0
+	.rept CONFIG_CORE_COUNT
+	CORE_STACKTOP __StackTop, %i
+	.set i, i+1
+	.endr
+
 	.section .text
+	.noaltmacro
+
+	.macro CORE_STACKTOP_to_r1
+	mfpir r3
+	se_slwi r3, 2
+	e_lis r1, __StackTop@ha
+	add r1, r1, r3
+	e_lwz r1, __StackTop@l(r1)
+	e_add16i r1, r1, -8	/* lr + backchain */
+	.endm
 
 	.align 4
 	.type arch_core_start, %function
@@ -29,26 +45,14 @@ arch_core_start:
 	INVALIDATE_AND_ENABLE_CACHE ICACHE
 	INVALIDATE_AND_ENABLE_CACHE DCACHE
 
-	ARCH_INIT_CORE_STACK
+	CORE_STACKTOP_to_r1
 	E_LIW r2, _SDA2_BASE_	/* provided by powerpc-eabivle- toolchain */
 	E_LIW r13, _SDA_BASE_	/* provided by powerpc-eabivle- toolchain */
 
 	/* IVPR */
-	E_LIW r0, __vectors_start__
+	E_LIW r0, __IVORs
 	mtivpr r0
 
 	/* get first task sp */
-	e_lwz r3, 0 (r1)
-	e_add16i r1, r1, 4
-
+	e_lwz r3, -4 (r1)
 	e_bl arch_start_first_task
-
-	.section .sbss
-
-	.align 4
-	.type arch_core_sp, %object
-	.global arch_core_sp
-arch_core_sp:
-	.rept CONFIG_SMP_CORES - 1
-	.long 0
-	.endr

@@ -66,6 +66,8 @@ void arch_timer_init(int period)
     /* register interrupt */
     arch_register_interrupt((picoRTOS_irq_t)IRQ_STM0_CIR0, (arch_isr_fn)Timer_Handler, NULL);
     arch_enable_interrupt((picoRTOS_irq_t)IRQ_STM0_CIR0);
+
+    arch_mpu_add_region(PID_KERNEL, STM0, sizeof(*STM0), MM_PRW | MM_NON_CACHEABLE);
 }
 #else
 /* ASM */
@@ -75,7 +77,7 @@ void arch_timer_init(int period)
 {
     arch_assert_void(period > 0);
 
-    size_t n = (size_t)CONFIG_SMP_CORES;
+    size_t n = (size_t)CONFIG_CORE_COUNT;
 
     /* STM0 source clock is FS80 (half-speed) */
     timer_stm_period = (uint32_t)period >> 1;
@@ -91,6 +93,9 @@ void arch_timer_init(int period)
         arch_register_interrupt((picoRTOS_irq_t)(IRQ_STM0_CIR0 + n), (arch_isr_fn)Timer_Handler, NULL);
         arch_smp_enable_interrupt((picoRTOS_irq_t)(IRQ_STM0_CIR0 + n), (picoRTOS_mask_t)(1u << n));
     }
+
+    /* mpu */
+    arch_mpu_add_region(PID_KERNEL, STM0, sizeof(*STM0), MM_PRW | MM_NON_CACHEABLE);
 }
 #endif
 

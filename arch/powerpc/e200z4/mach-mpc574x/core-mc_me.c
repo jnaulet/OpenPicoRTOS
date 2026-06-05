@@ -77,7 +77,7 @@ static void mode_transition_not_active_busywait(void)
 
 void arch_core_run(picoRTOS_core_t core)
 {
-    arch_assert_void(core < (picoRTOS_core_t)CONFIG_SMP_CORES);
+    arch_assert_void(core < (picoRTOS_core_t)CONFIG_CORE_COUNT);
 
     uint32_t mctl = MC_ME->MCTL;
 

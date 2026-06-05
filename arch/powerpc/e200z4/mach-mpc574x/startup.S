@@ -1,5 +1,6 @@
 	/* PPC e200z4 VLE startup */
 	#include "picoRTOS_device.h"
+	#include <generated/autoconf.h>
 	#include "../include/macros.S"
 
 	/* DISABLE_SWT */
@@ -24,8 +25,8 @@
 	.long 0	    /* CPU1 reset vector */
 
 	.section .init, "ax"
-
-	.align 4
+	
+	.align 5 /* .boot is 24 bytes, align to 32 */
 	.global Reset_Handler
 Reset_Handler:
 	wrteei 0	/* disable interrupts */
@@ -43,26 +44,27 @@ Reset_Handler:
 	INVALIDATE_AND_ENABLE_CACHE ICACHE
 	INVALIDATE_AND_ENABLE_CACHE DCACHE
 
-	E_LIW r1, __StackTop	/* stack */
-	E_LIW r2, _SDA2_BASE_	/* provided by powerpc-eabivle- toolchain */
-	E_LIW r13, _SDA_BASE_	/* provided by powerpc-eabivle- toolchain */
+	E_LIW r1, __StackTop0 - 8	/* __Stacktop - lr - backchain */
+	E_LIW r2, _SDA2_BASE_		/* provided by powerpc-eabivle- toolchain */
+	E_LIW r13, _SDA_BASE_		/* provided by powerpc-eabivle- toolchain */
 
-	E_LIW r7, __relocate_text
-	se_cmpi r7, 1
-	se_bne .ignore_text_relocation
-
+	E_LIW r7, __text_start__
+	E_LIW r4, __text_load__
+	se_cmp r7, r4
+	se_beq .ignore_text_relocation
+	
 	/* copy .text to ram */
-	COPY_TO_RAM __esdata, __text_start__, __text_end__
+	COPY_TO_RAM __einit, __text_start__, __text_end__
 
 .ignore_text_relocation:
 	/* copy .data section(s) */
 	COPY_TO_RAM __etext, __data_start__, __data_end__
-	COPY_TO_RAM __edata, __sdata_start__, __sdata_end__
 	/* zero .bss section */
 	ZERO_RAM __bss_start__, __bss_end__
+	ZERO_RAM __pbss_start__, __pbss_end__
 
 	/* IVPR */
-	E_LIW r0, __vectors_start__
+	E_LIW r0, __IVORs
 	mtivpr r0
 
 	/* jump to main */
@@ -73,15 +75,23 @@ __exit:
 	nop
 	e_b __exit
 
-	.section .vectors, "ax"
+	/* hijack newlib */
+	.global __eabi
+__eabi:
+	se_blr
 
 	.macro IVOR name, handler
-	.align 4
+	.align 4 /* 16 bytes alignment (2^4) */
 \name:
 	e_b \handler
 	.endm
 
-	.align 4
+	.section .vectors, "ax"
+	.extern MachineCheck_Handler
+	.extern DataStorage_Handler
+	.extern InstructionStorage_Handler
+	
+	.align 16 /* 64kbytes alignment (2^16) */
 	.global __IVORs
 __IVORs:
 	IVOR CriticalInput, CriticalInput_Handler
@@ -103,12 +113,12 @@ __IVORs:
 	IVOR SPEUnavailableException, SPEUnavailableException_Handler
 	IVOR EFPDataException, EFPDataException_Handler
 	IVOR EFPRoundException, EFPRoundException_Handler
-
+	
 	/* Default handlers */
 	def_irq_handler CriticalInput_Handler
-	def_irq_handler MachineCheck_Handler
-	def_irq_handler DataStorage_Handler
-	def_irq_handler InstructionStorage_Handler
+	// def_irq_handler MachineCheck_Handler
+	// def_irq_handler DataStorage_Handler
+	// def_irq_handler InstructionStorage_Handler
 	def_irq_handler Alignment_Handler
 	def_irq_handler Program_Handler
 	def_irq_handler FloatingPointUnavailable_Handler
@@ -123,7 +133,17 @@ __IVORs:
 	def_irq_handler EFPDataException_Handler
 	def_irq_handler EFPRoundException_Handler
 
-	/* hijack newlib */
-	.global __eabi
-__eabi:
-	se_blr
+	.section .pstack, "w"
+	.altmacro
+	
+	.macro LABEL l, n
+	.global \l\n
+\l\n :
+	.endm
+
+	.set i, 0
+	.rept CONFIG_CORE_COUNT
+	.fill 256, 4
+	LABEL __StackTop, %i
+	.set i, i+1
+	.endr
