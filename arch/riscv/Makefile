@@ -36,3 +36,4 @@ asflags-$(CONFIG_RISCV) += $(include-y) $(arch-y) $(abi-y) $(cmodel-y)
 
 ldflags-$(CONFIG_RISCV) += $(arch-y) $(abi-y) $(cmodel-y)
 ldflags-$(CONFIG_RISCV) += -nostdlib -nostartfiles
+ldflags-$(CONFIG_RISCV) += -L$(arch-riscv)/include -Tsections.ld

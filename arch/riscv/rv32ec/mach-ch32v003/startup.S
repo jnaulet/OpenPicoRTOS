@@ -17,21 +17,24 @@ Reset_Handler:
 	la gp, __gp
 	la tp, __tp
 	la sp, __StackTop
+	INIT_MTVEC __vectors_start__, 0x3
 
 	/* relocate text section if needed */
-	la t0, __relocate_text
+	la t0, __einit
+	la t1, __text_start__
 	beq t0, zero, .ignore_text_relocation
 
 	/* copy .text to ram */
 	COPY_TO_RAM __edata, __text_start__, __text_end__
+	COPY_TO_RAM __vectors, __runtime_vectors_start__, __runtime_vectors_end__
+	INIT_MTVEC __runtime_vectors_start__, 0x3
 
 .ignore_text_relocation:
-	/* vectors */
-	INIT_MTVEC __vectors_start__, 0x3
 	/* copy .data section */
 	COPY_TO_RAM __etext, __data_start__, __data_end__
 	/* zero .bss section */
 	ZERO_RAM __bss_start__, __bss_end__
+	ZERO_RAM __pbss_start__, __pbss_end__
 
 	call main
 
@@ -67,3 +70,8 @@ __vectors:
 	def_irq_handler NMI_Handler
 	def_irq_handler HardFault_Handler
 	def_irq_handler SW_Handler
+
+	.section .pstack, "w"
+	.global __StackTop
+	.fill 64, 4
+__StackTop:

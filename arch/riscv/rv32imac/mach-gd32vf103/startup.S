@@ -39,24 +39,25 @@ Reset_Handler:
 	la gp, __gp
 	la tp, __tp
 	la sp, __StackTop
+	INIT_MTVT __vectors_start__
 
 	/* relocate text section if needed */
-	la t0, __relocate_text
-	beq t0, zero, .ignore_text_relocation
+	la t0, __einit
+	la t1, __text_start__
+	beq t0, t1, .ignore_text_relocation
 
 	/* copy .text to ram */
 	COPY_TO_RAM __edata, __text_start__, __text_end__
-	COPY_TO_RAM __vectors, __vectors_start__, __vectors_end__
+	COPY_TO_RAM __vectors, __runtime_vectors_start__, __runtime_vectors_end__
+	INIT_MTVT __runtime_vectors_start__
 
 .ignore_text_relocation:
-	/* vectors */
 	INIT_MTVEC GeneralException_Handler, MTVEC_ECLIC
-	INIT_MTVT __vectors_start__
-
 	/* copy .data section */
 	COPY_TO_RAM __etext, __data_start__, __data_end__
 	/* zero .bss section */
 	ZERO_RAM __bss_start__, __bss_end__
+	ZERO_RAM __pbss_start__, __pbss_end__
 
 	call main
 
@@ -66,7 +67,7 @@ _exit:
 	ebreak
 	j _exit
 
-	.section .vectors
+	.section .vectors, "a"
 __vectors:
 	j Reset_Handler
 	.word 0
@@ -89,3 +90,8 @@ __vectors:
 	.endr
 
 	def_irq_handler MachineSoftwareInterrupt_Handler
+
+	.section .pstack, "w"
+	.global __StackTop
+	.fill 256, 4
+__StackTop:
