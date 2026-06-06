@@ -32,6 +32,12 @@ config CACHE_MAINTENANCE
        default n
        select CACHE
 
+config MPU_SMPU
+       bool "MPU support (EXPERIMENTAL)"
+       depends on E200Z4
+       default n
+       select MPU
+
 config DEBUG_AUX_CORE_STARTUP
        bool "Debug auxiliary core startup (Warning: not for production)"
        depends on SMP
