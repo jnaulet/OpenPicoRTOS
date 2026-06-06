@@ -113,15 +113,25 @@ static int flash_init(/*@partial@*/ struct devkit_mpc5748g *ctx)
 
 static int gpio_init(/*@partial@*/ struct devkit_mpc5748g *ctx)
 {
-    (void)gpio_nxp_siul2_init(&ctx->TICK, ADDR_GPIO_PTJ, (size_t)0);
-    (void)gpio_nxp_siul2_init(&ctx->LED[0], ADDR_GPIO_PTA, (size_t)4);
-    (void)gpio_nxp_siul2_init(&ctx->LED[1], ADDR_GPIO_PTA, (size_t)0);
-    (void)gpio_nxp_siul2_init(&ctx->LED[2], ADDR_GPIO_PTJ, (size_t)4);
-    (void)gpio_nxp_siul2_init(&ctx->LED[3], ADDR_GPIO_PTH, (size_t)5);
-    (void)gpio_nxp_siul2_init(&ctx->LED[4], ADDR_GPIO_PTC, (size_t)4);
-    (void)gpio_nxp_siul2_init(&ctx->LED[5], ADDR_GPIO_PTH, (size_t)13);
-    (void)gpio_nxp_siul2_init(&ctx->LED[6], ADDR_GPIO_PTA, (size_t)7);
-    (void)gpio_nxp_siul2_init(&ctx->LED[7], ADDR_GPIO_PTA, (size_t)10);
+    static struct gpio_nxp_siul2 PTA;
+    static struct gpio_nxp_siul2 PTC;
+    static struct gpio_nxp_siul2 PTH;
+    static struct gpio_nxp_siul2 PTJ;
+
+    (void)gpio_nxp_siul2_init(&PTA, ADDR_GPIO_PTA);
+    (void)gpio_nxp_siul2_init(&PTC, ADDR_GPIO_PTC);
+    (void)gpio_nxp_siul2_init(&PTH, ADDR_GPIO_PTH);
+    (void)gpio_nxp_siul2_init(&PTJ, ADDR_GPIO_PTJ);
+
+    (void)gpio_nxp_siul2_gpio_init(&ctx->TICK, &PTJ, (size_t)0);
+    (void)gpio_nxp_siul2_gpio_init(&ctx->VU.LED[0], &PTA, (size_t)4);
+    (void)gpio_nxp_siul2_gpio_init(&ctx->VU.LED[1], &PTA, (size_t)0);
+    (void)gpio_nxp_siul2_gpio_init(&ctx->VU.LED[2], &PTJ, (size_t)4);
+    (void)gpio_nxp_siul2_gpio_init(&ctx->VU.LED[3], &PTH, (size_t)5);
+    (void)gpio_nxp_siul2_gpio_init(&ctx->VU.LED[4], &PTC, (size_t)4);
+    (void)gpio_nxp_siul2_gpio_init(&ctx->VU.LED[5], &PTH, (size_t)13);
+    (void)gpio_nxp_siul2_gpio_init(&ctx->VU.LED[6], &PTA, (size_t)7);
+    (void)gpio_nxp_siul2_gpio_init(&ctx->VU.LED[7], &PTA, (size_t)10);
 
     return 0;
 }

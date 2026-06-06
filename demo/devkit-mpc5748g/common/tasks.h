@@ -1,0 +1,12 @@
+#ifndef TASKS_H
+#define TASKS_H
+
+void tick_main(void *priv);
+void led0_main(void *priv);
+void led1_main(void *priv);
+void adc_main(void *priv);
+void spi_main(void *priv);
+void can_main(void *priv);
+void console_main(void *priv);
+
+#endif

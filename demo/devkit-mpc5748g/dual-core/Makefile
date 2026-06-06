@@ -1,0 +1,23 @@
+# 1st: sources & targets
+target :=  devkit-mpc5748g.elf
+
+c_src-y += main.c
+c_src-y += ../common/devkit-mpc5748g.c
+c_src-y += ../common/tasks.c
+
+# avoid double-inclusion
+ifneq ($(skip-makefile),1)
+PWD := $(shell pwd)
+PICORTOS_SRC := ../../..
+
+all: $(TARGETS)
+	$(Q)$(MAKE) -C $(PICORTOS_SRC) O=$(PWD)
+
+%:
+	$(Q)$(MAKE) -C $(PICORTOS_SRC) O=$(PWD) $@
+
+PHONY += FORCE
+FORCE:
+
+.PHONY: $(PHONY)
+endif

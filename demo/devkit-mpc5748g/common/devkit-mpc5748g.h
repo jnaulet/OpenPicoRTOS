@@ -20,7 +20,9 @@ struct devkit_mpc5748g {
     } ADC_PWM;
     struct can CAN0;
     struct flash FLASH;
-    struct gpio LED[DEVKIT_MPC5748G_LED_COUNT];
+    struct gpio_led {
+        struct gpio LED[DEVKIT_MPC5748G_LED_COUNT];
+    } VU;
     struct lin LIN0;
     struct spi SPI;
     struct twi I2C0;
