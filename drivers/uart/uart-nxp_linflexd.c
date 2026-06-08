@@ -273,3 +273,9 @@ int uart_read(struct uart *ctx, char *buf, size_t n)
 
     return (int)recv;
 }
+
+struct uart *uart_claim(struct uart *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->base, sizeof(*ctx->base), MM_URW | MM_NON_CACHEABLE);
+    return ctx;
+}

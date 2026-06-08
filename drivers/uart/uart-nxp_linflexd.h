@@ -1,7 +1,7 @@
 #ifndef UART_NXP_LINFLEXD_H
 #define UART_NXP_LINFLEXD_H
 
-#include "uart.h"
+#include "uart+safety.h"
 #include "clock.h"
 
 struct UART_NXP_LINFLEXD;
