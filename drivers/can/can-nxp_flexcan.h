@@ -9,7 +9,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include "can.h"
+#include "can+safety.h"
 #include "clock.h"
 
 struct CAN_NXP_FLEXCAN;

@@ -729,3 +729,9 @@ int can_request_frame(/*@unused@*/ struct can *ctx __attribute__((unused)),
 {
     return -ENOSYS;
 }
+
+struct can *can_claim(struct can *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->base, sizeof(*ctx->base), MM_URW | MM_NON_CACHEABLE);
+    return ctx;
+}
