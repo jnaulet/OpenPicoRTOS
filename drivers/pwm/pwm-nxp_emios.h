@@ -1,7 +1,7 @@
 #ifndef PWM_NXP_EMIOS_H
 #define PWM_NXP_EMIOS_H
 
-#include "pwm.h"
+#include "pwm+safety.h"
 #include "ipwm.h"
 #include "clock.h"
 #include <stddef.h>
@@ -57,6 +57,8 @@ int pwm_nxp_emios_pwm_setup(struct pwm *ctx, const struct pwm_nxp_emios_pwm_sett
  *
  * void pwm_start(struct pwm *ctx);
  * void pwm_stop(struct pwm *ctx);
+ *
+ * struct pwm *pwm_claim(struct pwm *ctx);
  */
 
 typedef enum {

@@ -1,5 +1,7 @@
 #include "pwm-nxp_emios.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 #include <stdint.h>
 
@@ -190,6 +192,14 @@ void pwm_start(struct pwm *ctx)
 void pwm_stop(struct pwm *ctx)
 {
     ctx->uc->C &= ~C_UCPREN;        /* stop clock */
+}
+
+struct pwm *pwm_claim(struct pwm *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->parent, sizeof(*ctx->parent), MM_URW);
+    picoRTOS_mpu_add_region(ctx->parent->base, sizeof(*ctx->parent->base),
+                            MM_URW | MM_NON_CACHEABLE);
+    return ctx;
 }
 
 /* IPWM */
