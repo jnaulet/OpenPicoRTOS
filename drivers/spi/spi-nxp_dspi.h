@@ -3,7 +3,7 @@
 
 /* NXP_DSPI / SPI driver for NXP MPC5x series */
 
-#include "spi.h"
+#include "spi+safety.h"
 #include "clock.h"
 
 #include <stddef.h>
