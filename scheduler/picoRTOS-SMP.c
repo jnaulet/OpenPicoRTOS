@@ -421,7 +421,6 @@ void picoRTOS_start(void)
         arch_core_init(core, TASK_BY_PID(TASK_IDLE_PID + core).sp);
 
     /* start scheduler on core #0 */
-    arch_flush_dcache(&picoRTOS, sizeof(picoRTOS));
     arch_mpu_enable();
     arch_mpu_restore_regions(TASK_IDLE_PID); /* FIXME */
     arch_start_first_task(TASK_BY_PID(TASK_IDLE_PID).sp);
@@ -479,10 +478,7 @@ syscall_switch_context(struct picoRTOS_task_core *task)
     picoRTOS_assert(deadlock != -1, fatal());
     task_core_stat_start(task); /* stats */
 
-    arch_flush_dcache(&picoRTOS, sizeof(picoRTOS));
-    arch_invalidate_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);
     arch_spin_unlock();
-
     return task;
 }
 
@@ -596,8 +592,6 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, syscall_t syscall, void
      * - syscall_mpu()
      */
     arch_spin_lock();
-    arch_invalidate_dcache(&picoRTOS, sizeof(picoRTOS));
-
     struct picoRTOS_task_core *task = &TASK_CURRENT();
 
     picoRTOS_assert((picoRTOS.flags & F_RUNNING) != 0, fatal());
@@ -607,7 +601,6 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, syscall_t syscall, void
 
     /* store current sp & flush */
     task->sp = sp;
-    arch_flush_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);
 
     switch (syscall) {
     /* OS-related syscalls */
@@ -634,8 +627,6 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, syscall_t syscall, void
 picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
 {
     arch_spin_lock();
-    arch_invalidate_dcache(&picoRTOS, sizeof(picoRTOS));
-
     picoRTOS_core_t core = arch_core();
     struct picoRTOS_task_core *task = &TASK_CURRENT_CORE(core);
 
@@ -644,7 +635,6 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
 
     /* store current sp & flush */
     task->sp = sp;
-    arch_flush_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);
 
     /* mask task as immediately ready */
     task->state = TASK_STATE_READY;
@@ -691,10 +681,7 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
     if (picoRTOS.core_counter == (picoRTOS_core_t)CONFIG_CORE_COUNT)
         picoRTOS.core_counter = 0;
 
-    arch_flush_dcache(&picoRTOS, sizeof(picoRTOS));
-    arch_invalidate_dcache(task->sp, (size_t)task->stack_top - (size_t)task->sp);
     arch_spin_unlock();
-
     return task->sp;
 }
 

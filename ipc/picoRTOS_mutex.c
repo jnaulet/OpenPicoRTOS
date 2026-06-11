@@ -26,7 +26,6 @@ void picoRTOS_mutex_init(struct picoRTOS_mutex *mutex)
 {
     mutex->owner = nobody;
     mutex->count = 0;
-    picoRTOS_flush_dcache(mutex, sizeof(*mutex));
 }
 
 /* Function: picoRTOS_mutex_trylock
@@ -42,16 +41,12 @@ int picoRTOS_mutex_trylock(struct picoRTOS_mutex *mutex)
 {
     picoRTOS_atomic_t pid = (picoRTOS_atomic_t)picoRTOS_self();
 
-    picoRTOS_invalidate_dcache(mutex, sizeof(*mutex));
-
     /* mutex is re-entrant */
     if (arch_compare_and_swap(&mutex->owner, nobody, pid) != nobody &&
         mutex->owner != pid)
         return -EAGAIN;
 
     mutex->count++;
-
-    picoRTOS_flush_dcache(mutex, sizeof(*mutex));
     return 0;
 }
 
@@ -92,12 +87,9 @@ void picoRTOS_mutex_unlock(struct picoRTOS_mutex *mutex)
 {
     picoRTOS_atomic_t owner = (picoRTOS_atomic_t)picoRTOS_self();
 
-    picoRTOS_invalidate_dcache(mutex, sizeof(*mutex));
     picoRTOS_assert(mutex->owner == owner, picoRTOS_kill(EPERM));
     picoRTOS_assert(mutex->count > 0, picoRTOS_kill(EINVAL));
 
     if (--mutex->count == 0)
         mutex->owner = nobody;
-
-    picoRTOS_flush_dcache(mutex, sizeof(*mutex));
 }

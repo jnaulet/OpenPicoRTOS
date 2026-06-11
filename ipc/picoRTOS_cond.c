@@ -19,7 +19,6 @@ void picoRTOS_cond_init(struct picoRTOS_cond *cond)
 {
     cond->act = PICORTOS_COND_NONE;
     cond->count = (size_t)0;
-    picoRTOS_flush_dcache(cond, sizeof(*cond));
 }
 
 /* Function: picoRTOS_cond_signal
@@ -30,9 +29,7 @@ void picoRTOS_cond_init(struct picoRTOS_cond *cond)
  */
 void picoRTOS_cond_signal(struct picoRTOS_cond *cond)
 {
-    picoRTOS_invalidate_dcache(cond, sizeof(*cond));
     cond->act = PICORTOS_COND_SIGNAL;
-    picoRTOS_flush_dcache(cond, sizeof(*cond));
 }
 
 /* Function: picoRTOS_cond_broadcast
@@ -43,9 +40,7 @@ void picoRTOS_cond_signal(struct picoRTOS_cond *cond)
  */
 void picoRTOS_cond_broadcast(struct picoRTOS_cond *cond)
 {
-    picoRTOS_invalidate_dcache(cond, sizeof(*cond));
     cond->act = PICORTOS_COND_BROADCAST;
-    picoRTOS_flush_dcache(cond, sizeof(*cond));
 }
 
 /* Function: picoRTOS_cond_wait
@@ -81,15 +76,12 @@ void picoRTOS_cond_broadcast(struct picoRTOS_cond *cond)
  */
 void picoRTOS_cond_wait(struct picoRTOS_cond *cond, struct picoRTOS_mutex *mutex)
 {
-    picoRTOS_invalidate_dcache(cond, sizeof(*cond));
     picoRTOS_assert(cond->count < (size_t)CONFIG_TASK_COUNT, picoRTOS_kill(EINVAL));
 
     /* we already own the mutex */
     cond->count++;
-    picoRTOS_flush_dcache(cond, sizeof(*cond));
 
     for (;;) {
-        picoRTOS_invalidate_dcache(cond, sizeof(*cond));
         if (cond->act != PICORTOS_COND_NONE)
             break;
 
@@ -102,6 +94,4 @@ void picoRTOS_cond_wait(struct picoRTOS_cond *cond, struct picoRTOS_mutex *mutex
     if (--cond->count == 0 ||
         cond->act == PICORTOS_COND_SIGNAL)
         cond->act = PICORTOS_COND_NONE;
-
-    picoRTOS_flush_dcache(cond, sizeof(*cond));
 }
