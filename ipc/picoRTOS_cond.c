@@ -81,6 +81,9 @@ void picoRTOS_cond_wait(struct picoRTOS_cond *cond, struct picoRTOS_mutex *mutex
     /* we already own the mutex */
     cond->count++;
 
+    /*
+     * BUG: this loop should have a better upper limit
+     */
     for (;;) {
         if (cond->act != PICORTOS_COND_NONE)
             break;

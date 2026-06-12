@@ -41,12 +41,23 @@ int picoRTOS_mutex_trylock(struct picoRTOS_mutex *mutex)
 {
     picoRTOS_atomic_t pid = (picoRTOS_atomic_t)picoRTOS_self();
 
+#ifdef CONFIG_SMP
+    /*
+     * HOTFIX: in SMP, if the cores are perfectly in sync,
+     * one of them can never acquire the lock, this is a crude
+     * attempt at solving this very real problem
+     */
+    if (mutex->prev_owner == pid)
+        picoRTOS_postpone();
+#endif
+
     /* mutex is re-entrant */
     if (arch_compare_and_swap(&mutex->owner, nobody, pid) != nobody &&
         mutex->owner != pid)
         return -EAGAIN;
 
     mutex->count++;
+    mutex->prev_owner = pid;
     return 0;
 }
 
