@@ -6,33 +6,32 @@
 # error no deadlock defined for locks
 #endif
 
-/* Function: picoRTOS_futex_init
- * Initialises a futex
- *
- * Futexes are fast non re-entrant mutexes
- *
- * Parameters:
- *  futex - A pointer to the futex to initialize
- *
- * Remarks:
- * Another way to initialise a futex at startup is this one:
- * (start code)
- * picoRTOS_futex_t futex = PICORTOS_FUTEX_INITIALIZER;
- * (end)
+/**
+ * void **picoRTOS_futex_init**(**picoRTOS_futex_t** *<ins>futex</ins>);
+ * > Initializes a <ins>futex</ins> at runtime
+ * ### NOTES
+ * > Futexes are fast non-reentrant mutexes on picoRTOS.
+ * >
+ * > A way to statically initialise a futex at startup is this one:
+ * ```c
+ *     struct picoRTOS_futex futex = PICORTOS_FUTEX_INITIALIZER;
+ * ```
+ * > On memory-protected systems you almost always want to put your futexes
+ * > in the `UNPRIVILEGED_DATA` area, so all your tasks can directly access them:
+ * ```c
+ *     struct picoRTOS_futex UNPRIVILEGED_DATA futex = PICORTOS_FUTEX_INITIALIZER;
+ * ```
  */
 void picoRTOS_futex_init(picoRTOS_futex_t *futex)
 {
     *futex = (picoRTOS_futex_t)0;
 }
 
-/* Function: picoRTOS_futex_trylock
- * Tries to acquire a futex
- *
- * Returns:
- * 0 in case of success, -EAGAIN otherwise
- *
- * Parameters:
- *  futex - The futex you wish you can acquire
+/**
+ * int **picoRTOS_futex_trylock**(**struct picoRTOS_futex** *<ins>futex</ins>);
+ * > Tries to acquire a <ins>futex</ins>
+ * ### RETURN
+ * > Returns 0 if the futex has been acquired, -`EAGAIN` otherwise
  */
 int picoRTOS_futex_trylock(picoRTOS_futex_t *futex)
 {
@@ -42,15 +41,13 @@ int picoRTOS_futex_trylock(picoRTOS_futex_t *futex)
     return 0;
 }
 
-/* Function: picoRTOS_futex_lock
- * Acquires a futex
- *
- * Parameters:
- *  futex - The futex you want to acquire
- *
- * Remarks:
- * The fuction will make CONFIG_DEADLOCK_COUNT attempts to acquire the futex,
- * if it fails, picoRTOS will throw a debug exception and declare deadlock
+/**
+ * void **picoRTOS_futex_lock**(**struct picoRTOS_futex** *<ins>futex</ins>)
+ * > Acquires a <ins>futex</ins> or dies
+ * ### NOTES
+ * > The function will make `CONFIG_DEADLOCK_COUNT` attempts to acquire the futex.<br>
+ * > If it fails to acquire it, the calling task will be killed with a `EDEADLK`
+ * > failure code
  */
 void picoRTOS_futex_lock(picoRTOS_futex_t *futex)
 {
@@ -63,16 +60,12 @@ void picoRTOS_futex_lock(picoRTOS_futex_t *futex)
     picoRTOS_assert(loop != -1, picoRTOS_kill(EDEADLK));
 }
 
-/* Function: picoRTOS_futex_unlock
- * Releases a futex
- *
- * Parameters:
- *  futex - The futex you want to release
- *
- * Remarks:
- * picoRTOS will throw a debug exception if :
- * - the futex has not been acquired
- * - the futex has already been released
+/**
+ * void **picoRTOS_futex_unlock**(**struct picoRTOS_futex** *<ins>futex</ins>)
+ * > Releases a <ins>futex</ins>
+ * ### NOTES
+ * > Ths function will kill the calling task with `EINVAL` if the futex
+ * > has already been released.
  */
 void picoRTOS_futex_unlock(picoRTOS_futex_t *futex)
 {

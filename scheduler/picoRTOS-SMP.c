@@ -328,25 +328,20 @@ picoRTOS_priority_t picoRTOS_get_last_available_priority(void)
     return prio;
 }
 
-/* Group: picoRTOS-SMP extensions */
-
-/* Function: picoRTOS_SMP_add_task
- * Add a task to picoRTOS-SMP & assign it to specific core(s)
- *
- * Parameters:
- *  task - A pointer to already initialised task structure
- *  prio - The priority/identitifer of the task (MUST be < CONFIG_TASK_COUNT)
- *  core_mask - The cores to run the taks on in the form of a mask, where
- *  (1 << 0) is core 0, (1 << 1) is core 1, etc
- *
- * Example:
- * (start code)
- * picoRTOS_SMP_add_task(&task, (picoRTOS_priority_t)TASK_PRIO, (picoRTOS_mask_t)(1 << 1));
- * (end)
- *
- * Remarks:
- * picoRTOS-SMP will throw a debug exception and stall if the mask is 0, doesn't match the
- * exact number of cores, if prio is > CONFIG_TASK_COUNT or is not assigned yet
+/**
+ * void **picoRTOS_SMP_add_task**(**struct picoRTOS_task** \*<u>task</u>,
+ * **picoRTOS_priority_t** <u>prio</u>, **picoRTOS_core_mask_t** <u>mask</u>);
+ * > Adds a <u>task</u> to picoRTOS, sets its priority <u>prio</u> & its SMP core
+ * > <u>mask</u>
+ * ### NOTES
+ * > Priorities goes from 0 (highest) to CONFIG_TASK_COUNT (lowest).<br>
+ * > picoRTOS will assert prio < CONFIG_TASK_COUNT & return without adding
+ * > the task to the system if it fails.
+ * >
+ * > <u>mask</u> takes the form of a bitfield where core0 is (1 << 0),
+ * > core1 is (1 << 1), etc.<br>
+ * > If you want your task to run on any core, just use the regular *
+ * > `picoRTOS_add_task()` call.
  */
 void picoRTOS_SMP_add_task(struct picoRTOS_task *task,
                            picoRTOS_priority_t prio,
@@ -700,13 +695,13 @@ void picoRTOS_set_interrupt(picoRTOS_irq_t irq, bool active)
     else arch_disable_interrupt(irq);
 }
 
-/* Function: picoRTOS_SMP_set_interrupt
- * Enables/disables an interrupt on the selected cores
- *
- * Parameters:
- *  irq - the irq number to enable
- *  core_mask - The core mask in the form of (1 << 0) is core 0, (1 <<1) is core 1, etc
- *  active - true of false to enable/disable the irq
+/**
+ * void **picoRTOS_SMP_set_interrupt**(**picoRTOS_irq_t** <u>irq</u>,
+ * **picoRTOS_mask_t** <u>core_mask</u>, **bool** <u>active</u>);
+ * > Enables/disables an interrupt on the system according to the value of <u>active</u>
+ * ### NOTES
+ * > This is the SMP variant of picoRTOS_set_interrupt, with an added <u>core_mask</u>
+ * > for core attribution. Still experimental.
  */
 void picoRTOS_SMP_set_interrupt(picoRTOS_irq_t irq,
                                 picoRTOS_mask_t core_mask,

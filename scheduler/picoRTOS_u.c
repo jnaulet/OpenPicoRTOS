@@ -1,48 +1,60 @@
 #include "picoRTOS.h"
 #include "picoRTOS_port.h"
 
-/* Group: picoRTOS scheduler unprivileged API */
-
-/* Function: picoRTOS_run
- * Suspend/resumes the scheduling. Typical use is critical sections
+/**
+ * void **picoRTOS_run**(**bool** <ins>run</ins>);
+ * > Suspend/resume the scheduling according to the value of <ins>run</ins>
+ * ### NOTES
+ * > `picoRTOS_suspend()` is equivalent to `picoRTOS_run(false)`.<br>
+ * > `picoRTOS_resume()` is equivalent to `picoRTOS_run(true)`.
+ * >
+ * > Typical use is critical sections
  */
 void picoRTOS_run(bool run)
 {
     arch_syscall(SYSCALL_RUN, &run);
 }
 
-/* Function: picoRTOS_sleep
- * Puts the current task to sleep for the specified number of ticks
- *
- * Parameters:
- *  delay - A delay in picoRTOS_tick_t (ticks)
- *
+/**
+ * void **picoRTOS_sleep**(**picoRTOS_tick_t** <ins>delay</ins>);
+ * > Puts the current task to sleep for <ins>delay</ins> ticks
+ * ### NOTES
+ * > If <ins>delay</ins> is 1, the current task is put to sleep until
+ * > the next tick, this is equivalent to `picoRTOS_schedule()`
+ * >
+ * > If <ins>delay</ins> is 0, the current task is put to sleep and
+ * > set to be woken-up after the lowest priority task run and
+ * > before the next tick (FIFO scheduling), this is the same
+ * > as `picoRTOS_postpone()`
  */
 void picoRTOS_sleep(picoRTOS_tick_t delay)
 {
     arch_syscall(SYSCALL_SLEEP, &delay);
 }
 
-/* Function: picoRTOS_sleep_until
- * Puts the current task to sleep until *ref + period is elapsed.
+/**
+ * void **picoRTOS_sleep_until**(**picoRTOS_tick_t** \*<ins>ref</ins>,
+ * **picoRTOS_tick_t** <ins>period</ins>);
+ * > Puts the current task to sleep until *<ins>ref</ins> + <ins>period</ins> is elapsed.
+ * ### NOTES
+ * > <ins>ref</ins> is a pointer to a reference time that will be overwritten with
+ * > *<ins>ref</ins> + <ins>period</ins> after the call is completed.
+ * >
+ * > Example:
+ * ```c
+ *     picoRTOS_tick_t ref = picoRTOS_get_tick();
  *
- * Parameters:
- *  ref - A pointer to a reference time in ticks (will be overwritten)
- *  period - A period in ticks
- *
- * Example:
- * (start code)
- * picoRTOS_tick_t ref = picoRTOS_get_tick();
- *
- * for(;;){
- *   my_periodic_function();
- *   picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
- * }
- * (end)
- *
- * Remarks:
- * If the period is already elapsed (aka we're late), picoRTOS will throw a debug
- * exception, update *ref to current tick and continue anyway
+ *     for(;;){
+ *         my_periodic_function();
+ *         picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
+ *     }
+ * ```
+ * ### ADDITIONAL INFO
+ * > If the deadline is already elaspped (the caller is late), the function
+ * > returns immediately and doesn't update *<ins>ref</ins>.
+ * >
+ * > After CONFIG_DEADLOCK_COUNT unsuccessful attempts, picoRTOS will kill
+ * > the calling task with error code `FDEADLOCK`
  */
 void picoRTOS_sleep_until(picoRTOS_tick_t *ref, picoRTOS_tick_t period)
 {
@@ -53,16 +65,18 @@ void picoRTOS_sleep_until(picoRTOS_tick_t *ref, picoRTOS_tick_t period)
     *ref = sc.ref; /* update ref */
 }
 
-/* Function: picoRTOS_kill
- * Kills the current task (suicide)
+/**
+ * void **picoRTOS_kill**(**int** <ins>errnum</ins>);
+ * > Kills the current task with error code <ins>errnum</ins>
  */
 void picoRTOS_kill(int errnum)
 {
     arch_syscall(SYSCALL_KILL, &errnum);
 }
 
-/* Function: picoRTOS_self
- * Returns the current task's priority/identitifer
+/**
+ * picoRTOS_pid_t **picoRTOS_self**(void);
+ * > Returns the current task's identitifer
  */
 picoRTOS_pid_t picoRTOS_self(void)
 {
@@ -72,8 +86,9 @@ picoRTOS_pid_t picoRTOS_self(void)
     return pid;
 }
 
-/* Function: picoRTOS_get_tick
- * Returns the current system tick/timer
+/**
+ * picoRTOS_tick_t **picoRTOS_get_tick**(void);
+ * > Returns the current system tick
  */
 picoRTOS_tick_t picoRTOS_get_tick(void)
 {
@@ -83,14 +98,9 @@ picoRTOS_tick_t picoRTOS_get_tick(void)
     return tick;
 }
 
-/* Group: picoRTOS cache maintenance API */
-
-/* Function: picoRTOS_invalidate_dcache
- * Invalidates the data cache by address(es)
- *
- * Parameters:
- *  addr - The base address to invalidate
- *  n    - The size of the data to invalidate (in bytes)
+/**
+ * void **picoRTOS_invalidate_dcache**(const **void** \*<ins>addr</ins>, **size_t** <ins>n</ins>);
+ * > Invalidates the data cache from <ins>addr</ins> to <ins>addr</ins> + <ins>n</ins>
  */
 void picoRTOS_invalidate_dcache(const void *addr, size_t n)
 {
@@ -100,12 +110,9 @@ void picoRTOS_invalidate_dcache(const void *addr, size_t n)
     arch_syscall(SYSCALL_CACHEOP, &op);
 }
 
-/* Function: picoRTOS_flush_dcache
- * Flushes the data cache by address(es)
- *
- * Parameters:
- *  addr - The base address to flush
- *  n    - The size of the data to flush (in bytes)
+/**
+ * void **picoRTOS_flush_dcache**(const **void** \*<ins>addr</ins>, **size_t** <ins>n</ins>);
+ * > Forces data cache write to RAM, from <ins>addr</ins> to <ins>addr</ins> + <ins>n</ins>
  */
 void picoRTOS_flush_dcache(const void *addr, size_t n)
 {
@@ -115,15 +122,20 @@ void picoRTOS_flush_dcache(const void *addr, size_t n)
     arch_syscall(SYSCALL_CACHEOP, &op);
 }
 
-/* Group: picoRTOS MPU API */
-
-/* Function: picoRTOS_mpu_add_region
- * Adds a region to the MPU
- *
- * Parameters:
- *  addr - The base address of the region
- *  n    - The size of the region (in bytes)
- *  mode - The region mode as a mask (see picoRTOS_port.h)
+/**
+ * void **picoRTOS_mpu_add_region**(const **void** \*<ins>addr</ins>, **size_t** <ins>n</ins>,
+ * **unsigned** <ins>mode</ins>);
+ * > Adds a memory region (from <ins>addr</ins> to <ins>addr</ins> + <ins>n</ins>) to the MPU.
+ * >
+ * > <ins>mode</ins> is described in [picoRTOS port API](PORT_API.md).<br>
+ * > <ins>Remark:</ins> this forces us to `#include "picoRTOS_port.h"` wherever we
+ * > use the MPU calls, which is NOT very elegant.
+ * ### NOTES
+ * > The region is added to the context of the calling task and is NOT available to any other
+ * > taks unless the make the same call.
+ * >
+ * > This function is only useful is your system uses a Memory Protection Unit
+ * > supported by picoRTOS.
  */
 void picoRTOS_mpu_add_region(const void *addr, size_t n, unsigned mode)
 {

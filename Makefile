@@ -211,7 +211,7 @@ scripts/basic/%: scripts_basic ;
 # Detect when mixed targets is specified, and make a second invocation
 # of make so .config is not included in this case either (for *config).
 
-no-dot-config-targets := indent uncrustify check distcheck naturaldocs cloc
+no-dot-config-targets := indent uncrustify check distcheck docs cloc
 
 run-from-root  := 0
 config-targets := 0
@@ -311,11 +311,13 @@ uncrustify: FORCE
 # alias
 indent: uncrustify
 
-naturaldocs: FORCE
-	naturaldocs -i . \
-	  -xi docs -xi demo -xi staging -xi scripts -xi test -xi samples \
-	  -p etc/naturaldocs \
-	  -o HTML docs
+MKDOCS=sh ./scripts/mkdoc.sh
+
+docs: FORCE
+	$(MKDOCS) etc/PRIVILEGED_API.template.md > docs/PRIVILEGED_API.md
+	$(MKDOCS) etc/UNPRIVILEGED_API.template.md > docs/UNPRIVILEGED_API.md
+	$(MKDOCS) etc/IPCs_API.template.md > docs/IPCs_API.md
+	$(MKDOCS) etc/PORT_API.template.md > docs/PORT_API.md
 
 cloc: FORCE
 	cloc scheduler/picoRTOS.c

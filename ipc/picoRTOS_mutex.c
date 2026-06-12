@@ -7,20 +7,20 @@
 
 #define nobody (picoRTOS_atomic_t)PICORTOS_MUTEX_NOOWNER
 
-/* Function: picoRTOS_mutex_init
- * Initialises a mutex
- *
- * Mutexes are re-entrant on picoRTOS, if you don't need this feature,
- * prefer futexes
- *
- * Parameters:
- *  mutex - A pointer to the mutex to initialize
- *
- * Remarks:
- * Another way to initialise a mutex at startup is this one:
- * (start code)
- * struct picoRTOS_mutex mutex = PICORTOS_MUTEX_INITIALIZER;
- * (end)
+/**
+ * void **picoRTOS_mutex_init**(**picoRTOS_mutex_t** *<ins>mutex</ins>);
+ * > Initializes a <ins>mutex</ins> at runtime
+ * ### NOTES
+ * > Mutexes are re-entrant on picoRTOS, if you don't need this feature, prefer futexes.<br>
+ * > Another way to statically initialise a mutex at startup is this one:
+ * ```c
+ *     struct picoRTOS_mutex mutex = PICORTOS_MUTEX_INITIALIZER;
+ * ```
+ * > On memory-protected systems you almost always want to put your mutexes
+ * > in the `UNPRIVILEGED_DATA` area, so all your tasks can directly access them:
+ * ```c
+ *     struct picoRTOS_mutex UNPRIVILEGED_DATA mutex = PICORTOS_MUTEX_INITIALIZER;
+ * ```
  */
 void picoRTOS_mutex_init(struct picoRTOS_mutex *mutex)
 {
@@ -28,14 +28,17 @@ void picoRTOS_mutex_init(struct picoRTOS_mutex *mutex)
     mutex->count = 0;
 }
 
-/* Function: picoRTOS_mutex_trylock
- * Tries to acquire a mutex
- *
- * Returns:
- * 0 in case of success, -EAGAIN otherwise
- *
- * Parameters:
- *  mutex - The mutex you wish you can acquire
+/**
+ * int **picoRTOS_mutex_trylock**(**struct picoRTOS_mutex** *<ins>mutex</ins>);
+ * > Tries to acquire a <ins>mutex</ins>
+ * ### RETURN
+ * > Returns 0 if the mutex has been acquired, -`EAGAIN` otherwise
+ * ### NOTES
+ * > On SMP configurations, if a task is the previous owner of the mutex it
+ * > tries to acquire, it is `picoRTOS_postpone()`d to allow other cores
+ * > some garanteed access to the shared resource.
+ * >
+ * > <ins>Beware</ins>: this is potentially a violation of the tasks priorities order
  */
 int picoRTOS_mutex_trylock(struct picoRTOS_mutex *mutex)
 {
@@ -61,15 +64,13 @@ int picoRTOS_mutex_trylock(struct picoRTOS_mutex *mutex)
     return 0;
 }
 
-/* Function: picoRTOS_mutex_lock
- * Acquires a mutex
- *
- * Parameters:
- *  mutex - The mutex you want to acquire
- *
- * Remarks:
- * The fuction will make CONFIG_DEADLOCK_COUNT attempts to acquire the mutex,
- * if it fails, picoRTOS will throw a debug exception and declare deadlock
+/**
+ * void **picoRTOS_mutex_lock**(**struct picoRTOS_mutex** *<ins>mutex</ins>)
+ * > Acquires a <ins>mutex</ins> or dies
+ * ### NOTES
+ * > The function will make `CONFIG_DEADLOCK_COUNT` attempts to acquire the mutex.<br>
+ * > If it fails to acquire it, the calling task will be killed with a `EDEADLK`
+ * > failure code
  */
 void picoRTOS_mutex_lock(struct picoRTOS_mutex *mutex)
 {
@@ -82,17 +83,13 @@ void picoRTOS_mutex_lock(struct picoRTOS_mutex *mutex)
     picoRTOS_assert(loop != -1, picoRTOS_kill(EDEADLK));
 }
 
-/* Function: picoRTOS_mutex_unlock
- * Releases a mutex
- *
- * Parameters:
- *  mutex - The mutex you want to release
- *
- * Remarks:
- * picoRTOS will throw a debug exception if :
- * - the mutex has not been acquired
- * - the mutex has already been released
- * - you are not the owner
+/**
+ * void **picoRTOS_mutex_unlock**(**struct picoRTOS_mutex** *<ins>mutex</ins>)
+ * > Releases a <ins>mutex</ins>
+ * ### NOTES
+ * > Ths function will kill the calling task if :
+ * >  - the calling task is not the current owner (EPERM)
+ * >  - the mutex has already been released (EINVAL)
  */
 void picoRTOS_mutex_unlock(struct picoRTOS_mutex *mutex)
 {

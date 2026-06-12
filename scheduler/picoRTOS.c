@@ -215,10 +215,14 @@ static void task_idle_init(void)
 /*@external@*/ extern const void* __utext_start__[];
 /*@external@*/ extern const size_t __utext_len__[];
 
-/* Group: picoRTOS scheduler privileged API */
-
-/* Function: picoRTOS_init
- * Initialises picoRTOS (mandatory)
+/**
+ * void **picoRTOS_init**(void);
+ * > Initializes picoRTOS
+ * ### NOTES
+ * > This is the first function you need to call to be able to run picoRTOS.
+ * > It will:
+ * >> - partition the memory (on mpu-supported systems)
+ * >> - init the idle task
  */
 void picoRTOS_init(void)
 {
@@ -250,25 +254,23 @@ void picoRTOS_init(void)
     picoRTOS.flags = 0;
 }
 
-/* Function: picoRTOS_task_init
- * Initialises a task structure
+/**
+ * void **picoRTOS_task_init**(**struct picoRTOS_task** \*<ins>task</ins>,
+ * **picoRTOS_task_fn** <ins>fn</ins>, **void** \*<ins>priv</ins>, **picoRTOS_stack_t** \*<ins>stack</ins>,
+ * **size_t** <ins>stack_count</ins>);
+ * > Initialises a task structure with all relevant information.
+ * ### RETURN
+ * > picoRTOS will assert stack_count >= ARCH_MIN_STACK_COUNT & return immediately, leaving
+ * > *<ins>task</ins> untouched if it fails
+ * ### NOTES
+ * > Here's your typical use case:
+ * ```c
+ *     struct picoRTOS_task task;
+ *     struct picoRTOS_stack_t stack[CONFIG_DEFAULT_STACK_COUNT];
  *
- * Parameters:
- *  task - A pointer to the task stucture to initialize
- *  fn - The entry point of the main task
- *  priv - The parameter that will be passed to the task
- *  stack - A pointer to tasks's stack
- *  stack_count - The size of the stack in number of elements
- *
- * Example:
- * (start code)
- * struct picoRTOS_task task;
- * static picoRTOS_stack_t stack[CONFIG_DEFAULT_STACK_COUNT];
- *
- * picoRTOS_task_init(&task, task_entry_point, &task_context, stack, (size_t)CONFIG_DEFAULT_STACK_COUNT);
- * (end)
- *
- * picoRTOS will throw a debug exception and stall if stack_count < ARCH_MIN_STACK_COUNT (architecture-dependent)
+ *     picoRTOS_task_init(&task, task_entry_point, &task_context, stack, (size_t)CONFIG_DEFAULT_STACK_COUNT);
+ * ```
+ * > Remark: you can use the helper `PICORTOS_STACK_COUNT(stack)` to make your life easier
  */
 void picoRTOS_task_init(struct picoRTOS_task *task,
                         picoRTOS_task_fn fn, void *priv,
@@ -285,21 +287,14 @@ void picoRTOS_task_init(struct picoRTOS_task *task,
     task->stack_count = (size_t)((stack + stack_count) - task->stack) & ~STACK_COUNT_MASK;
 }
 
-/* Function: picoRTOS_add_task
- * Adds a task to picoRTOS
- *
- * Parameters:
- *  task - A pointer to already initialised task structure
- *  prio - The priority/identitifer of the task (MUST be < CONFIG_TASK_COUNT)
- *
- * Example:
- * (start code)
- * picoRTOS_add_task(&task, (picoRTOS_priority_t)TASK_PRIO);
- * (end)
- *
- * Remarks:
- * picoRTOS will throw a debug exception and stall if prio >= CONFIG_TASK_COUNT or
- * if the priority is already in use
+/**
+ * void **picoRTOS_add_task**(**struct picoRTOS_task** \*<ins>task</ins>,
+ * **picoRTOS_priority_t** <ins>prio</ins>);
+ * > Adds a <ins>task</ins> to picoRTOS & sets its priority <ins>prio</ins>.
+ * ### NOTES
+ * > Priorities goes from 0 (highest) to CONFIG_TASK_COUNT (lowest).<br>
+ * > picoRTOS will assert prio < CONFIG_TASK_COUNT & return without adding
+ * > the task to the system if it fails
  */
 void picoRTOS_add_task(struct picoRTOS_task *task, picoRTOS_priority_t prio)
 {
@@ -308,25 +303,24 @@ void picoRTOS_add_task(struct picoRTOS_task *task, picoRTOS_priority_t prio)
     task_append(picoRTOS.pid_count++, task, prio);
 }
 
-/* Function: picoRTOS_get_next_available_priority
- * Gets the first available priority by ascending order (0 -> n)
- *
- * Example:
- * (start code)
- * picoRTOS_priority_t prio = picoRTOS_get_next_available_priority()
- * picoRTOS_add_task(&task, prio);
- * (end)
- * Or:
- * (start code)
- * picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
- * (end)
- *
- * Remarks:
- * If no priority is available, picoRTOS will throw a debug exception and stall
- *
- * Beware:
- * This function might not be as useful in picoRTOS v1.7.x as it was in picoRTOS v1.6.x
- * and might disappear in the future
+/**
+ * picoRTOS_priority_t **picoRTOS_get_next_available_priority**(void);
+ * > Gets the first available priority by ascending order (0 -> n)
+ * ### NOTES
+ * > This call will provide the next unused available priority & can be helpful to
+ * > avoid managing priorities by hand & create potential involuntary round-robin
+ * > situations. Example:
+ * ```c
+ *     picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+ * ```
+ * > Round-robin can still be achieved this way:
+ * ```c
+ *    picoRTOS_priority_t prio = picoRTOS_get_next_available_priority();
+ *    picoRTOS_add_task(&task1, prio);
+ *    picoRTOS_add_task(&task2, prio);
+ * ```
+ * ### RETURN
+ * > picoRTOS will return priority -1 if no more priorities are available
  */
 picoRTOS_priority_t picoRTOS_get_next_available_priority(void)
 {
@@ -346,27 +340,26 @@ picoRTOS_priority_t picoRTOS_get_next_available_priority(void)
     return prio;
 }
 
-/* Function: picoRTOS_get_last_available_priority
- * Gets the first available priority by descending order (n -> 0)
- *
- * This is typically helpful for watchdog refreshing tasks
- *
- * Example:
- * (start code)
- * picoRTOS_priority_t prio = picoRTOS_get_last_available_priority()
- * picoRTOS_add_task(&task, prio);
- * (end)
- * Or:
- * (start code)
- * picoRTOS_add_task(&task, picoRTOS_get_last_available_priority());
- * (end)
- *
- * Remarks:
- * If no priority is available, picoRTOS will throw a debug exception and stall
- *
- * Beware:
- * This function might not be as useful in picoRTOS v1.7.x as it was in picoRTOS v1.6.x
- * and might disappear in the future
+/**
+ * picoRTOS_priority_t **picoRTOS_get_last_available_priority**(void);
+ * > Gets the first available priority by descending order (n -> 0)
+ * ### NOTES
+ * > This call will provide the next unused available priority & can be helpful to
+ * > avoid managing priorities by hand & create potential involuntary round-robin
+ * > situations. Example:
+ * ```c
+ *     picoRTOS_add_task(&task, picoRTOS_get_last_available_priority());
+ * ```
+ * > Round-robin can still be achieved this way:
+ * ```c
+ *    picoRTOS_priority_t prio = picoRTOS_get_last_available_priority();
+ *    picoRTOS_add_task(&task1, prio);
+ *    picoRTOS_add_task(&task2, prio);
+ * ```
+ * > This call is usually used for low-priority refreshing tasks like watchdog
+ * > management
+ * ### RETURN
+ * > picoRTOS will return priority -1 if no more priorities are available
  */
 picoRTOS_priority_t picoRTOS_get_last_available_priority(void)
 {
@@ -421,8 +414,12 @@ static void core_arrange_shared_priorities(void)
     }
 }
 
-/* Function: picoRTOS_start
- * Starts the scheduling. SHOULD never return
+/**
+ * void **picoRTOS_start**(void);
+ * > Starts picoRTOS' scheduler
+ * ### NOTES
+ * > On memory-portected systems, call to unprivileged functions if forbidden
+ * > after this one.
  */
 void picoRTOS_start(void)
 {
@@ -667,15 +664,12 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
     return task->sp;
 }
 
-/* Group: picoRTOS interrupt privileged API */
-
-/* Function: picoRTOS_register_interrupt
- * Registers an interrupt/irq to the system
- *
- * Parameters:
- *  irq - The irq number to register
- *  fn - The interrupt service routine to run
- *  priv - The parameter that will be passed to the ISR
+/**
+ * void **picoRTOS_register_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>,
+ * **picoRTOS_isr_fn** <ins>fn</ins>, **void** \*<ins>priv</ins>);
+ * > Registers an <ins>irq</ins> handler
+ * > On <ins>irq</ins>, the handler <ins>fn</ins> will be called with the param
+ * > <ins>priv</ins>
  */
 void picoRTOS_register_interrupt(picoRTOS_irq_t irq,
                                  picoRTOS_isr_fn fn,
@@ -685,12 +679,13 @@ void picoRTOS_register_interrupt(picoRTOS_irq_t irq,
     arch_register_interrupt(irq, fn, priv);
 }
 
-/* Function: picoRTOS_set_interrupt
- * Enables/disabled an interrupt on the system
- *
- * Parameters:
- *  irq - The irq number to enable
- *  active - true of false to enable/disable the irq
+/**
+ * void **picoRTOS_set_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>, **bool** <ins>active</ins>);
+ * > Enables/disables an interrupt on the system according to the value of <ins>active</ins>
+ * ### NOTES
+ * > `picoRTOS_enable_interrupt(irq)` is the same as `picoRTOS_set_interrupt(irq, true)`
+ * >, and<br>
+ * > `picoRTOS_disable_interrupt(irq)` is the same as `picoRTOS_set_interrupt(irq, false)`
  */
 void picoRTOS_set_interrupt(picoRTOS_irq_t irq, bool active)
 {

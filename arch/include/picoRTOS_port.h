@@ -7,13 +7,10 @@
 #include "picoRTOS_types.h"
 #include <generated/autoconf.h>
 
-/* Enum: picoRTOS syscalls
- *
- * SYSCALL_SLEEP - A task asked to sleep
- * SYSCALL_SLEEP_UNTIL - A task asked to sleep until a ref + period deadline
- * SYSCALL_KILL - A task committed suicide
- * SYSCALL_SWITCH_CONTEXT - A task asked to be postponed to the next tick
+/**§
+ * ## provided by picoRTOS
  */
+
 typedef enum {
     /* OS-related */
     SYSCALL_RUN         = 0,    /* W */
@@ -49,33 +46,35 @@ struct syscall_mpu {
 
 typedef unsigned mpu_mode_t;
 
-/* Function: picoRTOS_syscall
- * Executes a syscall
- *
- * This MUST be called from a syscall interrupt or equivalent
- *
- * Parameters:
- *  sp - The current task's stack pointer
- *  syscall - the syscall number
- *  priv - Internal syscall parameter (can be NULL)
- *
- * Returns:
- *  The task stack you have to switch to (context restoration)
+/**
+ * picoRTOS_stack_t \***picoRTOS_syscall**(**picoRTOS_stack_t** \*<ins>sp</ins>
+ * **syscall_t** <ins>syscall</ins>, **void** \*<ins>priv</ins>):
+ * > Executes a syscall
+ * ### NOTES
+ * > This **MUST** be called from a syscall interrupt or equivalent & provide
+ * > the calling task's <ins>sp</ins> as the first parameter.
+ * >
+ * > On memory-protected systems, you have to call this with a SYSCALL_SEGFAULT
+ * > <ins>syscall</ins> and provide a non-null <ins>priv</ins> parameter when there's
+ * > an access or privilege violation.
+ * >
+ * > Usually, this is the address of the instruction or data that lead to the exception.
+ * ### RETURN
+ * > This call returns the stack you have to switch to (context restore)
  */
 extern /*@exposed@*/
 picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp,
                                    syscall_t syscall,
                                    /*@null@*/ void *priv);
-/* Function: picoRTOS_tick
- * Executes a tick increment
- *
- * This MUST be called from you main tick timer interrupt
- *
- * Parameters:
- *  sp - The current task stack pointer (after context save)
- *
- * Returns:
- *  The task stack pointer you have to switch to (context restoration)
+
+/**
+ * picoRTOS_stack_t \***picoRTOS_tick**(**picoRTOS_stack_t** *<ins>sp</ins>);
+ * > Increments the tick & starts a new cycle
+ * ### NOTES
+ * > This **MUST** be called from your main tick timer interrupt and provide
+ * > the current task's <ins>sp</ins> as a single parameter.
+ * ### RETURN
+ * > This call will return the next task sp to restore.
  */
 extern /*@exposed@*/
 picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp);
@@ -85,15 +84,15 @@ typedef void (*arch_isr_fn)(void*);             /* interrupt service routine */
 
 #if !defined(NDEBUG)
 
-/* Macro: arch_assert(x, or_else)
- * Throws a debug exception & execute or_else if x is false, unless -DNDEBUG
- *
- * Parameters:
- *  x - predicate
- *  or_else - code to execute if predicate is false
- *
- * Returns:
- * The value of the predicate
+/**
+ * **arch_assert**(<ins>predicate</ins>, <ins>or_else</ins>);
+ * > Asserts <ins>predicate</ins>, execute <ins>or_else</ins> if it fails
+ * ### NOTES
+ * > This macro is very similar to `picoRTOS_assert()` but can be used in your
+ * > ports without creating a dependency issue.
+ * >
+ * > Remark: <ins>predicate</ins> **MUST** be side-effect free, this will be
+ * > enforced by the static analysis.
  */
 # define arch_assert(x, or_else)                \
     if (!(x)) {                                 \
@@ -102,11 +101,18 @@ typedef void (*arch_isr_fn)(void*);             /* interrupt service routine */
         { or_else; }                            \
     }
 
-/* Macro: arch_assert_void(x)
- * Throws a debug exception if x is false, unless -DNDEBUG
- *
- * Parameters:
- *  x - predicate
+/**
+ * **arch_assert_void**(<ins>predicate</ins>);
+ * > Asserts <ins>predicate</ins>
+ * ### NOTES
+ * > This macro is very similar to `picoRTOS_assert_void()` but can be used in
+ * > your ports without creating a dependency issue.
+ * >
+ * > If the macro NDEBUG is defined at the moment <ins><picoRTOS_port.h></ins>
+ * > is included, this macro generates no code.
+ * >
+ * > Remark: <ins>predicate</ins> **MUST** be side-effect free, this will be
+ * > enforced by the static analysis.
  */
 # define arch_assert_void(x)     \
     if (!(x)) {                  \
@@ -121,43 +127,51 @@ typedef void (*arch_isr_fn)(void*);             /* interrupt service routine */
 
 #endif
 
-/* Function: arch_init
- * Architecture port initialization function
- *
- * This is where you setup your tick timer, interrupts, etc
+/**§
+ * ## Provided by port 
+ */
+
+/**
+ * void **arch_init**(void);
+ * > Architecture/port main initialization function
+ * ### NOTES
+ * > This function will be called by picoRTOS in `picoRTOS_start()`.
+ * >
+ * > Ports **MUST** provide this function in order to setup the tick timer,
+ * > interrupts, and so on.
  */
 extern void arch_init(void);
 
-/* Function: arch_suspend
- * Suspends the scheduling
- *
- * See also:
- *  <picoRTOS_suspend>
+
+/**
+ * void **arch_suspend**(void);
+ * > Suspends the scheduling
+ * ### NOTES
+ * > This function will be called by `picoRTOS_syscall()`
  */
 extern void arch_suspend(void);
 
-/* Function: arch_resume
- * Resumes the scheduling
- *
- * See also:
- *  <picoRTOS_resume>
+/**
+ * void **arch_resume**(void);
+ * > Resumes the scheduling
+ * ### NOTES
+ * > This function will be called by `picoRTOS_syscall()`
  */
 extern void arch_resume(void);
 
-/* Function: arch_prepare_stack
- * Prepares a task's stack for context restoration
- *
- * This is where you arrange each tasks's stack to allow its first context restoration
- * This structure must match you context restoration procedure
- *
- * Parameters:
- *  stack - A pointer to the stack to prepare
- *  stack_count - The size (in elements) of the stack
- *  fn - The task/thread enytry point
- *  priv - The task/thread private parameter
- *
- * Returns:
- * A pointer to the first element of the newly prepared stack
+/**
+ * picoRTOS_stack_t \***arch_prepare_stack**(**picoRTOS_stack_t** \*<ins>stack</ins>,
+ * **size_t** <ins>stack_count</ins>, **arch_entry_point_fn** <ins>fn</ins>,
+ * **void** \*<ins>priv</ins>);
+ * > Prepares a task's stack for context restoration.
+ * ### NOTES
+ * > This function is used by `picoRTOS_add_task()` to prepare the stack 
+ * > for context restoration.<br>
+ * > The return stack structure must match your `RESTORE_CONTEXT` procedure
+ * > (see <<ins>picoRTOS_portasm.S</ins>> for more information).
+ * ### RETURN
+ * > This call **MUST** return a pointer to the first element of the newly
+ * > prepared stack.
  */
 extern /*@temp@*/
 picoRTOS_stack_t *arch_prepare_stack(/*@returned@*/ picoRTOS_stack_t *stack,
@@ -165,103 +179,103 @@ picoRTOS_stack_t *arch_prepare_stack(/*@returned@*/ picoRTOS_stack_t *stack,
                                      arch_entry_point_fn fn,
                                      /*@null@*/ void *priv);
 
-/* Function: arch_start_first_task
- * Starts the first task on the system (idle) and bootstraps the scheduler
- *
- * Parameters:
- *  sp - The stack pointer of the idle task
+/**
+ * void **arch_start_first_stack**(**picoRTOS_stack_t** \*<ins>sp</ins>);
+ * > Starts the first task on the system (usually *idle*) and 
+ * > bootstraps the scheduler.
+ * ### NOTES
+ * > This function is called by `picoRTOS_start()` and will restore
+ * > the previously prepared <ins>sp</ins>.
+ * >
+ * > Additionnaly, you might want to start the timer here.
  */
 extern /*@noreturn@*/ void arch_start_first_task(picoRTOS_stack_t *sp);
 
-/* Function: arch_syscall
- * Syscall port function
- *
- * This function will be called by picoRTOS every time someone calls picoRTOS_schedule,
- * picoRTOS_sleep or picoRTOS_sleep_until and MUST call picoRTOS_syscall
- *
- * As syscalls switch contexts, you want this function to trigger an interrupt, unless
- * you cannot (see AVR ports)
- *
- * Parameters:
- *  syscall - The syscall to execute
- *  priv - The syscall parameter to pass to picoRTOS_syscall (can be NULL)
- *
- * See also:
- *  <picoRTOS_syscall>
+/**
+ * void **arch_syscall**(**syscall_t** syscall, **void** \*<ins>priv</ins>);
+ * > Port syscall function
+ * ### NOTES
+ * > Every [UNPRIVILEGED API](UNPRIVILEGED_API.md) call found in 
+ * > <<ins>picoRTOS_u.c</ins>> will trigger a syscall to hand things 
+ * > over to the kernel.
+ * >
+ * > On memory-protected systems, this call **SHOULD** trigger a
+ * > privilege escalation (user -> supervisor).
  */
 extern void arch_syscall(syscall_t syscall, /*@null@*/ void *priv);
 
-/* Function: arch_idle
- * The default idle function/task
- *
- * Ths function must provide an infinite loop that puts the CPU in IDLE mode
+/**
+ * void **arch_idle**(void);
+ * > Idle task function
+ * ### NOTES
+ * > This function **MUST** provide an infinite loop that puts the CPU in IDLE mode
+ * >
+ * > This function will be called by `arch_start_first_task()` after ther first
+ * > context restoration.
  */
 extern /*@noreturn@*/ void arch_idle(void);
 
-/* ARCH: ATOMIC OPS */
+/**§
+ * ## Atomic operations
+ */
 
-/* Function: arch_test_and_set
- * Atomic test and set operation
- *
- * Parameters:
- *  ptr - A pointer to a picoRTOS_atomic_t object
- *
- * Returns:
- *  0 in case of success, 1 otherwise
+/**
+ * picoRTOS_atomic_t **arch_test_and_set**(**picoRTOS_atomic_t** \*<ins>ptr</ins>);
+ * > Atomic test and set operation
+ * ### NOTES
+ * > if *<ins>ptr</ins> value is 0, its value is changed to 1 & the function returns 0.<br>
+ * > if *<ins>ptr</ins> value is 1, the call does nothing & returns 1;
  */
 extern /*@unused@*/ picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr);
 
-/* Function: arch_compare_and_swap
- * Atomic compare and swap operation,
- * will swap the value of *var to new if it's equal to old
- *
- * Parameters:
- *  var - A pointer to the picoRTOS_atomic_t to swap
- *  old - The current value of *var
- *  new - The value to change *var to
- *
- * Returns:
- *  The previous value of *var (old) if success, anything else otherwise (preferably new)
+/**
+ * picoRTOS_atomic_t **arch_compare_and_swap**(**picoRTOS_atomic_t** \*<ins>var</ins>,
+ * **picoRTOS_atomic_t** <ins>old</ins>, **picoRTOS_atomic_t** <ins>val</ins>);
+ * > Atomic compare and swap operation
+ * ### NOTES
+ * > If *<ins>var</ins> & <ins>old</ins> are equal, *<ins>var</ins> is set to <ins>val</ins>
+ * > and the call returns <ins>old</ins>.<br>
+ * > If <ins>var</ins> & <ins>old</ins> are different, the call returns <ins>val</ins>.
  */
 extern /*@unused@*/ picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *var,
                                                             picoRTOS_atomic_t old,
                                                             picoRTOS_atomic_t val);
 
-/* ARCH: INTERRUPTS (optional) */
+/**§
+ * ## Interrupts
+ */
 
-/* Function: arch_register_interrupt
- * Registers an interrupt on the system
- *
- * See also:
- *  <picoRTOS_register_interrupt>
+/**
+ * void **arch_register_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>,
+ * **arch_isr_fn** <ins>fn</ins>, **void** \*<ins>priv</ins>);
+ * > Registers an interrupt on the system
+ * ### NOTES
+ * > Make sure that when <ins>irq</ins> is asserted, <ins>fn</ins> is
+ * > called with <ins>priv</ins> as a parameter.
  */
 extern /*@unused@*/ void arch_register_interrupt(picoRTOS_irq_t irq,
                                                  arch_isr_fn fn,
                                                  /*@null@*/ void *priv);
 
-/* Function: arch_enable_interrupt
- * Enables an irq
- *
- * Parameters:
- *  irq - The irq to enable
- *
- * See also:
- *  <picoRTOS_register_interrupt>
+/**
+ * void **arch_enable_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>);
+ * > Enables an <ins>irq</ins>
+ * ### NOTES
+ * > This function will be called by the relevant `picoRTOS_syscall()`
  */
 extern /*@unused@*/ void arch_enable_interrupt(picoRTOS_irq_t irq);
 
-/* Function: arch_disable_interrupt
- * Disables an irq
- *
- * Parameters:
- *  irq - The irq to disable
- *
- * See also:
- *  <picoRTOS_disable_interrupt>
+/**
+ * void **arch_disable_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>);
+ * > Disables an <ins>irq</ins>
+ * ### NOTES
+ * > This function will be called by the relevant `picoRTOS_syscall()`
  */
 extern /*@unused@*/ void arch_disable_interrupt(picoRTOS_irq_t irq);
 
-/* STATS */
+/**§
+ * ## Statistics
+ */
 
 typedef enum {
     ARCH_COUNTER_CURRENT,
@@ -269,41 +283,38 @@ typedef enum {
     ARCH_COUNTER_COUNT
 } arch_counter_t;
 
-/* Function: arch_counter
- * Provides the current cpu counter value (optional)
- *
- * This value should be between (0-PICORTOS_CYCLES_PER_TICK) and will
- * be used to populate the watermarks in picoRTOS_core::task[n]::stat
- *
- * This interface is not needed when using picoRTOS-lite
- *
- * Parameters:
- *  counter - The type of counter we want
- *  t - The counter value to operate on (only valid if ARCH_COUNTER_SINCE)
- *
- * Returns:
- *  The value of the counter in picoRTOS_cycles_t
+/**
+ * picoRTOS_cycles_t **arch_counter**(**arch_counter_t** <ins>counter</ins>,
+ * **picoRTOS_cycles_t** <ins>t</ins>);
+ * > Provides the current cpu counter value (optional)
+ * ### NOTES
+ * > picoRTOS will use this function to maintain tasks statistics in the kernel.<br>
+ * > picoRTOS-lite doesn't use it at all.
+ * >
+ * > <ins>counter</ins> can be:
+ * > - ARCH_COUNTER_CURRENT: returns the current counter value regardless of <ins>t</ins>
+ * > - ARCH_COUNTER_SINCE: computes & returns the elapsed time between <ins>t</ins> and now.
  */
 extern /*@external@*/ picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t);
 
-/* CACHES */
+/**§
+ * ## Cache operations (*only if `CONFIG_CACHE`*)
+ */
 
 #ifdef CONFIG_CACHE
-/* Function: arch_invalidate_dcache
- * Invalidates one or more cache lines (optional)
- *
- * Parameters:
- *  addr - A cacheable address in RAM
- *  n - The number of bytes to invalidate
+/**
+ * void **arch_invalidate_dcache**(const **void** \*<ins>addr</ins>,
+ * **size_t** <ins>n<ins>);
+ * > Invalidates one or more lines of cache, from <ins>addr</ins> to
+ * > <ins>addr + n</ins>
  */
 extern void arch_invalidate_dcache(const void *addr, size_t n);
 
-/* Function: arch_flush_dcache
- * Flushes one or more cache lines (optional)
- *
- * Parameters:
- *  addr - A cacheable address in RAM
- *  n - The number of bytes to flush
+/**
+ * void **arch_flush_dcache**(const **void** \*<ins>addr</ins>,
+ * **size_t** <ins>n<ins>);
+ * > Flushes one or more lines of cache to RAM, from <ins>addr</ins> to
+ * > <ins>addr + n</ins>
  */
 extern void arch_flush_dcache(const void *addr, size_t n);
 #else
@@ -311,25 +322,29 @@ extern void arch_flush_dcache(const void *addr, size_t n);
 # define arch_flush_dcache(x, y)      /*@i@*/ (void)(x)
 #endif /* CONFIG_CACHE */
 
-/* CLOCKS */
+/**§
+ * Clock operations
+ */
 
-/* Function: arch_set_clock_frequency
- * Sets the currect CPU input frequency
- *
- * Parameters:
- *  freq - The CPU input frequency (in hertz)
+/**
+ * void **arch_set_clock_frequency**(**unsigned long** <ins>freq</ins>);
+ * > Sets the current CPU input frequency (in hz)
+ * ### NOTES
+ * > This function is **NOT** called from picoRTOS itself, but **SHOULD**
+ * > be called from any clock driver to ensure kernel & hardware clock(s)
+ * > have the same parameters.
  */
 extern /*@external@*/ void arch_set_clock_frequency(unsigned long freq);
 
-/* Function: arch_delay_us
- * Busy waits for at least n microseconds
- *
- * Parameters:
- *  n - The number of microseconds to wait
+/**
+ * void **arch_delay_us**(**unsigned long** <ins>n</ins>);
+ *> Busy waits for at least <ins>n</ins> microseconds
  */
 extern /*@external@*/ void arch_delay_us(unsigned long n);
 
-/* MPU */
+/**§
+ * ## MPU Operations (*only if `CONFIG_MPU`*)
+ */
 
 #define PID_KERNEL -1
 
@@ -347,40 +362,46 @@ extern /*@external@*/ void arch_delay_us(unsigned long n);
 #define MM_URO (MM_READ)
 
 #ifdef CONFIG_MPU
-/* Function: arch_mpu_init
- * Initializes the Memory Protection Unit
- *
- * This function is called during picoRTOS_init()
+/**
+ * void **arch_mpu_init**(void);
+ * > Initializes the Memory Protection Unit
+ * ### NOTES
+ * > This function is called during `picoRTOS_init()`
  */
 extern void arch_mpu_init(void);
 
-/* Function: arch_mpu_add_region
- * Adds a memory region to the MPU
- *
- * Parameters:
- *  pid - The process id (-1 for general)
- *  addr - An address accessible to the CPU
- *  n - The size of the region in bytes
- *  mode - The region mode (MM_ mask)
+/**
+ * void **arch_mpu_add_region**(**int** <ins>pid</ins>, const **void** \*<ins>addr</ins>,
+ * **size_t** <ins>n</ins>, **mpu_mode_t** <ins>mode</ins>);
+ * > Adds a memory region to the MPU
+ * ### NOTES
+ * > if <ins>pid</ins> is PID_KERNEL, the region is not linked to a task, but directly
+ * > to the kernel itself.<br>
+ * > <ins>mode</ins> is a mask, not an enum that can cumulate the following values:
+ * >> MM_NON_CACHEABLE: the region is cache-inhibited<br>
+ * >> MM_PRIVILIEGED: the region is only accessible to the kernel<br>
+ * >> MM_READ: the region is readable<br>
+ * >> MM_WRITE: the region is writable<br>
+ * >> MM_EXECUTE: instructions can be fetched from this region
  */
 extern void arch_mpu_add_region(int pid, const void *addr, size_t n, mpu_mode_t mode);
 
-/* Function: arch_mpu_restore_regions
- * Restores MPU regions
- *
- * Called during context switches
- *
- * Parameters:
- *  pid - The process pid to restore, or -1 for general mpu
+/**
+ * void **arch_mpu_restore_regions**(**int** <ins>pid</ins>);
+ * > Restores MPU regions for the task identified by <ins>pid</ins>
+ * ### NOTES
+ * > This will be called by picoRTOS before any context restoration
  */
 extern void arch_mpu_restore_regions(int pid);
 
-/* Function: arch_mpu_enable
- * Enables the MPU
- *
- * Called by picoRTOS_start()
+/**
+ * void **arch_mpu_enable**(void);
+ * > Enables the MPU*
+ * ### NOTES
+ * > Called by `picoRTOS_start()`
  */
 extern void arch_mpu_enable(void);
+
 #else
 # define arch_mpu_init()
 # define arch_mpu_add_region(a, b, c, d) /*@ignore@*/ do { (void)(a); (void)(b); (void)(c); (void)(d); } while(false) /*@end@*/

@@ -20,22 +20,21 @@ void picoRTOS_queue_head_init(/*@out@*/ struct picoRTOS_queue_head *ctx, size_t 
 int picoRTOS_queue_head_pop(struct picoRTOS_queue_head *ctx);
 int picoRTOS_queue_head_push(struct picoRTOS_queue_head *ctx);
 
-/* Macro: PICORTOS_QUEUE(type, count)
- * Declares a queue (FIFO)
- *
- * Queues are thread-safe
- *
- * Parameters:
- *  type - The type of data used in this queue (char, int, uint32_t, etc)
- *  count - The size of the queue in number of elements
- *
- * Example:
- * (start code)
- * static PICORTOS_QUEUE(int, 32) queue;
- * (end)
- *
- * Remarks:
- * count MUST be a power of 2 or picoRTOS will throw a debug exception
+/**
+ * **PICORTOS_QUEUE**(<ins>type</ins>, <ins>count</ins>);
+ * > Declares a queue
+ * ### NOTES
+ * > Queues are thread safe FIFOs to exchange data between 2 or more
+ * > tasks
+ * >
+ * > <ins>Beware:</ins> <ins>count</ins> MUST be a power of two or the calling
+ * > task will be killed with a `EINVAL` error code. Example:
+ * ```c
+ *     static PICORTOS_QUEUE(int, 32) queue;
+ * ```
+ * > On memory-protected systems you almost might want to put your queues
+ * > in the `UNPRIVILEGED_DATA` area, but most of the time you want to
+ * > use **picoRTOS_mpu_add_region()** to share it between only 2 tasks
  */
 #define PICORTOS_QUEUE(type, count)                     \
     struct {                                              \
@@ -43,42 +42,34 @@ int picoRTOS_queue_head_push(struct picoRTOS_queue_head *ctx);
         type buf[count];                                    \
     }
 
-/* Macro: PICORTOS_QUEUE_INIT(queue)
- * Initializes a queue
- *
- * Parameters:
- *  queue - A pointer to a previously declared queue
+/**
+ * **PICORTOS_QUEUE_INIT**(<ins>queue</ins>);
+ * > Dynamically initializes a <ins>queue</ins>.
+ * ### NOTES
+ * > The queue has to be declared first.
  */
 #define PICORTOS_QUEUE_INIT(queue)                                      \
     { picoRTOS_queue_head_init(&(queue)->head, sizeof((queue)->buf) / sizeof(*(queue)->buf)); \
       (queue)->buf[0] = 0; }
 
-/* Macro: PICORTOS_QUEUE_READ(queue, rvalue)
- * Reads the first element of a queue
- *
- * Returns:
- * 0 if success, -EAGAIN if the queue is empty
- *
- * Parameters:
- *  queue - A pointer to a queue
- *  rvalue - A pointer to the (hopefully) returned value
+/**
+ * **PICORTOS_QUEUE_READ**(<ins>queue</ins>, <ins>rvalue</ins>);
+ * > Reads the first element of a queue and put it into *<ins>rvalue</ins>
+ * ### RETURN
+ * > Returns 0 on successful read, -`EAGAIN` if the queue is empty
  */
 #define PICORTOS_QUEUE_READ(queue, rvalue)                      \
     ((picoRTOS_queue_head_pop(&(queue)->head) != -EAGAIN) ?       \
      (*(rvalue) = (queue)->buf[(queue)->head.i], 0) : -EAGAIN)
 
-/* Macro: PICORTOS_QUEUE_WRITE(queue, value)
- * Writes a value at the end of a queue
- *
- * Returns:
- * 0 if write succeeded,  -EAGAIN if queue is full
- *
- * Parameters:
- *  queue - A pointer to a queue
- *  value - The value to add to the queue
- *
- * Remarks:
- * Queues elements are read using a pointer but written by direct copy
+/**
+ * **PICORTOS_QUEUE_WRITE**(<ins>queue</ins>, <ins>value</ins>);
+ * > Writes a <ins>value</ins> at the end of a queue
+ * ### RETURN
+ * > Returns 0 in successful write, -`EAGAIN` if the queue is full
+ * ### NOTES
+ * > Queues elements are read using a pointer but written by direct
+ * > copy
  */
 #define PICORTOS_QUEUE_WRITE(queue, value)                           \
     ((picoRTOS_queue_head_push(&(queue)->head) != -EAGAIN) ?           \
