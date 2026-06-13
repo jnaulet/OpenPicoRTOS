@@ -1,9 +1,9 @@
-	/* picoRTOS */
-	.extern arch_init_mmu
-	.extern arch_init_ivpr_and_ivors
-	.extern arch_start_first_task
+	.file "picoRTOS-SMP_portasm.S"
 
-	#include "include/macros.S"
+	/* picoRTOS_portasm.S */
+	.extern arch_start_idle_task
+
+	#include "../include/macros.S"
 	#include <generated/autoconf.h>
 
 	.section .rodata, "a"
@@ -43,7 +43,8 @@ arch_core_start:
 	ENABLE_MSR_ME
 
 	INVALIDATE_AND_ENABLE_CACHE ICACHE
-	INVALIDATE_AND_ENABLE_CACHE DCACHE
+	// See startup.S for more info about this
+	// INVALIDATE_AND_ENABLE_CACHE DCACHE
 
 	CORE_STACKTOP_to_r1
 	E_LIW r2, _SDA2_BASE_	/* provided by powerpc-eabivle- toolchain */
@@ -55,4 +56,4 @@ arch_core_start:
 
 	/* get first task sp */
 	e_lwz r3, -4 (r1)
-	e_bl arch_start_first_task
+	e_bl arch_start_idle_task

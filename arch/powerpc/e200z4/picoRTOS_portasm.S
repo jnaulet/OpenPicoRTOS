@@ -1,9 +1,11 @@
+	.file "picoRTOS_portasm.S"
+
 	/* picoRTOS */
 	.extern picoRTS_syscall
 	.extern picoRTOS_tick
 
 	#include "picoRTOS_device.h"
-	#include "include/macros.S"
+	#include "../include/macros.S"
 
 	/* macros */
 
@@ -15,6 +17,7 @@
 
 	.macro SAVE_CONTEXT
 	e_add16i r1, r1, -140
+	sthcx. r1, 0, r1	/* clear exclusive */
 	e_stmvsrrw 0 (r1)	/* srr[0-1] */
 	e_stmvsprw 8 (r1)	/* cr, lr, ctr, xer */
 	e_stmvgprw 24 (r1)	/* r[0, 3-12] */
@@ -55,10 +58,15 @@ arch_save_first_context:
 	/* switch to task stack */
 	mtsprg 0, r3
 	SWAP_STACK r3
-	e_add16i r1, r1, -148	/* -8 like __StackTopx */
+	e_add16i r1, r1, -148	/* -8 like __StackTop(s) */
 	se_mr r30, r4		/* srr0 / pc (fn) */
-	// E_LIW r31, 0x2029000	/* SPE, CE, EE, ME */
-	E_LIW r31, 0x202d000	/* SPE, CE, EE, PR, ME */
+
+	/* BUG: i can't get the user-mode PBDRIDGE to work
+	 * so we'll have to sacrifice some safety here until someone
+	 * at NXP can explain to us how it works */
+	E_LIW r31, 0x2029000	/* SPE, CE, EE, ME */
+	//E_LIW r31, 0x202d000	/* SPE, CE, EE, PR, ME */
+
 	e_stmw r30, 0 (r1)	/* srr[0-1] */
 	e_stw r5, 28 (r1)	/* r3 (priv) */
 	/* swap & ret */
@@ -68,39 +76,12 @@ arch_save_first_context:
 	se_blr
 
 	.align 4
-	.type arch_start_first_task, %function
-	.global arch_start_first_task
-arch_start_first_task:
+	.type arch_start_idle_task, %function
+	.global arch_start_idle_task
+arch_start_idle_task:
 	mtsprg 0, r3
 	RESTORE_CONTEXT
 	se_rfi
-
-	.align 4
-	.type arch_syscall, %function
-	.global arch_syscall
-arch_syscall:
-	se_sc
-	se_blr
-
-	.align 4
-	.type arch_compare_and_swap, %function
-	.global arch_compare_and_swap
-arch_compare_and_swap:
-	mbar
-	lharx r7, 0, r3
-	se_cmp r7, r4
-	se_bne .arch_compare_and_swap_fail_cmp
-	sthcx. r5, 0, r3
-	se_bne .arch_compare_and_swap_fail_sthcx
-	mbar
-	se_mr r3, r4		/* success */
-	se_blr
-.arch_compare_and_swap_fail_cmp:
-	sthcx. r7, 0, r3	/* turn reservation bit off */
-	mbar
-.arch_compare_and_swap_fail_sthcx:
-	se_mr r3, r5
-	se_blr
 
 	.align 4
 	.type arch_core, %function
@@ -179,13 +160,19 @@ isr_fn_is_null:
 	.global MachineCheck_Handler
 	.global DataStorage_Handler
 	.global InstructionStorage_Handler
-MachineCheck_Handler:	
+MachineCheck_Handler:
+	SAVE_CONTEXT
+	mfmcsr r3
+	mtmcsr r3
+	mfmcsrr0 r5	/* faulty pc */
+	e_b .segfault
 DataStorage_Handler:
 InstructionStorage_Handler:
 	SAVE_CONTEXT
+	e_li r5, 1	/* FIXME */
+.segfault:
 	mfsprg r3, 0
 	e_li r4, 8	/* SEGFAULT (FIXME) */
-	e_li r5, 1	/* FIXME */
 	e_bl picoRTOS_syscall
 	RESTORE_CONTEXT
 	se_rfi

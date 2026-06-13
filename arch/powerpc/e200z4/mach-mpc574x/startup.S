@@ -1,7 +1,7 @@
 	/* PPC e200z4 VLE startup */
 	#include "picoRTOS_device.h"
 	#include <generated/autoconf.h>
-	#include "../include/macros.S"
+	#include "../../include/macros.S"
 
 	/* DISABLE_SWT */
 	.macro DISABLE_SWT addr
@@ -12,6 +12,15 @@
 	e_stw r4, 0x10 (r3)
 	E_LIW r4, 0xff000102
 	e_stw r4, 0 (r3)
+	.endm
+
+	.macro PBRIDGE_USER_MODE base, offset
+	E_LIW r7, \base+\offset
+	E_LIW r8, ~0x44444444
+	e_lwz r3, 0 (r7)
+	and r3, r3, r8
+	e_stw r3, 0 (r7)
+	mbar
 	.endm
 
 	/* required for boot */
@@ -25,7 +34,7 @@
 	.long 0	    /* CPU1 reset vector */
 
 	.section .init, "ax"
-	
+
 	.align 5 /* .boot is 24 bytes, align to 32 */
 	.global Reset_Handler
 Reset_Handler:
@@ -38,12 +47,61 @@ Reset_Handler:
 
 	INIT_E2EECC __ram_start__, __ram_end__
 	ENABLE_BTB
-	CLEAR_RESERVATIONS_ON_EXT_INTERRUPT
 	ENABLE_MSR_ME
 
-	INVALIDATE_AND_ENABLE_CACHE ICACHE
-	INVALIDATE_AND_ENABLE_CACHE DCACHE
+	// Mark peripherals as "can be accessed in user mode"
+	// FIXME: fine-tune this to remove INTC, SPINLOCK,
+	// TIMER etc
+	
+	// BUG: this doesn't work at all & i get a MachineCheck
+	// exception everytime i try to access the bus in
+	// user-mode (see picoRTOS_portasm.S for more info)
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x100 /* PARA */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x104 /* PARB */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x108 /* PARC */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x10c /* PARD */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x114 /* PARF */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x140 /* OPACRA */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x144 /* OPACRB */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x148 /* OPACRC */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x14c /* OPACRD */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x150 /* OPACRE */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x154 /* OPACRF */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x158 /* OPACRG */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x164 /* OPACRJ */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x168 /* OPACRK */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x16c /* OPACRL */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x170 /* OPACRM */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x174 /* OPACRN */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x17c /* OPACRP */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x1a0 /* OPACRY */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x1a4 /* OPACRZ */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x1a8 /* OPACRAA */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x1ac /* OPACRAB */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x1b8 /* OPACRAE */
+	PBRIDGE_USER_MODE ADDR_AIPS_0, 0x1bc /* OPACRAF */
 
+	PBRIDGE_USER_MODE ADDR_AIPS_1, 0x100 /* PARA */
+	PBRIDGE_USER_MODE ADDR_AIPS_1, 0x148 /* OPACRC */
+	PBRIDGE_USER_MODE ADDR_AIPS_1, 0x14c /* OPACRD */
+	PBRIDGE_USER_MODE ADDR_AIPS_1, 0x154 /* OPACRF */
+	PBRIDGE_USER_MODE ADDR_AIPS_1, 0x164 /* OPACRJ */
+	PBRIDGE_USER_MODE ADDR_AIPS_1, 0x168 /* OPACRK */
+	PBRIDGE_USER_MODE ADDR_AIPS_1, 0x16c /* OPACRL */
+	PBRIDGE_USER_MODE ADDR_AIPS_1, 0x170 /* OPACRM */
+	PBRIDGE_USER_MODE ADDR_AIPS_1, 0x17c /* OPACRP */
+	PBRIDGE_USER_MODE ADDR_AIPS_1, 0x1a8 /* OPACRAA */
+	PBRIDGE_USER_MODE ADDR_AIPS_1, 0x1b8 /* OPACRAE */
+
+	INVALIDATE_AND_ENABLE_CACHE ICACHE
+#ifndef CONFIG_SMP
+	// Note: MPC5748G has no bus snooping mechanism, which means
+	// it cannot sync the caches properly on its own.
+	// As the SMPU cannot be used in SMP either, this dual-core
+	// chip seems less & less useful every day
+	INVALIDATE_AND_ENABLE_CACHE DCACHE
+#endif
+	
 	E_LIW r1, __StackTop0 - 8	/* __Stacktop - lr - backchain */
 	E_LIW r2, _SDA2_BASE_		/* provided by powerpc-eabivle- toolchain */
 	E_LIW r13, _SDA_BASE_		/* provided by powerpc-eabivle- toolchain */
@@ -52,7 +110,7 @@ Reset_Handler:
 	E_LIW r4, __text_load__
 	se_cmp r7, r4
 	se_beq .ignore_text_relocation
-	
+
 	/* copy .text to ram */
 	COPY_TO_RAM __einit, __text_start__, __text_end__
 
@@ -90,7 +148,7 @@ __eabi:
 	.extern MachineCheck_Handler
 	.extern DataStorage_Handler
 	.extern InstructionStorage_Handler
-	
+
 	.align 16 /* 64kbytes alignment (2^16) */
 	.global __IVORs
 __IVORs:
@@ -113,7 +171,7 @@ __IVORs:
 	IVOR SPEUnavailableException, SPEUnavailableException_Handler
 	IVOR EFPDataException, EFPDataException_Handler
 	IVOR EFPRoundException, EFPRoundException_Handler
-	
+
 	/* Default handlers */
 	def_irq_handler CriticalInput_Handler
 	// def_irq_handler MachineCheck_Handler
@@ -135,7 +193,7 @@ __IVORs:
 
 	.section .pstack, "w"
 	.altmacro
-	
+
 	.macro LABEL l, n
 	.global \l\n
 \l\n :

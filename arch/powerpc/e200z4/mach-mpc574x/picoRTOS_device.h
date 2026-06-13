@@ -3,6 +3,9 @@
 
 /* MEMORY MAPPING */
 
+#define ADDR_AIPS_1     0xf8000000
+#define ADDR_AIPS_0     0xfc000000
+
 #define ADDR_SEMA42     0xfc03c000
 
 #define ADDR_INTC       0xfc040000

@@ -13,11 +13,13 @@
 /* DRIVERS */
 /*@external@*/ extern void arch_spinlock_init(void);
 /*@external@*/ extern void arch_smp_intc_init(void);
+/*@external@*/ extern void arch_aux_core_reset_status(void);
+/*@external@*/ extern int arch_aux_core_is_idling(void);
 /*@external@*/ extern void arch_core_run(picoRTOS_core_t core);
 
-/* SW LOCK */
-static bool aux_core_is_idling
-__attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
+/* DRIVERS */
+/*@external@*/ extern void arch_timer_start(void);
+/*@external@*/ extern void arch_timer_stop(void);
 
 void arch_smp_init(void)
 {
@@ -34,19 +36,14 @@ void arch_core_init(picoRTOS_core_t core, picoRTOS_stack_t *sp)
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
     /* prepare core1 main stack */
-    picoRTOS_stack_t *stack = *__StackTop[core] - 2; /* lr + backchain */
+    picoRTOS_stack_t *stack = __StackTop[core] - 2; /* lr + backchain */
     *--stack = (picoRTOS_stack_t)sp;
 
-    /* reset state machine */
-    aux_core_is_idling = false;
-    arch_flush_dcache(&aux_core_is_idling, sizeof(aux_core_is_idling));
-
-    /* start */
-    arch_core_run(core);
+    arch_aux_core_reset_status();   /* reset state machine */
+    arch_core_run(core);            /* start */
 
     /* wait until aux core is idling */
-    while (!aux_core_is_idling && deadlock-- != 0) {
-        arch_invalidate_dcache(&aux_core_is_idling, sizeof(aux_core_is_idling));
+    while (arch_aux_core_is_idling() != 0 && deadlock-- != 0) {
         arch_delay_us(10ul);
 #if defined(CONFIG_DEBUG_AUX_CORE_STARTUP) && !defined(S_SPLINT_S)
 # warning CONFIG_DEBUG_AUX_CORE_STARTUP is defined ! Debug only !
@@ -55,14 +52,4 @@ void arch_core_init(picoRTOS_core_t core, picoRTOS_stack_t *sp)
     }
 
     arch_assert_void(deadlock != -1);
-}
-
-void arch_idle(void)
-{
-    /* signal we're idling */
-    aux_core_is_idling = true;
-    arch_flush_dcache(&aux_core_is_idling, sizeof(aux_core_is_idling));
-
-    for (;;)
-        ASM("wait");
 }

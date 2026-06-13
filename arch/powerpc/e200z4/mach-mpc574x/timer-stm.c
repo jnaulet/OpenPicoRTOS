@@ -1,5 +1,9 @@
 #include "picoRTOS_device.h"
+
 #include "picoRTOS_port.h"
+#ifdef CONFIG_SMP
+# include "picoRTOS-SMP_port.h"
+#endif
 
 #include <stdint.h>
 #include <generated/autoconf.h>
@@ -37,19 +41,24 @@ __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
 
 static void Timer_Handler(void)
 {
+    ASM("se_mflr %r0");
+    ASM("e_stwu %r0, -4(%r1)");
+
     ASM("mfsprg %r3, 0");       /* load task pointer from sprg0 */
     ASM("e_bl picoRTOS_tick");  /* call tick */
     ASM("mtsprg 0, %r3");       /* store returned task stack pointer */
 
-    {
-        int core = (int)arch_core();
-        /* reset flag & prepare next tick */
-        STM0->CH[core].CIRn = (uint32_t)CIRn_CIF;
-        STM0->CH[core].CMPn += timer_stm_period;
+    ASM("e_lwz %r0, 0(%r1)");
+    ASM("e_add16i %r1, %r1, 4");
+    ASM("se_mtlr %r0");
+
+    /* reset flag & prepare next tick */
+    if ((STM0->CH[0].CIRn & CIRn_CIF) != 0) {
+        STM0->CH[0].CIRn = (uint32_t)CIRn_CIF;
+        STM0->CH[0].CMPn += timer_stm_period;
     }
 }
 
-#ifndef CONFIG_SMP
 void arch_timer_init(int period)
 {
     arch_assert_void(period > 0);
@@ -57,47 +66,30 @@ void arch_timer_init(int period)
     /* STM0 source clock is FS80 (half-speed) */
     timer_stm_period = (uint32_t)period >> 1;
 
-    /* enable STM0 */
+    /* enable STM0 & setup period */
     STM0->CR = (uint32_t)(CR_FRZ | CR_TEN);
-    /* setup period & start */
     STM0->CH[0].CMPn = (uint32_t)timer_stm_period;
-    STM0->CH[0].CCRn = (uint32_t)CCRn_CEN;
 
     /* register interrupt */
     arch_register_interrupt((picoRTOS_irq_t)IRQ_STM0_CIR0, (arch_isr_fn)Timer_Handler, NULL);
+#ifndef CONFIG_SMP
     arch_enable_interrupt((picoRTOS_irq_t)IRQ_STM0_CIR0);
-
-    arch_mpu_add_region(PID_KERNEL, STM0, sizeof(*STM0), MM_PRW | MM_NON_CACHEABLE);
-}
 #else
-/* ASM */
-/*@external@*/ extern void arch_smp_enable_interrupt(picoRTOS_irq_t irq, picoRTOS_mask_t core_mask);
-
-void arch_timer_init(int period)
-{
-    arch_assert_void(period > 0);
-
-    size_t n = (size_t)CONFIG_CORE_COUNT;
-
-    /* STM0 source clock is FS80 (half-speed) */
-    timer_stm_period = (uint32_t)period >> 1;
-    arch_flush_dcache(&timer_stm_period, sizeof(timer_stm_period));
-
-    /* enable STM0 */
-    STM0->CR = (uint32_t)(CR_FRZ | CR_TEN);
-    while (n-- != 0) {
-        /* setup period & start */
-        STM0->CH[n].CMPn = (uint32_t)timer_stm_period;
-        STM0->CH[n].CCRn = (uint32_t)CCRn_CEN;
-        /* register interrupt */
-        arch_register_interrupt((picoRTOS_irq_t)(IRQ_STM0_CIR0 + n), (arch_isr_fn)Timer_Handler, NULL);
-        arch_smp_enable_interrupt((picoRTOS_irq_t)(IRQ_STM0_CIR0 + n), (picoRTOS_mask_t)(1u << n));
-    }
-
-    /* mpu */
+    arch_smp_enable_interrupt((picoRTOS_irq_t)IRQ_STM0_CIR0,
+                              (picoRTOS_mask_t)(1 << CONFIG_CORE_COUNT) - 1);
+#endif
     arch_mpu_add_region(PID_KERNEL, STM0, sizeof(*STM0), MM_PRW | MM_NON_CACHEABLE);
 }
-#endif
+
+void arch_timer_start(void)
+{
+    STM0->CH[0].CCRn = (uint32_t)CCRn_CEN;
+}
+
+void arch_timer_stop(void)
+{
+    STM0->CH[0].CCRn = 0;
+}
 
 /* STAT OPS */
 

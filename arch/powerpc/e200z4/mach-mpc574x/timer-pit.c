@@ -1,5 +1,7 @@
 #include "picoRTOS_device.h"
+
 #include "picoRTOS_port.h"
+#include "picoRTOS-SMP_port.h"
 
 #include <stdint.h>
 #include <generated/autoconf.h>
@@ -35,26 +37,24 @@ struct PIT {
 #define TCTRLn_TEN (1 << 0)
 
 /* instance */
-static struct PIT *PIT = (struct PIT*)ADDR_PIT;
+static struct PIT *PIT = (struct PIT*)ADDR_PIT; // NOLINT
 
-static void arch_timer_handler(void *priv)
+static void Timer_Handler(void)
 {
-    ASM("e_add16i %r1, %r1, -4");
     ASM("se_mflr %r0");
-    ASM("e_stw %r0, 0 (%r1)");
-
-    arch_assert_void(priv == NULL);
+    ASM("e_stwu %r0, -4(%r1)");
 
     ASM("mfsprg %r3, 0");       /* load task pointer from sprg0 */
     ASM("e_bl picoRTOS_tick");  /* call tick */
     ASM("mtsprg 0, %r3");       /* store returned task stack pointer */
 
-    /* reset flag */
-    PIT->PIT[PIT_INDEX].TFLGn = (uint32_t)1;
-
-    ASM("se_lwz %r0, 0 (%r1)");
-    ASM("se_mtlr %r0");
+    ASM("e_lwz %r0, 0(%r1)");
     ASM("e_add16i %r1, %r1, 4");
+    ASM("se_mtlr %r0");
+
+    /* reset flag */
+    if (PIT->PIT[PIT_INDEX].TFLGn != 0)
+        PIT->PIT[PIT_INDEX].TFLGn = (uint32_t)1;
 }
 
 void arch_timer_init(int period)
@@ -69,8 +69,16 @@ void arch_timer_init(int period)
     PIT->PIT[PIT_INDEX].TCTRLn = (uint32_t)(TCTRLn_TIE | TCTRLn_TEN);
 
     /* register interrupt */
-    arch_register_interrupt((picoRTOS_irq_t)PIT_IRQ, arch_timer_handler, NULL);
+    arch_register_interrupt((picoRTOS_irq_t)PIT_IRQ, (arch_isr_fn)Timer_Handler, NULL);
+#ifndef CONFIG_SMP
     arch_enable_interrupt((picoRTOS_irq_t)PIT_IRQ);
+#else
+    arch_smp_enable_interrupt((picoRTOS_irq_t)PIT_IRQ,
+                              (picoRTOS_mask_t)(1 << CONFIG_CORE_COUNT) - 1);
+#endif
+    /* mpu */
+    arch_mpu_add_region(PID_KERNEL, PIT, sizeof(*PIT),
+                        MM_PRW | MM_NON_CACHEABLE);
 }
 
 /* STAT OPS */

@@ -12,7 +12,7 @@ picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
 
 /*@external@*/ extern void arch_dcbi(uint32_t addr);
 /*@external@*/ extern void arch_dcbf(uint32_t addr);
-/*@external@*/ extern void arch_start_first_task(picoRTOS_stack_t *sp);
+/*@external@*/ extern void arch_start_idle_task(picoRTOS_stack_t *sp);
 /*@external@*/ extern void arch_syscall(syscall_t syscall, void *priv);
 /*@external@*/ extern picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *var,
                                                               picoRTOS_atomic_t old,
@@ -21,6 +21,8 @@ picoRTOS_stack_t *arch_save_first_context(picoRTOS_stack_t *sp,
 /* DRIVERS */
 /*@external@*/ extern void arch_intc_init(void);
 /*@external@*/ extern void arch_timer_init(int period);
+/*@external@*/ extern void arch_timer_start(void);
+/*@external@*/ extern void arch_timer_stop(void);
 
 /* CLOCK */
 static int sysclk_hz = DEVICE_DEFAULT_SYSCLK_HZ;
@@ -29,26 +31,19 @@ static int sysclk_hz = DEVICE_DEFAULT_SYSCLK_HZ;
 
 void arch_init(void)
 {
-    /* disable interrupts */
-    ASM("wrteei 0");
-
-    /* reset intc */
-    arch_intc_init();
-
-    /* init periodic timer */
-    arch_timer_init(sysclk_hz / CONFIG_TICK_HZ);
+    ASM("wrteei 0");                                /* disable interrupts */
+    arch_intc_init();                               /* reset intc */
+    arch_timer_init(sysclk_hz / CONFIG_TICK_HZ);    /* timer */
 }
 
 void arch_suspend(void)
 {
-    /* disable interrupts */
-    ASM("wrteei 0");
+    arch_timer_stop();
 }
 
 void arch_resume(void)
 {
-    /* enable interrupts */
-    ASM("wrteei 1");
+    arch_timer_start();
 }
 
 picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
@@ -64,17 +59,10 @@ picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
     return sp;
 }
 
-void __attribute__((weak)) arch_idle(void)
+void arch_start_first_task(picoRTOS_stack_t *sp)
 {
-    for (;;)
-        ASM("wait");
-}
-
-/* ATOMIC OPS */
-
-picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr)
-{
-    return arch_compare_and_swap(ptr, 0, (picoRTOS_atomic_t)1);
+    arch_timer_start();
+    arch_start_idle_task(sp);
 }
 
 /* CLOCKS */

@@ -29,14 +29,16 @@ SECTIONS
 		*picoRTOS.o (.text)
 		*picoRTOS_port.o (.text)
 		*picoRTOS_portasm.o (.text)
-		*mpu_*.o (.text)
-		*cache_*.o (.text)
-		*intc_*.o (.text)
-		*timer_*.o (.text)
+		*mpu-*.o (.text)
+		*cache-*.o (.text)
+		*intc-*.o (.text)
+		*timer-*.o (.text)
 
 		*picoRTOS-SMP.o (.text)
 		*picoRTOS-SMP_port.o (.text)
 		*picoRTOS-SMP_portasm.o (.text)
+		*core-*.o (.text)
+		*spinlock-*.o (.text)
 
 		*(.ptext)
 
@@ -44,6 +46,7 @@ SECTIONS
 		__ptext_end__ = .;
 		__utext_start__ = .;
 		*(.text*)
+		KEEP(*(.rodata*))
 
 		. = ALIGN(16);
 		__utext_end__ = .;
@@ -62,14 +65,16 @@ SECTIONS
 		*picoRTOS.o (.data)
 		*picoRTOS_port.o (.data)
 		*picoRTOS_portasm.o (.data)
-		*mpu_*.o (.data)
-		*cache_*.o (.data)
-		*intc_*.o (.data)
-		*timer_*.o (.data)
+		*mpu-*.o (.data)
+		*cache-*.o (.data)
+		*intc-*.o (.data)
+		*timer-*.o (.data)
 
 		*picoRTOS-SMP.o (.data)
 		*picoRTOS-SMP_port.o (.data)
 		*picoRTOS-SMP_portasm.o (.data)
+		*core-*.o (.data)
+		*spinlock-*.o (.data)
 
 		*(.pdata)
 
@@ -85,14 +90,16 @@ SECTIONS
 		*picoRTOS.o (.bss)
 		*picoRTOS_port.o (.bss)
 		*picoRTOS_portasm.o (.bss)
-		*mpu_*.o (.bss)
-		*cache_*.o (.bss)
-		*intc_*.o (.bss)
-		*timer_*.o (.bss)
+		*mpu-*.o (.bss)
+		*cache-*.o (.bss)
+		*intc-*.o (.bss)
+		*timer-*.o (.bss)
 
 		*picoRTOS-SMP.o (.bss)
 		*picoRTOS-SMP_port.o (.bss)
 		*picoRTOS-SMP_portasm.o (.bss)
+		*core-*.o (.data)
+		*spinlock-*.o (.bss)
 
 		*(.pbss)
 
@@ -106,7 +113,6 @@ SECTIONS
 
                 . = ALIGN(16);
 		__udata_start__ = .;
-		KEEP(*(.rodata*)) /* FIXME */
 		KEEP(*(.udata*))
 		
 		. = ALIGN(16);
