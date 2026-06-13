@@ -34,15 +34,21 @@ __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
 
 static void Timer_Handler(void)
 {
+    ASM("se_mflr %r0");
+    ASM("e_stwu %r0, -4(%r1)");
+
     ASM("mfsprg %r3, 0");       /* load task pointer from sprg0 */
     ASM("e_bl picoRTOS_tick");  /* call tick */
     ASM("mtsprg 0, %r3");       /* store returned task stack pointer */
 
-    {
-        int core = (int)arch_core();
-        /* reset flag & prepare next tick */
-        STMA->CH[core].CIRn = (uint32_t)CIRn_CIF;
-        STMA->CH[core].CMPn += timer_stm_period;
+    ASM("e_lwz %r0, 0(%r1)");
+    ASM("e_add16i %r1, %r1, 4");
+    ASM("se_mtlr %r0");
+
+    /* reset flag & prepare next tick */
+    if ((STMA->CH[0].CIRn & CIRn_CIF) != 0) {
+        STMA->CH[0].CIRn = (uint32_t)CIRn_CIF;
+        STMA->CH[0].CMPn += timer_stm_period;
     }
 }
 
@@ -55,23 +61,29 @@ void arch_timer_init(int period)
 {
     arch_assert_void(period > 0);
 
-    size_t n = (size_t)CONFIG_SMP_CORES;
     /* STMA source clock is FM_PER_DIV, extract divider */
     size_t fmperdiv = (size_t)(SYSDIV_FMPERDIV_M & (*SYSDIV >> SYSDIV_FMPERDIV_S)) + 1;
-
     timer_stm_period = (uint32_t)period >> fmperdiv;
-    arch_flush_dcache(&timer_stm_period, sizeof(timer_stm_period));
 
     /* enable STMA */
-    STMA->CR = (uint32_t)(CR_FRZ | CR_TEN);
-    while (n-- != 0) {
-        /* setup period & start */
-        STMA->CH[n].CMPn = (uint32_t)timer_stm_period;
-        STMA->CH[n].CCRn = (uint32_t)CCRn_CEN;
-        /* register interrupt */
-        arch_register_interrupt((picoRTOS_irq_t)(IRQ_STM_CIR0 + n), (arch_isr_fn)Timer_Handler, NULL);
-        arch_smp_enable_interrupt((picoRTOS_irq_t)(IRQ_STM_CIR0 + n), (picoRTOS_mask_t)(1u << n));
-    }
+    STMA->CH[0].CMPn = (uint32_t)timer_stm_period;
+    STMA->CH[0].CCRn = (uint32_t)CCRn_CEN;
+    /* register interrupt */
+    arch_register_interrupt((picoRTOS_irq_t)IRQ_STM_CIR0,
+                            (arch_isr_fn)Timer_Handler, NULL);
+    /* enable */
+    arch_smp_enable_interrupt((picoRTOS_irq_t)IRQ_STM_CIR0,
+                              (picoRTOS_mask_t)(1 << CONFIG_CORE_COUNT) - 1);
+}
+
+void arch_timer_start(void)
+{
+    STMA->CR = (uint32_t)CR_TEN;
+}
+
+void arch_timer_stop(void)
+{
+    STMA->CR = (uint32_t)CR_FRZ;
 }
 
 /* STAT OPS */

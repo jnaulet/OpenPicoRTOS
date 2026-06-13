@@ -14,7 +14,7 @@
 
 void arch_core_run(picoRTOS_core_t core)
 {
-    arch_assert_void(core < (picoRTOS_core_t)CONFIG_SMP_CORES);
+    arch_assert_void(core < (picoRTOS_core_t)CONFIG_CORE_COUNT);
 
     /* start (vle mode) */
     *SIU_RSTVEC1 = (uint32_t)arch_core_start | SIU_RSTVEC1_VLE;

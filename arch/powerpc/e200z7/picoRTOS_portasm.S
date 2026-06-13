@@ -1,12 +1,12 @@
+	.file "picoRTOS_portasm.S"
+
 	/* picoRTOS */
 	.extern picoRTS_syscall
 	.extern picoRTOS_tick
 
 	#include "picoRTOS_device.h"
 	#include "include/macros.S"
-
-	.extern arch_get_interrupt
-	.extern arch_ack_interrupt
+	#include "../include/macros.S"
 
 	/* macros */
 
@@ -18,6 +18,7 @@
 
 	.macro SAVE_CONTEXT
 	e_add16i r1, r1, -140
+	sthcx. r1, 0, r1	/* clear exclusive */
 	e_stmvsrrw 0 (r1)	/* srr[0-1] */
 	e_stmvsprw 8 (r1)	/* cr, lr, ctr, xer */
 	e_stmvgprw 24 (r1)	/* r[0, 3-12] */
@@ -27,7 +28,6 @@
 
 	.macro RESTORE_CONTEXT
 	SWAP_STACK r0
-	sthcx. r1, 0, r1	/* turn reservation bit off */
 	e_lmvsrrw 0 (r1)	/* srr[0-1] */
 	e_lmvsprw 8 (r1)	/* cr, lr, ctr, xer */
 	e_lmvgprw 24 (r1)	/* r[0, 3-12] */
@@ -44,7 +44,7 @@
 	mfspr r3, \SPR
 	se_blr
 	.endm
-	
+
 	.macro DEF_MTSPR name, SPR
 	.align 4
 	.type \name, %function
@@ -93,11 +93,15 @@ arch_save_first_context:
 	/* switch to task stack */
 	mtsprg 0, r3
 	SWAP_STACK r3
-	e_add16i r1, r1, -140
+	e_add16i r1, r1, -148	/* -8 like __StackTop(s) */
 	se_mr r30, r4		/* srr0 / pc (fn) */
+
+	/* BUG: i can't get the user-mode PBDRIDGE to work
+	 * so we'll have to sacrifice some safety here until someone
+	 * at NXP can explain to us how it works */
 	E_LIW r31, 0x2029000	/* SPE, CE, EE, ME */
-	mfmsr r3
-	or r31, r31, r3
+	//E_LIW r31, 0x202d000	/* SPE, CE, EE, PR, ME */
+
 	e_stmw r30, 0 (r1)	/* srr[0-1] */
 	e_stw r5, 28 (r1)	/* r3 (priv) */
 	/* swap & ret */
@@ -109,6 +113,7 @@ arch_save_first_context:
 	.align 4
 	.type arch_start_first_task, %function
 	.global arch_start_first_task
+	.weak arch_start_first_task
 arch_start_first_task:
 	/* start timebase */
 	mfhid0 r7
@@ -116,6 +121,12 @@ arch_start_first_task:
 	or r7, r7, r8
 	mthid0 r7
 	/* run */
+	e_bl arch_start_idle_task
+
+	.align 4
+	.type arch_start_idle_task, %function
+	.global arch_start_idle_task
+arch_start_idle_task:
 	mtsprg 0, r3
 	RESTORE_CONTEXT
 	se_rfi
@@ -160,7 +171,7 @@ arch_compare_and_swap:
 	DEF_MTSPR arch_mthid0, 1008
 
 	/* CACHES */
-	
+
 	.align 4
 	.type arch_dcbi, %function
 	.global arch_dcbi
@@ -175,29 +186,48 @@ arch_dcbf:
 	dcbf 0, r3
 	se_blr
 
+	.equ INTC_IACKR0, ADDR_INTC + 0x10
+	.equ INTC_EOIR0, ADDR_INTC + 0x18
+
+	.macro INTC_IACKRx_to_r3
+	mfpir r4
+	se_slwi r4, 2
+	e_lis r3, INTC_IACKR0@ha
+	add r3, r4, r3
+	e_lwz r3, INTC_IACKR0@l(r3)
+	.endm
+
+	.macro ZERO_INTC_EOIRx
+	mfpir r4
+	se_slwi r4, 2
+	e_lis r3, INTC_EOIR0@ha
+	add r3, r4, r3
+	e_li r4, 0
+	e_stw r4, INTC_EOIR0@l(r3)
+	.endm
+
 	.align 4
 	.global ExternalInput_Handler
 ExternalInput_Handler:
 	SAVE_CONTEXT
-	/* isr fn in r4 */
-	e_bl arch_get_interrupt
+	INTC_IACKRx_to_r3
+	/* dereference & check fn */
 	se_lwz r4, 0 (r3)
-	/* check fn */
-	se_cmp r4, 0
+	se_cmpi r4, 0
 	se_beq isr_fn_is_null
 	/* set lr */
 	se_mtlr r4
 	/* priv in r3 */
-	e_rlwinm r4, r3, 0, 20, 30	/* intvec */
+	e_rlwinm r4, r3, 0, 20, 30	/* intvec in r4 */
 	e_lis r3, ISR_TABLE_priv@ha
 	add r3, r4, r3
 	e_lwz r3, ISR_TABLE_priv@l(r3)
 	/* branch to isr */
+	se_mr r31, r1
 	se_blrl
 	mbar
 	/* ack */
-	e_bl arch_ack_interrupt
-	mbar
+	ZERO_INTC_EOIRx
 	/* epilogue */
 	RESTORE_CONTEXT
 	se_rfi
@@ -209,6 +239,14 @@ isr_fn_is_null:
 	e_b isr_fn_is_null
 
 	.section .bss
+
+	.align 12 /* VTBA is 20bits, align 2^12 (4096) */
+	.type ISR_TABLE_fn, %object
+	.global ISR_TABLE_fn
+ISR_TABLE_fn:
+	.rept DEVICE_INTERRUPT_VECTOR_COUNT
+	.long 0
+	.endr
 
 	.align 4
 	.type ISR_TABLE_priv, %object

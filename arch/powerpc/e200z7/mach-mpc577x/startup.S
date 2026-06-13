@@ -1,6 +1,8 @@
 	/* PPC e200z7 VLE startup */
 	#include "picoRTOS_device.h"
+	#include <generated/autoconf.h>
 	#include "../include/macros.S"
+	#include "../../include/macros.S"
 
 	.equ PCU_CESR, ADDR_PCU + 0x0
 
@@ -26,33 +28,33 @@ Reset_Handler:
 
 	INIT_E2EECC __ram_start__, __ram_end__
 	ENABLE_BTB
-	CLEAR_RESERVATIONS_ON_EXT_INTERRUPT
 	ENABLE_MSR_ME
 
 	INVALIDATE_AND_ENABLE_CACHE ICACHE
 	INVALIDATE_AND_ENABLE_CACHE DCACHE
 	SETUP_PCU 0xf001		/* bus snooping */
 
-	E_LIW r1, __StackTop	/* stack */
-	E_LIW r2, _SDA2_BASE_	/* provided by powerpc-eabivle- toolchain */
-	E_LIW r13, _SDA_BASE_	/* provided by powerpc-eabivle- toolchain */
+	E_LIW r1, __StackTop0 - 8	/* __StackTop - lr - backchain */
+	E_LIW r2, _SDA2_BASE_		/* provided by powerpc-eabivle- toolchain */
+	E_LIW r13, _SDA_BASE_		/* provided by powerpc-eabivle- toolchain */
 
-	E_LIW r7, __relocate_text
-	se_cmpi r7, 1
-	se_bne .ignore_text_relocation
+	E_LIW r7, __text_start__
+	E_LIW r4, __text_load__
+	se_cmp r7, r4
+	se_beq .ignore_text_relocation
 
 	/* copy .text to ram */
-	COPY_TO_RAM __esdata, __text_start__, __text_end__
+	COPY_TO_RAM __einit, __text_start__, __text_end__
 
 .ignore_text_relocation:
 	/* copy .data section(s) */
 	COPY_TO_RAM __etext, __data_start__, __data_end__
-	COPY_TO_RAM __edata, __sdata_start__, __sdata_end__
 	/* zero .bss section */
 	ZERO_RAM __bss_start__, __bss_end__
+	ZERO_RAM __pbss_start__, __pbss_end__
 
 	/* IVPR */
-	E_LIW r0, __vectors_start__
+	E_LIW r0, __IVORs
 	mtivpr r0
 
 	/* IVORs */
@@ -66,6 +68,11 @@ __exit:
 	nop
 	e_b __exit
 
+	/* hijack newlib */
+	.global __eabi
+__eabi:
+	se_blr
+	
 	.type arch_init_mmu, %function
 	.global arch_init_mmu
 arch_init_mmu:
@@ -108,12 +115,12 @@ arch_init_ivors:
 	.section .vectors, "ax"
 
 	.macro IVOR name, handler
-	.align 4
+	.align 4 /* 16 bytes alignment (2^4) */
 \name:
 	e_b \handler
 	.endm
 
-	.align 4
+	.align 16 /* 64kbytes alignment (2^16) */
 	.global __IVORs
 __IVORs:
 	IVOR CriticalInput, CriticalInput_Handler
@@ -157,7 +164,17 @@ __IVORs:
 	def_irq_handler EFPRoundException_Handler
 	def_irq_handler PerformanceMonitorInterrupt_Handler
 
-	/* hijack newlib */
-	.global __eabi
-__eabi:
-	se_blr
+	.section .pstack, "w"
+	.altmacro
+
+	.macro LABEL l, n
+	.global \l\n
+\l\n :
+	.endm
+
+	.set i, 0
+	.rept CONFIG_CORE_COUNT
+	.fill 256, 4
+	LABEL __StackTop, %i
+	.set i, i+1
+	.endr

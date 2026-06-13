@@ -4,10 +4,6 @@
 #include <stdint.h>
 #include <generated/autoconf.h>
 
-#ifndef CONFIG_SMP_CORES
-# define CONFIG_SMP_CORES 1
-#endif
-
 struct INTC {
     volatile uint32_t MCR;
     uint32_t RESERVED0;
@@ -32,19 +28,18 @@ static struct INTC *INTC = (struct INTC*)ADDR_INTC;
 /* ASM */
 /*@external@*/ extern picoRTOS_core_t arch_core(void);
 
-/*@external@*/ extern unsigned long __intc_vectors_start__[];
-/*@external@*/ extern unsigned long ISR_TABLE_priv[DEVICE_INTERRUPT_VECTOR_COUNT];
+/*@external@*/ extern unsigned long ISR_TABLE_fn[];
+/*@external@*/ extern unsigned long ISR_TABLE_priv[];
 
 void arch_intc_init(void)
 {
-    /* reset intc */
-    size_t n = (size_t)CONFIG_SMP_CORES;
+    size_t n = (size_t)CONFIG_CORE_COUNT;
 
     INTC->MCR = 0;
 
     while (n-- != 0) {
         INTC->CPR[n] = 0;
-        INTC->IACKR[n] = (uint32_t)__intc_vectors_start__;
+        INTC->IACKR[n] = (uint32_t)ISR_TABLE_fn;
     }
 }
 
@@ -52,7 +47,7 @@ void arch_register_interrupt(picoRTOS_irq_t irq, arch_isr_fn fn, void *priv)
 {
     arch_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return );
 
-    __intc_vectors_start__[irq] = (unsigned long)fn;
+    ISR_TABLE_fn[irq] = (unsigned long)fn;
     ISR_TABLE_priv[irq] = (unsigned long)priv;
 }
 
@@ -78,25 +73,6 @@ void arch_disable_interrupt(picoRTOS_irq_t irq)
 
     /* disable by setting prio to 0 */
     INTC->PSR[irq] &= ~(uint8_t)PSR_PRC_PRIn(PSR_PRC_PRIn_M);
-}
-
-/* Beware:
- * These functions are called from the assembly only,
- * we need to setup the static analysis accordingly
- */
-
-/*@external@*/
-/* cppcheck-suppress [unusedFunction,unmatchedSuppression] */
-uint32_t arch_get_interrupt(void)
-{
-    return INTC->IACKR[arch_core()];
-}
-
-/*@external@*/
-/* cppcheck-suppress [unusedFunction,unmatchedSuppression] */
-void arch_ack_interrupt(void)
-{
-    INTC->EOIR[arch_core()] = 0;
 }
 
 /* SMP */
