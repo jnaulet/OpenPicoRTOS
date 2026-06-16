@@ -55,27 +55,21 @@ extern void arch_spin_unlock(void);
  */
 
 /**
- * void **arch_smp_enable_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>,
+ * void **arch_smp_register_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>,
+ * **arch_isr_fn** <ins>fn</ins>, **void** \*<ins>priv</ins>,
  * **picoRTOS_mask_t** <ins>core_mask</ins>);
- * > Enables interrupt <ins>irq</ins> on a specific set of cores, defined
- * > by <ins>core_mask</ins>.
+ * > Registers an interrupt on the system & attach it to the core(s)
+ * > matching the <ins>core_mask</ins>
  * ### NOTES
+ * > Make sure that when <ins>irq</ins> is asserted, <ins>fn</ins> is
+ * > called with <ins>priv</ins> as a parameter.
+ * >
  * > <ins>core_mask</ins> is a bitfield where every core has it own bit,
  * > for example, (1 << 0) for core0, (1 << 1) for core1, etc
  */
-extern /*@unused@*/ void arch_smp_enable_interrupt(picoRTOS_irq_t irq,
-                                                   picoRTOS_mask_t core_mask);
-
-/**
- * void **arch_smp_disable_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>,
- * **picoRTOS_mask_t** <ins>core_mask</ins>);
- * > Disables interrupt <ins>irq</ins> on a specific set of cores, defined
- * > by <ins>core_mask</ins>.
- * ### NOTES
- * > <ins>core_mask</ins> is a bitfield where every core has it own bit,
- * > for example, (1 << 0) for core0, (1 << 1) for core1, etc
- */
-extern /*@unused@*/ void arch_smp_disable_interrupt(picoRTOS_irq_t irq,
-                                                    picoRTOS_mask_t core_mask);
+extern /*@unused@*/ void arch_smp_register_interrupt(picoRTOS_irq_t irq,
+                                                     arch_isr_fn fn,
+                                                     /*@null@*/ void *priv,
+                                                     picoRTOS_mask_t core_mask);
 
 #endif

@@ -144,3 +144,18 @@ void picoRTOS_mpu_add_region(const void *addr, size_t n, unsigned mode)
 
     arch_syscall(SYSCALL_MPU, &mpu);
 }
+
+/**
+ * void **picoRTOS_set_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>, **bool** <ins>active</ins>);
+ * > Enables/disables an interrupt on the system according to the value of <ins>active</ins>
+ * ### NOTES
+ * > `picoRTOS_enable_interrupt(irq)` is the same as `picoRTOS_set_interrupt(irq, true)`
+ * >, and<br>
+ * > `picoRTOS_disable_interrupt(irq)` is the same as `picoRTOS_set_interrupt(irq, false)`
+ */
+void picoRTOS_set_interrupt(picoRTOS_irq_t irq, bool active)
+{
+    struct syscall_irqop op = { irq, active };
+
+    arch_syscall(SYSCALL_IRQOP, &op);
+}

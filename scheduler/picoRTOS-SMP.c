@@ -566,6 +566,16 @@ syscall_cacheop(/*@returned@*/ struct picoRTOS_task_core *task,
 }
 
 /*@exposed@*/ static struct picoRTOS_task_core *
+syscall_irqop(/*@returned@*/ struct picoRTOS_task_core *task,
+              const struct syscall_irqop *op)
+{
+    if (op->enable) arch_enable_interrupt(op->irq);
+    else arch_disable_interrupt(op->irq);
+    arch_spin_unlock();
+    return task;
+}
+
+/*@exposed@*/ static struct picoRTOS_task_core *
 syscall_mpu(/*@returned@*/ struct picoRTOS_task_core *task,
             const struct syscall_mpu *mpu)
 {
@@ -594,21 +604,22 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, syscall_t syscall, void
     picoRTOS_assert(sp < task->stack_top, return syscall_kill(task, FSTACKOVF)->sp);
     picoRTOS_assert(priv != NULL, return syscall_kill(task, FNULLPTR)->sp);
 
-    /* store current sp & flush */
+    /* store current sp */
     task->sp = sp;
 
     switch (syscall) {
-    /* OS-related syscalls */
-    case SYSCALL_RUN: return syscall_run(task, (bool*)priv)->sp;
-    case SYSCALL_GETTICK: return syscall_get_tick(task, (picoRTOS_tick_t*)priv)->sp;
-    case SYSCALL_CACHEOP: return syscall_cacheop(task, (struct syscall_cacheop*)priv)->sp;
     /* task-related syscalls */
+    case SYSCALL_SEGFAULT: return syscall_kill(task, FSEGFAULT)->sp;
     case SYSCALL_SLEEP:  return syscall_sleep(task, *(picoRTOS_tick_t*)priv)->sp;
     case SYSCALL_SLEEP_UNTIL: return syscall_sleep_until(task, (struct syscall_sleep_until*)priv)->sp;
     case SYSCALL_GETPID: return syscall_get_pid(task, (picoRTOS_pid_t*)priv)->sp;
     case SYSCALL_MPU: return syscall_mpu(task, (struct syscall_mpu*)priv)->sp;
     case SYSCALL_KILL: return syscall_kill(task, *(int*)priv)->sp;
-    case SYSCALL_SEGFAULT: return syscall_kill(task, FSEGFAULT)->sp;
+    /* OS-related syscalls */
+    case SYSCALL_RUN: return syscall_run(task, (bool*)priv)->sp;
+    case SYSCALL_GETTICK: return syscall_get_tick(task, (picoRTOS_tick_t*)priv)->sp;
+    case SYSCALL_CACHEOP: return syscall_cacheop(task, (struct syscall_cacheop*)priv)->sp;
+    case SYSCALL_IRQOP: return syscall_irqop(task, (struct syscall_irqop*)priv)->sp;
     default: break;
     }
 
@@ -628,7 +639,7 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
     picoRTOS_assert(sp >= task->stack_bottom, tick_fault(task, FSTACKOVF));
     picoRTOS_assert(sp < task->stack_top, tick_fault(task, FSTACKOVF));
 
-    /* store current sp & flush */
+    /* store current sp */
     task->sp = sp;
 
     /* mask task as immediately ready */
@@ -688,28 +699,19 @@ void picoRTOS_register_interrupt(picoRTOS_irq_t irq,
     arch_register_interrupt(irq, fn, priv);
 }
 
-void picoRTOS_set_interrupt(picoRTOS_irq_t irq, bool active)
+/**
+ * void **picoRTOS_SMP_register_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>,
+ * **picoRTOS_isr_fn** <ins>fn</ins>, **void** \*<ins>priv</ins>,
+ * **picoRTOS_mask_t** <ins>core_mask</ins>);
+ * > Registers an <ins>irq</ins> handler on a dedicated set of cores.<br>
+ * > On <ins>irq</ins>, the handler <ins>fn</ins> will be called with the param
+ * > <ins>priv</ins> on any core matching <ins>core_mask</ins>
+ */
+void picoRTOS_SMP_register_interrupt(picoRTOS_irq_t irq,
+                                     picoRTOS_isr_fn fn,
+                                     void *priv,
+                                     picoRTOS_mask_t core_mask)
 {
     /* supervisor only (no syscall needed) */
-    if (active) arch_enable_interrupt(irq);
-    else arch_disable_interrupt(irq);
-}
-
-/**
- * void **picoRTOS_SMP_set_interrupt**(**picoRTOS_irq_t** <u>irq</u>,
- * **picoRTOS_mask_t** <u>core_mask</u>, **bool** <u>active</u>);
- * > Enables/disables an interrupt on the system according to the value of <u>active</u>
- * ### NOTES
- * > This is the SMP variant of picoRTOS_set_interrupt, with an added <u>core_mask</u>
- * > for core attribution. Still experimental.
- */
-void picoRTOS_SMP_set_interrupt(picoRTOS_irq_t irq,
-                                picoRTOS_mask_t core_mask,
-                                bool active)
-{
-    picoRTOS_assert(core_mask != 0, return );
-    picoRTOS_assert(core_mask < (picoRTOS_mask_t)(1 << CONFIG_CORE_COUNT), return );
-
-    if (active) arch_smp_enable_interrupt(irq, core_mask);
-    else arch_smp_disable_interrupt(irq, core_mask);
+    arch_smp_register_interrupt(irq, fn, priv, core_mask);
 }

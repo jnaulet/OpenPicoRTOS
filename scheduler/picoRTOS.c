@@ -576,6 +576,15 @@ syscall_cacheop(/*@returned@*/ struct picoRTOS_task_core *task,
 }
 
 /*@exposed@*/ static struct picoRTOS_task_core *
+syscall_irqop(/*@returned@*/ struct picoRTOS_task_core *task,
+              const struct syscall_irqop *op)
+{
+    if (op->enable) arch_enable_interrupt(op->irq);
+    else arch_disable_interrupt(op->irq);
+    return task;
+}
+
+/*@exposed@*/ static struct picoRTOS_task_core *
 syscall_mpu(/*@returned@*/ struct picoRTOS_task_core *task,
             const struct syscall_mpu *mpu)
 {
@@ -596,17 +605,18 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, syscall_t syscall, void
     task->sp = sp;
 
     switch (syscall) {
-    /* OS-related syscalls */
-    case SYSCALL_RUN: return syscall_run(task, (bool*)priv)->sp;
-    case SYSCALL_GETTICK: return syscall_get_tick(task, (picoRTOS_tick_t*)priv)->sp;
-    case SYSCALL_CACHEOP: return syscall_cacheop(task, (struct syscall_cacheop*)priv)->sp;
     /* task-related syscalls */
+    case SYSCALL_SEGFAULT: return syscall_kill(task, FSEGFAULT)->sp;
     case SYSCALL_SLEEP:  return syscall_sleep(task, *(picoRTOS_tick_t*)priv)->sp;
     case SYSCALL_SLEEP_UNTIL: return syscall_sleep_until(task, (struct syscall_sleep_until*)priv)->sp;
     case SYSCALL_GETPID: return syscall_get_pid(task, (picoRTOS_pid_t*)priv)->sp;
     case SYSCALL_MPU: return syscall_mpu(task, (struct syscall_mpu*)priv)->sp;
     case SYSCALL_KILL: return syscall_kill(task, *(int*)priv)->sp;
-    case SYSCALL_SEGFAULT: return syscall_kill(task, FSEGFAULT)->sp;
+    /* OS-related syscalls */
+    case SYSCALL_RUN: return syscall_run(task, (bool*)priv)->sp;
+    case SYSCALL_GETTICK: return syscall_get_tick(task, (picoRTOS_tick_t*)priv)->sp;
+    case SYSCALL_CACHEOP: return syscall_cacheop(task, (struct syscall_cacheop*)priv)->sp;
+    case SYSCALL_IRQOP: return syscall_irqop(task, (struct syscall_irqop*)priv)->sp;
     default: break;
     }
 
@@ -667,7 +677,7 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
 /**
  * void **picoRTOS_register_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>,
  * **picoRTOS_isr_fn** <ins>fn</ins>, **void** \*<ins>priv</ins>);
- * > Registers an <ins>irq</ins> handler
+ * > Registers an <ins>irq</ins> handler.<br>
  * > On <ins>irq</ins>, the handler <ins>fn</ins> will be called with the param
  * > <ins>priv</ins>
  */
@@ -677,19 +687,4 @@ void picoRTOS_register_interrupt(picoRTOS_irq_t irq,
 {
     /* supervisor only (no syscall needed) */
     arch_register_interrupt(irq, fn, priv);
-}
-
-/**
- * void **picoRTOS_set_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>, **bool** <ins>active</ins>);
- * > Enables/disables an interrupt on the system according to the value of <ins>active</ins>
- * ### NOTES
- * > `picoRTOS_enable_interrupt(irq)` is the same as `picoRTOS_set_interrupt(irq, true)`
- * >, and<br>
- * > `picoRTOS_disable_interrupt(irq)` is the same as `picoRTOS_set_interrupt(irq, false)`
- */
-void picoRTOS_set_interrupt(picoRTOS_irq_t irq, bool active)
-{
-    /* supervisor only (no syscall needed) */
-    if (active) arch_enable_interrupt(irq);
-    else arch_disable_interrupt(irq);
 }

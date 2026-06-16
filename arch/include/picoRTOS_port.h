@@ -12,19 +12,25 @@
  */
 
 typedef enum {
-    /* OS-related */
-    SYSCALL_RUN         = 0,    /* W */
-    SYSCALL_GETTICK     = 1,    /* R */
-    SYSCALL_CACHEOP     = 2,    /* W */
     /* task-related */
-    SYSCALL_SLEEP       = 3,    /* W */
-    SYSCALL_SLEEP_UNTIL = 4,    /* RW */
-    SYSCALL_GETPID      = 5,    /* R */
-    SYSCALL_MPU         = 6,    /* W */
-    SYSCALL_KILL        = 7,    /* W */
-    SYSCALL_SEGFAULT    = 8,    /* W */
+    SYSCALL_SEGFAULT    = 0,    /* W */
+    SYSCALL_SLEEP       = 1,    /* W */
+    SYSCALL_SLEEP_UNTIL = 2,    /* RW */
+    SYSCALL_GETPID      = 3,    /* R */
+    SYSCALL_MPU         = 4,    /* W */
+    SYSCALL_KILL        = 5,    /* W */
+    /* OS-related */
+    SYSCALL_RUN         = 6,    /* W */
+    SYSCALL_GETTICK     = 7,    /* R */
+    SYSCALL_CACHEOP     = 8,    /* W */
+    SYSCALL_IRQOP       = 9,    /* W */
     SYSCALL_COUNT
 } syscall_t;
+
+struct syscall_irqop {
+    picoRTOS_irq_t irq;
+    bool enable;
+};
 
 struct syscall_cacheop {
     bool invalidate;
@@ -128,7 +134,7 @@ typedef void (*arch_isr_fn)(void*);             /* interrupt service routine */
 #endif
 
 /**§
- * ## Provided by port 
+ * ## Provided by port
  */
 
 /**
@@ -165,7 +171,7 @@ extern void arch_resume(void);
  * **void** \*<ins>priv</ins>);
  * > Prepares a task's stack for context restoration.
  * ### NOTES
- * > This function is used by `picoRTOS_add_task()` to prepare the stack 
+ * > This function is used by `picoRTOS_add_task()` to prepare the stack
  * > for context restoration.<br>
  * > The return stack structure must match your `RESTORE_CONTEXT` procedure
  * > (see <<ins>picoRTOS_portasm.S</ins>> for more information).
@@ -181,7 +187,7 @@ picoRTOS_stack_t *arch_prepare_stack(/*@returned@*/ picoRTOS_stack_t *stack,
 
 /**
  * void **arch_start_first_stack**(**picoRTOS_stack_t** \*<ins>sp</ins>);
- * > Starts the first task on the system (usually *idle*) and 
+ * > Starts the first task on the system (usually *idle*) and
  * > bootstraps the scheduler.
  * ### NOTES
  * > This function is called by `picoRTOS_start()` and will restore
@@ -195,8 +201,8 @@ extern /*@noreturn@*/ void arch_start_first_task(picoRTOS_stack_t *sp);
  * void **arch_syscall**(**syscall_t** syscall, **void** \*<ins>priv</ins>);
  * > Port syscall function
  * ### NOTES
- * > Every [UNPRIVILEGED API](UNPRIVILEGED_API.md) call found in 
- * > <<ins>picoRTOS_u.c</ins>> will trigger a syscall to hand things 
+ * > Every [UNPRIVILEGED API](UNPRIVILEGED_API.md) call found in
+ * > <<ins>picoRTOS_u.c</ins>> will trigger a syscall to hand things
  * > over to the kernel.
  * >
  * > On memory-protected systems, this call **SHOULD** trigger a
