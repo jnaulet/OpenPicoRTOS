@@ -274,16 +274,11 @@ void arch_spin_unlock(void)
 
 /* INTERRUPT MANAGEMENT */
 
-void arch_smp_enable_interrupt(/*@unused@*/ picoRTOS_irq_t irq __attribute__((unused)),
-                               /*@unused@*/ picoRTOS_mask_t core_mask __attribute__((unused)))
+void arch_smp_register_interrupt(picoRTOS_irq_t irq, arch_isr_fn fn, void *priv,
+                                 picoRTOS_mask_t core_mask)
 {
-    /* unsupported on RP2040 */
-    arch_break();
-}
+    /*@i@*/ (void)core_mask;
 
-void arch_smp_disable_interrupt(/*@unused@*/ picoRTOS_irq_t irq __attribute__((unused)),
-                                /*@unused@*/ picoRTOS_mask_t core_mask __attribute__((unused)))
-{
-    /* unsupported on RP2040 */
-    arch_break();
+    arch_break(); /* signal it's not working as it's uspposed to */
+    arch_register_interrupt(irq, fn, priv);
 }
