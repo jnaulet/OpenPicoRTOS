@@ -63,17 +63,17 @@ void arch_timer_init(int period)
 
     /* STMA source clock is FM_PER_DIV, extract divider */
     size_t fmperdiv = (size_t)(SYSDIV_FMPERDIV_M & (*SYSDIV >> SYSDIV_FMPERDIV_S)) + 1;
+
     timer_stm_period = (uint32_t)period >> fmperdiv;
 
     /* enable STMA */
     STMA->CH[0].CMPn = (uint32_t)timer_stm_period;
     STMA->CH[0].CCRn = (uint32_t)CCRn_CEN;
-    /* register interrupt */
+    /* register interrupt on all cores */
     arch_register_interrupt((picoRTOS_irq_t)IRQ_STM_CIR0,
                             (arch_isr_fn)Timer_Handler, NULL);
     /* enable */
-    arch_smp_enable_interrupt((picoRTOS_irq_t)IRQ_STM_CIR0,
-                              (picoRTOS_mask_t)(1 << CONFIG_CORE_COUNT) - 1);
+    arch_enable_interrupt((picoRTOS_irq_t)IRQ_STM_CIR0);
 }
 
 void arch_timer_start(void)
