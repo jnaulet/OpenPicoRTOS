@@ -5,10 +5,10 @@ on POSIX & Linux.
 
 These basic tasks sync mechanisms are listed here:
 
-1. [Futexes](#futexes)
-1. [Mutexes](#mutexes)
-1. [Conditions](#conditions)
-1. [Queues](#queues)
+   1. [Futexes](#futexes)
+   1. [Mutexes](#mutexes)
+   1. [Conditions](#conditions)
+   1. [Queues](#queues)
 
 ## Futexes
 

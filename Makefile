@@ -318,6 +318,8 @@ docs: FORCE
 	$(MKDOCS) etc/UNPRIVILEGED_API.template.md > docs/UNPRIVILEGED_API.md
 	$(MKDOCS) etc/IPCs_API.template.md > docs/IPCs_API.md
 	$(MKDOCS) etc/PORT_API.template.md > docs/PORT_API.md
+	$(MKDOCS) etc/MEMORY_MAP.template.md > docs/MEMORY_MAP.md
+	$(MKDOCS) etc/HAL_API.template.md > docs/HAL_API.md
 
 cloc: FORCE
 	cloc scheduler/picoRTOS.c

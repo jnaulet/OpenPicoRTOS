@@ -6,8 +6,8 @@ This API can be called anytime up until `picoRTOS_start()`.
 On memory-protected systems, picoRTOS enforces the privileged/unprivileged model
 and will kill any tasks trying to access these resources directly.
 
-1. [picoRTOS & lite](#single-core)
-1. [picoRTOS-SMP extensions](#multi-core-smp-extensions)
+ 1. [picoRTOS & lite](#single-core)
+ 1. [picoRTOS-SMP extensions](#multi-core-smp-extensions)
 
 ## Single core
 
@@ -19,8 +19,8 @@ void **picoRTOS_init**(void);
 ### NOTES
 > This is the first function you need to call to be able to run picoRTOS.
 > It will:
->> - partition the memory (on mpu-supported systems)
->> - init the idle task
+> - partition the memory (on mpu-supported systems)
+> - init the idle task
 
 ---
 void **picoRTOS_task_init**(**struct picoRTOS_task** \*<ins>task</ins>,
@@ -104,7 +104,7 @@ void **picoRTOS_register_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>,
 > <ins>priv</ins>
 
 
-## Muilti core SMP extensions
+## Multi core SMP extensions
 
 This extended API is provided by picoRTOS-SMP
 

@@ -221,8 +221,8 @@ static void task_idle_init(void)
  * ### NOTES
  * > This is the first function you need to call to be able to run picoRTOS.
  * > It will:
- * >> - partition the memory (on mpu-supported systems)
- * >> - init the idle task
+ * > - partition the memory (on mpu-supported systems)
+ * > - init the idle task
  */
 void picoRTOS_init(void)
 {

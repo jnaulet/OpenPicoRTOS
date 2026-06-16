@@ -3,11 +3,12 @@
 
 #include "adc.h"
 
-/* Function: adc_claim
- * Claims the adc for this process/thread (opt. MPU-related feature)
- *
- * Parameters:
- *  adc - A adc instance
+/**
+ * struct adc \***adc_claim**(**struct adc** \*<ins>ctx</ins>);
+ * > Claims the adc channel <ins>ctx</ins> & its dependencies
+ * ### NOTES
+ * > This feature is related to MPU & will only have an effect if
+ * > `CONFIG_MPU` is active.
  */
 struct adc *adc_claim(/*@returned@*/ struct adc *ctx);
 

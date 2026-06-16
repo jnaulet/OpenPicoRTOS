@@ -18,24 +18,89 @@
 # endif
 #endif
 
-/* Macro: PRIVILEGED_DATA
- * Put the following data in the privileged/kernel section
+/**
+ * **PRIVILEGED_TEXT**
+ * > Puts the following code in the kernel privileged section `.ptext`
+ * ### NOTES
+ * > If `CONFIG_MPU`, this section is only accessible through privilege
+ * > escalation & no task can access & fetch instructions (SEGFAULT)<br>
+ * > This is where the kernel code sits & you **SHOULDN'T** put
+ * > anything here
+ */
+#define PRIVILEGED_TEXT    __attribute__((section(".ptext")))
+
+/**
+ * **UNPRIVILEGED_TEXT**
+ * > Puts the following code in the unprivileged section `.utext`
+ * ### NOTES
+ * > If `CONFIG_MPU`, this section is accessible to everyoneto read or fetch
+ * > instructions.<br>
+ * > If you want better code protection, you **SHOULD** use custom sections
+ * > & add them through `picoRTOS_mpu_add_region()`
+ */
+#define UNPRIVILEGED_TEXT  __attribute__((section(".utext")))
+
+/**
+ * **PRIVILEGED_DATA**
+ * > Puts the following data in the kernel privileged section `.pdata`
+ * ### NOTES
+ * > If `CONFIG_MPU`, this section is only accessible through privilege
+ * > escalation & no task can access it (SEGFAULT)
  */
 #define PRIVILEGED_DATA   __attribute__((section(".pdata")))
-/* Macro: UNPRIVILEGED_DATA
- * Put the following daa in the unprivileged/shared section
- * Typical use:
- * (start code)
- * static struct picoRTOS_mutex UNPRIVILEGED_DATA mutex = PICORTOS_MUTEX_INITIALIZER;
- * static struct picoRTOS_cond UNPRIVILEGED_DATA cond = PICORTOS_COND_INITIALIZER;
- * (end)
+
+/**
+ * **UNPRIVILEGED_DATA**
+ * > Put the following data in the unprivileged section `.udata`
+ * > ###NOTES
+ * > Typical use:
+ * ```c
+ *     static struct picoRTOS_mutex UNPRIVILEGED_DATA mutex = PICORTOS_MUTEX_INITIALIZER;
+ *     static struct picoRTOS_cond UNPRIVILEGED_DATA cond = PICORTOS_COND_INITIALIZER;
+ * ```
+ * > If `CONFIG_MPU`, this section is accessible to any task, regardless of
+ * > privileges. This **SHOULD** be of very limited use (IPCs, typically)
  */
 #define UNPRIVILEGED_DATA  __attribute__((section(".udata")))
+
+/**
+ * **PRIVILEGED_STACK**
+ * > Put the following data in the privileged data section `.pstack`
+ * ### NOTES
+ * > You **SHOULDN'T** use this section, it is reserved for internal kernel
+ * > use (main stacks for single-core & SMP).
+ */
 #define PRIVILEGED_STACK   __attribute__((section(".pstack")))
+
+/**
+ * **UNPRIVILEGED_STACK**
+ * > Put the following data in the unprivileged data section `.ustack`
+ * ### NOTES
+ * > You **SHOULDN'T** use this section, it is reserved for internal kernel
+ * > use (idle stacks)
+ */
 #define UNPRIVILEGED_STACK __attribute__((section(".ustack")))
+
+/**
+ * **PRIVILEGED_BSS**
+ * > Put the following data in the privileged data section `.pbss`
+ * ### NOTES
+ * > You **SHOULDN'T** use this section, it is reserved for internal kernel
+ * > use (main stacks for single-core & SMP).
+ */
 #define PRIVILEGED_BSS     __attribute__((section(".pbss")))
-#define UNPRIVILEGED_BSS   __attribute__((section(".ubss")))
-#define PRIVILEGED_TEXT    __attribute__((section(".ptext")))
-#define UNPRIVILEGED_TEXT  __attribute__((section(".utext")))
+
+/**
+ * **UNPRIVILEGED_BSS**
+ * > Put the following data in the unprivileged bss section `.bss`
+ * ### NOTES
+ * > This section is ignored by picoRTOS & any access without prior
+ * > use of `picoRTOS_mpu_add_region()` will lead to a SEGFAULT.
+ * >
+ * > A notable exception are the tasks' stacks, who sit there but
+ * > are made R/W accessible to their owners automatically after
+ * > `picoRTOS_start()`
+ */
+#define UNPRIVILEGED_BSS   __attribute__((section(".bss")))
 
 #endif
