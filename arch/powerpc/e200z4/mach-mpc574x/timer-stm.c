@@ -1,9 +1,5 @@
 #include "picoRTOS_device.h"
-
 #include "picoRTOS_port.h"
-#ifdef CONFIG_SMP
-# include "picoRTOS-SMP_port.h"
-#endif
 
 #include <stdint.h>
 #include <generated/autoconf.h>
@@ -30,9 +26,6 @@ struct STM {
 
 #define CCRn_CEN (1 << 0)
 #define CIRn_CIF (1 << 0)
-
-/* ASM */
-/*@external@*/ extern picoRTOS_core_t arch_core(void);
 
 /* instance */
 static struct STM *STM0 = (struct STM*)ADDR_STM0;
@@ -72,12 +65,8 @@ void arch_timer_init(int period)
 
     /* register interrupt */
     arch_register_interrupt((picoRTOS_irq_t)IRQ_STM0_CIR0, (arch_isr_fn)Timer_Handler, NULL);
-#ifndef CONFIG_SMP
     arch_enable_interrupt((picoRTOS_irq_t)IRQ_STM0_CIR0);
-#else
-    arch_smp_enable_interrupt((picoRTOS_irq_t)IRQ_STM0_CIR0,
-                              (picoRTOS_mask_t)(1 << CONFIG_CORE_COUNT) - 1);
-#endif
+    /* mpu */
     arch_mpu_add_region(PID_KERNEL, STM0, sizeof(*STM0), MM_PRW | MM_NON_CACHEABLE);
 }
 

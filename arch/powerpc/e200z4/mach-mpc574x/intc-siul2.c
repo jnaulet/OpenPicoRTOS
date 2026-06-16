@@ -1,6 +1,10 @@
 #include "picoRTOS_device.h"
 #include "picoRTOS_port.h"
 
+#ifdef CONFIG_SMP
+# include "picoRTOS-SMP_port.h"
+#endif
+
 #include <stdint.h>
 #include <generated/autoconf.h>
 
@@ -36,6 +40,9 @@ static struct INTC *INTC = (struct INTC*)ADDR_INTC;
 /*@external@*/ extern unsigned long ISR_TABLE_fn[];
 /*@external@*/ extern unsigned long ISR_TABLE_priv[];
 
+/* SMP */
+static picoRTOS_mask_t ISR_TABLE_mask[DEVICE_INTERRUPT_VECTOR_COUNT];
+
 void arch_intc_init(void)
 {
     size_t n = (size_t)CONFIG_CORE_COUNT;
@@ -48,42 +55,30 @@ void arch_intc_init(void)
     }
 
     /* mpu */
-    arch_mpu_add_region(PID_KERNEL, INTC, sizeof(*INTC), MM_PRW | MM_NON_CACHEABLE);
+    arch_mpu_add_region(PID_KERNEL, INTC, sizeof(*INTC),
+                        MM_PRW | MM_NON_CACHEABLE);
+}
+
+#ifndef CONFIG_SMP
+static /* FIXME */
+#endif
+void arch_smp_register_interrupt(picoRTOS_irq_t irq, arch_isr_fn fn, /*@null@*/ void *priv,
+                                 picoRTOS_mask_t core_mask)
+{
+    arch_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return );
+    arch_assert(core_mask > 0, return );
+    arch_assert(core_mask < (picoRTOS_mask_t)(1 << CONFIG_CORE_COUNT), return );
+
+    ISR_TABLE_fn[irq] = (unsigned long)fn;
+    ISR_TABLE_priv[irq] = (unsigned long)priv;
+    ISR_TABLE_mask[irq] = core_mask;
 }
 
 void arch_register_interrupt(picoRTOS_irq_t irq, arch_isr_fn fn, void *priv)
 {
     arch_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return );
-
-    ISR_TABLE_fn[irq] = (unsigned long)fn;
-    ISR_TABLE_priv[irq] = (unsigned long)priv;
+    arch_smp_register_interrupt(irq, fn, priv, (picoRTOS_mask_t)(1 << CONFIG_CORE_COUNT) - 1);
 }
-
-void arch_enable_interrupt(picoRTOS_irq_t irq)
-{
-    arch_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return );
-
-    /* only support for priority 1 yet */
-    int prc_sel = 0x8000 >> arch_core();
-
-    INTC->PSR[irq] = (uint16_t)(prc_sel | PSR_PRIN(1));
-}
-
-
-void arch_disable_interrupt(picoRTOS_irq_t irq)
-{
-    arch_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return );
-
-    /* de-select core */
-    int prc_sel = 0x8000 >> arch_core();
-
-    INTC->PSR[irq] &= ~(uint16_t)prc_sel;
-}
-
-/* SMP */
-
-#ifdef CONFIG_SMP
-#include "picoRTOS-SMP_port.h"
 
 static uint16_t prc_sel_from_mask(picoRTOS_mask_t core_mask)
 {
@@ -98,23 +93,21 @@ static uint16_t prc_sel_from_mask(picoRTOS_mask_t core_mask)
     return prc_sel;
 }
 
-void arch_smp_enable_interrupt(picoRTOS_irq_t irq,
-                               picoRTOS_mask_t core_mask)
+void arch_enable_interrupt(picoRTOS_irq_t irq)
 {
     arch_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT,  return );
-    arch_assert(core_mask != 0, return );
+    arch_assert(ISR_TABLE_mask[irq] != 0, return );
 
     /* force to prio 1 */
-    INTC->PSR[irq] = prc_sel_from_mask(core_mask) | (uint16_t)PSR_PRIN(1);
+    INTC->PSR[irq] = prc_sel_from_mask(ISR_TABLE_mask[irq]) |
+                     (uint16_t)PSR_PRIN(1);
 }
 
-void arch_smp_disable_interrupt(picoRTOS_irq_t irq,
-                                picoRTOS_mask_t core_mask)
+void arch_disable_interrupt(picoRTOS_irq_t irq)
 {
     arch_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT,  return );
-    arch_assert(core_mask != 0, return );
+    arch_assert(ISR_TABLE_mask[irq] != 0, return );
 
     /* de-select core(s) */
-    INTC->PSR[irq] &= ~prc_sel_from_mask(core_mask);
+    INTC->PSR[irq] &= ~prc_sel_from_mask(ISR_TABLE_mask[irq]);
 }
-#endif

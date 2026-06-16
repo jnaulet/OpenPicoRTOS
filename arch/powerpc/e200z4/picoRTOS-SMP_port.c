@@ -37,6 +37,7 @@ void arch_core_init(picoRTOS_core_t core, picoRTOS_stack_t *sp)
 
     /* prepare core1 main stack */
     picoRTOS_stack_t *stack = __StackTop[core] - 2; /* lr + backchain */
+
     *--stack = (picoRTOS_stack_t)sp;
 
     arch_aux_core_reset_status();   /* reset state machine */

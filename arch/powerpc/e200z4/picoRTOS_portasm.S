@@ -172,7 +172,7 @@ InstructionStorage_Handler:
 	e_li r5, 1	/* FIXME */
 .segfault:
 	mfsprg r3, 0
-	e_li r4, 8	/* SEGFAULT (FIXME) */
+	e_li r4, 0	/* SEGFAULT (FIXME) */
 	e_bl picoRTOS_syscall
 	RESTORE_CONTEXT
 	se_rfi
