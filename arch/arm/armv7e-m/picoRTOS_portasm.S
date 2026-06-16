@@ -111,7 +111,7 @@ BusFault_Handler:
 	ldr r1, =SCB_CFSR	/* clear fault (FIXME) */
 	mov r2, #(0xffu << 8)
 	str r2, [r1]
-	mov r1, #8		/* SEGFAULT (FIXME) */
+	mov r1, #0		/* SEGFAULT (FIXME) */
 	ldr r2, =SCB_BFAR	/* provide fault addr reg */
 	bl picoRTOS_syscall
 	RESTORE_CONTEXT r0
@@ -124,7 +124,7 @@ MemManage_Handler:
 	ldr r1, =SCB_CFSR	/* clear fault (FIXME) */
 	mov r2, #(0xffu << 0)
 	str r2, [r1]
-	mov r1, #8		/* SEGFAULT (FIXME) */
+	mov r1, #0		/* SEGFAULT (FIXME) */
 	ldr r2, =MPU_MMFAR	/* provide fault addr reg */
 	bl picoRTOS_syscall
 	RESTORE_CONTEXT r0
