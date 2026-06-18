@@ -1,7 +1,7 @@
 #ifndef UART_ATSAMX7X_USART_H
 #define UART_ATSAMX7X_USART_H
 
-#include "uart.h"
+#include "uart+safety.h"
 #include "clock.h"
 
 struct UART_ATSAMX7X_USART;
@@ -30,6 +30,7 @@ int uart_atsamx7x_usart_set_usclks(struct uart *ctx, uart_atsamx7x_usart_usclks_
  * int uart_setup(struct uart *ctx, const struct uart_settings *settings);
  * int uart_write(struct uart *ctx, const char *buf, size_t n);
  * int uart_read(struct uart *ctx, char *buf, size_t n);
+ * struct uart *uart_claim(struct uart *ctx);
  */
 
 #endif

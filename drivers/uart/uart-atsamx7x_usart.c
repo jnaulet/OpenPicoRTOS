@@ -1,5 +1,7 @@
 #include "uart-atsamx7x_usart.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 #include <stdint.h>
 
@@ -289,4 +291,11 @@ int uart_read(struct uart *ctx, char *buf, size_t n)
         return -EAGAIN;
 
     return recv;
+}
+
+struct uart *uart_claim(struct uart *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->base, sizeof(*ctx->base),
+                            MM_URW | MM_NON_CACHEABLE);
+    return ctx;
 }

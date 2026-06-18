@@ -350,3 +350,12 @@ int flash_ext_unlock(struct flash_ext *ctx, size_t offset)
 
     return res;
 }
+
+/*
+ * FIXME: debatable
+ */
+struct flash_ext *flash_ext_claim(struct flash_ext *ctx)
+{
+    (void)spi_claim(ctx->spi);
+    return ctx;
+}

@@ -1,7 +1,7 @@
 #ifndef FLASH_EXT_S25FL1_H
 #define FLASH_EXT_S25FL1_H
 
-#include "flash-ext.h"
+#include "flash-ext+safety.h"
 #include "spi.h"
 
 #include <stdint.h>
@@ -28,6 +28,7 @@ int flash_ext_s25fl1_quad_enable(struct flash_ext *ctx, bool enable);
  * int flash_ext_write(struct flash_ext *ctx, size_t addr, const void *data, size_t n);
  * int flash_ext_lock(struct flash_ext *ctx, size_t offset);
  * int flash_ext_unlock(struct flash_ext *ctx, size_t offset);
+ * struct flash_ext *flash_ext_claim(struct flash_ext *ctx);
  */
 
 #endif
