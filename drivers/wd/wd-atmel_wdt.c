@@ -1,5 +1,7 @@
 #include "wd-atmel_wdt.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 #include <stdint.h>
 
@@ -93,4 +95,11 @@ int wd_stop(struct wd *ctx)
 void wd_refresh(struct wd *ctx)
 {
     ctx->base->WDT_CR = (uint32_t)(WDT_CR_KEY(0xa5) | WDT_CR_WDRSTT);
+}
+
+struct wd *wd_claim(struct wd *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->base, sizeof(*ctx->base),
+                            MM_URW | MM_NON_CACHEABLE);
+    return ctx;
 }

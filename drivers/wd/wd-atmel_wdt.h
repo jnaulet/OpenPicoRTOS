@@ -1,7 +1,7 @@
 #ifndef WD_ATMEL_WDT_H
 #define WD_ATMEL_WDT_H
 
-#include "wd.h"
+#include "wd+safety.h"
 #include "clock.h"
 
 struct WD_ATMEL_WDT;
@@ -22,6 +22,7 @@ int wd_atmel_wdt_setup(struct wd *ctx, const struct wd_atmel_wdt_settings *setti
  * int wd_start(struct wd *ctx);
  * int wd_stop(struct wd *ctx);
  * void wd_refresh(struct wd *ctx);
+ * struct wd *wd_claim(struct wd *ctx);
  */
 
 #endif
