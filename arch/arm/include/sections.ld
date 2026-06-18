@@ -20,7 +20,7 @@ SECTIONS
                 KEEP(*(.fini))
                 KEEP(*(.eh_frame*))
 
-		. = ALIGN(4096);
+		. = ALIGN(32);
 		__init_end__ = .;
 	}
 
@@ -31,6 +31,7 @@ SECTIONS
 	.text : AT(__einit)
 	{
 		__text_start__ = .;
+		. = ALIGN(1 << LOG2CEIL(__ptext_len__));
 		__ptext_start__ = .;
 		*picoRTOS.o (.text)
 		*picoRTOS_port.o (.text)
@@ -51,7 +52,11 @@ SECTIONS
 
 		. = ALIGN(4096);
 		__runtime_vectors_end__ = .;
+
+		. = ALIGN(1 << LOG2CEIL(__ptext_len__));
 		__ptext_end__ = .;
+		
+		. = ALIGN(1 << LOG2CEIL(__utext_len__));
 		__utext_start__ = .;
 		*(.text*)
 
@@ -63,7 +68,7 @@ SECTIONS
 		. = ALIGN(4);
 		KEEP(*(.rodata*))
 
-		. = ALIGN(4096);
+		. = ALIGN(1 << LOG2CEIL(__utext_len__));
 		__utext_end__ = .;
 		__text_end__ = .;
 	} > REGION_TEXT
@@ -76,6 +81,7 @@ SECTIONS
 	.data : AT(__etext)
 	{
                 __data_start__ = .;
+		. = ALIGN(1 << LOG2CEIL(__pdata_len__));
 		__pdata_start__ = .;
 		*picoRTOS.o (.data)
 		*picoRTOS_port.o (.data)
@@ -89,14 +95,14 @@ SECTIONS
 
 		*(.pdata)
 
-		. = ALIGN(128);
+		. = ALIGN(4);
 		/* join pdata & pbss to save 1 mpu entry
 		 * FIXME: very inefficient at startup */
 		__pbss_start__ = .;
 		__pstack_start__ = .;
 		*(.pstack)
 
-		. = ALIGN(128);
+		. = ALIGN(4);
 		__pstack_end__ = .;
 		*picoRTOS.o (.bss)
 		*picoRTOS_port.o (.bss)
@@ -110,18 +116,19 @@ SECTIONS
 
 		*(.pbss)
 
-		. = ALIGN(4096);
+		. = ALIGN(4);
 		__pbss_end__ = .;
+		. = ALIGN(1 << LOG2CEIL(__pdata_len__));
 		__pdata_end__ = .;
 		KEEP(*(.init_array))
 		KEEP(*(.fini_array))
                 KEEP(*(.data*))
 
-                . = ALIGN(4096);
+		. = ALIGN(1 << LOG2CEIL(__udata_len__));
 		__udata_start__ = .;
 		KEEP(*(.udata*))
-		
-		. = ALIGN(4096);
+
+		. = ALIGN(1 << LOG2CEIL(__udata_len__));
 		__udata_end__ = .;
                 __data_end__ = .;
 	}
@@ -133,13 +140,12 @@ SECTIONS
 	.bss :
 	{
 		__bss_start__ = .;
-		. = ALIGN(512);
+		. = ALIGN(256);
 		*(.ustack)
 		
                 *(.bss*)
                 *(COMMON)
 
-		. = ALIGN(128);
 		__bss_end__ = .;
 	}
 
