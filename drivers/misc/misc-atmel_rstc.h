@@ -22,5 +22,7 @@ typedef enum {
 
 int atmel_rstc_reset(struct atmel_rstc *ctx);
 int atmel_rstc_get_rsttyp(struct atmel_rstc *ctx, /*@out@*/ atmel_rstc_rsttyp_t *rsttyp);
+struct atmel_rstc *atmel_rstc_claim(/*@returned@*/ struct atmel_rstc *ctx);
 
 #endif
+

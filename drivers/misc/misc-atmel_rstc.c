@@ -1,4 +1,8 @@
 #include "misc-atmel_rstc.h"
+
+#include "picoRTOS.h"
+#include "picoRTOS_port.h"
+
 #include <stdint.h>
 
 struct ATMEL_RSTC {
@@ -45,4 +49,11 @@ int atmel_rstc_get_rsttyp(struct atmel_rstc *ctx, atmel_rstc_rsttyp_t *rsttyp)
     *rsttyp = (atmel_rstc_rsttyp_t)((ctx->base->RSTC_SR >> RSTC_SR_RSTTYPE_S) &
                                     RSTC_SR_RSTTYPE_M);
     return 0;
+}
+
+struct atmel_rstc *atmel_rstc_claim(struct atmel_rstc *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->base, sizeof(*ctx->base),
+                            MM_URW | MM_NON_CACHEABLE);
+    return ctx;
 }
