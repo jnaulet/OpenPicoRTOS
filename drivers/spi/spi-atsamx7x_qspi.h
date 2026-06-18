@@ -1,7 +1,7 @@
 #ifndef SPI_ATSAMX7X_QPI_H
 #define SPI_ATSAMX7X_QPI_H
 
-#include "spi.h"
+#include "spi+safety.h"
 #include "clock.h"
 
 #include <stdint.h>
@@ -30,10 +30,12 @@ struct spi_atsamx7x_qspi_smm_settings {
 };
 
 int spi_atsamx7x_qspi_smm(struct spi *ctx, const struct spi_atsamx7x_qspi_smm_settings *settings);
+int spi_atsamx7x_qspi_reset(struct spi *ctx);
 
 /* Runtime calls:
  * int spi_setup(struct spi *ctx, const struct spi_settings *settings);
  * int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n);
+ * struct spi *spi_claim(struct spi *ctx);
  */
 
 #endif

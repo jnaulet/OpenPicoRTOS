@@ -143,6 +143,26 @@ int spi_atsamx7x_qspi_smm(struct spi *ctx, const struct spi_atsamx7x_qspi_smm_se
     return 0;
 }
 
+int spi_atsamx7x_qspi_reset(struct spi *ctx)
+{
+    int deadlock = CONFIG_DEADLOCK_COUNT;
+
+    /* reset and enable */
+    ctx->base->QSPI_CR = (uint32_t)QSPI_CR_SWRST;
+    ctx->base->QSPI_CR = (uint32_t)QSPI_CR_QSPIEN;
+
+    while ((ctx->base->QSPI_SR & QSPI_SR_QSPIENS) == 0 &&
+           deadlock-- != 0) arch_delay_us(10ul);
+
+    picoRTOS_assert(deadlock != -1, return -EBUSY);
+
+    /* wait data read before transfer */
+    ctx->base->QSPI_MR = (uint32_t)(QSPI_MR_WDRBT |
+                                    QSPI_MR_CSMODE(1)); /* LASTXFER */
+
+    return 0;
+}
+
 static int set_bitrate(struct spi *ctx, unsigned long bitrate)
 {
     picoRTOS_assert(bitrate > 0, return -EINVAL);
@@ -310,4 +330,11 @@ int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n)
         return -EAGAIN;
 
     return (int)recv;
+}
+
+struct spi *spi_claim(struct spi *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->base, sizeof(*ctx->base),
+                            MM_URW | MM_NON_CACHEABLE);
+    return ctx;
 }
