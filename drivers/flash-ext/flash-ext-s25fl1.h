@@ -1,19 +1,28 @@
 #ifndef FLASH_EXT_S25FL1_H
 #define FLASH_EXT_S25FL1_H
 
-#include "flash-ext+safety.h"
+#include "flash-ext.h"
 #include "spi.h"
 
 #include <stdint.h>
 #include <stdbool.h>
 
+#define FLASH_EXT_S25FL1_RD_LEN 256
+#define FLASH_EXT_S25FL1_PP_LEN 256
+
 struct flash_ext {
     /*@temp@*/ struct spi *spi;
-    uint8_t jedec[3];
+    uint8_t jedec[4];
     struct flash_attributes attr;
     /* spi xfers */
     size_t left;
     int seq;
+    /* quad */
+    uint8_t rsr[2];
+    uint8_t wsr[4];
+    /* read/write */
+    uint8_t rd[FLASH_EXT_S25FL1_RD_LEN + 4];
+    uint8_t pp[FLASH_EXT_S25FL1_PP_LEN + 4];
 };
 
 int flash_ext_s25fl1_init(/*@out@*/ struct flash_ext *ctx, struct spi *spi);
@@ -28,7 +37,6 @@ int flash_ext_s25fl1_quad_enable(struct flash_ext *ctx, bool enable);
  * int flash_ext_write(struct flash_ext *ctx, size_t addr, const void *data, size_t n);
  * int flash_ext_lock(struct flash_ext *ctx, size_t offset);
  * int flash_ext_unlock(struct flash_ext *ctx, size_t offset);
- * struct flash_ext *flash_ext_claim(struct flash_ext *ctx);
  */
 
 #endif

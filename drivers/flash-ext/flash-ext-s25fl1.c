@@ -65,7 +65,7 @@ int flash_ext_s25fl1_reset(struct flash_ext *ctx)
         switch (ctx->seq) {
         case 0: res = run_single(ctx, (uint8_t)S25FL1_RSTEN); break;
         case 1: res = run_single(ctx, (uint8_t)S25FL1_RST); break;
-        case 2: arch_delay_us(2ul); /* TRST */ /*@fallthrough@*/
+        case 2: /* TRST */ /*@fallthrough@*/
         default: ctx->seq = 0; return 0;
         }
 
@@ -84,45 +84,42 @@ int flash_ext_s25fl1_quad_enable(struct flash_ext *ctx, bool enable)
 #define S25FL1_RSR2_QE (1 << 1)
 
     /* this is a damn long sequence */
-    static uint8_t rsr[2] = { 0, 0 };
-    static uint8_t wsr[4] = { (uint8_t)S25FL1_WSR, 0, 0, 0 };
-
     int res = 0;
 
     for (;;) {
         switch (ctx->seq) {
         case 0:
-            rsr[0] = (uint8_t)S25FL1_RSR1;
-            res = run_cmd(ctx, rsr, sizeof(rsr));
+            ctx->rsr[0] = (uint8_t)S25FL1_RSR1;
+            res = run_cmd(ctx, ctx->rsr, sizeof(ctx->rsr));
             break;
 
         case 1:
-            wsr[1] = rsr[1]; /* store prev result */
-            rsr[0] = (uint8_t)S25FL1_RSR2;
-            res = run_cmd(ctx, rsr, sizeof(rsr));
+            ctx->wsr[1] = ctx->rsr[1]; /* store prev result */
+            ctx->rsr[0] = (uint8_t)S25FL1_RSR2;
+            res = run_cmd(ctx, ctx->rsr, sizeof(ctx->rsr));
             break;
 
         case 2:
-            if (enable) wsr[2] = rsr[1] | S25FL1_RSR2_QE;
-            else wsr[2] = rsr[1] & ~S25FL1_RSR2_QE;
-            if (wsr[2] == rsr[1]) {
+            if (enable) ctx->wsr[2] = ctx->rsr[1] | S25FL1_RSR2_QE;
+            else ctx->wsr[2] = ctx->rsr[1] & ~S25FL1_RSR2_QE;
+            if (ctx->wsr[2] == ctx->rsr[1]) {
                 /* aready in QE */
                 ctx->seq = 0;
                 return 0;
             }
             /* next step */
-            rsr[0] = (uint8_t)S25FL1_RSR3;
-            res = run_cmd(ctx, rsr, sizeof(rsr));
+            ctx->rsr[0] = (uint8_t)S25FL1_RSR3;
+            res = run_cmd(ctx, ctx->rsr, sizeof(ctx->rsr));
             break;
 
         case 3:
-            wsr[3] = rsr[1]; /* store prev result */
+            ctx->wsr[3] = ctx->rsr[1]; /* store prev result */
             res = run_single(ctx, (uint8_t)S25FL1_WREN);
             break;
 
         case 4:
-            wsr[0] = (uint8_t)S25FL1_WSR;
-            res = run_cmd(ctx, wsr, sizeof(wsr));
+            ctx->wsr[0] = (uint8_t)S25FL1_WSR;
+            res = run_cmd(ctx, ctx->wsr, sizeof(ctx->wsr));
             break;
 
         case 5:
@@ -146,22 +143,20 @@ int flash_ext_probe(struct flash_ext *ctx)
 {
 #define S25FL1_RDID  0x9f
     int res;
-    static uint8_t jedec[4] = { 0, 0, 0, 0 };
 
-    jedec[0] = (uint8_t)S25FL1_RDID;
-    if ((res = run_cmd(ctx, jedec, sizeof(jedec))) < 0)
+    ctx->jedec[0] = (uint8_t)S25FL1_RDID;
+    if ((res = run_cmd(ctx, ctx->jedec, sizeof(ctx->jedec))) < 0)
         return res;
 
-    memcpy(ctx->jedec, &jedec[1], sizeof(ctx->jedec));
     /* set attr according to JEDEC */
-    picoRTOS_assert(ctx->jedec[0] == (uint8_t)0x1, return -EIO);
-    picoRTOS_assert(ctx->jedec[1] == (uint8_t)0x40, return -EIO);
+    picoRTOS_assert(ctx->jedec[1] == (uint8_t)0x1, return -EIO);
+    picoRTOS_assert(ctx->jedec[2] == (uint8_t)0x40, return -EIO);
 
     ctx->attr.erase_unit_len = (size_t)4096;
     ctx->attr.write_unit_len = sizeof(uint8_t);
     ctx->attr.lock_unit_len = (size_t)4096;
 
-    switch (ctx->jedec[2]) {
+    switch (ctx->jedec[3]) {
     case 0x15: ctx->attr.erase_unit_count = (size_t)512; break;
     case 0x16: ctx->attr.erase_unit_count = (size_t)1024; break;
     case 0x17: ctx->attr.erase_unit_count = (size_t)2048; break;
@@ -237,12 +232,10 @@ int flash_ext_read(struct flash_ext *ctx, size_t offset, void *data, size_t n)
     n = MIN(n, (size_t)S25FL1_RD_LEN);
 
     for (;;) {
-        static uint8_t rd[S25FL1_RD_LEN + 4];
-
         switch (ctx->seq) {
-        case 0: res = make_rd_req(rd, offset, n); break;
-        case 2: res = run_cmd(ctx, rd, sizeof(rd)); break;
-        case 3: memcpy(data, &rd[4], n); /*@fallthrough@*/
+        case 0: res = make_rd_req(ctx->rd, offset, n); break;
+        case 2: res = run_cmd(ctx, ctx->rd, sizeof(ctx->rd)); break;
+        case 3: memcpy(data, &ctx->rd[4], n); /*@fallthrough@*/
         default: ctx->seq = 0; return (int)n;
         }
 
@@ -282,12 +275,10 @@ int flash_ext_write(struct flash_ext *ctx, size_t offset, const void *data, size
     n = MIN(n, (size_t)S25FL1_PP_LEN);
 
     for (;;) {
-        static uint8_t pp[S25FL1_PP_LEN + 4];
-
         switch (ctx->seq) {
         case 0: res = run_single(ctx, (uint8_t)S25FL1_WREN); break;
-        case 1: res = make_pp_req(pp, offset, data, n); break;
-        case 2: res = run_cmd(ctx, pp, sizeof(pp)); break;
+        case 1: res = make_pp_req(ctx->pp, offset, data, n); break;
+        case 2: res = run_cmd(ctx, ctx->pp, sizeof(ctx->pp)); break;
         case 3: res = run_busy(ctx); break;
         default: ctx->seq = 0; return (int)n;
         }
@@ -349,13 +340,4 @@ int flash_ext_unlock(struct flash_ext *ctx, size_t offset)
     }
 
     return res;
-}
-
-/*
- * FIXME: debatable
- */
-struct flash_ext *flash_ext_claim(struct flash_ext *ctx)
-{
-    (void)spi_claim(ctx->spi);
-    return ctx;
 }
