@@ -173,8 +173,6 @@ static int mainck_setup(const struct clock_settings *settings)
            deadlock-- != 0) arch_delay_us(10ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
-
-    clocks.mainck = (clock_freq_t)settings->mosc;
     return 0;
 #undef MOSCXTST_DEFAULT
 }
@@ -182,7 +180,7 @@ static int mainck_setup(const struct clock_settings *settings)
 static int plla_setup(const struct clock_settings *settings)
 {
 #define PLLACOUNT_DEFAULT 0x3f
-    picoRTOS_assert((clock_freq_t)(settings->plla / 2ul) >= clocks.mainck,
+    picoRTOS_assert((settings->plla / 2ul) >= settings->mosc,
                     return -EINVAL);
 
     unsigned long diva = 0;
@@ -190,8 +188,8 @@ static int plla_setup(const struct clock_settings *settings)
 
     for (diva = 1ul; diva <= (unsigned long)CKGR_PLLAR_DIVA_M; diva++) {
         /* try to find the best match */
-        mula = settings->plla * diva / (unsigned long)clocks.mainck;
-        if (((mula * (unsigned long)clocks.mainck) / diva) == settings->plla) break;
+        mula = settings->plla * diva / settings->mosc;
+        if (((mula * settings->mosc) / diva) == settings->plla) break;
     }
 
     picoRTOS_assert(diva < (unsigned long)(CKGR_PLLAR_DIVA_M + 1u),
@@ -214,8 +212,6 @@ static int plla_setup(const struct clock_settings *settings)
         arch_delay_us(10ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
-
-    clocks.pllack = (clock_freq_t)settings->plla;
     return 0;
 #undef PLLACOUNT_DEFAULT
 #undef MULA_COUNT
@@ -234,20 +230,17 @@ static int upll_setup(const struct clock_settings *settings)
     }
 
     /* uplldiv2 */
-    if (settings->upll == CLOCK_ATMEL_PMC_UPLL_DIV2) {
+    if (settings->upll == CLOCK_ATMEL_PMC_UPLL_DIV2)
         PMC->PMC_MCKR |= PMC_MCKR_UPLLDIV2;
-        clocks.upllckdiv = (clock_freq_t)(UPLLCK_HZ / 2ul);
-    }else{
+    else
         PMC->PMC_MCKR &= ~PMC_MCKR_UPLLDIV2;
-        clocks.upllckdiv = (clock_freq_t)UPLLCK_HZ;
-    }
 
     /* Enable PLL */
     PMC->CKGR_UCKR |= CKGR_UCKR_UPLLEN;
 
     /* wait for lock bit */
     while ((PMC->PMC_SR & PMC_SR_LOCKU) == 0 &&
-           deadlock-- != 0) arch_delay_us(10ul);
+           deadlock-- != 0) arch_delay_us(100ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
     return 0;
@@ -292,7 +285,6 @@ static int hclk_mck_setup(const struct clock_settings *settings)
 
     int pres;
     int mdiv;
-    unsigned long freq = 0;
     uint32_t pmc_mckr = PMC->PMC_MCKR;
     int deadlock = CONFIG_DEADLOCK_COUNT;
 
@@ -325,22 +317,9 @@ static int hclk_mck_setup(const struct clock_settings *settings)
     PMC->PMC_MCKR = pmc_mckr;
     /* f. Wait for PMC_SR.MCKRDY to be set */
     while ((PMC->PMC_SR & PMC_SR_MCKRDY) == 0 && deadlock-- != 0)
-        arch_delay_us(10ul);
+        arch_delay_us(100ul);
 
     picoRTOS_assert(deadlock != -1, return -EBUSY);
-
-    switch (settings->mckr_css) {
-    case CLOCK_ATMEL_PMC_MCKR_CSS_SLCK: freq = (unsigned long)clocks.slck; break;
-    case CLOCK_ATMEL_PMC_MCKR_CSS_MAINCK: freq = (unsigned long)clocks.mainck; break;
-    case CLOCK_ATMEL_PMC_MCKR_CSS_PLLACK: freq = (unsigned long)clocks.pllack; break;
-    case CLOCK_ATMEL_PMC_MCKR_CSS_UPLLCKDIV: freq = (unsigned long)clocks.upllckdiv; break;
-    default: picoRTOS_assert(false, return -EIO);
-    }
-
-    clocks.mck = (clock_freq_t)(freq / (settings->mckr_prescaler * settings->mckr_mdiv));
-    clocks.hclk = (clock_freq_t)(freq / settings->mckr_prescaler);
-    arch_set_clock_frequency((unsigned long)clocks.hclk);
-
     return 0;
 }
 
@@ -355,17 +334,45 @@ static int hclk_mck_setup(const struct clock_settings *settings)
  */
 int clock_atmel_pmc_init(const struct clock_settings *settings)
 {
+    picoRTOS_assert(settings->config < CLOCK_ATMEL_PMC_CONFIG_COUNT, return -EINVAL);
+
     int res;
+    unsigned long freq = 0;
 
-    /* ensure write protect is disabled */
-    PMC->PMC_WPMR = (uint32_t)PMC_WPMR_WPKEY(0x504d43);
+    /* slck */
+    (void)slck_probe();
 
-    (void)slck_probe();                                     /* slck */
-    if ((res = mainck_setup(settings)) < 0) return res;     /* mainck */
-    if (settings->plla != 0 &&
-        (res = plla_setup(settings)) < 0) return res;       /* plla */
-    if ((res = upll_setup(settings)) < 0) return res;       /* upll */
-    if ((res = hclk_mck_setup(settings)) < 0) return res;   /* hclk, mck */
+    if (settings->config == CLOCK_ATMEL_PMC_CONFIG_HW) {
+        /* ensure write protect is disabled */
+        PMC->PMC_WPMR = (uint32_t)PMC_WPMR_WPKEY(0x504d43);
+        if ((res = mainck_setup(settings)) < 0) return res;     /* mainck */
+        if (settings->plla != 0 &&
+            (res = plla_setup(settings)) < 0) return res;       /* plla */
+        if ((res = upll_setup(settings)) < 0) return res;       /* upll */
+        if ((res = hclk_mck_setup(settings)) < 0) return res;   /* hclk, mck */
+    }
+
+    clocks.mainck = (clock_freq_t)settings->mosc;
+    clocks.pllack = (clock_freq_t)settings->plla;
+
+    switch (settings->upll) {
+    case CLOCK_ATMEL_PMC_UPLL_DISABLE: clocks.upllckdiv = 0; break;
+    case CLOCK_ATMEL_PMC_UPLL_DIV1: clocks.upllckdiv = (clock_freq_t)UPLLCK_HZ; break;
+    case CLOCK_ATMEL_PMC_UPLL_DIV2: clocks.upllckdiv = (clock_freq_t)(UPLLCK_HZ / 2ul); break;
+    default: picoRTOS_assert(false, return -EINVAL);
+    }
+
+    switch (settings->mckr_css) {
+    case CLOCK_ATMEL_PMC_MCKR_CSS_SLCK: freq = (unsigned long)clocks.slck; break;
+    case CLOCK_ATMEL_PMC_MCKR_CSS_MAINCK: freq = (unsigned long)clocks.mainck; break;
+    case CLOCK_ATMEL_PMC_MCKR_CSS_PLLACK: freq = (unsigned long)clocks.pllack; break;
+    case CLOCK_ATMEL_PMC_MCKR_CSS_UPLLCKDIV: freq = (unsigned long)clocks.upllckdiv; break;
+    default: picoRTOS_assert(false, return -EIO);
+    }
+
+    clocks.mck = (clock_freq_t)(freq / (settings->mckr_prescaler * settings->mckr_mdiv));
+    clocks.hclk = (clock_freq_t)(freq / settings->mckr_prescaler);
+    arch_set_clock_frequency((unsigned long)clocks.hclk);
 
     return 0;
 }

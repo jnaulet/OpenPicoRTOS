@@ -36,6 +36,12 @@ typedef enum {
     CLOCK_ATMEL_PMC_MCKR_CSS_COUNT
 } clock_atmel_pmc_mckr_css_t;
 
+typedef enum {
+  CLOCK_ATMEL_PMC_CONFIG_HW,
+  CLOCK_ATMEL_PMC_CONFIG_RTOS,
+  CLOCK_ATMEL_PMC_CONFIG_COUNT
+} clock_atmel_pmc_config_t;
+
 struct clock_settings {
     /* clock generator */
     clock_atmel_pmc_mainck_t mainck;    /* main oscillator (MAINCK) */
@@ -48,6 +54,7 @@ struct clock_settings {
     unsigned long mckr_mdiv;
     /* usb clock controller (TODO) */
     /* peripheral clock controller (TODO) */
+    clock_atmel_pmc_config_t config;
 };
 
 int clock_atmel_pmc_init(const struct clock_settings *settings);
