@@ -20,5 +20,4 @@ void picoRTOS_SMP_register_interrupt(picoRTOS_irq_t irq,
                                      void *priv,
                                      picoRTOS_mask_t core_mask);
 
-
 #endif

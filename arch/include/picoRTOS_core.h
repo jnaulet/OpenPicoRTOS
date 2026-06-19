@@ -52,7 +52,7 @@
 /**
  * **UNPRIVILEGED_DATA**
  * > Put the following data in the unprivileged section `.udata`
- * > ###NOTES
+ * > ### NOTES
  * > Typical use:
  * ```c
  *     static struct picoRTOS_mutex UNPRIVILEGED_DATA mutex = PICORTOS_MUTEX_INITIALIZER;

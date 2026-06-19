@@ -70,7 +70,7 @@ This is where the picoRTOS kernel code sits & runs.
 If `CONFIG_MPU`, picoRTOS will configure the MPU to ensure this code can only
 be executed in supervisor/privileged mode.
 
-Permissions are PRX (Privileged Read-only eXecute).
+> Permissions are PRX (Privileged Read-only eXecute).
 
 #### .text
 
@@ -79,7 +79,7 @@ This is where the rest of the code (drivers & tasks) sit & run.
 If `CONFIG_MPU`, picoRTOS will configure the MPU to ensure this code can
 be executed in user/unprivileged mode.
 
-Permissions are URX (Unprivileged Read-only eXecute).
+> Permissions are URX (Unprivileged Read-only eXecute).
 
 #### Beyond .text
 
@@ -101,7 +101,7 @@ This is where the picoRTOS kernel data sits.
 If `CONFIG_MPU`, picoRTOS will configure the MPU to ensure this data can only
 be accessed in supervisor/privileged mode.
 
-Permissions are PRW (Privileged Read Write).
+> Permissions are PRW (Privileged Read Write).
 
 #### Privileged stack(s)
 
@@ -111,7 +111,7 @@ picoRTOS switches to these stacks in privileged mode.
 If `CONFIG_MPU`, picoRTOS will configure the MPU to ensure this data can only
 be accessed in supervisor/privileged mode.
 
-Permissions are PRW (Privileged Read Write).
+> Permissions are PRW (Privileged Read Write).
 
 #### Privileged .bss
 
@@ -120,7 +120,7 @@ This is the privileged .bss section, where kernel zero-initialized data sits.
 If `CONFIG_MPU`, picoRTOS will configure the MPU to ensure this data can only
 be accessed in supervisor/privileged mode.
 
-Permissions are PRW (Privileged Read Write).
+> Permissions are PRW (Privileged Read Write).
 
 #### .data
 
@@ -129,7 +129,7 @@ This is the usual .data section.
 If `CONFIG_MPU`, nothing in this section is available to anyone, except if
 explicitly added with `picoRTOS_mpu_add_region()`
 
-No permissions are set.
+> No permissions are set.
 
 #### Unprivileged .data
 
@@ -141,7 +141,7 @@ be accessed by everyone (shared memory).<br>
 You should really be careful with this option & only put IPCs like mutexes
 & conditions in this section.
 
-Permissions are URW (Unprivileged Read Write).
+> Permissions are URW (Unprivileged Read Write).
 
 ### .bss
 
@@ -153,7 +153,7 @@ accessible to them in user/unprivileged mode.
 If `CONFIG_MPU`, picoRTOS will configure the MPU to ensure this data can only
 be accessed by the idle task.
 
-Permissions are URW (Unprivileged Read Write).
+> Permissions are URW (Unprivileged Read Write).
 
 #### .bss
 
@@ -162,8 +162,9 @@ This is the usual .bss section, where zero-initialized data sits.
 If `CONFIG_MPU`, nothing in this section is available to anyone, except if
 explicitly added with `picoRTOS_mpu_add_region()`
 
-No permissions are set.
+> No permissions are set.
 
+---
 ## Keywords (C)
 
 These sections are accessible using keywords in the code if needed.
@@ -196,7 +197,7 @@ These sections are accessible using keywords in the code if needed.
 ---
 **UNPRIVILEGED_DATA**
 > Put the following data in the unprivileged section `.udata`
-> ###NOTES
+> ### NOTES
 > Typical use:
 ```c
     static struct picoRTOS_mutex UNPRIVILEGED_DATA mutex = PICORTOS_MUTEX_INITIALIZER;
@@ -237,7 +238,3 @@ These sections are accessible using keywords in the code if needed.
 > are made R/W accessible to their owners automatically after
 > `picoRTOS_start()`
 
-
-## Architecture-specific
-
-TBD
