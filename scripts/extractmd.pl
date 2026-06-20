@@ -26,7 +26,8 @@ Readonly my $TOKEN => 1;
 
 sub main {
 
-    my ($path) = @ARGV;
+    my $path = shift @ARGV;
+    my $filter = shift @ARGV;
     my $state = $IDLE;
 
     assert( -e $path );
@@ -36,15 +37,19 @@ sub main {
 
         # IDLE
         if ( $line =~ /^\/[*]{2}/sxm ) {
-            $state = $TOKEN;
             my ($opt) = $line =~ m/^\/[*]{2}(.*)$/sxm;
-            if ( $opt =~ /§/sxm ) {
-                print qq{\n} || return;
-            }
-            else {
-                print '---' . qq{\n} || return;
-            }
-            next;
+	    if ( !defined $filter || $opt =~ /$filter/sxm){
+		$state = $TOKEN;
+		
+		# check for paragraph
+		if ( $opt =~ /§/sxm  ) {
+		    print qq{\n} || return;
+		}
+		else {
+		    print '---' . qq{\n} || return;
+		}
+	    }
+	    next;
         }
 
         # TOKEN
