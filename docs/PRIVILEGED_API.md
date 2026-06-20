@@ -9,6 +9,16 @@ and will kill any tasks trying to access these resources directly.
  1. [picoRTOS & lite](#single-core)
  1. [picoRTOS-SMP extensions](#multi-core-smp-extensions)
 
+## Macros & shortcuts
+
+
+### TASK MANAGEMENT
+
+---
+**PICORTOS_STACK_COUNT**(<ins>x</ins>);
+> Computes stack count from array <ins>x</ins>
+
+
 ## Single core
 
 This API is provided by picoRTOS & picoRTOS-lite

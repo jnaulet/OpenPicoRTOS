@@ -22,13 +22,13 @@ void picoRTOS_task_init(/*@out@*/ struct picoRTOS_task *task,
                         /*@reldef@*/ picoRTOS_stack_t *stack,
                         size_t stack_count);
 
-/* Group: picoRTOS scheduler API */
+/**§ p
+ * ### TASK MANAGEMENT
+ */
 
-/* Macro: PICORTOS_STACK_COUNT(x)
- * Computes stack count from array
- *
- * Parameters:
- *  x - a picoRTOS_stack_t array
+/** p
+ * **PICORTOS_STACK_COUNT**(<ins>x</ins>);
+ * > Computes stack count from array <ins>x</ins>
  */
 #define PICORTOS_STACK_COUNT(x) (sizeof(x) / sizeof(picoRTOS_stack_t))
 
@@ -47,23 +47,35 @@ void picoRTOS_sleep(picoRTOS_tick_t delay);                             /* put c
 void picoRTOS_sleep_until(picoRTOS_tick_t *ref,                         /* put current task to sleep until */
                           picoRTOS_tick_t period);
 
-/* Macro: picoRTOS_schedule()
- * Puts the current task to sleep until next tick
+/**§ u
+ * ### SCHEDULER MANAGEMENT
+ */
+
+/** u
+ * **picoRTOS_schedule**();
+ * > Puts the current task to sleep until next tick.<br>
+ * > Strictly equivalent to `picoRTOS_sleep(1)`
  */
 #define picoRTOS_schedule() picoRTOS_sleep((picoRTOS_tick_t)1)
 
-/* Macro: picoRTOS_postpone()
- * Puts the current task back in the scheduler's FIFO (don't wait for next tick)
+/** u
+ * **picoRTOS_postpone**();
+ * > Puts the current task back in the scheduler's FIFO [(more info)](SCHEDULERS.md)<br>
+ * > Strictly equivalent to `picoRTOS_sleep(0)`
  */
 #define picoRTOS_postpone() picoRTOS_sleep((picoRTOS_tick_t)0)
 
-/* Macro: picoRTOS_suspend()
- * Suspends the scheduling. Typical use is critical sections
+/** u
+ * **picoRTOS_suspend**();
+ * > Suspends the scheduling. Typical use is critical sections.<br>
+ * > Strictly equivalent to `picoRTOS_run(false)`
  */
 #define picoRTOS_suspend() picoRTOS_run(false)
 
-/* Macro: picoRTOS_resume()
- * Resumes the scheduling. Typical use is critical sections
+/** u
+ * **picoRTOS_suspend**();
+ * > Resumes the scheduling. Typical use is critical sections.<br>
+ * > Strictly equivalent to `picoRTOS_run(true)`
  */
 #define picoRTOS_resume() picoRTOS_run(true)
 
@@ -73,40 +85,33 @@ picoRTOS_pid_t picoRTOS_self(void);                         /* gets the current 
 
 /* TIME MANAGEMENT */
 
-/* Macro: PICORTOS_DELAY_SEC(x)
- * Converts seconds to picoRTOS_tick_t
- *
- * Parameters:
- *  x - a value in seconds
+/**§ u
+ * ### TIME MANAGEMENT
+ */
+
+/** u
+ * **PICORTOS_DELAY_SEC**(<ins>x</ins>);
+ * > Converts <ins>x</ins> seconds in picoRTOS_tick_t
  */
 #define PICORTOS_DELAY_SEC(x) (picoRTOS_tick_t)((x) * CONFIG_TICK_HZ)
 
-/* Macro: PICORTOS_DELAY_MSEC(x)
- * Converts milliseconds to picoRTOS_tick_t (rounded to closest upper tick)
- *
- * Parameters:
- *  x - a value in milliseconds
+/** u
+ * **PICORTOS_DELAY_MSEC**(<ins>x</ins>);
+ * > Converts <ins>x</ins> milliseconds in picoRTOS_tick_t
  */
 #define PICORTOS_DELAY_MSEC(x) (picoRTOS_tick_t)((((x) * CONFIG_TICK_HZ) + 999) / 1000)
 
-/* Macro: PICORTOS_DELAY_USEC(x)
- * Converts microseconds in picoRTOS_tick_t (rounded to closest upper tick)
- *
- * Parameters:
- *  x - a value in microseconds
+/** u
+ * **PICORTOS_DELAY_MSEC**(<ins>x</ins>);
+ * > Converts <ins>x</ins> microseconds in picoRTOS_tick_t
  */
 #define PICORTOS_DELAY_USEC(x) (picoRTOS_tick_t)((((x) * CONFIG_TICK_HZ) + 999999) / 1000000)
 
-/* Macro: PICORTOS_DELAY_ELAPSED(ref, x)
- * Checks if a specific delay has passed since ref
- *
- * Parameters:
- *  ref - the reference time/tick
- *  x - a delay in ticks
+/** u
+ * **PICORTOS_DELAY_ELAPSED**(<ins>ref</ins>, <ins>x</ins>);
+ * > Checks if delay <ins>ref</ins> + <ins>x</ins> has elapsed
  */
 #define PICORTOS_DELAY_ELAPSED(ref, x) !((picoRTOS_get_tick() - (ref)) < (x))
-
-/* INTERRUPT MANAGEMENT */
 
 typedef void (*picoRTOS_isr_fn)(/*@null@*/ void*);
 
@@ -116,21 +121,23 @@ void picoRTOS_register_interrupt(picoRTOS_irq_t irq,
 
 void picoRTOS_set_interrupt(picoRTOS_irq_t irq, bool active);
 
-/* Macro: picoRTOS_enable_interrupt
- * Enables an interrupt on the system
- *
- * Parameters:
- *  irq - The irq number to enable
+/**§ u
+ * ### INTERRUPT MANAGEMENT
  */
-#define picoRTOS_enable_interrupt(irq) picoRTOS_set_interrupt(irq, true);
 
-/* Macro: picoRTOS_disable_interrupt
- * Disables an interrupt on the system
- *
- * Parameters:
- *  irq - The irq number to enable
+/** u
+ * **picoRTOS_enable_interrupt**(<ins>irq</ins>);
+ * > Enables an interrupt on the system.<br>
+ * > Strictly equivalent to `picoRTOS_set_interrupt(irq, true)`
  */
-#define picoRTOS_disable_interrupt(irq) picoRTOS_set_interrupt(irq, false);
+#define picoRTOS_enable_interrupt(irq) picoRTOS_set_interrupt(irq, true)
+
+/** u
+ * **picoRTOS_disable_interrupt**(<ins>irq</ins>);
+ * > Disables an interrupt on the system.<br>
+ * > Strictly equivalent to `picoRTOS_set_interrupt(irq, false)`
+ */
+#define picoRTOS_disable_interrupt(irq) picoRTOS_set_interrupt(irq, false)
 
 /* CACHE MANAGEMENT */
 
@@ -141,19 +148,28 @@ void picoRTOS_flush_dcache(const void *addr, size_t n);
 
 void picoRTOS_mpu_add_region(const void *addr, size_t n, unsigned mode);
 
-/* Group: picoRTOS assert API */
+/**§ u
+ * ### ASSERTS
+ */
 
 #ifndef NDEBUG
-/* Macro: picoRTOS_dbgbreak()
- * Throws a debug exception, ignored if -DNDEBUG */
+/** u
+ * **picoRTOS_dbgbreak**();
+ * > Throws a debug exception, ignored if -DNDEBUG
+ */
 # define picoRTOS_dbgbreak() arch_break()
 #else
 # define picoRTOS_dbgbreak()
 #endif
 
-/* Macro: picoRTOS_assert(x, or_else)
- * Returns x, throws a debug exception & executes or_else if x is false,
- * unless -DNDEBUG */
+/** u
+ * **picoRTOS_assert**(<ins>x</ins>, <ins>or_else</ins>);
+ * > If predicate <ins>x</ins> is true, do nothing.<br>
+ * > If predicate <ins>x</ins> is false, execute <ins>or_else</ins>.
+ * 
+ * >[!NOTE]
+ * > This will throw a debug exception unless NDEBUG is set
+ */
 # define picoRTOS_assert(x, or_else)            \
     if (!(x)) {                                 \
         picoRTOS_core_sef(x);                   \
@@ -161,8 +177,12 @@ void picoRTOS_mpu_add_region(const void *addr, size_t n, unsigned mode);
         { or_else; }                            \
     }
 
-/* Macro: picoRTOS_assert_void(x)
- * Throws a debug exception if x is false, unless -DNDEBUG */
+/** u
+ * **picoRTOS_assert**(<ins>x</ins>, <ins>or_else</ins>);
+ * > If predicate <ins>x</ins> is true, do nothing.<br>
+ * > If predicate <ins>x</ins> is false, throw a debug exeption, unless
+ * > NDEBUG is set.
+ */
 # define picoRTOS_assert_void(x)                \
     if (!(x)){                                  \
         picoRTOS_core_sef(x);                   \

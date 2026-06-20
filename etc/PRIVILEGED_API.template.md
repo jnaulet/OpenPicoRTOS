@@ -9,6 +9,10 @@ and will kill any tasks trying to access these resources directly.
  1. [picoRTOS & lite](#single-core)
  1. [picoRTOS-SMP extensions](#multi-core-smp-extensions)
 
+## Macros & shortcuts
+
+!extractmd.pl picoRTOS.h p
+
 ## Single core
 
 This API is provided by picoRTOS & picoRTOS-lite

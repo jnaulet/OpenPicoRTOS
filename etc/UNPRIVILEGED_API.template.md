@@ -8,4 +8,10 @@ attempts to make a privileged call.
 
 All these functions are available to picoRTOS, picoRTOS-SMP & picoRTOS-lite.
 
+## Macros & shortcuts
+
+!extractmd.pl picoRTOS.h u
+
+## API
+
 !extractmd.pl scheduler/picoRTOS_u.c

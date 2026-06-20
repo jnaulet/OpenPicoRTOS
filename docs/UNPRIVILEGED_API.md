@@ -8,6 +8,87 @@ attempts to make a privileged call.
 
 All these functions are available to picoRTOS, picoRTOS-SMP & picoRTOS-lite.
 
+## Macros & shortcuts
+
+
+### SCHEDULER MANAGEMENT
+
+---
+**picoRTOS_schedule**();
+> Puts the current task to sleep until next tick.<br>
+> Strictly equivalent to `picoRTOS_sleep(1)`
+
+---
+**picoRTOS_postpone**();
+> Puts the current task back in the scheduler's FIFO [(more info)](SCHEDULERS.md)<br>
+> Strictly equivalent to `picoRTOS_sleep(0)`
+
+---
+**picoRTOS_suspend**();
+> Suspends the scheduling. Typical use is critical sections.<br>
+> Strictly equivalent to `picoRTOS_run(false)`
+
+---
+**picoRTOS_suspend**();
+> Resumes the scheduling. Typical use is critical sections.<br>
+> Strictly equivalent to `picoRTOS_run(true)`
+
+
+### TIME MANAGEMENT
+
+---
+**PICORTOS_DELAY_SEC**(<ins>x</ins>);
+> Converts <ins>x</ins> seconds in picoRTOS_tick_t
+
+---
+**PICORTOS_DELAY_MSEC**(<ins>x</ins>);
+> Converts <ins>x</ins> milliseconds in picoRTOS_tick_t
+
+---
+**PICORTOS_DELAY_MSEC**(<ins>x</ins>);
+> Converts <ins>x</ins> microseconds in picoRTOS_tick_t
+
+---
+**PICORTOS_DELAY_ELAPSED**(<ins>ref</ins>, <ins>x</ins>);
+> Checks if delay <ins>ref</ins> + <ins>x</ins> has elapsed
+
+
+### INTERRUPT MANAGEMENT
+
+---
+**picoRTOS_enable_interrupt**(<ins>irq</ins>);
+> Enables an interrupt on the system.<br>
+> Strictly equivalent to `picoRTOS_set_interrupt(irq, true)`
+
+---
+**picoRTOS_disable_interrupt**(<ins>irq</ins>);
+> Disables an interrupt on the system.<br>
+> Strictly equivalent to `picoRTOS_set_interrupt(irq, false)`
+
+
+### ASSERTS
+
+---
+**picoRTOS_dbgbreak**();
+> Throws a debug exception, ignored if -DNDEBUG
+
+---
+**picoRTOS_assert**(<ins>x</ins>, <ins>or_else</ins>);
+> If predicate <ins>x</ins> is true, do nothing.<br>
+> If predicate <ins>x</ins> is false, execute <ins>or_else</ins>.
+
+>[!NOTE]
+> This will throw a debug exception unless NDEBUG is set
+
+---
+**picoRTOS_assert**(<ins>x</ins>, <ins>or_else</ins>);
+> If predicate <ins>x</ins> is true, do nothing.<br>
+> If predicate <ins>x</ins> is false, throw a debug exeption, unless
+> NDEBUG is set.
+
+
+## API
+
 ---
 void **picoRTOS_run**(**bool** <ins>run</ins>);
 > Suspend/resume the scheduling according to the value of <ins>run</ins>
