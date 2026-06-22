@@ -10,7 +10,6 @@
 	.type Reset_Handler, %function
 	.global Reset_Handler
 Reset_Handler:
-	DISABLE_MPU
 	INIT_STACK __StackTop
 	INIT_VTOR __vectors_start__
 
