@@ -81,7 +81,7 @@ void picoRTOS_sleep_until(picoRTOS_tick_t *ref,                         /* put c
 
 /*@noreturn@*/ void picoRTOS_kill(int errnum);              /* kills the current task */
 picoRTOS_pid_t picoRTOS_self(void);                         /* gets the current thread pid */
-/*@unused@*/ picoRTOS_tick_t picoRTOS_get_tick(void) /*@*/; /* get current tick */
+/*@unused@*/ picoRTOS_tick_t picoRTOS_get_tick(void);       /* get current tick */
 
 /* TIME MANAGEMENT */
 
@@ -166,7 +166,7 @@ void picoRTOS_mpu_add_region(const void *addr, size_t n, unsigned mode);
  * **picoRTOS_assert**(<ins>x</ins>, <ins>or_else</ins>);
  * > If predicate <ins>x</ins> is true, do nothing.<br>
  * > If predicate <ins>x</ins> is false, execute <ins>or_else</ins>.
- * 
+ *
  * >[!NOTE]
  * > This will throw a debug exception unless NDEBUG is set
  */

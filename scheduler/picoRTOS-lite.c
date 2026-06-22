@@ -221,17 +221,23 @@ void picoRTOS_kill(int errnum)
 
 picoRTOS_pid_t picoRTOS_self(void)
 {
-    picoRTOS_pid_t pid = 0;
+    picoRTOS_pid_t pid;
 
-    arch_syscall(SYSCALL_GETPID, &pid);
+    arch_suspend();
+    pid = picoRTOS.index;
+    arch_resume();
+
     return pid;
 }
 
-picoRTOS_tick_t picoRTOS_get_tick(void) /*@modifies nothing@*/
+picoRTOS_tick_t picoRTOS_get_tick(void)
 {
-    picoRTOS_tick_t tick = 0;
+    picoRTOS_tick_t tick;
 
-    arch_syscall(SYSCALL_GETTICK, &tick);
+    arch_suspend();
+    tick = picoRTOS.tick;
+    arch_resume();
+
     return tick;
 }
 
@@ -312,20 +318,6 @@ syscall_sleep_until(/*@returned@*/ struct picoRTOS_task_core *task,
     return task; /* don't switch */
 }
 
-/*@exposed@*/ static struct picoRTOS_task_core *
-syscall_get_tick(/*@returned@*/ struct picoRTOS_task_core *task, picoRTOS_tick_t *tick)
-{
-    *tick = picoRTOS.tick;
-    return task;
-}
-
-/*@exposed@*/ static struct picoRTOS_task_core *
-syscall_get_pid(/*@returned@*/ struct picoRTOS_task_core *task, picoRTOS_pid_t *pid)
-{
-    *pid = picoRTOS.index;
-    return task;
-}
-
 picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, syscall_t syscall, void *priv)
 {
     struct picoRTOS_task_core *task = &TASK_CURRENT();
@@ -342,9 +334,7 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp, syscall_t syscall, void
     /* OS-related syscalls */
     /* task-related syscalls */
     case SYSCALL_SLEEP: return syscall_sleep(task, *(picoRTOS_tick_t*)priv)->sp;
-    case SYSCALL_GETTICK: return syscall_get_tick(task, (picoRTOS_tick_t*)priv)->sp;
     case SYSCALL_SLEEP_UNTIL: return syscall_sleep_until(task, (struct syscall_sleep_until*)priv)->sp;
-    case SYSCALL_GETPID: return syscall_get_pid(task, (picoRTOS_pid_t*)priv)->sp;
     case SYSCALL_KILL: /*@fallthrough@*/
     case SYSCALL_SEGFAULT: return syscall_kill(task)->sp;
     default: break;
