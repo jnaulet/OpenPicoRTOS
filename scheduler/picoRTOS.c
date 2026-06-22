@@ -7,6 +7,10 @@
 # error Default stack is too small
 #endif
 
+#if (ARCH_L1_DCACHE_LINESIZE & ((ARCH_L1_DCACHE_LINESIZE)-1)) != 0
+# error L1 cache line is not a power of 2
+#endif
+
 /* SCHEDULER main structures */
 
 typedef enum {
