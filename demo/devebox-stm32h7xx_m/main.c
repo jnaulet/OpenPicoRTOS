@@ -179,6 +179,7 @@ static void can_main(void *priv)
 
         int res;
         can_id_t id = 0;
+        bool timeout = false;
         int deadlock = CONFIG_DEADLOCK_COUNT;
 
         char tx[CAN_DATA_COUNT] = { (char)0, (char)0, (char)0, (char)0,
@@ -191,8 +192,9 @@ static void can_main(void *priv)
                !PICORTOS_DELAY_ELAPSED(ref, CAN_TIMEOUT) &&
                deadlock-- != 0) picoRTOS_postpone();
 
+        timeout = PICORTOS_DELAY_ELAPSED(ref, CAN_TIMEOUT);
         picoRTOS_assert_void(deadlock != -1);
-        picoRTOS_assert_void(!PICORTOS_DELAY_ELAPSED(ref, CAN_TIMEOUT));
+        picoRTOS_assert_void(!timeout);
 
         /* ping */
         if ((res = can_write(CAN, (can_id_t)CAN_TEST_ID, tx, (size_t)CAN_DATA_COUNT)) == -EAGAIN &&
@@ -201,16 +203,17 @@ static void can_main(void *priv)
             continue;
         }
 
+        timeout = PICORTOS_DELAY_ELAPSED(ref, CAN_TIMEOUT);
         picoRTOS_assert_void(res > 0);
-        picoRTOS_assert_void(!PICORTOS_DELAY_ELAPSED(ref, CAN_TIMEOUT));
+        picoRTOS_assert_void(!timeout);
 
         /* pong */
         while (((res = can_read(CAN, &id, rx, sizeof(rx)))) == -EAGAIN &&
-               !PICORTOS_DELAY_ELAPSED(ref, CAN_TIMEOUT))
+               !(timeout = PICORTOS_DELAY_ELAPSED(ref, CAN_TIMEOUT)))
             picoRTOS_schedule();
 
         picoRTOS_assert_void(res == (int)sizeof(rx));
-        picoRTOS_assert_void(!PICORTOS_DELAY_ELAPSED(ref, CAN_TIMEOUT));
+        picoRTOS_assert_void(!timeout);
         picoRTOS_assert_void(id == (can_id_t)CAN_TEST_ID);
         picoRTOS_assert_void(rx[0] == tx[0]);
         picoRTOS_assert_void(rx[7] == tx[7]);
