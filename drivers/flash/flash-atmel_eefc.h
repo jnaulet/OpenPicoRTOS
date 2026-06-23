@@ -1,13 +1,16 @@
 #ifndef FLASH_ATMEL_EEFC_H
 #define FLASH_ATMEL_EEFC_H
 
-#include "flash.h"
+#include "flash+safety.h"
+
+#include <stdint.h>
 #include <stdbool.h>
 
 struct FLASH_ATMEL_EEFC;
 
 struct flash {
     /*@temp@*/ struct FLASH_ATMEL_EEFC *base;
+    /*@temp@*/ uint32_t *latch_buffer;
     struct flash_attributes attr;
     bool pending;
 };
