@@ -138,10 +138,16 @@ void arch_set_clock_frequency(unsigned long freq)
 
 void arch_delay_us(unsigned long n)
 {
-    arch_assert_void(n != 0);
+    arch_assert(n != 0, return );
 
-    unsigned long ncycles = n * ((unsigned long)sysclk_hz / 1000000ul);
-
-    while (ncycles-- != 0)
-        ASM("");
+    ASM("ldr r2, =sysclk_hz");
+    ASM("ldr r2, [r2]");
+    ASM("ldr r1, =2000000");
+    ASM("udiv r2, r2, r1");
+    ASM("umull r2, r0, r2, r0");
+    ASM(".loop:");
+    ASM("cbz r2, .end");
+    ASM("subs r2, r2, #1");
+    ASM("b .loop");
+    ASM(".end:");
 }
