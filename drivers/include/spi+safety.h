@@ -3,11 +3,12 @@
 
 #include "spi.h"
 
-/* Function: spi_claim
- * Claims the spi for this process/thread (opt. MPU-related feature)
- *
- * Parameters:
- *  spi - A spi instance
+/**
+ * struct spi \***spi_claim**(**struct spi** \*<ins>ctx</ins>);
+ * > Claims the spi channel <ins>ctx</ins> & its dependencies
+ * ### NOTES
+ * > This feature is related to MPU & will only have an effect if
+ * > `CONFIG_MPU` is active.
  */
 struct spi *spi_claim(/*@returned@*/ struct spi *ctx);
 

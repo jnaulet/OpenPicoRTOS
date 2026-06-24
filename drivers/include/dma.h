@@ -24,38 +24,30 @@ struct dma_xfer {
     size_t byte_count;                  /* byte count */
 };
 
-/* Function: dma_setup
- * Configures a DMA for external trigger
+/**
+ * int **dma_setup**(**struct dma** \*<ins>ctx</ins>, const **struct dma_xfer** \*<ins>xfer</ins>);
+ * > Configures a DMA channel <ins>ctx</ins> for external trigger
  *
- * Parameters:
- *  ctx - The DMA channel to configure
- *  xfer - The transfer parameters
- *
- * Returns:
- * 0 in case of success, -errno otherwise
+ * ### RETURN
+ * > Returns 0 in case of success, -errno otherwise
  */
 int dma_setup(struct dma *ctx, const struct dma_xfer *xfer);
 
-/* Function: dma_xfer
- * Starts a DMA transfer
+/**
+ * int **dma_xfer**(**struct dma** \*<ins>ctx</ins>, const **struct dma_xfer** \*<ins>xfer</ins>);
+ * > Manually starts a DMA transfer <ins>xfer</ins>
  *
- * Parameters:
- *  ctx - The DMA channel to operate
- *  xfer - The transfer parameters
- *
- * Returns:
- * 0 in case of success, -errno otherwise
+ * ### RETURN
+ * > Returns 0 in case of success, -errno otherwise
  */
 int dma_xfer(struct dma *ctx, const struct dma_xfer *xfer);
 
-/* Function: dma_xfer_done
- * Polls a DMA for end of transfer
+/**
+ * int **dma_xfer_done**(**struct dma** \*<ins>ctx</ins>);
+ * > Polls a DMA channel for end of transfer
  *
- * Parameters:
- *  ctx - The DMA to poll
- *
- * Returns:
- * 0 in case of success, -errno otherwise
+ * ### RETURN
+ * Returns 0 in case of xfer success, -errno otherwise
  */
 int dma_xfer_done(struct dma *ctx);
 

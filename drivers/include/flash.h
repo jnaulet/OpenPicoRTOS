@@ -7,76 +7,59 @@
 
 struct flash;
 
-/* Function: flash_probe
- * Probe the flash
+/**
+ * int **flash_probe**(**struct flash** \*<ins>ctx</ins>);
+ * > Probe the flash
  *
- * Parameters:
- *  ctx - A flash instance
- *
- * Returns:
- * 0 if success, -errno otherwise
+ * ### RETURN
+ * > Returns 0 if success, -errno otherwise
  */
 int flash_probe(struct flash *ctx);
 
-/* Function: flash_get_attributes
- * Gets the flash's attributes
+/**
+ * int **flash_get_attributes**(**struct flash** \*<ins>ctx</ins>,
+ * **struct flash_attributes** \*<ins>attr</ins>);
+ * > Gets the flash's attributes
  *
- * Parameters:
- *  ctx - A flash instance
- *  attributes - The structure that will contain the information
- *
- * Returns:
- * 0 if success, -errno otherwise
+ * ### RETURN
+ * > Returns 0 if success, -errno otherwise
  */
 int flash_get_attributes(struct flash *ctx, /*@out@*/ struct flash_attributes *attr);
 
-/* Function: flash_erase
- * Erases a sector from flash
+/**
+ * int **flash_erase**(**struct flash** \*<ins>ctx</ins>, **size_t** <ins>offset</ins>);
+ * > Erases a sector from flash
  *
- * Parameters:
- *  ctx - A flash instance
- *  offset - The offset of the sector/erase_unit to erase
- *
- * Returns:
- * 0 in case of success, -errno otherwise
+ * ### RETURN
+ * > Returns 0 in case of success, -errno otherwise
  */
 int flash_erase(struct flash *ctx, size_t offset);
 
-/* Function: flash_write
- * Writes data to flash
+/**
+ * int **flash_write**(**struct flash** \*<ins>ctx</ins>, **size_t** <ins>offset</ins>,
+ * const **void** \*<ins>data</ins>, **size_t** <ins>n</ins>);
+ * > Writes data to flash
  *
- * Parameters:
- *  ctx - A flash instance
- *  offset - The flash address to write to
- *  data - A buffer containing the data to write
- *  n - The size of the data to write in bytes
- *
- * Returns:
- * The number of bytes written if success, -errno otherwise
+ * ### RETURN
+ * > Returns the number of bytes written if success, -errno otherwise
  */
 int flash_write(struct flash *ctx, size_t offset, const void *data, size_t n);
 
-/* Function: flash_lock
- * Protects a block in flash
+/**
+ * int **flash_lock**(**struct flash** \*<ins>ctx</ins>, **size_t** <ins>offset</ins>);
+ * > Protects a block in flash
  *
- * Parameters:
- *  ctx - A flash instance
- *  offset - The block to protect
- *
- * Returns:
- * 0 if success, -errno otherwise
+ * ### RETURN
+ * > Returns 0 if success, -errno otherwise
  */
 int flash_lock(struct flash *ctx, size_t offset);
 
-/* Function: flash_unlock
- * Unprotects a flash block
+/**
+ * int **flash_unlock**(**struct flash** \*<ins>ctx</ins>, **size_t** <ins>offset</ins>);
+ * > Unprotects a flash block
  *
- * Parameters:
- *  ctx - A flash instance
- *  offset - The block to unprotect
- *
- * Returns:
- * 0 if success, -errno otherwise
+ * ### RETURN
+ * > Returns 0 if success, -errno otherwise
  */
 int flash_unlock(struct flash *ctx, size_t offset);
 

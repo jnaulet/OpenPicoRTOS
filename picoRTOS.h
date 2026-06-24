@@ -27,7 +27,7 @@ void picoRTOS_task_init(/*@out@*/ struct picoRTOS_task *task,
  */
 
 /** p
- * **PICORTOS_STACK_COUNT**(<ins>x</ins>);
+ * **PICORTOS_STACK_COUNT**(<ins>x</ins>)
  * > Computes stack count from array <ins>x</ins>
  */
 #define PICORTOS_STACK_COUNT(x) (sizeof(x) / sizeof(picoRTOS_stack_t))
@@ -53,28 +53,36 @@ void picoRTOS_sleep_until(picoRTOS_tick_t *ref,                         /* put c
 
 /** u
  * **picoRTOS_schedule**();
- * > Puts the current task to sleep until next tick.<br>
+ * > Puts the current task to sleep until next tick
+ *
+ * > [!NOTE]
  * > Strictly equivalent to `picoRTOS_sleep(1)`
  */
 #define picoRTOS_schedule() picoRTOS_sleep((picoRTOS_tick_t)1)
 
 /** u
  * **picoRTOS_postpone**();
- * > Puts the current task back in the scheduler's FIFO [(more info)](SCHEDULERS.md)<br>
+ * > Puts the current task back in the scheduler's FIFO [(more info)](SCHEDULERS.md)
+ *
+ * > [!NOTE]
  * > Strictly equivalent to `picoRTOS_sleep(0)`
  */
 #define picoRTOS_postpone() picoRTOS_sleep((picoRTOS_tick_t)0)
 
 /** u
  * **picoRTOS_suspend**();
- * > Suspends the scheduling. Typical use is critical sections.<br>
+ * > Suspends the scheduling. Typical use is critical sections
+ *
+ * > [!NOTE]
  * > Strictly equivalent to `picoRTOS_run(false)`
  */
 #define picoRTOS_suspend() picoRTOS_run(false)
 
 /** u
  * **picoRTOS_suspend**();
- * > Resumes the scheduling. Typical use is critical sections.<br>
+ * > Resumes the scheduling. Typical use is critical sections
+ *
+ * > [!NOTE]
  * > Strictly equivalent to `picoRTOS_run(true)`
  */
 #define picoRTOS_resume() picoRTOS_run(true)
@@ -90,26 +98,26 @@ picoRTOS_pid_t picoRTOS_self(void);                         /* gets the current 
  */
 
 /** u
- * **PICORTOS_DELAY_SEC**(<ins>x</ins>);
+ * **PICORTOS_DELAY_SEC**(<ins>x</ins>)
  * > Converts <ins>x</ins> seconds in picoRTOS_tick_t
  */
 #define PICORTOS_DELAY_SEC(x) (picoRTOS_tick_t)((x) * CONFIG_TICK_HZ)
 
 /** u
- * **PICORTOS_DELAY_MSEC**(<ins>x</ins>);
+ * **PICORTOS_DELAY_MSEC**(<ins>x</ins>)
  * > Converts <ins>x</ins> milliseconds in picoRTOS_tick_t
  */
 #define PICORTOS_DELAY_MSEC(x) (picoRTOS_tick_t)((((x) * CONFIG_TICK_HZ) + 999) / 1000)
 
 /** u
- * **PICORTOS_DELAY_MSEC**(<ins>x</ins>);
+ * **PICORTOS_DELAY_USEC**(<ins>x</ins>)
  * > Converts <ins>x</ins> microseconds in picoRTOS_tick_t
  */
 #define PICORTOS_DELAY_USEC(x) (picoRTOS_tick_t)((((x) * CONFIG_TICK_HZ) + 999999) / 1000000)
 
 /** u
- * **PICORTOS_DELAY_ELAPSED**(<ins>ref</ins>, <ins>x</ins>);
- * > Checks if delay <ins>ref</ins> + <ins>x</ins> has elapsed
+ * **PICORTOS_DELAY_ELAPSED**(<ins>ref</ins>, <ins>x</ins>)
+ * > True if delay <ins>ref</ins> + <ins>x</ins> has elapsed
  */
 #define PICORTOS_DELAY_ELAPSED(ref, x) !((picoRTOS_get_tick() - (ref)) < (x))
 
@@ -127,14 +135,18 @@ void picoRTOS_set_interrupt(picoRTOS_irq_t irq, bool active);
 
 /** u
  * **picoRTOS_enable_interrupt**(<ins>irq</ins>);
- * > Enables an interrupt on the system.<br>
+ * > Enables an interrupt on the system
+ *
+ * > [!NOTE]
  * > Strictly equivalent to `picoRTOS_set_interrupt(irq, true)`
  */
 #define picoRTOS_enable_interrupt(irq) picoRTOS_set_interrupt(irq, true)
 
 /** u
  * **picoRTOS_disable_interrupt**(<ins>irq</ins>);
- * > Disables an interrupt on the system.<br>
+ * > Disables an interrupt on the system
+ *
+ * > [!NOTE]
  * > Strictly equivalent to `picoRTOS_set_interrupt(irq, false)`
  */
 #define picoRTOS_disable_interrupt(irq) picoRTOS_set_interrupt(irq, false)
@@ -167,7 +179,7 @@ void picoRTOS_mpu_add_region(const void *addr, size_t n, unsigned mode);
  * > If predicate <ins>x</ins> is true, do nothing.<br>
  * > If predicate <ins>x</ins> is false, execute <ins>or_else</ins>.
  *
- * >[!NOTE]
+ * > [!NOTE]
  * > This will throw a debug exception unless NDEBUG is set
  */
 # define picoRTOS_assert(x, or_else)            \
@@ -178,7 +190,7 @@ void picoRTOS_mpu_add_region(const void *addr, size_t n, unsigned mode);
     }
 
 /** u
- * **picoRTOS_assert**(<ins>x</ins>, <ins>or_else</ins>);
+ * **picoRTOS_assert_void**(<ins>x</ins>);
  * > If predicate <ins>x</ins> is true, do nothing.<br>
  * > If predicate <ins>x</ins> is false, throw a debug exeption, unless
  * > NDEBUG is set.

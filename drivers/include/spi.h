@@ -76,29 +76,21 @@ struct spi_settings {
     size_t cs;
 };
 
-/* Function: spi_setup
- * Configure a SPI interface
- *
- * Parameters:
- *  ctx - A SPI instance
- *  settings - The parameters used to configure the SPI
- *
- * Returns:
- * 0 in case of success, -errno otherwise
+/**
+ * int **spi_setup**(**struct spi** \*<ins>ctx</ins>, 
+ * const **struct spi_settings** \*<ins>settings</ins>);
+ * > Configure a SPI interface
+ * ### RETURN
+ * Returns 0 in case of success, -errno otherwise
  */
 int spi_setup(struct spi *ctx, const struct spi_settings *settings);
 
-/* Function: spi_xfer
- * Transfers data over a SPI interface
- *
- * Parameters:
- *  ctx - A SPI instance
- *  rx - A buffer to receive the data
- *  tx - A buffer with the data to transmit
- *  n - The size of the data to transfer (in bytes)
- *
- * Returns:
- * The number of bytes transfered if success, -errno otherwise
+/**
+ * int **spi_xfer**(**struct spi** \*<ins>ctx</ins>, **void** \*<ins>rx</ins>, 
+ * const **void** \*<ins>tx</ins>, **size_t** <ins>n</ins>);
+ * > Transfers data over a SPI interface
+ * ### RETURN
+ * Returns the number of bytes transfered if success, -errno otherwise
  */
 int spi_xfer(struct spi *ctx, void *rx, const void *tx, size_t n);
 

@@ -23,26 +23,22 @@ struct dmasg_xfer {
     int dlastsga;       /* last destination adjustment scatter-gather */
 };
 
-/* Function: dmasg_xfer
- * Starts a DMA scatter-gather transfer
+/**
+ * int **dmasg_xfer**(**struct dmasg** \*<ins>ctx</ins>, 
+ * const **struct dmasg_xfer** \*<ins>xfer<ins>);
+ * > Starts a DMA scatter-gather transfer <ins>xfer</ins>
  *
- * Parameters:
- *  ctx - The DMA-SG channel to operate
- *  xfer - The transfer parameters
- *
- * Returns:
- * 0 in case of success, -errno otherwise
+ * ### RETURN
+ * > Returns 0 in case of success, -errno otherwise
  */
 int dmasg_xfer(struct dmasg *ctx, const struct dmasg_xfer *xfer);
 
-/* Function: dma_xfer_done
- * Polls a DMA-SG for end of transfer
+/**
+ * int **dmasg_xfer_done**(**struct dmasg** \*<ins>ctx</ins>);
+ * > Polls a DMA-SG for end of transfer
  *
- * Parameters:
- *  ctx - The DMA-SG to poll
- *
- * Returns:
- * 0 in case of success, -errno otherwise
+ * ### RETURN
+ * > Returns 0 in case of successful xfer, -errno otherwise
  */
 int dmasg_xfer_done(struct dmasg *ctx);
 

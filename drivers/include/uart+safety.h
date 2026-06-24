@@ -3,11 +3,12 @@
 
 #include "uart.h"
 
-/* Function: uart_claim
- * Claims the uart for this process/thread (opt. MPU-related feature)
- *
- * Parameters:
- *  uart - A uart instance
+/**
+ * struct uart \***uart_claim**(**struct uart** \*<ins>ctx</ins>);
+ * > Claims the uart channel <ins>ctx</ins> & its dependencies
+ * ### NOTES
+ * > This feature is related to MPU & will only have an effect if
+ * > `CONFIG_MPU` is active.
  */
 struct uart *uart_claim(/*@returned@*/ struct uart *ctx);
 

@@ -23,43 +23,34 @@ struct gpio_settings {
     gpio_invert_t invert;
 };
 
-/* Function: gpio_setup
- * Configures a gpio
+/**
+ * int **gpio_setup**(**struct gpio** \*<ins>ctx</ins>,
+ * const **struct gpio_settings** \*<ins>settings</ins>);
+ * > Configures a gpio
  *
- * Parameters:
- *  gpio - A gpio instance
- *  settings - The settings to apply
- *
- * Returns:
- * Always 0
+ * ### RETURN
+ * Returns always 0
  */
 int gpio_setup(struct gpio *ctx, const struct gpio_settings *settings);
 
-/* Function: gpio_write
- * Sets a gpio to a value
- *
- * Parameters:
- *  gpio - A gpio instance
- *  value - The value to set
+/**
+ * void **gpio_write**(**struct gpio** \*<ins>ctx/<ins>, **bool** <ins>value</ins>);
+ * > Sets gpio value
  */
 void gpio_write(struct gpio *ctx, bool value);
 
-/* Function: gpio_read
- * Read value from a gpio
+/**
+ * bool **gpio_read**(**struct gpio** \*<ins>ctx</ins>);
+ * > Read gpio value
  *
- * Parameters:
- *  gpio - A gpio instance
- *
- * Returns:
- * true if the gpio is high, false otherwise
+ * ### RETURN
+ * > Returns true if the gpio is high, false otherwise
  */
 bool gpio_read(struct gpio *ctx);
 
-/* Function: gpio_toggle
- * Toggles a gpio value
- *
- * Parameters:
- *  gpio - A gpio instance
+/**
+ * void **gpio_toggle**(**struct gpio** \*<ins>ctx</ins>);
+ * > Toggles a gpio value
  */
 void gpio_toggle(struct gpio *ctx);
 

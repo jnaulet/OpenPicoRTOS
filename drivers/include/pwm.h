@@ -28,43 +28,31 @@ typedef uint16_t pwm_duty_cycle_t;
  * Converts a value in 1/100th of a % to pwm_duty_cycle_t */
 #define PWM_DUTY_CYCLE_PTTHOU(x) (pwm_duty_cycle_t)(((x) * PWM_DUTY_CYCLE_MAX) / 10000)
 
-/* Function: pwm_set_period
- * Defines a PWM period
- *
- * Parameters:
- *  ctx - A PWM instance
- *  period - The value of the period in microseconds
- *
- * Returns:
- * 0 in case of success, -errno otherwise
+/**
+ * int **pwm_set_period**(**struct pwm** \*<ins>ctx</ins>, **pwm_period_us_t** <ins>period</ins>);
+ * > Defines a PWM period
+ * ### RETURN
+ * > Returns 0 in case of success, -errno otherwise
  */
 int pwm_set_period(struct pwm *ctx, pwm_period_us_t period);
 
-/* Function: pwm_set_duty_cycle
- * Defines a PWM duty cycle
- *
- * Parameters:
- *  ctx - A PWM instance
- *  duty_cycle - The value of the period in pwm_duty_cycle_t (0-65535)
- *
- * Returns:
- * 0 in case of success, -errno otherwise
+/**
+ * int **pwm_set_duty_cycle**(**struct pwm** \*<ins>ctx</ins>, **pwm_duty_cycle_t** <ins>duty_cycle</ins>);
+ * > Defines a PWM duty cycle
+ * ### RETURN
+ * > Returns 0 in case of success, -errno otherwise
  */
 int pwm_set_duty_cycle(struct pwm *ctx, pwm_duty_cycle_t duty_cycle);
 
-/* Function: pwm_start
- * Starts the PWM
- *
- * Parameters:
- *  ctx - A PWM instance
+/**
+ * void **pwm_start**(**struct pwm** \*<ins>ctx</ins>);
+ * > Starts the PWM
  */
 void pwm_start(struct pwm *ctx);
 
-/* Function: pwm_stop
- * Stops the PWM
- *
- * Parameters:
- *  ctx - A PWM instance
+/**
+ * void **pwm_stop**(**struct pwm** \*<ins>ctx</ins>);
+ * > Stops the PWM
  */
 void pwm_stop(struct pwm *ctx);
 

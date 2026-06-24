@@ -23,43 +23,33 @@ struct lin_settings {
     /* TODO: break length */
 };
 
-/* Function: lin_setup
- * Configures a LIN interface
+/**
+ * int **lin_setup**(**struct lin** \*<ins>ctx</ins>, 
+ * const **struct lin_settings** \*<ins>settings</ins>);
+ * > Configures a LIN interface
  *
- * Parameters:
- *  ctx - the LIN interface to configure
- *  settings - The settings to apply
- *
- * Returns:
- *  if success, -errno otherwise
+ * ### RETURN
+ * Returns 0 if success, -errno otherwise
  */
 int lin_setup(struct lin *ctx, const struct lin_settings *settings);
 
-/* Function: lin_write
- * Writes data to the LIN interface
+/**
+ * int **lin_write**(**struct lin** \*<ins>ctx</ins>, **uint8_t** <ins>id</ins>,
+ * const **void** \*<ins>buf</ins>, **size_t** <ins>n</ins>);
+ * > Writes data to the LIN interface
  *
- * Parameters:
- *  ctx - The LIN interface to use
- *  id - The ID to transfer (ignored in slave mode)
- *  buf - A pointer to the data to transfer
- *  n - The size of the data (in bytes, should be <= LIN_FRAME_COUNT)
- *
- * Returns:
- * The number of bytes written if success, -errno otherwise
+ * ### RETURN
+ * > Returns the number of bytes written if success, -errno otherwise
  */
 int lin_write(struct lin *ctx, uint8_t id, const void *buf, size_t n);
 
-/* Function: lin_read
- * Reads data from a LIN interface
+/**
+ * int **lin_read**(**struct lin** \*<ins>ctx</ins>, **uint8_t** \*<ins>id</ins>,
+ * **void** \*<ins>buf</ins>, **size_t** <ins>n</ins>);
+ * > Reads data from a LIN interface
  *
- * Parameters:
- *  ctx - The LIN interface to use
- *  id - A pointer to the ID to send (master) or to the received id (slave)
- *  buf - A buffer where the read data will be stored
- *  n - The size of the data to read (in bytes)
- *
- * Returns:
- * The number of bytes read if success, -errno otherwise
+ * ### RETURN
+ * Returns the number of bytes read if success, -errno otherwise
  */
 int lin_read(struct lin *ctx, uint8_t *id, void *buf, size_t n);
 

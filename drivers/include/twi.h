@@ -76,54 +76,41 @@ struct twi_settings {
     twi_addr_t slave_addr;
 };
 
-/* Function: twi_setup
- * Configures a TWI interface
- *
- * Parameters:
- *  ctx - A TWI instance
- *  settings - The parameters used to configure the interface
- *
- * Returns:
- * 0 in case of success, -errno otherwise
+/**
+ * int **twi_setup**(**struct twi** \*<ins>ctx</ins>, 
+ * const **struct twi_settings** \*<ins>settings</ins>);
+ * > Configures a TWI interface
+ * ### RETURN
+ * Returns 0 in case of success, -errno otherwise
  */
 int twi_setup(struct twi *ctx, const struct twi_settings *settings);
 
-/* Function: twi_poll
- * Polls TWI interface for transfer (slave mode)
- *
- * Paramters:
- *  ctx - A TWI instance
- *
- * Returns:
- * TWI_READ if a read is recv, TWI_WRITE if write is recv, -errno otherwise
+/**
+ * int **twi_poll**(**struct twi** \*<ins>ctx<ins>);
+ * > Polls TWI interface for transfer (slave mode)
+ * ### RETURN
+ * > Returns:
+ * > - TWI_READ if a read is recv
+ * > - TWI_WRITE if write is recv
+ * > - -errno otherwise
  */
 int twi_poll(struct twi *ctx);
 
-/* Function: twi_write
- * Write data to a TWI interface
- *
- * Parameters:
- *  ctx - A TWI instance
- *  buf - A buffer containing the data to write
- *  n - The size of the data to write (in bytes)
- *  flags - The flags for this transfer
- *
- * Returns:
- * The number of byte written if success, -errno otherwise
+/**
+ * int **twi_write**(**struct twi** \*<ins>ctx</ins>, const **void** \*<ins>buf</ins>, 
+ * **size_t** <ins>n</ins>, **int** <ins>flags</ins>);
+ * > Write data to a TWI interface
+ * ### RETURN
+ * Returns the number of byte written if success, -errno otherwise
  */
 int twi_write(struct twi *ctx, const void *buf, size_t n, int flags);
 
-/* Function: twi_read
- * Read data from a TWI interface
- *
- * Parameters:
- *  ctx - A TWI instance
- *  buf - A buffer to receive the data
- *  n - The size of the buffer (in bytes)
- *  flags - The flags for this transfer
- *
- * Returns:
- * The number of byte read if success, -errno otherwise
+/**
+ * int **twi_read**(**struct twi** \*<ins>ctx</ins>, **void** \*<ins>buf</ins>, 
+ * **size_t** <ins>n</ins>, **int** <ins>flags</ins>);
+ * > Read data from a TWI interface
+ * ### RETURN
+ * > Returns the number of byte read if success, -errno otherwise
  */
 int twi_read(struct twi *ctx, void *buf, size_t n, int flags);
 

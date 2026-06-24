@@ -15,7 +15,7 @@ and will kill any tasks trying to access these resources directly.
 ### TASK MANAGEMENT
 
 ---
-**PICORTOS_STACK_COUNT**(<ins>x</ins>);
+**PICORTOS_STACK_COUNT**(<ins>x</ins>)
 > Computes stack count from array <ins>x</ins>
 
 

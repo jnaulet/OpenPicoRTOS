@@ -15,54 +15,66 @@ All these functions are available to picoRTOS, picoRTOS-SMP & picoRTOS-lite.
 
 ---
 **picoRTOS_schedule**();
-> Puts the current task to sleep until next tick.<br>
+> Puts the current task to sleep until next tick
+
+> [!NOTE]
 > Strictly equivalent to `picoRTOS_sleep(1)`
 
 ---
 **picoRTOS_postpone**();
-> Puts the current task back in the scheduler's FIFO [(more info)](SCHEDULERS.md)<br>
+> Puts the current task back in the scheduler's FIFO [(more info)](SCHEDULERS.md)
+
+> [!NOTE]
 > Strictly equivalent to `picoRTOS_sleep(0)`
 
 ---
 **picoRTOS_suspend**();
-> Suspends the scheduling. Typical use is critical sections.<br>
+> Suspends the scheduling. Typical use is critical sections
+
+> [!NOTE]
 > Strictly equivalent to `picoRTOS_run(false)`
 
 ---
 **picoRTOS_suspend**();
-> Resumes the scheduling. Typical use is critical sections.<br>
+> Resumes the scheduling. Typical use is critical sections
+
+> [!NOTE]
 > Strictly equivalent to `picoRTOS_run(true)`
 
 
 ### TIME MANAGEMENT
 
 ---
-**PICORTOS_DELAY_SEC**(<ins>x</ins>);
+**PICORTOS_DELAY_SEC**(<ins>x</ins>)
 > Converts <ins>x</ins> seconds in picoRTOS_tick_t
 
 ---
-**PICORTOS_DELAY_MSEC**(<ins>x</ins>);
+**PICORTOS_DELAY_MSEC**(<ins>x</ins>)
 > Converts <ins>x</ins> milliseconds in picoRTOS_tick_t
 
 ---
-**PICORTOS_DELAY_MSEC**(<ins>x</ins>);
+**PICORTOS_DELAY_USEC**(<ins>x</ins>)
 > Converts <ins>x</ins> microseconds in picoRTOS_tick_t
 
 ---
-**PICORTOS_DELAY_ELAPSED**(<ins>ref</ins>, <ins>x</ins>);
-> Checks if delay <ins>ref</ins> + <ins>x</ins> has elapsed
+**PICORTOS_DELAY_ELAPSED**(<ins>ref</ins>, <ins>x</ins>)
+> True if delay <ins>ref</ins> + <ins>x</ins> has elapsed
 
 
 ### INTERRUPT MANAGEMENT
 
 ---
 **picoRTOS_enable_interrupt**(<ins>irq</ins>);
-> Enables an interrupt on the system.<br>
+> Enables an interrupt on the system
+
+> [!NOTE]
 > Strictly equivalent to `picoRTOS_set_interrupt(irq, true)`
 
 ---
 **picoRTOS_disable_interrupt**(<ins>irq</ins>);
-> Disables an interrupt on the system.<br>
+> Disables an interrupt on the system
+
+> [!NOTE]
 > Strictly equivalent to `picoRTOS_set_interrupt(irq, false)`
 
 
@@ -77,11 +89,11 @@ All these functions are available to picoRTOS, picoRTOS-SMP & picoRTOS-lite.
 > If predicate <ins>x</ins> is true, do nothing.<br>
 > If predicate <ins>x</ins> is false, execute <ins>or_else</ins>.
 
->[!NOTE]
+> [!NOTE]
 > This will throw a debug exception unless NDEBUG is set
 
 ---
-**picoRTOS_assert**(<ins>x</ins>, <ins>or_else</ins>);
+**picoRTOS_assert_void**(<ins>x</ins>);
 > If predicate <ins>x</ins> is true, do nothing.<br>
 > If predicate <ins>x</ins> is false, throw a debug exeption, unless
 > NDEBUG is set.

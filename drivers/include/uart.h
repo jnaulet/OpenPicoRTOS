@@ -41,41 +41,30 @@ struct uart_settings {
     uart_cstopb_t cstopb;
 };
 
-/* Function: uart_setup
- * Configure a UART interface
- *
- * Parameters:
- *  ctx - The UART interface to configure
- *  settings - The configuration parameters
- *
- * Returns:
- * 0 in case of success, -errno otherwise
+/**
+ * int **uart_setup**(**struct uart** \*<ins>ctx</ins>, 
+ * const **struct uart_settings** \*<ins>settings</ins>);
+ * > Configure a UART interface
+ * ### RETURN
+ * > Returns 0 in case of success, -errno otherwise
  */
 int uart_setup(struct uart *ctx, const struct uart_settings *settings);
 
-/* Function: uart_write
- * Write data to a UART interface
- *
- * Parameters:
- *  ctx - A UART interface
- *  buf - A buffer containing the data to write
- *  n - The size of the data to write (in bytes)
- *
- * Returns:
- * The number of bytes written if success, -errno otherwise
+/**
+ * int **uart_write**(**struct uart** \*<ins>ctx</ins>, 
+ * const **char** \*<ins>buf</ins>, **size_t** <ins>n</ins>);
+ * > Write data to a UART interface
+ * ### RETURN
+ * > Returns the number of bytes written if success, -errno otherwise
  */
 int uart_write(struct uart *ctx, const char *buf, size_t n);
 
-/* Function: uart_read
- * Read data from a UART interface
- *
- * Parameters:
- *  ctx - A UART interface
- *  buf - A buffer to receive the read data
- *  n - The size of the buffer (in bytes)
- *
- * Returns:
- * The number of bytes read if success, -errno otherwise
+/**
+ * int **uart_read**(**struct uart** \*<ins>ctx</ins>, 
+ * **char** \*<ins>buf</ins>, **size_t** <ins>n</ins>);
+ * > Read data from a UART interface
+ * ### RETURN
+ * > Returns the number of bytes read if success, -errno otherwise
  */
 int uart_read(struct uart *ctx, char *buf, size_t n);
 

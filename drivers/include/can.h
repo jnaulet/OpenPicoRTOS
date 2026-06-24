@@ -51,76 +51,65 @@ struct can_settings {
     can_loopback_t loopback;
 };
 
-/* Function: can_setup
- * Configures a CAN interface
- *
- * Parameters:
- *  ctx - The CAN interface to configure
- *  settings - The settings structure
- *
- * Returns:
- * 0 in case of success, -errno otherwise
+/**
+ * int **can_setup**(**struct can** \*<ins>ctx</ins>, 
+ * **const struct can_settings** \*<ins>settings</ins>);
+ * > Configures a CAN interface according to <ins>settings</ins>
+ * ### RETURN
+ * > Returns 0 in case of success, -errno otherwise
  */
 int can_setup(struct can *ctx, const struct can_settings *settings);
 
-/* Function: can_accept
- * Registers a message for rx on a CAN interface
+/**
+ * int **can_accept**(**struct can** \*<ins>ctx</ins>, 
+ * **can_id_t** <ins>id</ins>, **can_id_t** <ins>accept_mask</ins>);
+ * > Accepts messages according to <ins>id</ins> & <ins>accept_mask</ins> on
+ * > can interface <ins>ctx</ins>
  *
- * Parameters:
- *  ctx - A CAN interface
- *  id - The ID of the message to register
- *  accept_mask - The acceptance mask for this ID
+ * ### NOTES
+ * > CAN_ACCEPT_STRICT(_EXT) as acceptance mask means only the specified ID 
+ * > will be accepted.<br>
+ * > Acceptance masks act as a logical AND between the received ID, the
+ * > acceptance mask and the specified id
  *
- * Remarks:
- * CAN_ACCEPT_STRICT(_EXT) as acceptance mask means only the specified ID will be accepted
- * Acceptance masks act as a logical AND between the received ID, the
- * acceptance mask and the specified id
+ * > - CAN_ACCEPT_STRICT(_EXT) will only accept the specified ID
+ * > - CAN_ACCEPT_ANY will accept any message (mostly for debug purposes)
  *
- * CAN_ACCEPT_STRICT(_EXT) will only accept the specified ID
- * CAN_ACCEPT_ANY will accept any message (mostly for debug purposes)
- *
- * Returns:
- * 0 in case of success, -errno otherwise
+ * ### RETURN
+ * > Returns 0 in case of success, -errno otherwise
  */
 int can_accept(struct can *ctx, can_id_t id, can_id_t accept_mask);
 
-/* Function: can_write
- * Sends a message on the CAN interface
+/**
+ * int **can_write**(**struct can** \*<ins>ctx</ins>, 
+ * **can_id_t** <ins>id</ins>, **const void** \*<ins>buf</ins>, 
+ * **size_t** <ins>n</ins>);
+ * > Sends a message on the CAN interface
  *
- * Parameters:
- *  ctx - A CAN interface
- *  id - The ID of the message to send
- *  buf - The data to send
- *  n - the size (in bytes) of the data to send
- *
- * Returns:
- * The number of bytes sent in case of success, -errno otherwise
+ * ### RETURN
+ * > Returns the number of bytes sent in case of success, 
+ * > -errno otherwise
  */
 int can_write(struct can *ctx, can_id_t id, const void *buf, size_t n);
 
-/* Function: can_read
- * Receives a message from the CAN interface
+/**
+ * int **can_read**(**struct can** \*<ins>ctx</ins>, 
+ * **can_id_t** \*<ins>id</ins>, **void** \*<ins>buf</ins>,
+ * **size_t** <ins>n</ins>);
+ * > Receives a message from the CAN interface
  *
- * Parameters:
- *  ctx - A CAN interface
- *  id - The ID of the received message
- *  buf - A buffer where to store the received data
- *  n - the size (in bytes) of the reception buffer
- *
- * Returns:
- * The number of bytes received in case of success, -errno otherwise
+ * ### RETURN
+ * > Returns the number of bytes received in case of success, 
+ * > -errno otherwise
  */
 int can_read(struct can *ctx, can_id_t *id, void *buf, size_t n);
 
-/* Function: can_request_frame
- * Send a RTR frame with the specified ID
+/**
+ * int **can_request_frame**(**struct can** \*<ins>ctx</ins>, **can_id_t** <ins>id</ins>);
+ * > Send a RTR frame with the specified <ins>id</ins>
  *
- * Parameters:
- *  ctx - A CAN interface
- *  id - The ID of the message to request
- *
- * Returns:
- * 0 if success, -errno otherwise
+ * ### RETURN
+ * > Returns 0 if success, -errno otherwise
  */
 int can_request_frame(struct can *ctx, can_id_t id);
 
