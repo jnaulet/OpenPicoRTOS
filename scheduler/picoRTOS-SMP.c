@@ -184,14 +184,14 @@ static void task_sub_init(/*@out@*/ struct picoRTOS_task_sub *sub)
     sub->count = (picoRTOS_priority_t)1;
 }
 
-static void task_append(picoRTOS_pid_t pid,
-                        struct picoRTOS_task *task,
-                        picoRTOS_priority_t prio,
-                        picoRTOS_mask_t core_mask)
+static int task_append(picoRTOS_pid_t pid,
+                       struct picoRTOS_task *task,
+                       picoRTOS_priority_t prio,
+                       picoRTOS_mask_t core_mask)
 {
-    picoRTOS_assert(pid < (picoRTOS_pid_t)TASK_COUNT, return );
-    picoRTOS_assert(prio < (picoRTOS_priority_t)TASK_COUNT, return );
-    picoRTOS_assert(TASK_BY_PID(pid).state == TASK_STATE_DISABLED, return );
+    picoRTOS_assert(pid < (picoRTOS_pid_t)TASK_COUNT, return -1);
+    picoRTOS_assert(prio < (picoRTOS_priority_t)TASK_COUNT, return -1);
+    picoRTOS_assert(TASK_BY_PID(pid).state == TASK_STATE_DISABLED, return -1);
 
     /* state machine */
     TASK_BY_PID(pid).state = TASK_STATE_READY;
@@ -205,6 +205,8 @@ static void task_append(picoRTOS_pid_t pid,
     TASK_BY_PID(pid).prio = prio;
     /* SMP */
     TASK_BY_PID(pid).core_mask = core_mask;
+
+    return 0;
 }
 
 static void task_idle_init(void)
@@ -222,9 +224,9 @@ static void task_idle_init(void)
                            (size_t)ARCH_MIN_STACK_COUNT);
 
         /* similar to picoRTOS_add_task, but without count limit */
-        task_append((picoRTOS_pid_t)(TASK_IDLE_PID + (int)core), &idle,
-                    (picoRTOS_priority_t)TASK_IDLE_PRIO,
-                    (picoRTOS_mask_t)(1u << core));
+        (void)task_append((picoRTOS_pid_t)(TASK_IDLE_PID + (int)core), &idle,
+                          (picoRTOS_priority_t)TASK_IDLE_PRIO,
+                          (picoRTOS_mask_t)(1u << core));
     }
 }
 
@@ -293,7 +295,7 @@ void picoRTOS_add_task(struct picoRTOS_task *task, picoRTOS_priority_t prio)
     /* check params */
     picoRTOS_assert(prio < (picoRTOS_priority_t)CONFIG_TASK_COUNT, return );
     picoRTOS_assert(picoRTOS.pid_count < (picoRTOS_pid_t)CONFIG_TASK_COUNT, return );
-    task_append(picoRTOS.pid_count++, task, prio, (picoRTOS_mask_t)SMP_CORE_ANY);
+    (void)task_append(picoRTOS.pid_count++, task, prio, (picoRTOS_mask_t)SMP_CORE_ANY);
 }
 
 picoRTOS_priority_t picoRTOS_get_next_available_priority(void)
@@ -355,7 +357,7 @@ void picoRTOS_SMP_add_task(struct picoRTOS_task *task,
     picoRTOS_assert(core_mask < (picoRTOS_mask_t)(1 << CONFIG_CORE_COUNT), return );
     picoRTOS_assert(prio < (picoRTOS_priority_t)CONFIG_TASK_COUNT, return );
     picoRTOS_assert(picoRTOS.pid_count < (picoRTOS_pid_t)CONFIG_TASK_COUNT, return );
-    task_append(picoRTOS.pid_count++, task, prio, core_mask);
+    (void)task_append(picoRTOS.pid_count++, task, prio, core_mask);
 }
 
 static void core_sort_tasks(void)

@@ -86,10 +86,10 @@ static bool task_core_is_available(const struct picoRTOS_task_core *task)
     return task->state == TASK_STATE_READY;
 }
 
-static void task_append(picoRTOS_pid_t pid, struct picoRTOS_task *task)
+static int task_append(picoRTOS_pid_t pid, struct picoRTOS_task *task)
 {
-    picoRTOS_assert(pid < (picoRTOS_pid_t)TASK_COUNT, return );
-    picoRTOS_assert(TASK_BY_PID(pid).state == TASK_STATE_DISABLED, return );
+    picoRTOS_assert(pid < (picoRTOS_pid_t)TASK_COUNT, return -1);
+    picoRTOS_assert(TASK_BY_PID(pid).state == TASK_STATE_DISABLED, return -1);
 
     /* state machine */
     TASK_BY_PID(pid).state = TASK_STATE_READY;
@@ -99,6 +99,8 @@ static void task_append(picoRTOS_pid_t pid, struct picoRTOS_task *task)
     TASK_BY_PID(pid).stack_bottom = task->stack;
     TASK_BY_PID(pid).stack_top = task->stack + task->stack_count;
     TASK_BY_PID(pid).stack_count = task->stack_count;
+
+    return 0;
 }
 
 static void task_idle_init(void)
@@ -112,7 +114,7 @@ static void task_idle_init(void)
                        (size_t)ARCH_MIN_STACK_COUNT);
 
     /* similar to picoRTOS_add_task, but without count limit */
-    task_append((picoRTOS_pid_t)TASK_IDLE_PID, &idle);
+    (void)task_append((picoRTOS_pid_t)TASK_IDLE_PID, &idle);
 }
 
 void picoRTOS_init(void)
@@ -151,7 +153,7 @@ void picoRTOS_add_task(struct picoRTOS_task *task, picoRTOS_priority_t prio)
 {
     picoRTOS_assert(prio < (picoRTOS_priority_t)CONFIG_TASK_COUNT, return );
     picoRTOS_assert(TASK_BY_PID(prio).state == TASK_STATE_DISABLED, return );
-    task_append((picoRTOS_pid_t)prio, task);
+    (void)task_append((picoRTOS_pid_t)prio, task);
 }
 
 picoRTOS_priority_t picoRTOS_get_next_available_priority(void)
