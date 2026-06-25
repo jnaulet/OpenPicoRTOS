@@ -1,4 +1,4 @@
-TESTS := test_picoRTOS test_picoRTOS-SMP test_picoRTOS-lite
+TESTS := picoRTOS
 
 CC := gcc
 
@@ -15,16 +15,8 @@ OBJ := $(SRC:%.c=$(BUILD_DIR)/%.o)
 
 all: $(TESTS)
 
-test_picoRTOS: $(OBJ)
-	$(CC) $(CFLAGS) -c test.c -o $@.o
-	$(CC) $^ $@.o -o $@ $(LDFLAGS)
-
-test_picoRTOS-SMP: $(OBJ)
-	$(CC) $(CFLAGS) -DTEST_PICORTOS_SMP -c test.c -o $@.o
-	$(CC) $^ $@.o -o $@ $(LDFLAGS)
-
-test_picoRTOS-lite: $(OBJ)
-	$(CC) $(CFLAGS) -DTEST_PICORTOS_LITE -c test.c -o $@.o
+picoRTOS: $(OBJ)
+	$(CC) $(CFLAGS) -c $@.c -o $@.o
 	$(CC) $^ $@.o -o $@ $(LDFLAGS)
 
 $(BUILD_DIR)/%.o: %.c
@@ -32,7 +24,7 @@ $(BUILD_DIR)/%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 indent:
-	uncrustify -c ../../etc/uncrustify.cfg $(SRC) test.c \
+	uncrustify -c ../../etc/uncrustify.cfg $(SRC) picoRTOS.c \
 	  --replace --no-backup
 
 clean:
