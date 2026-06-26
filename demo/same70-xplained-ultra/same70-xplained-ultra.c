@@ -19,7 +19,8 @@ static int clock_init(/*@partial@*/ struct same70_xplained_ultra *ctx)
         CLOCK_ATMEL_PMC_UPLL_DIV2,
         CLOCK_ATMEL_PMC_MCKR_CSS_PLLACK,
         1ul,    /* prescaler */
-        2ul     /* mdiv */
+        2ul,    /* mdiv */
+	CLOCK_ATMEL_PMC_CONFIG_HW
     };
 
     /* disable automatic watchdog */
