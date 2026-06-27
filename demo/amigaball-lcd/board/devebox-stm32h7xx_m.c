@@ -78,19 +78,25 @@ static void mux_init(void)
 
 static void gpio_init(/*@partial@*/ struct board *ctx)
 {
+    static struct gpio_stm32h7xx GPIOA;
+    static struct gpio_stm32h7xx GPIOB;
+
     static struct gpio LED;
     static struct gpio BLK;
     static struct gpio DC;
     static struct gpio CS;
     static struct gpio RES;
 
+    (void)gpio_stm32h7xx_init(&GPIOA, ADDR_GPIOA);
+    (void)gpio_stm32h7xx_init(&GPIOB, ADDR_GPIOB);
+
     /* led */
-    (void)gpio_stm32h7xx_init(&LED, ADDR_GPIOA, (size_t)1);
+    (void)gpio_stm32h7xx_gpio_init(&LED, &GPIOA, (size_t)1);
     /* lcd */
-    (void)gpio_stm32h7xx_init(&BLK, ADDR_GPIOB, (size_t)0);
-    (void)gpio_stm32h7xx_init(&DC, ADDR_GPIOB, (size_t)1);
-    (void)gpio_stm32h7xx_init(&CS, ADDR_GPIOB, (size_t)12);
-    (void)gpio_stm32h7xx_init(&RES, ADDR_GPIOB, (size_t)14);
+    (void)gpio_stm32h7xx_gpio_init(&BLK, &GPIOB, (size_t)0);
+    (void)gpio_stm32h7xx_gpio_init(&DC, &GPIOB, (size_t)1);
+    (void)gpio_stm32h7xx_gpio_init(&CS, &GPIOB, (size_t)12);
+    (void)gpio_stm32h7xx_gpio_init(&RES, &GPIOB, (size_t)14);
 
     /* leds */
     ctx->LED = &LED;

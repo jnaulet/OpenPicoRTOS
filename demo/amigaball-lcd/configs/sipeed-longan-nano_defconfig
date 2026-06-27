@@ -43,7 +43,7 @@ CONFIG_DEBUG=y
 # CONFIG_NDEBUG is not set
 # CONFIG_MAP is not set
 CONFIG_EXTRA_CFLAGS="-DLCD_FPS=25"
-CONFIG_LDSCRIPT="${srctree}/samples/ldscripts/gd32vf103cbt6_flash_xip.ld"
+CONFIG_LDSCRIPT="ldscripts/gd32vf103cbt6_flash_xip.ld"
 CONFIG_EXTRA_LDFLAGS=""
 
 #

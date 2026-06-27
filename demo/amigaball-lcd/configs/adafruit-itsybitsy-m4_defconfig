@@ -59,7 +59,7 @@ CONFIG_DEBUG=y
 # CONFIG_NDEBUG is not set
 # CONFIG_MAP is not set
 CONFIG_EXTRA_CFLAGS="-DLCD_FPS=25 -DLCD_FB_SWAP16"
-CONFIG_LDSCRIPT="${srctree}/samples/ldscripts/atsamd51g19a_ram.ld"
+CONFIG_LDSCRIPT="ldscripts/atsamd51g19a_ram.ld"
 CONFIG_EXTRA_LDFLAGS=""
 
 #

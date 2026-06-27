@@ -47,7 +47,7 @@ CONFIG_DEBUG=y
 # CONFIG_NDEBUG is not set
 # CONFIG_MAP is not set
 CONFIG_EXTRA_CFLAGS="-DLCD_FPS=12"
-CONFIG_LDSCRIPT="${srctree}/samples/ldscripts/f28379x_ram.cmd"
+CONFIG_LDSCRIPT="ldscripts/f28379x_ram.cmd"
 CONFIG_EXTRA_LDFLAGS=""
 
 #

@@ -48,7 +48,7 @@ CONFIG_DEBUG=y
 # CONFIG_NDEBUG is not set
 # CONFIG_MAP is not set
 CONFIG_EXTRA_CFLAGS="-DLCD_FPS=25 -DLCD_FB_DIVIDER=8"
-CONFIG_LDSCRIPT="${srctree}/samples/ldscripts/rp2040_ram.ld"
+CONFIG_LDSCRIPT="ldscripts/rp2040_ram.ld"
 CONFIG_EXTRA_LDFLAGS=""
 
 #
