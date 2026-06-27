@@ -1,9 +1,12 @@
 #include <picoRTOS.h>
 #include <picoRTOS_device.h>
 
+#include <errno.h>
+
 static unsigned char *SCREEN1 = (unsigned char*)ADDR_SCREEN1;
 /* static unsigned char *COLOR = (unsigned char*)ADDR_COLOR; */
 
+/* cppcheck-suppress [constParameterCallback] */
 static void tick_main(void *priv)
 {
     picoRTOS_assert(priv == NULL, picoRTOS_kill(EINVAL));
