@@ -1,5 +1,16 @@
 # Release notes
 
+## picoRTO v1.11.0
+### What's new ?
+
+A lot of things have changed is this new major release:
+ - Support for MPUs
+ - Better linker scripts
+ - New z80 architecture added
+ - New safety HAL added
+
+This is a major step in the right direction (DO-178C certifiability).
+
 ## picoRTOS v1.10.4
 ### What's new ?
 
