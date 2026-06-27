@@ -336,13 +336,13 @@ int clock_atmel_pmc_init(const struct clock_settings *settings)
 {
     picoRTOS_assert(settings->config < CLOCK_ATMEL_PMC_CONFIG_COUNT, return -EINVAL);
 
-    int res;
     unsigned long freq = 0;
 
     /* slck */
     (void)slck_probe();
 
     if (settings->config == CLOCK_ATMEL_PMC_CONFIG_HW) {
+        int res;
         /* ensure write protect is disabled */
         PMC->PMC_WPMR = (uint32_t)PMC_WPMR_WPKEY(0x504d43);
         if ((res = mainck_setup(settings)) < 0) return res;     /* mainck */

@@ -186,7 +186,7 @@ static int write_to_latch_buffer(struct flash *ctx, size_t offset, const void *d
     picoRTOS_assert(((size_t)data % sizeof(uint32_t)) == 0, return -EINVAL);
 
     size_t i;
-    uint32_t *data32 = (uint32_t*)data;
+    const uint32_t *data32 = (const uint32_t*)data;
     uint32_t *ptr = (uint32_t*)((uintptr_t)ctx->latch_buffer + offset);
 
     /* MUST be in order */
