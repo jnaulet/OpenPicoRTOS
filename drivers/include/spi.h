@@ -77,7 +77,7 @@ struct spi_settings {
 };
 
 /**
- * int **spi_setup**(**struct spi** \*<ins>ctx</ins>, 
+ * int **spi_setup**(**struct spi** \*<ins>ctx</ins>,
  * const **struct spi_settings** \*<ins>settings</ins>);
  * > Configure a SPI interface
  * ### RETURN
@@ -86,7 +86,7 @@ struct spi_settings {
 int spi_setup(struct spi *ctx, const struct spi_settings *settings);
 
 /**
- * int **spi_xfer**(**struct spi** \*<ins>ctx</ins>, **void** \*<ins>rx</ins>, 
+ * int **spi_xfer**(**struct spi** \*<ins>ctx</ins>, **void** \*<ins>rx</ins>,
  * const **void** \*<ins>tx</ins>, **size_t** <ins>n</ins>);
  * > Transfers data over a SPI interface
  * ### RETURN

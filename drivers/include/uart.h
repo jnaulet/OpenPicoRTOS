@@ -42,7 +42,7 @@ struct uart_settings {
 };
 
 /**
- * int **uart_setup**(**struct uart** \*<ins>ctx</ins>, 
+ * int **uart_setup**(**struct uart** \*<ins>ctx</ins>,
  * const **struct uart_settings** \*<ins>settings</ins>);
  * > Configure a UART interface
  * ### RETURN
@@ -51,7 +51,7 @@ struct uart_settings {
 int uart_setup(struct uart *ctx, const struct uart_settings *settings);
 
 /**
- * int **uart_write**(**struct uart** \*<ins>ctx</ins>, 
+ * int **uart_write**(**struct uart** \*<ins>ctx</ins>,
  * const **char** \*<ins>buf</ins>, **size_t** <ins>n</ins>);
  * > Write data to a UART interface
  * ### RETURN
@@ -60,7 +60,7 @@ int uart_setup(struct uart *ctx, const struct uart_settings *settings);
 int uart_write(struct uart *ctx, const char *buf, size_t n);
 
 /**
- * int **uart_read**(**struct uart** \*<ins>ctx</ins>, 
+ * int **uart_read**(**struct uart** \*<ins>ctx</ins>,
  * **char** \*<ins>buf</ins>, **size_t** <ins>n</ins>);
  * > Read data from a UART interface
  * ### RETURN

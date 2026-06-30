@@ -22,7 +22,7 @@ next:
 	;; a = *base++
 	mov dpl, r2
 	mov dph, r3
-        mov a, #0
+	clr a
 	movc a, @a+dptr
 	inc dptr
 	mov r2, dpl

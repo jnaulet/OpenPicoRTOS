@@ -139,6 +139,7 @@ loop:
 	mov dph, a
 	.endm
 
+	.area XINIT (CODE)
 	.area CSEG (CODE)
 
 	.globl SysTick_Handler
