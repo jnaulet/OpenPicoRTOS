@@ -1,5 +1,7 @@
 #include "adc-atmel_afec.h"
+
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 #include <stdint.h>
 
@@ -141,6 +143,7 @@ int adc_atmel_afec_init(struct adc_atmel_afec *ctx, int base, clock_id_t clkid)
 
     picoRTOS_assert(f > 0, return -EIO);
     prescal = (int)div_floor(f, (clock_freq_t)AFE_CLOCK_TYP);
+    picoRTOS_assert(prescal > 0, return -EIO);
 
     /* TODO: reset */
 
@@ -266,4 +269,12 @@ int adc_read_multiple(struct adc *ctx, int *data, size_t n)
 {
     picoRTOS_assert(n > 0, return -EINVAL);
     return adc_read(ctx, data);
+}
+
+struct adc *adc_claim(struct adc *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->parent, sizeof(*ctx->parent), MM_URW);
+    picoRTOS_mpu_add_region(ctx->parent->base, sizeof(*ctx->parent->base),
+                            MM_URW | MM_NON_CACHEABLE);
+    return ctx;
 }

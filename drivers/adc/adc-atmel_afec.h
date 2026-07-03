@@ -1,7 +1,7 @@
 #ifndef ADC_ATMEL_AFEC_H
 #define ADC_ATMEL_AFEC_H
 
-#include "adc.h"
+#include "adc+safety.h"
 #include "clock.h"
 #include <stddef.h>
 
@@ -35,6 +35,7 @@ int adc_atmel_afec_adc_init(/*@out@*/ struct adc *ctx, struct adc_atmel_afec *pa
  *
  * int adc_read(struct adc *ctx, int *data);
  * int adc_read_multiple(struct adc *ctx, int *data, size_t n);
+ * struct adc *adc_claim(struct adc *ctx);
  */
 
 #endif
