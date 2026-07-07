@@ -65,14 +65,23 @@ struct MPU_PMSAV7 {
 #define MPU_PMSAV7_ADDR_ERR_THRES 128u
 #define TASK_COUNT                (CONFIG_TASK_COUNT + CONFIG_CORE_COUNT)
 
+struct mpu_desc {
+    /* human-readable */
+    uintptr_t bottom;
+    uintptr_t top;
+    /* arm */
+    uint32_t RBAR;
+    uint32_t SIZE;
+    uint32_t SRD;
+};
+
 struct mpu_entry {
+    uintptr_t addr;
+    size_t n;
+    mpu_mode_t mode;
+    struct mpu_desc desc;
     volatile uint32_t MPU_RBAR;
     volatile uint32_t MPU_RASR;
-    struct {
-        uintptr_t addr;
-        mpu_mode_t mode;
-        size_t n;
-    } match;
 };
 
 static struct {
@@ -88,6 +97,9 @@ static struct {
 } mpu;
 
 static struct MPU_PMSAV7 *MPU = (struct MPU_PMSAV7*)PMSAV7_BASE; // NOLINT
+
+#define div_floor(a, b) (((a)) / (b))
+#define div_ceil(a, b) (((a) + (b - 1)) / (b))
 
 void arch_mpu_init(void)
 {
@@ -145,9 +157,9 @@ static uint32_t RASR_from_mode(mpu_mode_t mode)
 }
 
 #define MPU_ENTRY_MATCH(entry, addr, n, mode)                           \
-  ((uintptr_t)addr >= (entry)->match.addr &&                            \
-   (uintptr_t)addr + n <= (entry)->match.addr + (entry)->match.n &&     \
-   (mode) == (entry)->match.mode) /* FIXME, some mode should be compatible */
+  ((uintptr_t)addr >= (entry)->desc.bottom &&                           \
+   (uintptr_t)addr + n <= (entry)->desc.top &&                          \
+   (mode) == (entry)->mode) /* FIXME, some mode should be compatible */
 
 static int region_already_exists(int pid, const void *addr, size_t n, mpu_mode_t mode)
 {
@@ -167,98 +179,13 @@ static int region_already_exists(int pid, const void *addr, size_t n, mpu_mode_t
     return -ENOENT;
 }
 
-static int RBAR_SIZE_from_addr_n(uintptr_t addr, size_t n,
-                                 /*@reldef@*/ uintptr_t *rRBAR,
-                                 /*@reldef@*/ uint32_t *rSIZE)
-{
-#define MPU_RASR_SIZE_COUNT 32
-    arch_assert(n > 0, return -EINVAL);
-
-    size_t p2;
-    size_t max_p2;
-
-    /* step 1: determine the maximum size we can get depending
-     * on addr alignment */
-    for (p2 = (size_t)5; p2 < (size_t)MPU_RASR_SIZE_COUNT; p2++) {
-        unsigned mask = (1u << p2) - 1u;
-        if ((addr & mask) > MPU_PMSAV7_ADDR_ERR_THRES)
-            break;
-        /* ack */
-        max_p2 = p2;
-    }
-
-    uint32_t SIZE = (uint32_t)4; /* min: 32 */
-    uintptr_t RBAR = addr & (uintptr_t) ~((1u << max_p2) - 1u);
-
-    /* step 2: try to fit all the data */
-    for (p2 = (size_t)4; p2 < (size_t)max_p2; p2++) {
-        size_t size = (size_t)(1u << (p2 + 1)); /* SIZE field is -1 */
-        if ((RBAR + size) > (addr + n) + MPU_PMSAV7_ADDR_ERR_THRES)
-            break;
-        /* ack */
-        SIZE = (uint32_t)p2;
-    }
-
-    /* return values */
-    *rRBAR = RBAR;
-    *rSIZE = SIZE;
-
-    /* step 3: dedtermine how much data we really covered */
-    size_t diff = (size_t)((addr + n) - (RBAR + (1u << (SIZE + 1))));
-    return (int)(diff > n ? n : (n - diff));
-}
-
-static uint32_t SRD_from_RBAR_SIZE(uintptr_t addr, size_t n,
-                                   uintptr_t RBAR, uint32_t SIZE)
-{
-#define div_ceil(a, b)  (((a) + ((b) - 1)) / (b))
-#define div_floor(a, b) ((a) / (b))
-    arch_assert(n > 0, return 0);
-
-    /* fine-tune with SRD */
-    size_t size = (size_t)(1u << (SIZE + 1));
-    size_t sr_size = size / (size_t)8;
-    size_t pre = (size_t)(addr - RBAR);
-    size_t post = (size_t)((RBAR + size) - (addr + n));
-    /* last segment will be cut short if needed */
-    uint32_t SRD = ((uint32_t)0xff00u >> div_floor(post, sr_size) |
-                    (uint32_t)0x00ffu >> (8u - (pre / sr_size)));
-
-    /* for regions < 256 bytes */
-    if (size < (size_t)256)
-        SRD = 0;
-
-    return SRD;
-}
-
-static void addr_n_from_RBAR_SIZE_SRD(uintptr_t RBAR, uint32_t SIZE, uint32_t SRD,
-                                      /*@reldef@*/ uintptr_t *raddr,
-                                      /*@reldef@*/ uintptr_t *rn)
-{
-    size_t i;
-    size_t n = (size_t)(1u << (SIZE + 1));
-    size_t sr_size = n >> 3;
-
-    for (i = (size_t)8; i-- != 0;)
-        if ((SRD & (uint32_t)(1u << i)) != 0) n -= sr_size;
-
-    for (i = 0; i < (size_t)8; i++) {
-        if ((SRD & (uint32_t)(1u << i)) == 0) break;
-        RBAR += sr_size;
-    }
-
-    *raddr = RBAR;
-    *rn = n;
-}
-
-#define MPU_MATCH_CONTIGUOUS(e0, e1)                            \
-  (((e0)->match.addr + (e0)->match.n) == (e1)->match.addr &&    \
-   (e0)->match.mode == (e1)->match.mode)
-#define MPU_MERGE_CONTIGUOUS(e0, e1)            \
-  do {                                          \
-    (e0)->match.n += (e1)->match.n;             \
-    (e1)->match.n = (e0)->match.n;              \
-    (e1)->match.addr = (e0)->match.addr;        \
+#define MPU_MATCH_CONTIGUOUS(e0, e1)         \
+  ((e0)->desc.top == (e1)->desc.bottom &&    \
+   (e0)->mode == (e1)->mode)
+#define MPU_MERGE_CONTIGUOUS(e0, e1)                    \
+  do {                                                  \
+    (e0)->desc.top = (e1)->desc.top;                    \
+    (e1)->desc.bottom = (e0)->desc.bottom;              \
   } while(false)
 
 static void merge_contiguous_entries(int pid)
@@ -286,6 +213,51 @@ static void merge_contiguous_entries(int pid)
     }
 }
 
+static int mpu_desc_from_addr_n(uintptr_t addr, size_t n,
+                                /*@out@*/ struct mpu_desc *d)
+{
+#define MPU_RASR_SIZE_COUNT 32
+#define MPU_SRD_SIZE_MIN    256
+
+    size_t p2;
+    size_t size;
+    uintptr_t top;
+    uintptr_t bottom;
+    uintptr_t midpoint = addr + div_ceil(n, 2u);
+
+    /* closest pow2 */
+    for (p2 = (size_t)8; p2 < (size_t)MPU_RASR_SIZE_COUNT; p2++) {
+        size_t mask = (size_t)(1u << p2) - 1u;
+        /* adjust */
+        size = mask + 1u;
+        bottom = midpoint & ~mask;
+        top = (bottom + size);
+        /* out condition */
+        if (bottom <= addr && size >= n)
+            break;
+    }
+
+    size_t part_len = size >> 3;
+    size_t before = div_floor((addr - bottom), part_len);
+    size_t before_len = before * part_len;
+    size_t after = div_floor(top - (addr + n), part_len);
+    size_t after_len = after * part_len;
+
+    /* underflow */
+    if (after > n) after_len = 0;
+
+    d->RBAR = bottom;
+    d->SIZE = p2 - 1;
+    d->SRD = (uint32_t)0xffu & ((uint32_t)0xff00u >> after |
+                                (uint32_t)0x00ffu >> (8u - before));
+
+    /* correct our numbers */
+    d->bottom = bottom + before_len;
+    d->top = top - after_len;
+
+    return (int)(d->top - addr);
+}
+
 void arch_mpu_add_region(int pid, const void *addr, size_t n, mpu_mode_t mode)
 {
     arch_assert(pid < TASK_COUNT, return );
@@ -297,10 +269,10 @@ void arch_mpu_add_region(int pid, const void *addr, size_t n, mpu_mode_t mode)
 
     size_t left = n;
     struct mpu_entry *entry = NULL;
-    uintptr_t start = (uintptr_t)addr;
+    uintptr_t MPU_RBAR = (uintptr_t)addr;
     uint32_t MPU_RASR = RASR_from_mode(mode);
 
-    while (left != 0) {
+    for (;;) {
 
         size_t index;
         bool is_kernel = (pid < 0);
@@ -313,32 +285,26 @@ void arch_mpu_add_region(int pid, const void *addr, size_t n, mpu_mode_t mode)
             arch_assert(index < mpu.count, return );
         }
 
-        uint32_t SIZE = 0;
-        uintptr_t MPU_RBAR = 0;
-        int ncovered = RBAR_SIZE_from_addr_n(start, left, &MPU_RBAR, &SIZE);
-        uint32_t SRD = SRD_from_RBAR_SIZE(start, left, MPU_RBAR, SIZE);
-        arch_assert(ncovered > 0, return );
-
-        /* set reg */
-        MPU->MPU_RNR = (uint32_t)MPU_RNR_REGION(index);
-        MPU->MPU_RBAR = (uint32_t)MPU_RBAR;
-        MPU->MPU_RASR = (uint32_t)(MPU_RASR | MPU_RASR_SRD(SRD) |
-                                   MPU_RASR_SIZE(SIZE) | MPU_RASR_ENABLE);
-
         /* kernel regions are put last (highest priority) */
         if (is_kernel) entry = &mpu.MPU[--mpu.count];
         else entry = &mpu.pid[pid].MPU[mpu.pid[pid].count++];
+        int ncovered = mpu_desc_from_addr_n(MPU_RBAR, left, &entry->desc);
 
+        /* for debug */
+        entry->addr = (uintptr_t)addr;
+        entry->n = n;
+        entry->mode = mode;
         /* fill-up entry */
-        entry->MPU_RBAR = MPU->MPU_RBAR | MPU_RBAR_VALID;
-        entry->MPU_RASR = MPU->MPU_RASR;
-        /* cache values */
-        entry->match.mode = mode;
-        addr_n_from_RBAR_SIZE_SRD(MPU_RBAR, SIZE, SRD,
-                                  &entry->match.addr,
-                                  &entry->match.n);
+        entry->MPU_RBAR = (uint32_t)(entry->desc.RBAR | MPU_RBAR_VALID |
+                                     MPU_RBAR_REGION(index));
+        entry->MPU_RASR = (uint32_t)(MPU_RASR | MPU_RASR_SRD(entry->desc.SRD) |
+                                     MPU_RASR_SIZE(entry->desc.SIZE) |
+                                     MPU_RASR_ENABLE);
+        /* out condition */
+        if ((size_t)ncovered >= left)
+            break;
 
-        start += (uintptr_t)ncovered;
+        MPU_RBAR = (uintptr_t)entry->desc.top;
         left -= (size_t)ncovered;
     }
 
@@ -346,25 +312,38 @@ void arch_mpu_add_region(int pid, const void *addr, size_t n, mpu_mode_t mode)
      * FIXME: this is the lazy quick and dirty way of doing things.
      * doesn't mean it's wrong, just slightly inelegant */
     merge_contiguous_entries(pid);
+    arch_mpu_restore_regions(pid);
 
     /* check back */
     arch_assert(entry != NULL, return );
+#if 0
     arch_assert_void((uintptr_t)addr - entry->match.addr < (uintptr_t)MPU_PMSAV7_ADDR_ERR_THRES);
     arch_assert_void((entry->match.addr + entry->match.n) - ((uintptr_t)addr + n) <
                      (uintptr_t)MPU_PMSAV7_ADDR_ERR_THRES);
+#endif
 }
 
 void arch_mpu_restore_regions(int pid)
 {
     arch_assert(pid < TASK_COUNT, return );
-    arch_assert(pid > PID_KERNEL, return );
+    arch_assert(pid >= PID_KERNEL, return );
 
-    size_t n = mpu.count;
-    struct mpu_pid *p = &mpu.pid[pid];
+    bool is_kernel = (pid < 0);
 
-    while (n-- != 0) {
-        MPU->MPU_RBAR = p->MPU[n].MPU_RBAR;
-        MPU->MPU_RASR = p->MPU[n].MPU_RASR;
+    if (is_kernel) {
+        size_t n = (size_t)MPU_PMSAV7_DREGION_COUNT;
+        while (n-- != mpu.count) {
+            MPU->MPU_RBAR = mpu.MPU[n].MPU_RBAR;
+            MPU->MPU_RASR = mpu.MPU[n].MPU_RASR;
+        }
+    }else{
+        size_t n = mpu.count;
+        struct mpu_pid *p = &mpu.pid[pid];
+
+        while (n-- != 0) {
+            MPU->MPU_RBAR = p->MPU[n].MPU_RBAR;
+            MPU->MPU_RASR = p->MPU[n].MPU_RASR;
+        }
     }
 }
 
