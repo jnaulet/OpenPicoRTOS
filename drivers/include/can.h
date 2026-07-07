@@ -52,7 +52,7 @@ struct can_settings {
 };
 
 /**
- * int **can_setup**(**struct can** \*<ins>ctx</ins>, 
+ * int **can_setup**(**struct can** \*<ins>ctx</ins>,
  * **const struct can_settings** \*<ins>settings</ins>);
  * > Configures a CAN interface according to <ins>settings</ins>
  * ### RETURN
@@ -61,13 +61,13 @@ struct can_settings {
 int can_setup(struct can *ctx, const struct can_settings *settings);
 
 /**
- * int **can_accept**(**struct can** \*<ins>ctx</ins>, 
+ * int **can_accept**(**struct can** \*<ins>ctx</ins>,
  * **can_id_t** <ins>id</ins>, **can_id_t** <ins>accept_mask</ins>);
  * > Accepts messages according to <ins>id</ins> & <ins>accept_mask</ins> on
  * > can interface <ins>ctx</ins>
  *
  * ### NOTES
- * > CAN_ACCEPT_STRICT(_EXT) as acceptance mask means only the specified ID 
+ * > CAN_ACCEPT_STRICT(_EXT) as acceptance mask means only the specified ID
  * > will be accepted.<br>
  * > Acceptance masks act as a logical AND between the received ID, the
  * > acceptance mask and the specified id
@@ -81,25 +81,25 @@ int can_setup(struct can *ctx, const struct can_settings *settings);
 int can_accept(struct can *ctx, can_id_t id, can_id_t accept_mask);
 
 /**
- * int **can_write**(**struct can** \*<ins>ctx</ins>, 
- * **can_id_t** <ins>id</ins>, **const void** \*<ins>buf</ins>, 
+ * int **can_write**(**struct can** \*<ins>ctx</ins>,
+ * **can_id_t** <ins>id</ins>, **const void** \*<ins>buf</ins>,
  * **size_t** <ins>n</ins>);
  * > Sends a message on the CAN interface
  *
  * ### RETURN
- * > Returns the number of bytes sent in case of success, 
+ * > Returns the number of bytes sent in case of success,
  * > -errno otherwise
  */
 int can_write(struct can *ctx, can_id_t id, const void *buf, size_t n);
 
 /**
- * int **can_read**(**struct can** \*<ins>ctx</ins>, 
+ * int **can_read**(**struct can** \*<ins>ctx</ins>,
  * **can_id_t** \*<ins>id</ins>, **void** \*<ins>buf</ins>,
  * **size_t** <ins>n</ins>);
  * > Receives a message from the CAN interface
  *
  * ### RETURN
- * > Returns the number of bytes received in case of success, 
+ * > Returns the number of bytes received in case of success,
  * > -errno otherwise
  */
 int can_read(struct can *ctx, can_id_t *id, void *buf, size_t n);
