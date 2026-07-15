@@ -2,5 +2,8 @@ menu "RNG drivers"
 
 config RNG_XORSHIFT32
        bool "George Marsaglia's xorshift32 pseudo-random RNG"
+       
+config RNG_ATSAMX7X
+       bool "Atmel atsamx7x series TRNG"
 
 endmenu
