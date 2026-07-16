@@ -147,7 +147,7 @@ int spi_atsamx7x_qspi_reset(struct spi *ctx)
 {
     int deadlock = CONFIG_DEADLOCK_COUNT;
     uint32_t QSPI_SCR = ctx->base->QSPI_SCR;
-    uint32_t QSPI_MR = ctx->base->QSPI_MR & QSPI_MR_NBBITS(QSPI_MR_NBBITS_M);
+    uint32_t QSPI_MR = ctx->base->QSPI_MR & (uint32_t)QSPI_MR_NBBITS(QSPI_MR_NBBITS_M);
 
     /* reset and enable */
     ctx->base->QSPI_CR = (uint32_t)QSPI_CR_SWRST;
@@ -160,8 +160,8 @@ int spi_atsamx7x_qspi_reset(struct spi *ctx)
 
     /* wait data read before transfer */
     ctx->base->QSPI_SCR = QSPI_SCR;
-    ctx->base->QSPI_MR = QSPI_MR | (QSPI_MR_WDRBT |
-                                    QSPI_MR_CSMODE(1)); /* LASTXFER */
+    ctx->base->QSPI_MR = QSPI_MR | (uint32_t)(QSPI_MR_WDRBT |
+                                              QSPI_MR_CSMODE(1)); /* LASTXFER */
     return 0;
 }
 
