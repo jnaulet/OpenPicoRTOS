@@ -1,7 +1,7 @@
 #ifndef PWM_ATSAMX7X_TC_H
 #define PWM_ATSAMX7X_TC_H
 
-#include "pwm.h"
+#include "pwm+safety.h"
 #include "clock.h"
 
 #define PWM_ATSAMX7X_TC_CH_COUNT 3
@@ -77,6 +77,8 @@ int pwm_atsamx7x_tc_pwm_setup(struct pwm *ctx, const struct pwm_atsamx7x_tc_pwm_
  *
  * void pwm_start(struct pwm *ctx);
  * void pwm_stop(struct pwm *ctx);
+ *
+ * struct pwm *pwm_claim(struct pwm *ctx);
  */
 
 #endif

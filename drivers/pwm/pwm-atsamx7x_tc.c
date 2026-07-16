@@ -1,5 +1,6 @@
 #include "pwm-atsamx7x_tc.h"
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 
 #include <stdint.h>
 
@@ -279,4 +280,12 @@ void pwm_start(struct pwm *ctx)
 void pwm_stop(struct pwm *ctx)
 {
     ctx->base->TC_CCRx = (uint32_t)TC_CCRx_CLKDIS;
+}
+
+struct pwm *pwm_claim(struct pwm *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->parent, sizeof(*ctx->parent), MM_URW);
+    picoRTOS_mpu_add_region(ctx->parent->base, sizeof(*ctx->parent->base),
+                            MM_URW | MM_NON_CACHEABLE);
+    return ctx;
 }
