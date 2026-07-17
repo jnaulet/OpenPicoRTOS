@@ -144,7 +144,6 @@ int flash_probe(struct flash *ctx)
     return -EAGAIN;
 }
 
-/* cppcheck-suppress [constParameterPointer] */
 int flash_get_attributes(struct flash *ctx, struct flash_attributes *attr)
 {
     memcpy(attr, &ctx->attr, sizeof(*attr));
@@ -187,12 +186,14 @@ static int write_to_latch_buffer(struct flash *ctx, size_t offset, const void *d
 
     size_t i;
     const uint32_t *data32 = (const uint32_t*)data;
-    uint32_t *ptr = (uint32_t*)((uintptr_t)ctx->latch_buffer + offset);
+    uint32_t *ptr = &ctx->latch_buffer[offset / sizeof(uint32_t)];
+    uint32_t *ptr_save = ptr;
 
     /* MUST be in order */
     for (i = 0; i < n; i += sizeof(uint32_t))
         *ptr++ = *data32++;
 
+    picoRTOS_flush_dcache(ptr_save, n);
     return 0;
 }
 
