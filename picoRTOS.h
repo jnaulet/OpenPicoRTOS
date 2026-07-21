@@ -87,6 +87,9 @@ void picoRTOS_sleep_until(picoRTOS_tick_t *ref,                         /* put c
  */
 #define picoRTOS_resume() picoRTOS_run(true)
 
+#ifdef __cppcheck__
+[[noreturn]]
+#endif
 /*@noreturn@*/ void picoRTOS_kill(int errnum);              /* kills the current task */
 picoRTOS_pid_t picoRTOS_self(void);                         /* gets the current thread pid */
 /*@unused@*/ picoRTOS_tick_t picoRTOS_get_tick(void);       /* get current tick */
