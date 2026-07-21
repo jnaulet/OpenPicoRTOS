@@ -117,7 +117,6 @@ int flash_ext_probe(struct flash_ext *ctx)
     return 0;
 }
 
-/* cppcheck-suppress [constParameterPointer] */
 int flash_ext_get_attributes(struct flash_ext *ctx, struct flash_attributes *attr)
 {
     memcpy(attr, &ctx->attr, sizeof(*attr));
