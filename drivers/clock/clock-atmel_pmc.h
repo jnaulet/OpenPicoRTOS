@@ -37,9 +37,9 @@ typedef enum {
 } clock_atmel_pmc_mckr_css_t;
 
 typedef enum {
-  CLOCK_ATMEL_PMC_CONFIG_HW,
-  CLOCK_ATMEL_PMC_CONFIG_RTOS,
-  CLOCK_ATMEL_PMC_CONFIG_COUNT
+    CLOCK_ATMEL_PMC_CONFIG_HW,
+    CLOCK_ATMEL_PMC_CONFIG_RTOS,
+    CLOCK_ATMEL_PMC_CONFIG_COUNT
 } clock_atmel_pmc_config_t;
 
 struct clock_settings {
