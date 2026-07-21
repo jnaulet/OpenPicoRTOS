@@ -31,8 +31,8 @@ SECTIONS
 	.text : AT(__einit)
 	{
 		__text_start__ = .;
-		. = ALIGN(1 << LOG2CEIL(__ptext_len__));
-		__ptext_start__ = .;
+		. = ALIGN(1 << LOG2CEIL(ptext_len));
+		ptext_start = .;
 		*picoRTOS.o (.text)
 		*picoRTOS_port.o (.text)
 		*picoRTOS_portasm.o (.text)
@@ -53,11 +53,11 @@ SECTIONS
 		. = ALIGN(4096);
 		__runtime_vectors_end__ = .;
 
-		. = ALIGN(1 << LOG2CEIL(__ptext_len__));
-		__ptext_end__ = .;
+		. = ALIGN(1 << LOG2CEIL(ptext_len));
+		ptext_end = .;
 		
-		. = ALIGN(1 << LOG2CEIL(__utext_len__));
-		__utext_start__ = .;
+		. = ALIGN(1 << LOG2CEIL(utext_len));
+		utext_start = .;
 		*(.text*)
 
 		/* We won't be using a mpu region for rodata so we have to
@@ -68,8 +68,8 @@ SECTIONS
 		. = ALIGN(4);
 		KEEP(*(.rodata*))
 
-		. = ALIGN(1 << LOG2CEIL(__utext_len__));
-		__utext_end__ = .;
+		. = ALIGN(1 << LOG2CEIL(utext_len));
+		utext_end = .;
 		__text_end__ = .;
 	} > REGION_TEXT
 
@@ -81,8 +81,8 @@ SECTIONS
 	.data : AT(__etext)
 	{
                 __data_start__ = .;
-		. = ALIGN(1 << LOG2CEIL(__pdata_len__));
-		__pdata_start__ = .;
+		. = ALIGN(1 << LOG2CEIL(pdata_len));
+		pdata_start = .;
 		*picoRTOS.o (.data)
 		*picoRTOS_port.o (.data)
 		*picoRTOS_portasm.o (.data)
@@ -118,18 +118,18 @@ SECTIONS
 
 		. = ALIGN(4);
 		__pbss_end__ = .;
-		. = ALIGN(1 << LOG2CEIL(__pdata_len__));
-		__pdata_end__ = .;
+		. = ALIGN(1 << LOG2CEIL(pdata_len));
+		pdata_end = .;
 		KEEP(*(.init_array))
 		KEEP(*(.fini_array))
                 KEEP(*(.data*))
 
-		. = ALIGN(1 << LOG2CEIL(__udata_len__));
-		__udata_start__ = .;
+		. = ALIGN(1 << LOG2CEIL(udata_len));
+		udata_start = .;
 		KEEP(*(.udata*))
 
-		. = ALIGN(1 << LOG2CEIL(__udata_len__));
-		__udata_end__ = .;
+		. = ALIGN(1 << LOG2CEIL(udata_len));
+		udata_end = .;
                 __data_end__ = .;
 	}
 
@@ -158,8 +158,8 @@ SECTIONS
 	/DISCARD/ : { *(.ARM*) }
 
 	/* for picoRTOS.c */
-	PROVIDE(__pdata_len__ = __pdata_end__ - __pdata_start__);
-	PROVIDE(__udata_len__ = __udata_end__ - __udata_start__);
-	PROVIDE(__ptext_len__ = __ptext_end__ - __ptext_start__);
-	PROVIDE(__utext_len__ = __utext_end__ - __utext_start__);
+	PROVIDE(pdata_len = pdata_end - pdata_start);
+	PROVIDE(udata_len = udata_end - udata_start);
+	PROVIDE(ptext_len = ptext_end - ptext_start);
+	PROVIDE(utext_len = utext_end - utext_start);
 }

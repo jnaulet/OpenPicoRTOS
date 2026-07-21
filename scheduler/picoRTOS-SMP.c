@@ -231,25 +231,25 @@ static void task_idle_init(void)
 }
 
 /* linker mandatory sections */
-/*@external@*/ extern const void* __pdata_start__[];
-/*@external@*/ extern const size_t __pdata_len__[];
-/*@external@*/ extern const void* __udata_start__[];
-/*@external@*/ extern const size_t __udata_len__[];
-/*@external@*/ extern const void* __ptext_start__[];
-/*@external@*/ extern const size_t __ptext_len__[];
+/*@external@*/ extern const void* pdata_start[];
+/*@external@*/ extern const size_t pdata_len[];
+/*@external@*/ extern const void* udata_start[];
+/*@external@*/ extern const size_t udata_len[];
+/*@external@*/ extern const void* ptext_start[];
+/*@external@*/ extern const size_t ptext_len[];
 /* FIXME: partition even more */
-/*@external@*/ extern const void* __utext_start__[];
-/*@external@*/ extern const size_t __utext_len__[];
+/*@external@*/ extern const void* utext_start[];
+/*@external@*/ extern const size_t utext_len[];
 
 void picoRTOS_init(void)
 {
     /* MPU */
     arch_mpu_init();
-    arch_mpu_add_region(PID_KERNEL, (void*)__pdata_start__, (size_t)__pdata_len__, MM_PRW);
-    arch_mpu_add_region(PID_KERNEL, (void*)__udata_start__, (size_t)__udata_len__, MM_URW);
-    arch_mpu_add_region(PID_KERNEL, (void*)__ptext_start__, (size_t)__ptext_len__, MM_PRX);
+    arch_mpu_add_region(PID_KERNEL, (void*)pdata_start, (size_t)pdata_len, MM_PRW);
+    arch_mpu_add_region(PID_KERNEL, (void*)udata_start, (size_t)udata_len, MM_URW);
+    arch_mpu_add_region(PID_KERNEL, (void*)ptext_start, (size_t)ptext_len, MM_PRX);
     /* TODO: improve code partitioning */
-    arch_mpu_add_region(PID_KERNEL, (void*)__utext_start__, (size_t)__utext_len__, MM_URX);
+    arch_mpu_add_region(PID_KERNEL, (void*)utext_start, (size_t)utext_len, MM_URX);
 
     /* reset pids */
     picoRTOS.pid_count = 0;
