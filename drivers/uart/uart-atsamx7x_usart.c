@@ -142,7 +142,9 @@ int uart_atsamx7x_usart_init(struct uart *ctx, int base, clock_id_t clkid)
 
     /* reset & enable */
     ctx->base->US_CR = (uint32_t)(US_CR_RSTSTA | US_CR_RSTTX | US_CR_RSTRX);
+    arch_delay_us(100ul);
     ctx->base->US_CR = (uint32_t)(US_CR_TXEN | US_CR_RXEN);
+    ctx->base->US_MR = 0;
 
     return 0;
 }
@@ -262,7 +264,7 @@ int uart_write(struct uart *ctx, const char *buf, size_t n)
     int sent = 0;
 
     while ((size_t)sent != n) {
-        if ((ctx->base->US_CSR & US_CSR_TXEMPTY) == 0)
+        if ((ctx->base->US_CSR & US_CSR_TXRDY) == 0)
             break;
 
         ctx->base->US_THR = (uint32_t)buf[sent++];
