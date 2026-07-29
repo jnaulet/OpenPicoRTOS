@@ -7,8 +7,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define FLASH_EXT_SST26VF_RD_LEN 256
-#define FLASH_EXT_SST26VF_PP_LEN 256
+#define FLASH_EXT_SST26VF_RD_LEN   256
+#define FLASH_EXT_SST26VF_PP_LEN   256
+#define FLASH_EXT_SST26VF_WBPR_LEN 18
 
 struct flash_ext {
     /*@temp@*/ struct spi *spi;
@@ -20,6 +21,7 @@ struct flash_ext {
     /* read/write */
     uint8_t rd[FLASH_EXT_SST26VF_RD_LEN + 4];
     uint8_t pp[FLASH_EXT_SST26VF_PP_LEN + 4];
+    uint8_t wbpr[FLASH_EXT_SST26VF_WBPR_LEN + 1];
 };
 
 int flash_ext_sst26vf_init(/*@out@*/ struct flash_ext *ctx, struct spi *spi);
