@@ -297,7 +297,7 @@ struct CAN_BOSCH_MCAN {
 #define RXFnS_FnPI(x) (((x) & RXFnS_FnPI_M) << 16)
 #define RXFnS_FnGI_M  0x3fu
 #define RXFnS_FnGI(x) (((x) & RXFnS_FnGI_M) << 8)
-#define RXFnS_FnFL_M  0x3fu
+#define RXFnS_FnFL_M  0x7fu
 #define RXFnS_FnFL(x) ((x) & RXFnS_FnFL_M)
 
 #define RXFnA_FnAI_M  0x3fu
@@ -782,17 +782,8 @@ static int buffer_write(struct tx_buf *txb, const void *buf, size_t n)
     return (int)n;
 }
 
-int can_write(struct can *ctx, can_id_t id, const void *buf, size_t n)
+static int bus_off_recovery(struct can *ctx)
 {
-#define PSR_LEC_BIT0ERROR      5u
-#define BUS_OFF_RECOVERY_COUNT 129
-    /* picoRTOS_assert(n > 0, return -EINVAL); */
-    picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT, return -EINVAL);
-
-    int dlc;
-    uint32_t txfqs = ctx->base->TXFQS;
-
-    /* bus_off recovery */
     if (ctx->bus_off_recovery) {
         if ((ctx->base->CCCR & CCCR_INIT) != 0) {
             ctx->base->CCCR &= ~CCCR_INIT;
@@ -808,6 +799,23 @@ int can_write(struct can *ctx, can_id_t id, const void *buf, size_t n)
         return -EIO; /* signal something went wrong */
     }
 
+    return 0;
+}
+
+int can_write(struct can *ctx, can_id_t id, const void *buf, size_t n)
+{
+#define PSR_LEC_BIT0ERROR      5u
+#define BUS_OFF_RECOVERY_COUNT 129
+    /* picoRTOS_assert(n > 0, return -EINVAL); */
+    picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT, return -EINVAL);
+
+    int res;
+    uint32_t txfqs = ctx->base->TXFQS;
+
+    /* bus_off recovery */
+    if ((res = bus_off_recovery(ctx)) < 0)
+        return res;
+
     if ((txfqs & TXFQS_TFQF) != 0)
         return -EAGAIN;
 
@@ -819,14 +827,14 @@ int can_write(struct can *ctx, can_id_t id, const void *buf, size_t n)
     else tx_buf[index].T0 = (uint32_t)(T0_XTD | T0_ID(id));
 
     tx_buf[index].T1 = (uint32_t)T1_DLC(n);
-    dlc = buffer_write(&tx_buf[index], buf, n);
+    res = buffer_write(&tx_buf[index], buf, n);
 
     /* cache */
     picoRTOS_flush_dcache(tx_buf, sizeof(*tx_buf) * TX_BUFFERS_SIZE_COUNT);
 
     /* request xfer */
     ctx->base->TXBAR = (uint32_t)(1 << index);
-    return dlc;
+    return res;
 }
 
 static int buffer_read(const struct rx_buf *rxb, void *buf, size_t n)
@@ -856,10 +864,14 @@ int can_read(struct can *ctx, can_id_t *id, void *buf, size_t n)
     picoRTOS_assert(n <= (size_t)CAN_DATA_COUNT, return -EINVAL);
 
     /* retrieve message from FIFO */
-    size_t dlc;
+    int res;
     uint32_t rxf0s = ctx->base->RXF0S;
 
-    if ((rxf0s & RXFnS_FnFL_M) == 0)
+    /* bus_off recovery */
+    if ((res = bus_off_recovery(ctx)) < 0)
+        return res;
+
+    if ((rxf0s & RXFnS_FnFL(RXFnS_FnFL_M)) == 0)
         return -EAGAIN;
 
     struct rx_buf *rx_buf = (struct rx_buf*)ctx->rx_fifo0;
@@ -873,15 +885,15 @@ int can_read(struct can *ctx, can_id_t *id, void *buf, size_t n)
     else                                    /* extended */
         *id = (can_id_t)(rx_buf[index].R0 & R0_ID(R0_ID_M));
 
-    dlc = (size_t)(rx_buf[index].R1 & R1_DLC(R1_DLC_M)) >> 16;
-    picoRTOS_assert_void(dlc <= (size_t)8); /* double-check */
+    res = (int)((rx_buf[index].R1 & R1_DLC(R1_DLC_M)) >> 16);
+    picoRTOS_assert_void(res <= 8); /* double-check */
 
-    (void)buffer_read(&rx_buf[index], buf, dlc);
+    (void)buffer_read(&rx_buf[index], buf, (size_t)res);
     /* TODO: check for errors */
 
     /* ack */
     ctx->base->RXF0A = (uint32_t)RXFnA_FnAI(index);
-    return (int)dlc;
+    return res;
 }
 
 int can_request_frame(/*@unused@*/ struct can *ctx __attribute__((unused)),
