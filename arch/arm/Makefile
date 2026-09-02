@@ -41,8 +41,8 @@ arch-$(CONFIG_ARMV6M) := -march=armv6-m -mfloat-abi=soft
 arch-$(CONFIG_ARMV7M) := -march=armv7-m -mfloat-abi=soft
 arch-$(CONFIG_ARMV7EM) := -march=armv7e-m
 # mfpu
-fpu-$(CONFIG_FPV4_SP_D16) := -mfpu=fpv4-sp-d16
-fpu-$(CONFIG_FPV5_SP_D16) := -mfpu=fpv5-sp-d16
+fpu-$(CONFIG_FPV4_SP_D16) := -mfpu=fpv4-sp-d16 -mfloat-abi=hard
+fpu-$(CONFIG_FPV5_SP_D16) := -mfpu=fpv5-sp-d16 -mfloat-abi=hard
 
 # machines
 a_src-$(CONFIG_MACH_RP2040) += $(arch-arm)/armv6-m/mach-rp2040/startup.S
