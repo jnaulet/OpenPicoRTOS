@@ -27,5 +27,6 @@ int mux_atmel_pio_input(struct mux *ctx, size_t pin, mux_atmel_pio_t mux);
 int mux_atmel_pio_output(struct mux *ctx, size_t pin, mux_atmel_pio_t mux);
 
 int mux_atmel_pio_pull_up(struct mux *ctx, size_t pin);
+int mux_atmel_pio_open_drain(struct mux *ctx, size_t pin);
 
 #endif

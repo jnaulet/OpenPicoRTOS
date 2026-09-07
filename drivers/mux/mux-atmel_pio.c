@@ -32,14 +32,17 @@ struct MUX_ATMEL_PIO {
     volatile uint32_t PIO_PUER;
     volatile uint32_t PIO_PUSR;
     uint32_t RESERVED4;
-    volatile uint32_t PIO_ABCDSR0;
     volatile uint32_t PIO_ABCDSR1;
+    volatile uint32_t PIO_ABCDSR2;
     uint32_t RESERVED5[2];
-    volatile uint32_t PIO_SCIFSR;
-    volatile uint32_t PIO_DIFSR;
-    volatile uint32_t PIO_IFDGSR;
+    volatile uint32_t PIO_IFSCDR;
+    volatile uint32_t PIO_IFSCER;
+    volatile uint32_t PIO_IFSCSR;
     volatile uint32_t PIO_SCDR;
-    uint32_t RESERVED6[4];
+    volatile uint32_t PIO_PPDDR;
+    volatile uint32_t PIO_PPDER;
+    volatile uint32_t PIO_PPDSR;
+    uint32_t RESERVED6;
     volatile uint32_t PIO_OWER;
     volatile uint32_t PIO_OWDR;
     volatile uint32_t PIO_OWSR;
@@ -59,6 +62,17 @@ struct MUX_ATMEL_PIO {
     volatile uint32_t PIO_LOCKSR;
     volatile uint32_t PIO_WPMR;
     volatile uint32_t PIO_WPSR;
+    uint32_t RESERVED11[5];
+    volatile uint32_t PIO_SCHMITT;
+    uint32_t RESERVED12[5];
+    volatile uint32_t PIO_DRIVER1;
+    uint32_t RESERVED13[13];
+    volatile uint32_t PIO_PCMR;
+    volatile uint32_t PIO_PCIER;
+    volatile uint32_t PIO_PCIDR;
+    volatile uint32_t PIO_PCIMR;
+    volatile uint32_t PIO_PCISR;
+    volatile uint32_t PIO_PCRHR;
 };
 
 /* Function: mux_atmel_pio_init
@@ -92,26 +106,26 @@ static int mux_atmel_pio(struct mux *ctx, mux_atmel_pio_t mux, uint32_t mask)
 
     case MUX_ATMEL_PIO_A:
         ctx->base->PIO_PDR = mask;
-        ctx->base->PIO_ABCDSR0 &= ~mask;
         ctx->base->PIO_ABCDSR1 &= ~mask;
+        ctx->base->PIO_ABCDSR2 &= ~mask;
         break;
 
     case MUX_ATMEL_PIO_B:
         ctx->base->PIO_PDR = mask;
-        ctx->base->PIO_ABCDSR0 |= mask;
-        ctx->base->PIO_ABCDSR1 &= ~mask;
+        ctx->base->PIO_ABCDSR1 |= mask;
+        ctx->base->PIO_ABCDSR2 &= ~mask;
         break;
 
     case MUX_ATMEL_PIO_C:
         ctx->base->PIO_PDR = mask;
-        ctx->base->PIO_ABCDSR0 &= ~mask;
-        ctx->base->PIO_ABCDSR1 |= mask;
+        ctx->base->PIO_ABCDSR1 &= ~mask;
+        ctx->base->PIO_ABCDSR2 |= mask;
         break;
 
     case MUX_ATMEL_PIO_D:
         ctx->base->PIO_PDR = mask;
-        ctx->base->PIO_ABCDSR0 |= mask;
         ctx->base->PIO_ABCDSR1 |= mask;
+        ctx->base->PIO_ABCDSR2 |= mask;
         break;
 
     default:
@@ -189,6 +203,25 @@ int mux_atmel_pio_pull_up(struct mux *ctx, size_t pin)
 {
     picoRTOS_assert(pin < (size_t)MUX_ATMEL_PIN_COUNT, return -EINVAL);
 
+    ctx->base->PIO_PPDDR = (uint32_t)(1ul << pin);
     ctx->base->PIO_PUER = (uint32_t)(1ul << pin);
+    return 0;
+}
+
+/* Function: mux_atmel_pio_open_drain
+ * Set specific pin to multi-drive controle
+ *
+ * Parameters:
+ *  ctx - The mux port
+ *  pin - The pin to multi-drive
+ *
+ * Returns:
+ * 0 if success, -errno otherwise
+ */
+int mux_atmel_pio_open_drain(struct mux *ctx, size_t pin)
+{
+    picoRTOS_assert(pin < (size_t)MUX_ATMEL_PIN_COUNT, return -EINVAL);
+
+    ctx->base->PIO_MDER = (uint32_t)(1ul << pin);
     return 0;
 }
