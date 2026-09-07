@@ -110,3 +110,10 @@ int atsamx7x_matrix_set_can1dmaba(struct atsamx7x_matrix *ctx, uint16_t addr_msb
     ctx->base->CCFG_SYSIO |= CCFG_SYSIO_CAN1DMABA(addr_msb);
     return 0;
 }
+
+int atsamx7x_matrix_set_sysio(struct atsamx7x_matrix *ctx, size_t sysio)
+{
+    picoRTOS_assert(sysio < (size_t)16, return -EINVAL);
+    ctx->base->CCFG_SYSIO |= (1u << sysio);
+    return 0;
+}

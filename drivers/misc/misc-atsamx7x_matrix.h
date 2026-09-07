@@ -48,6 +48,7 @@ int atsamx7x_matrix_set_scfg(struct atsamx7x_matrix *ctx, size_t index,
 
 int atsamx7x_matrix_set_can0dmaba(struct atsamx7x_matrix *ctx, uint16_t addr_msb);
 int atsamx7x_matrix_set_can1dmaba(struct atsamx7x_matrix *ctx, uint16_t addr_msb);
+int atsamx7x_matrix_set_sysio(struct atsamx7x_matrix *ctx, size_t sysio);
 
 #endif
 
