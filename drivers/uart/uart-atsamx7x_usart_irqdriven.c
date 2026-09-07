@@ -1,6 +1,7 @@
 #include "uart-atsamx7x_usart_irqdriven.h"
 
 #include "picoRTOS.h"
+#include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
 #include <stdint.h>
@@ -194,7 +195,11 @@ int uart_atsamx7x_usart_irqdriven_init(struct uart *ctx, int base, clock_id_t cl
 
     /* enable rx int */
     ctx->base->US_IER = (uint32_t)US_CSR_RXRDY;
-    picoRTOS_enable_interrupt(irq);
+    arch_enable_interrupt(irq);
+
+    /* mpu */
+    arch_mpu_add_region(PID_IRQ((int)irq), ctx->base, sizeof(*ctx->base), MM_PRW | MM_NON_CACHEABLE);
+    arch_mpu_add_region(PID_IRQ((int)irq), ctx, sizeof(*ctx), MM_PRW);
 
     return 0;
 }
@@ -337,4 +342,10 @@ int uart_read(struct uart *ctx, char *buf, size_t n)
         return -EAGAIN;
 
     return recv;
+}
+
+struct uart *uart_claim(struct uart *ctx)
+{
+    picoRTOS_mpu_add_region(ctx->base, sizeof(*ctx->base), MM_URW | MM_NON_CACHEABLE);
+    return ctx;
 }
