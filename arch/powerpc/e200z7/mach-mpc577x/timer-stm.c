@@ -1,3 +1,4 @@
+#include "picoRTOS.h"
 #include "picoRTOS_device.h"
 #include "picoRTOS-SMP_port.h"
 
@@ -70,8 +71,8 @@ void arch_timer_init(int period)
     STMA->CH[0].CMPn = (uint32_t)timer_stm_period;
     STMA->CH[0].CCRn = (uint32_t)CCRn_CEN;
     /* register interrupt on all cores */
-    arch_register_interrupt((picoRTOS_irq_t)IRQ_STM_CIR0,
-                            (arch_isr_fn)Timer_Handler, NULL);
+    picoRTOS_register_interrupt((picoRTOS_irq_t)IRQ_STM_CIR0,
+                                (picoRTOS_isr_fn)Timer_Handler, NULL);
     /* enable */
     arch_enable_interrupt((picoRTOS_irq_t)IRQ_STM_CIR0);
 }

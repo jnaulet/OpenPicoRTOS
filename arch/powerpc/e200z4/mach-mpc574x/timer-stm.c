@@ -1,5 +1,6 @@
 #include "picoRTOS_device.h"
 #include "picoRTOS_port.h"
+#include "picoRTOS.h"
 
 #include <stdint.h>
 #include <generated/autoconf.h>
@@ -64,7 +65,7 @@ void arch_timer_init(int period)
     STM0->CH[0].CMPn = (uint32_t)timer_stm_period;
 
     /* register interrupt */
-    arch_register_interrupt((picoRTOS_irq_t)IRQ_STM0_CIR0, (arch_isr_fn)Timer_Handler, NULL);
+    picoRTOS_register_interrupt((picoRTOS_irq_t)IRQ_STM0_CIR0, (picoRTOS_isr_fn)Timer_Handler, NULL);
     arch_enable_interrupt((picoRTOS_irq_t)IRQ_STM0_CIR0);
     /* mpu */
     arch_mpu_add_region(PID_KERNEL, STM0, sizeof(*STM0), MM_PRW | MM_NON_CACHEABLE);

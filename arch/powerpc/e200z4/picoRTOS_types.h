@@ -10,6 +10,7 @@ typedef unsigned long picoRTOS_pid_t;
 typedef unsigned short picoRTOS_atomic_t;
 typedef unsigned long picoRTOS_irq_t;
 typedef unsigned long picoRTOS_cycles_t;
+typedef unsigned long picoRTOS_mask_t;
 
 typedef long picoRTOS_intptr_t;
 typedef unsigned long picoRTOS_uintptr_t;
@@ -21,7 +22,6 @@ typedef unsigned long picoRTOS_uintptr_t;
 #define ARCH_MIN_STACK_COUNT     (ARCH_INITIAL_STACK_COUNT + 8) /* in -O0 */
 
 /* SMP */
-typedef unsigned long picoRTOS_mask_t;
 typedef unsigned long picoRTOS_core_t;
 
 #define ARCH_SMP_MIN_STACK_COUNT 128
