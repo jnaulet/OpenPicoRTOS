@@ -1,17 +1,18 @@
 	.if __TI_EABI__
 	.asg picoRTOS_tick, _picoRTOS_tick
 	.asg picoRTOS_syscall, _picoRTOS_syscall
+	.asg picoRTOS_irq, _picoRTOS_irq
 	.endif
 
 	.ref _picoRTOS_tick
 	.ref _picoRTOS_syscall
+	.ref _picoRTOS_irq
 
 	.if __TI_EABI__
 	.asg arch_save_first_context, _arch_save_first_context
 	.asg arch_start_first_task, _arch_start_first_task
 	.asg arch_syscall, _arch_syscall
 	.asg arch_test_and_set, _arch_test_and_set
-	.asg ISR_TABLE, _ISR_TABLE
 	.endif
 
 	.cdecls C, NOLIST, "picoRTOS_device.h"
@@ -192,37 +193,14 @@ _arch_test_and_set:
 	.global Default_Handler
 Default_Handler:
 	SAVE_CONTEXT
-	;; get index from PIECTRL
+	movz AR4, @stack
+	;; get PIEVECT from PIECTRL
 	movl XAR5, #ADDR_PIECTRL
-	mov ACC, *XAR5
-	sub ACC, #ADDR_PIEVECTTABLE
-	and ACC, #0x1fe
-	lsl ACC, #1
-	;; get fn
-	movl XAR7, #_ISR_TABLE
-	addl XAR7, ACC
-	movl XAR7, *XAR7
-	;; get priv
-	movl XAR4, #_ISR_TABLE + 2
-	addl XAR4, ACC
-	movl XAR4, *XAR4
-	;; check before calling
-	movl ACC, XAR7
-	test ACC
-	b isr_fn_is_null, EQ ; jump out
-	;; call fn(priv)
-	lcr *XAR7
+	mov AL, *XAR5
+	lsr AL, #1
+	mov AR6, AL
+	lcr _picoRTOS_irq
+	movz DP, #stack
+	mov @stack, AR4
 	RESTORE_CONTEXT
 	iret
-
-isr_fn_is_null:
-	;; isr is not handled, use picoRTOS_register_interrupt()
-	estop0
-	lb isr_fn_is_null
-
-	.global _ISR_TABLE
-	.if __TI_EABI__
-_ISR_TABLE: .usect ".bss:_ISR_TABLE", (DEVICE_INTERRUPT_VECTOR_COUNT * 4), 0, 1
-	.else
-_ISR_TABLE: .usect ".ebss", (DEVICE_INTERRUPT_VECTOR_COUNT * 4), 0, 1
-	.endif
