@@ -1,6 +1,7 @@
 /*
  * ATTINY88 has a specific variant of TC0
  */
+#include "picoRTOS.h"
 #include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
@@ -12,7 +13,7 @@
 #define TCNT0  ((volatile unsigned char*)(ADDR_TC0 + 2))
 #define OCR0A  ((volatile unsigned char*)(ADDR_TC0 + 3))
 
-static void __attribute__((naked)) arch_TIMER0_COMPA(/*@unused@*/ void *priv)
+static void arch_TIMER0_COMPA(/*@unused@*/ void *priv)
 {
     /*@i@*/ (void)priv;
 
@@ -23,7 +24,6 @@ static void __attribute__((naked)) arch_TIMER0_COMPA(/*@unused@*/ void *priv)
     /* store back task sp */
     ASM("out 0x2b, r25");   /* GPIOR2 */
     ASM("out 0x2a, r24");   /* GPIOR1 */
-    ASM("ret");
 }
 
 void arch_timer_init(void)
@@ -58,8 +58,8 @@ void arch_timer_init(void)
     *OCR0A = (unsigned char)(OCR / PRESCALER);
 
     /* register interrupt */
-    arch_register_interrupt((picoRTOS_irq_t)IRQ_TIMER0_COMPA,
-                            arch_TIMER0_COMPA, NULL);
+    picoRTOS_register_interrupt((picoRTOS_irq_t)IRQ_TIMER0_COMPA,
+                                arch_TIMER0_COMPA, NULL);
 }
 
 /* STATS */

@@ -1,5 +1,6 @@
 	/* Declarations */
 	.extern picoRTOS_syscall
+	.extern picoRTOS_irq
 
 	.equ GPIOR1, 0x2a
 	.equ GPIOR2, 0x2b
@@ -8,19 +9,19 @@
 	.equ SREG, 0x3f
 
 	.macro SWAP_STACK
-	in r23, GPIOR2
-	in r22, GPIOR1
+	in r29, GPIOR2
+	in r28, GPIOR1
 	in r25, SPH
 	in r24, SPL
 	out GPIOR2, r25
 	out GPIOR1, r24
-	out SPH, r23
-	out SPL, r22
+	out SPH, r29
+	out SPL, r28
 	.endm
 
 	.macro SAVE_CONTEXT_IRQ_STEP1
-	push r28
-	push r29
+	push r22
+	push r23
 	.endm
 
 	.macro SAVE_CONTEXT_IRQ_STEP2
@@ -48,12 +49,12 @@
 	push r19
 	push r20
 	push r21
-	push r22
-	push r23
 	push r24
 	push r25
 	push r26
 	push r27
+	push r28
+	push r29
 	push r30
 	push r31
 	SWAP_STACK
@@ -68,12 +69,12 @@
 	SWAP_STACK
 	pop r31
 	pop r30
+	pop r29
+	pop r28
 	pop r27
 	pop r26
 	pop r25
 	pop r24
-	pop r23
-	pop r22
 	pop r21
 	pop r20
 	pop r19
@@ -98,8 +99,8 @@
 	pop r0
 	out SREG, r0
 	pop r0
-	pop r29
-	pop r28
+	pop r23
+	pop r22
 	.endm
 
 	.text
@@ -107,18 +108,15 @@
 	.type arch_save_first_context, %function
 	.global arch_save_first_context
 arch_save_first_context:
-	push r19
-	push r18
+	push r29
+	push r28
 	/* switch to task sp */
 	out GPIOR2, r25
 	out GPIOR1, r24
-	/* preserve r23:r22 */
-	mov r19, r23
-	mov r18, r22
 	SWAP_STACK
 	/* ret pc (fn) */
-	push r18
-	push r19
+	push r22
+	push r23
 #ifdef __AVR_3_BYTE_PC__
 	ldi r19, 0
 	push r19
@@ -130,8 +128,8 @@ arch_save_first_context:
 	/* ret */
 	in r25, GPIOR2
 	in r24, GPIOR1
-	pop r18
-	pop r19
+	pop r28
+	pop r29
 	ret
 
 	.type arch_start_first_task, %function
@@ -152,11 +150,10 @@ arch_syscall:
 	in r29, GPIOR2
 	in r28, GPIOR1
 	/* get priv to r21:r20 */
-	ldd r21, Y+7
-	ldd r20, Y+8
-	/* get syscall to r23:r22 */
-	ldd r23, Y+5
-	ldd r22, Y+6
+	ldd r21, Y+32
+	ldd r20, Y+33
+	/* get syscall to r22 */
+	ldd r22, Y+8
 	/* get task sp to r25:r24 */
 	mov r25, r29
 	mov r24, r28
@@ -176,16 +173,16 @@ arch_syscall:
 
 	#include "picoRTOS_device.h"
 
-	.global ISR_TABLE
-	.comm ISR_TABLE, DEVICE_INTERRUPT_VECTOR_COUNT, 4
-
 vector_isr_handler:
 	SAVE_CONTEXT_IRQ_STEP2
-	ld  r30, Y
-	ldd r31, Y+1
-	ldd r24, Y+2
-	ldd r25, Y+3
-	icall
+	/* get task sp to r25:r24 */
+	in r25, GPIOR2
+	in r24, GPIOR1
+#ifdef __AVR_HAVE_JMP_CALL__
+	call picoRTOS_irq
+#else
+	rcall picoRTOS_irq
+#endif
 	RESTORE_CONTEXT
 	reti
 
@@ -197,15 +194,15 @@ vector_isr_handler:
 	__vector_\n:
 	.endm
 
-	.set i, 0
+	.set i, 1
 	.rept DEVICE_INTERRUPT_VECTOR_COUNT
 	.altmacro
-	EXPORT__VECTOR_ %i+1
-__VECTOR_ %i+1
+	EXPORT__VECTOR_ %i
+__VECTOR_ %i
 	.noaltmacro
 	SAVE_CONTEXT_IRQ_STEP1
-	ldi r28, lo8(ISR_TABLE+(i*4))
-	ldi r29, hi8(ISR_TABLE+(i*4))
+	/* get irq to r22 */
+	ldi r22, lo8(i)
 	rjmp vector_isr_handler
 	.set i, i+1
 	.endr

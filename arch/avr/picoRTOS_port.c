@@ -83,31 +83,18 @@ picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr)
 
 /* INTERRUPTS MANAGEMENT */
 
-/*@external@*/
-extern struct {
-    arch_isr_fn fn;
-    /*@temp@*/ /*@null@*/ void *priv;
-} ISR_TABLE[DEVICE_INTERRUPT_VECTOR_COUNT];
-
-void arch_register_interrupt(picoRTOS_irq_t irq, arch_isr_fn fn, void *priv)
+void arch_enable_interrupt_ext(picoRTOS_irq_t irq, picoRTOS_mask_t core_mask)
 {
+    /*@i@*/ (void)core_mask;
     arch_assert(irq > (picoRTOS_irq_t)0, return );
-    arch_assert(irq < (picoRTOS_irq_t)(DEVICE_INTERRUPT_VECTOR_COUNT + 1), return );
-
-    ISR_TABLE[irq - 1].fn = fn;
-    ISR_TABLE[irq - 1].priv = priv;
-}
-
-void arch_enable_interrupt(picoRTOS_irq_t irq)
-{
-    arch_assert(irq > (picoRTOS_irq_t)0, return );
-    arch_assert(irq < (picoRTOS_irq_t)(DEVICE_INTERRUPT_VECTOR_COUNT + 1), return );
+    arch_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return );
     /* no effect */
 }
 
-void arch_disable_interrupt(picoRTOS_irq_t irq)
+void arch_disable_interrupt_ext(picoRTOS_irq_t irq, picoRTOS_mask_t core_mask)
 {
+    /*@i@*/ (void)core_mask;
     arch_assert(irq > (picoRTOS_irq_t)0, return );
-    arch_assert(irq < (picoRTOS_irq_t)(DEVICE_INTERRUPT_VECTOR_COUNT + 1), return );
+    arch_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return );
     /* no effect */
 }

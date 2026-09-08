@@ -1,3 +1,4 @@
+#include "picoRTOS.h"
 #include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
@@ -17,7 +18,7 @@
 
 static unsigned long sysclk_hz = (unsigned long)DEVICE_DEFAULT_SYSCLK_HZ;
 
-static void __attribute__((naked)) arch_TIMER0_COMPA(/*@unused@*/ void *priv)
+static void arch_TIMER0_COMPA(/*@unused@*/ void *priv)
 {
     /*@i@*/ (void)priv;
 
@@ -28,7 +29,6 @@ static void __attribute__((naked)) arch_TIMER0_COMPA(/*@unused@*/ void *priv)
     /* store back task sp */
     ASM("out 0x2b, r25");   /* GPIOR2 */
     ASM("out 0x2a, r24");   /* GPIOR1 */
-    ASM("ret");
 }
 
 void arch_timer_init(void)
@@ -66,8 +66,8 @@ void arch_timer_init(void)
     *OCR0A = (unsigned char)(ocr / prescaler);
 
     /* register interrupt */
-    arch_register_interrupt((picoRTOS_irq_t)IRQ_TIMER0_COMPA,
-                            arch_TIMER0_COMPA, NULL);
+    picoRTOS_register_interrupt((picoRTOS_irq_t)IRQ_TIMER0_COMPA,
+                                arch_TIMER0_COMPA, NULL);
 }
 
 /* STATS */

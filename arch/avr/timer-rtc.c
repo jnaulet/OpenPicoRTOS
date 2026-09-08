@@ -1,3 +1,4 @@
+#include "picoRTOS.h"
 #include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
@@ -42,8 +43,8 @@ void arch_timer_init(void)
     *RTC_CTRLA = (unsigned char)0x1;
 
     /* register interrupt */
-    arch_register_interrupt((picoRTOS_irq_t)IRQ_RTC_CNT,
-                            arch_RTC_CNT, NULL);
+    picoRTOS_register_interrupt((picoRTOS_irq_t)IRQ_RTC_CNT,
+                                arch_RTC_CNT, NULL);
 }
 
 /* STATS */
