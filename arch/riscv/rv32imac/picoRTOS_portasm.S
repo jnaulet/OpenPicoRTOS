@@ -1,6 +1,7 @@
 	/* Declarations */
 	.extern picoRTOS_tick
 	.extern picoRTOS_syscall
+	.extern picoRTOS_irq
 
 	#include "picoRTOS_device.h"
 	#include "../include/regs.h"
@@ -203,30 +204,19 @@ arch_compare_and_swap:
 	.global PlatformDefined_Handler
 PlatformDefined_Handler:
 	SAVE_CONTEXT
+	csrr a0, mscratch
 	/* extract irq parameters */
-	la t0, ISR_TABLE
-	la t1, 0xfff
-	csrr t2, mcause
-	and t1, t1, t2 /* t1: exception code */
+	la a1, 0xfff
+	csrr a2, mcause
+	and a1, a1, a2 /* a1: exception code */
 	/* find isr table entry */
-	addi t1, t1, -16
-	slli t1, t1, 2
-	add t0, t0, t1
-	lw t2, 0 (t0)
-	lw a0, 4 (t0)
-	/* check fn */
-	beq t2, zero, isr_fn_is_null
-	/* finally branch to isr */
-	jr t2
+	addi a1, a1, -16
+	slli a1, a1, 2
+	jal picoRTOS_irq
 	/* TODO: ack irq ? */
 	/* epilogue */
 	RESTORE_CONTEXT
 	mret
-
-isr_fn_is_null:
-	/* fn call is null, use picoRTOS_register_interrupt() */
-	ebreak
-	j isr_fn_is_null
 
 	.align 4
 	.type arch_mtimel, %function
@@ -246,12 +236,3 @@ arch_mtimel:
 	.global timer_core_period
 timer_core_period:
 	.long 0
-
-	.align 4
-	.type ISR_TABLE, %object
-	.global ISR_TABLE
-ISR_TABLE:
-	.rept DEVICE_INTERRUPT_VECTOR_COUNT
-	.long 0
-	.long 0
-	.endr
