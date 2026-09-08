@@ -8,7 +8,9 @@
 #define MPU_SMPU_COUNT        2
 #define MPU_SMPU_ERR_COUNT    16
 #define MPU_SMPU_REGION_COUNT 16
+
 #define TASK_COUNT (CONFIG_TASK_COUNT + CONFIG_CORE_COUNT)
+#define PID_COUNT  (TASK_COUNT + DEVICE_INTERRUPT_VECTOR_COUNT)
 
 struct MPU_SMPU {
     volatile uint32_t CES0;
@@ -107,7 +109,7 @@ static struct {
     struct mpu_pid {
         struct smpu_rgd RGD[MPU_SMPU_REGION_COUNT];
         size_t count;
-    } pid[TASK_COUNT];
+    } pid[PID_COUNT];
 } mpu[MPU_SMPU_COUNT];
 
 static struct MPU_SMPU *SMPU[MPU_SMPU_COUNT] = {
@@ -173,7 +175,7 @@ static uint32_t WRD3_from_mode(mpu_mode_t mode)
 
 static int region_already_exists(int pid, const void *addr, size_t n, mpu_mode_t mode)
 {
-    arch_assert(pid < TASK_COUNT, return -EINVAL);
+    arch_assert(pid < PID_COUNT, return -EINVAL);
     arch_assert(pid >= PID_KERNEL, return -EINVAL);
     arch_assert(n > 0, return -EINVAL);
 
@@ -193,7 +195,7 @@ static int region_already_exists(int pid, const void *addr, size_t n, mpu_mode_t
 
 void arch_mpu_add_region(int pid, const void *addr, size_t n, mpu_mode_t mode)
 {
-    arch_assert(pid < TASK_COUNT, return );
+    arch_assert(pid < PID_COUNT, return );
     arch_assert(pid >= PID_KERNEL, return );
 
     size_t index;
@@ -237,7 +239,7 @@ void arch_mpu_add_region(int pid, const void *addr, size_t n, mpu_mode_t mode)
 
 void arch_mpu_restore_regions(int pid)
 {
-    arch_assert(pid < TASK_COUNT, return );
+    arch_assert(pid < PID_COUNT, return );
     arch_assert(pid > PID_KERNEL, return );
 
     size_t i, j;

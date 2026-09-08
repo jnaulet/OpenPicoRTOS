@@ -3,6 +3,7 @@
 	/* picoRTOS */
 	.extern picoRTS_syscall
 	.extern picoRTOS_tick
+	.extern picoRTOS_irq
 
 	#include "picoRTOS_device.h"
 	#include "../include/macros.S"
@@ -107,12 +108,14 @@ arch_dcbf:
 	.equ INTC_IACKR0, ADDR_INTC + 0x20
 	.equ INTC_EOIR0, ADDR_INTC + 0x30
 
-	.macro INTC_IACKRx_to_r3
+	.macro INTC_INTVEC_to_r4
 	mfpir r4
 	se_slwi r4, 2
 	e_lis r3, INTC_IACKR0@ha
 	add r3, r4, r3
 	e_lwz r3, INTC_IACKR0@l(r3)
+	e_rlwinm r4, r3, 0, 20, 30
+	se_srwi r4, 2
 	.endm
 
 	.macro ZERO_INTC_EOIRx
@@ -128,33 +131,15 @@ arch_dcbf:
 	.global ExternalInput_Handler
 ExternalInput_Handler:
 	SAVE_CONTEXT
-	INTC_IACKRx_to_r3
-	/* dereference & check fn */
-	se_lwz r4, 0 (r3)
-	se_cmpi r4, 0
-	se_beq isr_fn_is_null
-	/* set lr */
-	se_mtlr r4
-	/* priv in r3 */
-	e_rlwinm r4, r3, 0, 20, 30	/* intvec in r4 */
-	e_lis r3, ISR_TABLE_priv@ha
-	add r3, r4, r3
-	e_lwz r3, ISR_TABLE_priv@l(r3)
-	/* branch to isr */
-	se_mr r31, r1
-	se_blrl
+	INTC_INTVEC_to_r4	/* get irq from INTC */
+	mfsprg r3, 0		/* move task stack pointer to r3 */
+	e_bl picoRTOS_irq
 	mbar
 	/* ack */
 	ZERO_INTC_EOIRx
 	/* epilogue */
 	RESTORE_CONTEXT
 	se_rfi
-
-isr_fn_is_null:
-	/* fn call is null, use picoRTOS_register_interrupt() */
-	se_illegal
-	se_nop
-	e_b isr_fn_is_null
 
 	.align 4
 	.global MachineCheck_Handler
@@ -176,21 +161,3 @@ InstructionStorage_Handler:
 	e_bl picoRTOS_syscall
 	RESTORE_CONTEXT
 	se_rfi
-
-	.section .bss
-
-	.align 12 /* VTBA is 20bits, align 2^12 (4096) */
-	.type ISR_TABLE_fn, %object
-	.global ISR_TABLE_fn
-ISR_TABLE_fn:
-	.rept DEVICE_INTERRUPT_VECTOR_COUNT
-	.long 0
-	.endr
-
-	.align 4
-	.type ISR_TABLE_priv, %object
-	.global ISR_TABLE_priv
-ISR_TABLE_priv:
-	.rept DEVICE_INTERRUPT_VECTOR_COUNT
-	.long 0
-	.endr
