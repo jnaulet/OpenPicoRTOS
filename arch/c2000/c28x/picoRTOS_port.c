@@ -110,23 +110,6 @@ picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *var,
 
 /* ARCH: INTERRUPTS */
 
-/*@external@*/
-extern struct {
-    arch_isr_fn fn;
-    /*@temp@*/ /*@null@*/ void *priv;
-} ISR_TABLE[DEVICE_INTERRUPT_VECTOR_COUNT];
-
-void arch_register_interrupt(picoRTOS_irq_t irq,
-                             arch_isr_fn fn,
-                             void *priv)
-{
-    arch_assert_void(irq >= (picoRTOS_irq_t)IRQ_INT1_1);
-    arch_assert_void(irq <= (picoRTOS_irq_t)IRQ_INT12_16);
-
-    ISR_TABLE[irq - IRQ_INT1_1].fn = fn;
-    ISR_TABLE[irq - IRQ_INT1_1].priv = priv;
-}
-
 static void arch_set_irq_status(picoRTOS_irq_t irq, bool enable)
 {
     arch_assert_void(irq >= (picoRTOS_irq_t)IRQ_INT1_1);
@@ -152,16 +135,18 @@ static void arch_set_irq_status(picoRTOS_irq_t irq, bool enable)
     ASM(" edis");
 }
 
-void arch_enable_interrupt(picoRTOS_irq_t irq)
+void arch_enable_interrupt_ext(picoRTOS_irq_t irq, picoRTOS_mask_t core_mask)
 {
+    /*@i@*/ (void)core_mask;
     arch_assert_void(irq >= (picoRTOS_irq_t)IRQ_INT1_1);
     arch_assert_void(irq <= (picoRTOS_irq_t)IRQ_INT12_16);
 
     arch_set_irq_status(irq, true);
 }
 
-void arch_disable_interrupt(picoRTOS_irq_t irq)
+void arch_disable_interrupt_ext(picoRTOS_irq_t irq, picoRTOS_mask_t core_mask)
 {
+    /*@i@*/ (void)core_mask;
     arch_assert_void(irq >= (picoRTOS_irq_t)IRQ_INT1_1);
     arch_assert_void(irq <= (picoRTOS_irq_t)IRQ_INT12_16);
 

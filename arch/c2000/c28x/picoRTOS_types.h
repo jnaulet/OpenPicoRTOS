@@ -10,6 +10,7 @@ typedef unsigned int picoRTOS_pid_t;
 typedef unsigned int picoRTOS_atomic_t;
 typedef unsigned int picoRTOS_irq_t;
 typedef unsigned long picoRTOS_cycles_t;
+typedef unsigned int picoRTOS_mask_t;
 
 typedef long picoRTOS_intptr_t;
 typedef unsigned long picoRTOS_uintptr_t;
