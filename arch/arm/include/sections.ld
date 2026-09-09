@@ -6,6 +6,7 @@ SECTIONS
 {
 	.init :
 	{
+		. = ALIGN(4);
 		PROVIDE(vectors = .);
 		PROVIDE(_vectors = vectors);
 		PROVIDE(__vectors = vectors);
@@ -30,6 +31,7 @@ SECTIONS
 
 	.text : AT(__einit)
 	{
+		. = ALIGN(4);
 		__text_start__ = .;
 		. = ALIGN(1 << LOG2CEIL(ptext_len));
 		ptext_start = .;
@@ -68,6 +70,7 @@ SECTIONS
 		. = ALIGN(4);
 		KEEP(*(.rodata*))
 
+		. = ALIGN(4);
 		. = ALIGN(1 << LOG2CEIL(utext_len));
 		utext_end = .;
 		__text_end__ = .;
@@ -80,6 +83,7 @@ SECTIONS
 	
 	.data : AT(__etext)
 	{
+		. = ALIGN(4);
                 __data_start__ = .;
 		. = ALIGN(1 << LOG2CEIL(pdata_len));
 		pdata_start = .;
@@ -128,6 +132,7 @@ SECTIONS
 		udata_start = .;
 		KEEP(*(.udata*))
 
+		. = ALIGN(4);
 		. = ALIGN(1 << LOG2CEIL(udata_len));
 		udata_end = .;
                 __data_end__ = .;
@@ -146,6 +151,7 @@ SECTIONS
                 *(.bss*)
                 *(COMMON)
 
+		. = ALIGN(4);
 		__bss_end__ = .;
 	}
 

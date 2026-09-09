@@ -3,6 +3,7 @@
 
 	.extern picoRTOS_tick
 	.extern picoRTOS_syscall
+	.extern picoRTOS_irq
 
 	.macro SAVE_CONTEXT rS
 	mrs \rS, psp
@@ -107,38 +108,9 @@ SVC_Handler:
 Default_Handler:
 	push {lr}
 	SAVE_CONTEXT r0
-	push {r0}
-	/* get active exception in r0 */
-	mrs r0, IPSR
-	subs r0, #16
-	ldr r3, =ISR_TABLE
-	lsls r0, r0, #3	/* x8 to get the right entry */
-	add r3, r3, r0
-	ldr r1, [r3]
-	ldr r0, [r3, #4]
-	/* check if handled */
-	cmp r1, #0
-	beq isr_fn_is_null
-	/* call fn(priv) */
-	blx r1
-	pop {r0}
+	/* get active exception in r1 */
+	mrs r1, IPSR
+	subs r1, #16
+	bl picoRTOS_irq
 	RESTORE_CONTEXT r0
 	pop {pc}
-
-isr_fn_is_null:
-	/* isr call is null, use picoRTOS_register_interrupt() */
-	bkpt #0
-	b isr_fn_is_null
-
-	.bss
-
-	#include "picoRTOS_device.h"
-
-	.align 2
-	.type ISR_TABLE, %object
-	.global ISR_TABLE
-ISR_TABLE:
-	.rept DEVICE_INTERRUPT_VECTOR_COUNT
-	.long 0
-	.long 0
-	.endr

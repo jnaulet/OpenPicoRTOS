@@ -79,27 +79,16 @@ picoRTOS_stack_t *arch_prepare_stack(picoRTOS_stack_t *stack,
 
 /* INTERRUPT MANAGEMENT */
 
-/*@external@*/
-extern struct {
-    arch_isr_fn fn;
-    /*@temp@*/ /*@null@*/ void *priv;
-} ISR_TABLE[DEVICE_INTERRUPT_VECTOR_COUNT];
-
-void arch_register_interrupt(picoRTOS_irq_t irq, arch_isr_fn fn, void *priv)
+void arch_enable_interrupt_ext(picoRTOS_irq_t irq, picoRTOS_mask_t core_mask)
 {
-    arch_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return );
-    ISR_TABLE[irq].fn = fn;
-    ISR_TABLE[irq].priv = priv;
-}
-
-void arch_enable_interrupt(picoRTOS_irq_t irq)
-{
+    /*@i@*/ (void)core_mask;
     arch_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return );
     NVIC_ISER[irq >> 5] |= (1ul << (0x1fu & irq));
 }
 
-void arch_disable_interrupt(picoRTOS_irq_t irq)
+void arch_disable_interrupt_ext(picoRTOS_irq_t irq, picoRTOS_mask_t core_mask)
 {
+    /*@i@*/ (void)core_mask;
     arch_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return );
     NVIC_ISER[irq >> 5] &= ~(1ul << (0x1fu & irq));
 }

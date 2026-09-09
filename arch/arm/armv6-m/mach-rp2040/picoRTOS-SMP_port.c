@@ -213,7 +213,10 @@ static int arch_xfer_to_core1(unsigned long value)
     return 0;
 }
 
+#include <stdint.h>
+
 /*@external@*/ extern int arch_core1_is_idling(void);
+/*@external@*/ extern picoRTOS_stack_t __StackBottom1[];
 /*@external@*/ extern picoRTOS_stack_t __StackTop1[];
 
 void arch_core_init(picoRTOS_core_t core, picoRTOS_stack_t *sp)
@@ -222,7 +225,8 @@ void arch_core_init(picoRTOS_core_t core, picoRTOS_stack_t *sp)
     arch_assert_void(core == (picoRTOS_core_t)1);
 
     int deadlock = CONFIG_DEADLOCK_COUNT;
-    picoRTOS_stack_t *stack = __StackTop1;
+    uintptr_t bias = (uintptr_t)__StackTop1 - (uintptr_t)__StackBottom1;
+    picoRTOS_stack_t *stack = &__StackBottom1[bias / sizeof(*stack)];
 
     arch_spin_lock();
     *--stack = (picoRTOS_stack_t)sp;
@@ -270,15 +274,4 @@ void arch_spin_lock(void)
 void arch_spin_unlock(void)
 {
     *SIO_SPINLOCK0 = 1ul;
-}
-
-/* INTERRUPT MANAGEMENT */
-
-void arch_smp_register_interrupt(picoRTOS_irq_t irq, arch_isr_fn fn, void *priv,
-                                 picoRTOS_mask_t core_mask)
-{
-    /*@i@*/ (void)core_mask;
-
-    arch_break(); /* signal it's not working as it's uspposed to */
-    arch_register_interrupt(irq, fn, priv);
 }
