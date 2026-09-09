@@ -64,6 +64,7 @@ struct MPU_PMSAV7 {
 #define MPU_PMSAV7_DREGION_COUNT  16
 #define MPU_PMSAV7_ADDR_ERR_THRES 128u
 #define TASK_COUNT                (CONFIG_TASK_COUNT + CONFIG_CORE_COUNT)
+#define PID_COUNT                 (TASK_COUNT + DEVICE_INTERRUPT_VECTOR_COUNT)
 
 struct mpu_desc {
     /* human-readable */
@@ -89,11 +90,11 @@ static struct {
     size_t dregion;
     struct mpu_entry MPU[MPU_PMSAV7_DREGION_COUNT];
     size_t count;
-    /* by process */
+    /* by process/irq */
     struct mpu_pid {
         struct mpu_entry MPU[MPU_PMSAV7_DREGION_COUNT];
         size_t count;
-    } pid[TASK_COUNT];
+    } pid[PID_COUNT];
 } mpu;
 
 static struct MPU_PMSAV7 *MPU = (struct MPU_PMSAV7*)PMSAV7_BASE; // NOLINT
@@ -114,7 +115,7 @@ void arch_mpu_init(void)
         MPU->MPU_RNR = (uint32_t)MPU_RNR_REGION(n);
         MPU->MPU_RASR = 0;
         /* init processes */
-        int m = TASK_COUNT;
+        int m = PID_COUNT;
         while (m-- != 0) {
             mpu.pid[m].MPU[n].MPU_RBAR = (uint32_t)(MPU_RBAR_VALID | MPU_RBAR_REGION(n));
             mpu.pid[m].MPU[n].MPU_RASR = 0;
@@ -123,7 +124,7 @@ void arch_mpu_init(void)
 
     /* add system region to the memory map, prw
      * FIXME: might want to put that somewhere else */
-    arch_mpu_add_region(PID_KERNEL, (void*)SCS_BASE, (size_t)SCS_LEN, 0xeu);
+    arch_mpu_add_region(PID_KERNEL, (void*)SCS_BASE, (size_t)SCS_LEN, MM_PRW);
 }
 
 static uint32_t RASR_from_mode(mpu_mode_t mode)
@@ -163,7 +164,7 @@ static uint32_t RASR_from_mode(mpu_mode_t mode)
 
 static int region_already_exists(int pid, const void *addr, size_t n, mpu_mode_t mode)
 {
-    arch_assert(pid < TASK_COUNT, return -EINVAL);
+    arch_assert(pid < PID_COUNT, return -EINVAL);
     arch_assert(pid >= PID_KERNEL, return -EINVAL);
     arch_assert(n > 0, return -EINVAL);
 
@@ -190,7 +191,7 @@ static int region_already_exists(int pid, const void *addr, size_t n, mpu_mode_t
 
 static void merge_contiguous_entries(int pid)
 {
-    arch_assert(pid < TASK_COUNT, return );
+    arch_assert(pid < PID_COUNT, return );
     arch_assert(pid >= PID_KERNEL, return );
 
     if (pid < 0) {
@@ -260,7 +261,7 @@ static int mpu_desc_from_addr_n(uintptr_t addr, size_t n,
 
 void arch_mpu_add_region(int pid, const void *addr, size_t n, mpu_mode_t mode)
 {
-    arch_assert(pid < TASK_COUNT, return );
+    arch_assert(pid < PID_COUNT, return );
     arch_assert(pid >= PID_KERNEL, return );
 
     /* jump out asap */
@@ -316,16 +317,11 @@ void arch_mpu_add_region(int pid, const void *addr, size_t n, mpu_mode_t mode)
 
     /* check back */
     arch_assert(entry != NULL, return );
-#if 0
-    arch_assert_void((uintptr_t)addr - entry->match.addr < (uintptr_t)MPU_PMSAV7_ADDR_ERR_THRES);
-    arch_assert_void((entry->match.addr + entry->match.n) - ((uintptr_t)addr + n) <
-                     (uintptr_t)MPU_PMSAV7_ADDR_ERR_THRES);
-#endif
 }
 
 void arch_mpu_restore_regions(int pid)
 {
-    arch_assert(pid < TASK_COUNT, return );
+    arch_assert(pid < PID_COUNT, return );
     arch_assert(pid >= PID_KERNEL, return );
 
     bool is_kernel = (pid < 0);

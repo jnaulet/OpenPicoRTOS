@@ -143,6 +143,7 @@ _exit:
 
 	.set i, 0
 	.rept CONFIG_CORE_COUNT
+	LABEL __StackBottom, %i
 	.fill 256, 4
 	LABEL __StackTop, %i
 	.set i, i+1
