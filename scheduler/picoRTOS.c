@@ -593,9 +593,8 @@ syscall_cacheop(/*@returned@*/ struct picoRTOS_task_core *task,
 syscall_irqop(/*@returned@*/ struct picoRTOS_task_core *task,
               const struct syscall_irqop *op)
 {
-#define CORE_MASK ((1 << CONFIG_CORE_COUNT) - 1)
-    if (op->enable) arch_enable_interrupt(op->irq, (picoRTOS_mask_t)CORE_MASK);
-    else arch_disable_interrupt(op->irq, (picoRTOS_mask_t)CORE_MASK);
+    if (op->enable) arch_enable_interrupt(op->irq);
+    else arch_disable_interrupt(op->irq);
     return task;
 }
 

@@ -1,6 +1,8 @@
 #include "picoRTOS-SMP.h"
 #include "picoRTOS-SMP_port.h"
 
+#include "picoRTOS_device.h"
+
 /* CHECK FOR OBVIOUS ERRORS */
 
 #if CONFIG_DEFAULT_STACK_COUNT < ARCH_MIN_STACK_COUNT
@@ -583,12 +585,12 @@ syscall_irqop(/*@returned@*/ struct picoRTOS_task_core *task,
               const struct syscall_irqop *op)
 {
     picoRTOS_assert(op->irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT,
-                    return syscall_kill(task, FINVALID)->sp);
+                    return syscall_kill(task, FINVALID));
 
     picoRTOS_mask_t core_mask = picoRTOS.irq[op->irq].core_mask;
 
-    if (op->enable) arch_enable_interrupt(op->irq, core_mask);
-    else arch_disable_interrupt(op->irq, core_mask);
+    if (op->enable) arch_enable_interrupt_ext(op->irq, core_mask);
+    else arch_disable_interrupt_ext(op->irq, core_mask);
     arch_spin_unlock();
     return task;
 }

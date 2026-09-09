@@ -265,20 +265,37 @@ extern /*@unused@*/ picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *v
  */
 
 /**
- * void **arch_enable_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>);
- * > Enables an <ins>irq</ins>
+ * void **arch_enable_interrupt_ext**(**picoRTOS_irq_t** <ins>irq</ins>,
+ * **picoRTOS_mask_t** <ins>core_mask</ins>);
+ * > Enables an <ins>irq</ins> on cores matched by <ins>core_mask</ins>
  * ### NOTES
  * > This function will be called by the relevant `picoRTOS_syscall()`
  */
-extern /*@unused@*/ void arch_enable_interrupt(picoRTOS_irq_t irq);
+extern /*@unused@*/ void arch_enable_interrupt_ext(picoRTOS_irq_t irq,
+                                                   picoRTOS_mask_t core_mask);
 
 /**
- * void **arch_disable_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>);
- * > Disables an <ins>irq</ins>
+ * void **arch_disable_interrupt_ext**(**picoRTOS_irq_t** <ins>irq</ins>,
+ * **picoRTOS_mask_t** <ins>core_mask</ins>);
+ * > Disables an <ins>irq</ins> on cores matched by <ins>core_mask</ins>
  * ### NOTES
  * > This function will be called by the relevant `picoRTOS_syscall()`
  */
-extern /*@unused@*/ void arch_disable_interrupt(picoRTOS_irq_t irq);
+extern /*@unused@*/ void arch_disable_interrupt_ext(picoRTOS_irq_t irq,
+                                                    picoRTOS_mask_t core_mask);
+
+/**
+ * void **arch_enable_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>);
+ * > Disables an <ins>irq</ins> on all cores
+ */
+#define arch_enable_interrupt(x) \
+    arch_enable_interrupt_ext((x), (picoRTOS_mask_t)((1 << CONFIG_CORE_COUNT) - 1))
+/**
+ * void **arch_disable_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>);
+ * > Disables an <ins>irq</ins> on all cores
+ */
+#define arch_disable_interrupt(x) \
+    arch_disable_interrupt_ext((x), (picoRTOS_mask_t)((1 << CONFIG_CORE_COUNT) - 1))
 
 /**§
  * ## Statistics
