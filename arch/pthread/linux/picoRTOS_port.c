@@ -240,16 +240,12 @@ picoRTOS_cycles_t arch_counter(arch_counter_t counter, picoRTOS_cycles_t t)
 
 /* INTERRUPTS : unsupported */
 
-void arch_register_interrupt(/*@unused@*/ picoRTOS_irq_t irq __attribute__((unused)),
-                             /*@unused@*/ arch_isr_fn fn __attribute__((unused)),
-                             /*@unused@*/ void *priv __attribute__((unused)))
+void arch_enable_interrupt_ext(/*@unused@*/ picoRTOS_irq_t irq __attribute__((unused)),
+                               /*@unused@*/ picoRTOS_mask_t core_mask __attribute__((unused)))
 {
 }
 
-void arch_enable_interrupt(/*@unused@*/ picoRTOS_irq_t irq __attribute__((unused)))
-{
-}
-
-void arch_disable_interrupt(/*@unused@*/ picoRTOS_irq_t irq __attribute__((unused)))
+void arch_disable_interrupt_ext(/*@unused@*/ picoRTOS_irq_t irq __attribute__((unused)),
+                                /*@unused@*/ picoRTOS_mask_t core_mask __attribute__((unused)))
 {
 }

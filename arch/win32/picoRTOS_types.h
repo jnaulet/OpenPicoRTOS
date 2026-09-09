@@ -11,6 +11,7 @@ typedef unsigned long picoRTOS_tick_t;
 typedef unsigned long picoRTOS_atomic_t;
 typedef unsigned long picoRTOS_irq_t;
 typedef unsigned long picoRTOS_cycles_t;
+typedef unsigned long picoRTOS_mask_t;
 
 typedef long picoRTOS_intptr_t;
 typedef unsigned long picoRTOS_uintptr_t;
