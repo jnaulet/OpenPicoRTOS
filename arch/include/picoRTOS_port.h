@@ -402,6 +402,8 @@ extern void arch_mpu_init(void);
  * ### NOTES
  * > if <ins>pid</ins> is PID_KERNEL, the region is not linked to a task, but directly
  * > to the kernel itself.<br>
+ * > if <ins>pid</ins> is PID_IRQ(x), the region is not linked to a task, but to
+ * > interrupt x's context.<br>
  * > <ins>mode</ins> is a mask, not an enum that can cumulate the following values:
  * >> MM_NON_CACHEABLE: the region is cache-inhibited<br>
  * >> MM_PRIVILIEGED: the region is only accessible to the kernel<br>
