@@ -17,7 +17,7 @@ struct ipwm;
 int ipwm_get_period(struct ipwm *ctx, pwm_period_us_t *period);
 
 /**
- * int **ipwm_get_duty_cycle**(**struct ipwm** \*<ins>ctx</ins>, 
+ * int **ipwm_get_duty_cycle**(**struct ipwm** \*<ins>ctx</ins>,
  * **pwm_duty_cycle_t** \*<ins>duty_cycle</ins>);
  * > Measures the <ins>duty cycle</ins> of a PWM
  *

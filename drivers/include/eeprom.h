@@ -7,8 +7,8 @@
 struct eeprom;
 
 /**
- * int **eeprom_read**(**struct eeprom** \*<ins>ctx</ins>, 
- * **size_t** <ins>addr</ins>, **void** \*<ins>buf</ins>, 
+ * int **eeprom_read**(**struct eeprom** \*<ins>ctx</ins>,
+ * **size_t** <ins>addr</ins>, **void** \*<ins>buf</ins>,
  * **size_t** <ins>n</ins>);
  * > Reads value from EEPROM
  *
@@ -18,7 +18,7 @@ struct eeprom;
 int eeprom_read(struct eeprom *ctx, size_t addr, void *buf, size_t n);
 
 /**
- * int **eeprom_erase**(**struct eeprom** \*<ins>ctx</ins>, 
+ * int **eeprom_erase**(**struct eeprom** \*<ins>ctx</ins>,
  * **size_t** <ins>addr</ins>, **size_t** <ins>n</ins>);
  * > Erase data from EEPROM
  *
@@ -27,8 +27,8 @@ int eeprom_read(struct eeprom *ctx, size_t addr, void *buf, size_t n);
  */
 int eeprom_erase(struct eeprom *ctx, size_t addr, size_t n);
 
-/** 
- * int **eeprom_write**(**struct eeprom** \*<ins>ctx</ins>, 
+/**
+ * int **eeprom_write**(**struct eeprom** \*<ins>ctx</ins>,
  * **size_t** <ins>addr</ins>, const **void** \*<ins>buf</ins>,
  * **size_t** <ins>n</ins>);
  * > Write values to EEPROM

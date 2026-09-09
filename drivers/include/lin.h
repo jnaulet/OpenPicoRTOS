@@ -24,7 +24,7 @@ struct lin_settings {
 };
 
 /**
- * int **lin_setup**(**struct lin** \*<ins>ctx</ins>, 
+ * int **lin_setup**(**struct lin** \*<ins>ctx</ins>,
  * const **struct lin_settings** \*<ins>settings</ins>);
  * > Configures a LIN interface
  *

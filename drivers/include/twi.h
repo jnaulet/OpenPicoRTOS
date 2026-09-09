@@ -77,7 +77,7 @@ struct twi_settings {
 };
 
 /**
- * int **twi_setup**(**struct twi** \*<ins>ctx</ins>, 
+ * int **twi_setup**(**struct twi** \*<ins>ctx</ins>,
  * const **struct twi_settings** \*<ins>settings</ins>);
  * > Configures a TWI interface
  * ### RETURN
@@ -97,7 +97,7 @@ int twi_setup(struct twi *ctx, const struct twi_settings *settings);
 int twi_poll(struct twi *ctx);
 
 /**
- * int **twi_write**(**struct twi** \*<ins>ctx</ins>, const **void** \*<ins>buf</ins>, 
+ * int **twi_write**(**struct twi** \*<ins>ctx</ins>, const **void** \*<ins>buf</ins>,
  * **size_t** <ins>n</ins>, **int** <ins>flags</ins>);
  * > Write data to a TWI interface
  * ### RETURN
@@ -106,7 +106,7 @@ int twi_poll(struct twi *ctx);
 int twi_write(struct twi *ctx, const void *buf, size_t n, int flags);
 
 /**
- * int **twi_read**(**struct twi** \*<ins>ctx</ins>, **void** \*<ins>buf</ins>, 
+ * int **twi_read**(**struct twi** \*<ins>ctx</ins>, **void** \*<ins>buf</ins>,
  * **size_t** <ins>n</ins>, **int** <ins>flags</ins>);
  * > Read data from a TWI interface
  * ### RETURN
