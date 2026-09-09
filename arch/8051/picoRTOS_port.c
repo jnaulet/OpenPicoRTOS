@@ -1,5 +1,3 @@
-
-
 #include "picoRTOS_port.h"
 #include "picoRTOS_device.h"
 
@@ -63,20 +61,4 @@ picoRTOS_atomic_t arch_test_and_set(picoRTOS_atomic_t *ptr)
 {
     return arch_compare_and_swap(ptr, (picoRTOS_atomic_t)0,
                                  (picoRTOS_atomic_t)1);
-}
-
-/* INTERRUPTS MANAGEMENT */
-
-/*@external@*/
-extern struct {
-    arch_isr_fn fn;
-    /*@temp@*/ /*@null@*/ void *priv;
-} ISR_TABLE[DEVICE_INTERRUPT_VECTOR_COUNT];
-
-void arch_register_interrupt(picoRTOS_irq_t irq, arch_isr_fn fn, void *priv)
-{
-    arch_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return );
-
-    ISR_TABLE[irq].fn = fn;
-    ISR_TABLE[irq].priv = priv;
 }

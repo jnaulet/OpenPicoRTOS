@@ -4,6 +4,7 @@
 
 	.globl _picoRTOS_tick
 	.globl _picoRTOS_syscall
+	.globl _picoRTOS_irq
 
 	.globl _arch_timer_ack
 
@@ -155,43 +156,8 @@ SysTick_Handler:
 Default_Handler:
 	SAVE_CONTEXT_STEP1
 	;; point to the right entry
-	mov a, _vn
-	mov b, #5
-	mul ab
-	mov dptr, #_ISR_TABLE
-	add a, dpl
-	mov dpl, a
-	mov a, dph
-	addc a, #0
-	mov dph, a
-	;; get fn to r3:r4
-	movx a, @dptr
-	mov r3, a
-	inc dptr
-	movx a, @dptr
-	mov r4, a
-	inc dptr
-	;; get priv in r5:r6:r7
-	movx a, @dptr
-	mov r5, a
-	inc dptr
-	movx a, @dptr
-	mov r6, a
-	;; inc dptr
-	;; movx a, @dptr
-	;; mov r7, a
-	;; prepare to call fn(priv)
-	lcall fn_priv
-	sjmp epilogue
-fn_priv:
-	push ar3
-	push ar4
-	mov dpl, r5
-	mov dph, r6
-	;; mov b, r7
-	mov b, #0
-	ret			; call fn(priv)
-epilogue:
+	push _vn
+	lcall _picoRTOS_irq
 	RESTORE_CONTEXT_STEP2
 	reti
 
@@ -321,11 +287,3 @@ _vn:
 	.globl __start__stack
 __start__stack:
 	.ds	1
-
-	.area XSEG (XDATA)
-	.globl _ISR_TABLE
-_ISR_TABLE:
-	.rept DEVICE_INTERRUPT_VECTOR_COUNT
-	.ds 2 ; fn
-	.ds 3 ; priv
-	.endm
