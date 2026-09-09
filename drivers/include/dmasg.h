@@ -24,7 +24,7 @@ struct dmasg_xfer {
 };
 
 /**
- * int **dmasg_xfer**(**struct dmasg** \*<ins>ctx</ins>, 
+ * int **dmasg_xfer**(**struct dmasg** \*<ins>ctx</ins>,
  * const **struct dmasg_xfer** \*<ins>xfer<ins>);
  * > Starts a DMA scatter-gather transfer <ins>xfer</ins>
  *

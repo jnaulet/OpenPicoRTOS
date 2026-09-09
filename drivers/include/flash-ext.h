@@ -28,7 +28,7 @@ int flash_ext_probe(struct flash_ext *ctx);
 int flash_ext_get_attributes(struct flash_ext *ctx, /*@out@*/ struct flash_attributes *attr);
 
 /**
- * int **flash_ext_erase**(**struct flash_ext** \*<ins>ctx</ins>, 
+ * int **flash_ext_erase**(**struct flash_ext** \*<ins>ctx</ins>,
  * **size_t** <ins>offset</ins>);
  * > Erases a sector from flash
  *
@@ -38,7 +38,7 @@ int flash_ext_get_attributes(struct flash_ext *ctx, /*@out@*/ struct flash_attri
 int flash_ext_erase(struct flash_ext *ctx, size_t offset);
 
 /**
- * int **flash_ext_read**(**struct flash_ext** \*<ins>ctx</ins>, 
+ * int **flash_ext_read**(**struct flash_ext** \*<ins>ctx</ins>,
  * **size_t** <ins>offset</ins>, const **void** \*<ins>data</ins>,
  * **size_t** <ins>n</ins>);
  * > Reads data from flash
@@ -49,8 +49,8 @@ int flash_ext_erase(struct flash_ext *ctx, size_t offset);
 int flash_ext_read(struct flash_ext *ctx, size_t offset, void *data, size_t n);
 
 /**
- * int **flash_ext_write**(**struct flash_ext** \*<ins>ctx</ins>, 
- * **size_t** <ins>offset</ins>, const **void** \*<ins>data</ins>, 
+ * int **flash_ext_write**(**struct flash_ext** \*<ins>ctx</ins>,
+ * **size_t** <ins>offset</ins>, const **void** \*<ins>data</ins>,
  * **size_t** <ins>n</ins>);
  * > Writes data to flash
  *
