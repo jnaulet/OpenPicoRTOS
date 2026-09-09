@@ -2,7 +2,7 @@
 arch-stm8 := $(srctree)/arch/stm8
 
 # mcu
-mcu-$(CONFIG_STM8) := -mstm8 --int-long-reent --out-fmt-elf
+mcu-$(CONFIG_STM8) := -mstm8 --int-long-reent
 
 # required
 include-$(CONFIG_STM8) += -I$(arch-stm8)/include
