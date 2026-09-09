@@ -5,6 +5,7 @@
 
 	.globl _picoRTOS_tick
 	.globl _picoRTOS_syscall
+	.globl _picoRTOS_irq
 
 	.macro SWAP_STACK
 	ld iy, (#stack)
@@ -124,10 +125,3 @@ _arch_compare_and_swap_exit:
 	.area _DATA
 stack:
 	.ds 2
-	
-	.globl _ISR_TABLE
-_ISR_TABLE:
-	.rept DEVICE_INTERRUPT_VECTOR_COUNT
-	.ds 2 ; fn
-	.ds 2 ; priv
-	.endm
