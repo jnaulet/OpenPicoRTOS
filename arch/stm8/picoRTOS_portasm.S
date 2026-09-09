@@ -5,6 +5,7 @@
 
 	.globl _picoRTOS_tick
 	.globl _picoRTOS_syscall
+	.globl _picoRTOS_irq
 
 	.macro SWAP_STACK
 	ldw x, sp
@@ -62,33 +63,11 @@ Awu_Handler:
 	.globl Default_Handler
 Default_Handler:
 	SAVE_CONTEXT
-	sll a	; * 2
-	sll a	; * 4
-	push a
-	push #0
-	;; point to ISR_TABLE
-	ldw x, #_ISR_TABLE
-	addw x, (1, sp)
-	addw sp, #2
-	;; fn, priv in y, x
-	ldw y, x
-	ldw y, (y)
-	incw x
-	incw x
-	ldw x, (x)
-	;; check for nullness
-	cpw y, #0
-	jreq isr_fn_is_null
-	;; call sub-routine
-	call (y)
-epilogue:
+	;; x is already set (task sp)
+	;; a is already set (irq)
+	call _picoRTOS_irq
 	RESTORE_CONTEXT
 	iret
-
-isr_fn_is_null:
-	;;  isr call is null, use picoRTOS_register_interrupt()
-	break
-	jra isr_fn_is_null
 
 	.globl _arch_save_first_context
 _arch_save_first_context:
@@ -132,13 +111,6 @@ _arch_syscall:
 
 	.globl _bsp
 _bsp:	.ds 2
-
-	.globl _ISR_TABLE
-_ISR_TABLE:
-	.rept DEVICE_INTERRUPT_VECTOR_COUNT
-	.ds 2 ; fn
-	.ds 2 ; priv
-	.endm
 
 	.area INITIALIZED
 	;; sdcc 4.0.0 requires this
