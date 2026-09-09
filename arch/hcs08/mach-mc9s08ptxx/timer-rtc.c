@@ -1,5 +1,6 @@
 #include "picoRTOS_device.h"
 #include "picoRTOS_port.h"
+#include "picoRTOS.h"
 
 #include <generated/autoconf.h>
 
@@ -51,7 +52,7 @@ void arch_timer_init(void)
                          SC2_RTCPS(1));     /* prescaler */
 
     /* reset & enable */
-    arch_register_interrupt((picoRTOS_irq_t)IRQ_RTC, arch_timer_isr, NULL);
+    picoRTOS_register_interrupt((picoRTOS_irq_t)IRQ_RTC, arch_timer_isr, NULL);
     RTC->CNTL = 0;
     RTC->CNTH = 0;
     RTC->SC1 = (uint8_t)(SC1_RTIF | SC1_RTIE);
