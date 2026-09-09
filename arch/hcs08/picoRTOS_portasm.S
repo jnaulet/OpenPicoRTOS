@@ -5,6 +5,7 @@
 
 	.globl _picoRTOS_tick
 	.globl _picoRTOS_syscall
+	.globl _picoRTOS_irq
 
 	.macro SWAP_STACK
 	ldhx _bhx
@@ -74,35 +75,11 @@ Vswi_Handler:
 Default_Handler:
 	SAVE_CONTEXT
 	;; a contains !vector
-	lsla ; multiply by 2
-	lsla ; multiply by 4
-	;; point to ISR_TABLE
-	add #_ISR_TABLE
-	tax
-	clra
-	adc #>_ISR_TABLE
 	psha
-	pulh
-	;; check for nullness
-	pshx
-	pshh
-	ldhx ,x
-	cphx #0
-	beq isr_fn_is_null
-	pulh
-	pulx
-	;;
-	bsr fn_priv
-	bra epilogue
-fn_priv:
-	lda 1,x ; pch
-	psha
-	lda  ,x ; pcl
-	psha
-	lda 3,x ; :a
-	ldx 2,x ; x:
-	rts
-epilogue:
+	;; sp is x:a
+	ldhx _bhx
+	HX_TO_XA
+	jsr _picoRTOS_irq
 	RESTORE_CONTEXT
 	rti
 
