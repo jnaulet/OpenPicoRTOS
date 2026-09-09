@@ -54,7 +54,7 @@ typedef unsigned mpu_mode_t;
 
 /**
  * picoRTOS_stack_t \***picoRTOS_syscall**(**picoRTOS_stack_t** \*<ins>sp</ins>
- * **syscall_t** <ins>syscall</ins>, **void** \*<ins>priv</ins>):
+ * **syscall_t** <ins>syscall</ins>, **void** \*<ins>priv</ins>);
  * > Executes a syscall
  * ### NOTES
  * > This **MUST** be called from a syscall interrupt or equivalent & provide
@@ -74,7 +74,20 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp,
                                    /*@null@*/ void *priv);
 
 /**
- * picoRTOS_stack_t \***picoRTOS_tick**(**picoRTOS_stack_t** *<ins>sp</ins>);
+ * picoRTOS_stack_t \***picoRTOS_tick**(**picoRTOS_stack_t** *<ins>sp</ins>
+ * **picoRTOS_irq_t** <ins>irq</ins>);
+ * > Executes an interrupt request
+ * ### NOTES
+ * > This **MUST** be called from a default interrupt and provide
+ * > the current task's <ins>sp</ins> as a first parameter.
+ * ### RETURN
+ * > This call will return the next task sp to restore.
+ */
+extern /*@exposed@*/
+picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp);
+
+/**
+ * picoRTOS_stack_t \***picoRTOS_irq**(**picoRTOS_stack_t** *<ins>sp</ins>);
  * > Increments the tick & starts a new cycle
  * ### NOTES
  * > This **MUST** be called from your main tick timer interrupt and provide
@@ -83,10 +96,10 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp,
  * > This call will return the next task sp to restore.
  */
 extern /*@exposed@*/
-picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp);
+picoRTOS_stack_t *picoRTOS_irq(picoRTOS_stack_t *sp,
+                               picoRTOS_irq_t irq);
 
 typedef void (*arch_entry_point_fn)(void*);     /* entry point */
-typedef void (*arch_isr_fn)(void*);             /* interrupt service routine */
 
 #if !defined(NDEBUG)
 
@@ -252,18 +265,6 @@ extern /*@unused@*/ picoRTOS_atomic_t arch_compare_and_swap(picoRTOS_atomic_t *v
  */
 
 /**
- * void **arch_register_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>,
- * **arch_isr_fn** <ins>fn</ins>, **void** \*<ins>priv</ins>);
- * > Registers an interrupt on the system
- * ### NOTES
- * > Make sure that when <ins>irq</ins> is asserted, <ins>fn</ins> is
- * > called with <ins>priv</ins> as a parameter.
- */
-extern /*@unused@*/ void arch_register_interrupt(picoRTOS_irq_t irq,
-                                                 arch_isr_fn fn,
-                                                 /*@null@*/ void *priv);
-
-/**
  * void **arch_enable_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>);
  * > Enables an <ins>irq</ins>
  * ### NOTES
@@ -353,6 +354,7 @@ extern /*@external@*/ void arch_delay_us(unsigned long n);
  */
 
 #define PID_KERNEL -1
+#define PID_IRQ(x) ((CONFIG_TASK_COUNT + CONFIG_CORE_COUNT) + (x))
 
 #define MM_NON_CACHEABLE (1u << 4)
 #define MM_PRIVILEGED    (1u << 3)

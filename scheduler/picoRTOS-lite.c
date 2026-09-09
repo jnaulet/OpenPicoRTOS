@@ -1,5 +1,6 @@
 #include "picoRTOS.h"
 #include "picoRTOS_port.h"
+#include "picoRTOS_device.h"
 
 /* CHECK FOR OBVIOUS ERRORS */
 
@@ -52,6 +53,11 @@ static void *L1_CACHE_ALIGN(/*@returned@*/ const char *ptr, int align)
     return (void*)(ptr + bias);
 }
 
+struct picoRTOS_irq_core {
+    picoRTOS_isr_fn fn;
+    /*@temp@*/ /*@null@*/ void *priv;
+};
+
 #define F_RUNNING   (1 << 0)
 #define F_POSTPONED (1 << 1)
 
@@ -60,6 +66,7 @@ struct picoRTOS_core {
     picoRTOS_pid_t index;
     picoRTOS_tick_t tick;
     struct picoRTOS_task_core task[TASK_COUNT];
+    struct picoRTOS_irq_core irq[DEVICE_INTERRUPT_VECTOR_COUNT];
 } __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
 
 /* main core component */
@@ -390,12 +397,25 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
     return task->sp;
 }
 
+/* IRQ */
+
+picoRTOS_stack_t *picoRTOS_irq(picoRTOS_stack_t *sp, picoRTOS_irq_t irq)
+{
+    picoRTOS_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return sp);
+    picoRTOS_assert(picoRTOS.irq[irq].fn != NULL, return sp);
+
+    /* warning: function pointer */
+    picoRTOS.irq[irq].fn(picoRTOS.irq[irq].priv);
+    return sp;
+}
 void picoRTOS_register_interrupt(picoRTOS_irq_t irq,
                                  picoRTOS_isr_fn fn,
                                  void *priv)
 {
     /* supervisor only (no syscall needed) */
-    arch_register_interrupt(irq, fn, priv);
+    picoRTOS_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return );
+    picoRTOS.irq[irq].fn = fn;
+    picoRTOS.irq[irq].priv = priv;
 }
 
 void picoRTOS_set_interrupt(picoRTOS_irq_t irq, bool active)

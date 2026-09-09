@@ -86,6 +86,12 @@ static void *L1_CACHE_ALIGN(/*@returned@*/ const char *ptr, int align)
     return (void*)(ptr + bias);
 }
 
+struct picoRTOS_irq_core {
+    picoRTOS_isr_fn fn;
+    /*@temp@*/ /*@null@*/ void *priv;
+    picoRTOS_mask_t core_mask;
+};
+
 #define F_RUNNING   (1 << 0)
 #define F_POSTPONED (1 << 1)
 
@@ -97,6 +103,7 @@ struct picoRTOS_SMP_core {
     picoRTOS_core_t core_counter;
     struct picoRTOS_task_core task[TASK_COUNT];
     struct picoRTOS_task_sub sub[TASK_COUNT];
+    struct picoRTOS_irq_core irq[DEVICE_INTERRUPT_VECTOR_COUNT];
 } __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
 
 /* main core component */
@@ -575,8 +582,13 @@ syscall_cacheop(/*@returned@*/ struct picoRTOS_task_core *task,
 syscall_irqop(/*@returned@*/ struct picoRTOS_task_core *task,
               const struct syscall_irqop *op)
 {
-    if (op->enable) arch_enable_interrupt(op->irq);
-    else arch_disable_interrupt(op->irq);
+    picoRTOS_assert(op->irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT,
+                    return syscall_kill(task, FINVALID)->sp);
+
+    picoRTOS_mask_t core_mask = picoRTOS.irq[op->irq].core_mask;
+
+    if (op->enable) arch_enable_interrupt(op->irq, core_mask);
+    else arch_disable_interrupt(op->irq, core_mask);
     arch_spin_unlock();
     return task;
 }
@@ -697,12 +709,30 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
     return task->sp;
 }
 
+/* IRQ */
+
+picoRTOS_stack_t *picoRTOS_irq(picoRTOS_stack_t *sp, picoRTOS_irq_t irq)
+{
+    picoRTOS_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return sp);
+    picoRTOS_assert(picoRTOS.irq[irq].fn != NULL, return sp);
+
+    arch_mpu_restore_regions((int)PID_IRQ(irq));
+    /* warning: function pointer */
+    picoRTOS.irq[irq].fn(picoRTOS.irq[irq].priv);
+
+    arch_mpu_restore_regions((int)picoRTOS.index);
+    return sp;
+}
+
 void picoRTOS_register_interrupt(picoRTOS_irq_t irq,
                                  picoRTOS_isr_fn fn,
                                  void *priv)
 {
     /* supervisor only (no syscall needed) */
-    arch_register_interrupt(irq, fn, priv);
+    picoRTOS_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return );
+    picoRTOS.irq[irq].fn = fn;
+    picoRTOS.irq[irq].priv = priv;
+    picoRTOS.irq[irq].core_mask = (picoRTOS_mask_t)(1 << CONFIG_CORE_COUNT) - 1;
 }
 
 /**
@@ -719,5 +749,8 @@ void picoRTOS_SMP_register_interrupt(picoRTOS_irq_t irq,
                                      picoRTOS_mask_t core_mask)
 {
     /* supervisor only (no syscall needed) */
-    arch_smp_register_interrupt(irq, fn, priv, core_mask);
+    picoRTOS_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return );
+    picoRTOS.irq[irq].fn = fn;
+    picoRTOS.irq[irq].priv = priv;
+    picoRTOS.irq[irq].core_mask = core_mask;
 }

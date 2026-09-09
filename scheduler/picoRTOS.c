@@ -1,6 +1,8 @@
 #include "picoRTOS.h"
 #include "picoRTOS_port.h"
 
+#include "picoRTOS_device.h"
+
 /* CHECK FOR OBVIOUS ERRORS */
 
 #if CONFIG_DEFAULT_STACK_COUNT < ARCH_MIN_STACK_COUNT
@@ -80,6 +82,11 @@ static void *L1_CACHE_ALIGN(/*@returned@*/ const char *ptr, int align)
     return (void*)(ptr + bias);
 }
 
+struct picoRTOS_irq_core {
+    picoRTOS_isr_fn fn;
+    /*@temp@*/ /*@null@*/ void *priv;
+};
+
 #define F_RUNNING   (1 << 0)
 #define F_POSTPONED (1 << 1)
 
@@ -90,6 +97,7 @@ struct picoRTOS_core {
     picoRTOS_pid_t pid_count;
     struct picoRTOS_task_core task[TASK_COUNT];
     struct picoRTOS_task_sub sub[TASK_COUNT];
+    struct picoRTOS_irq_core irq[DEVICE_INTERRUPT_VECTOR_COUNT];
 } __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
 
 /* main core component */
@@ -585,8 +593,9 @@ syscall_cacheop(/*@returned@*/ struct picoRTOS_task_core *task,
 syscall_irqop(/*@returned@*/ struct picoRTOS_task_core *task,
               const struct syscall_irqop *op)
 {
-    if (op->enable) arch_enable_interrupt(op->irq);
-    else arch_disable_interrupt(op->irq);
+#define CORE_MASK ((1 << CONFIG_CORE_COUNT) - 1)
+    if (op->enable) arch_enable_interrupt(op->irq, (picoRTOS_mask_t)CORE_MASK);
+    else arch_disable_interrupt(op->irq, (picoRTOS_mask_t)CORE_MASK);
     return task;
 }
 
@@ -680,6 +689,21 @@ picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp)
     return task->sp;
 }
 
+/* IRQ */
+
+picoRTOS_stack_t *picoRTOS_irq(picoRTOS_stack_t *sp, picoRTOS_irq_t irq)
+{
+    picoRTOS_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return sp);
+    picoRTOS_assert(picoRTOS.irq[irq].fn != NULL, return sp);
+
+    arch_mpu_restore_regions((int)PID_IRQ(irq));
+    /* warning: function pointer */
+    picoRTOS.irq[irq].fn(picoRTOS.irq[irq].priv);
+
+    arch_mpu_restore_regions((int)picoRTOS.index);
+    return sp;
+}
+
 /**
  * void **picoRTOS_register_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>,
  * **picoRTOS_isr_fn** <ins>fn</ins>, **void** \*<ins>priv</ins>);
@@ -692,5 +716,7 @@ void picoRTOS_register_interrupt(picoRTOS_irq_t irq,
                                  void *priv)
 {
     /* supervisor only (no syscall needed) */
-    arch_register_interrupt(irq, fn, priv);
+    picoRTOS_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return );
+    picoRTOS.irq[irq].fn = fn;
+    picoRTOS.irq[irq].priv = priv;
 }
