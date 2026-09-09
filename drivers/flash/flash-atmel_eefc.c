@@ -144,6 +144,7 @@ int flash_probe(struct flash *ctx)
     return -EAGAIN;
 }
 
+/* cppcheck-suppress [constParameterPointer] */
 int flash_get_attributes(struct flash *ctx, struct flash_attributes *attr)
 {
     memcpy(attr, &ctx->attr, sizeof(*attr));
