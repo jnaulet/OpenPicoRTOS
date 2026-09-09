@@ -21,8 +21,9 @@ static unsigned char IE2;
 #define IE2_ESPI (1 << 1)
 #define IE2_ES2  (1 << 0)
 
-void arch_enable_interrupt(picoRTOS_irq_t irq)
+void arch_enable_interrupt_ext(picoRTOS_irq_t irq, picoRTOS_mask_t core_mask)
 {
+    /*@i@*/ (void)core_mask;
     arch_assert_void(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT);
 
     switch (irq) {
@@ -42,8 +43,9 @@ void arch_enable_interrupt(picoRTOS_irq_t irq)
     }
 }
 
-void arch_disable_interrupt(picoRTOS_irq_t irq)
+void arch_disable_interrupt_ext(picoRTOS_irq_t irq, picoRTOS_mask_t core_mask)
 {
+    /*@i@*/ (void)core_mask;
     arch_assert_void(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT);
 
     switch (irq) {
