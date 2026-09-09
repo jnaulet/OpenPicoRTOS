@@ -25,6 +25,9 @@ upload: $(hex)
 	avrdude -v -patmega2560 -cwiring -P$(TTY) \
 	-b115200 -D -Uflash:w:$<:i
 
+isp_program: $(hex)
+	avrdude -v -patmega2560 -c atmelice_isp -D -Uflash:w:$<:i
+
 clean: FORCE
 	$(Q)$(MAKE) -C $(KBUILD_SRC) O=$(PWD) $@
 	@rm -f $(target) $(hex) *.map
