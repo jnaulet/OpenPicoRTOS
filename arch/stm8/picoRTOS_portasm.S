@@ -40,7 +40,7 @@ Trap_Handler:
 	;; a is already set (syscall)
 	;; get priv from sp
 	ldw y, x
-	addw y, #12
+	ldw y, (0x03, y)
 	pushw y
 	;; syscall
 	call _picoRTOS_syscall
