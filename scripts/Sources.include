@@ -9,6 +9,7 @@ include arch/avr/Makefile
 include arch/c2000/Makefile
 include arch/hcs08/Makefile
 include arch/mips/Makefile
+include arch/msp430/Makefile
 include arch/powerpc/Makefile
 include arch/pthread/Makefile
 include arch/riscv/Makefile

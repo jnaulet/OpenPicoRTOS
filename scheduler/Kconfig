@@ -1,25 +1,33 @@
 menu "Scheduler options"
 
+config DISABLE_SINGLE_CORE
+        bool
+        default n
+
+config DISABLE_SMP
+        bool
+        default n
+
 choice
-	prompt "Main scheduler"
+        prompt "Main scheduler"
 
 config SINGLE_CORE
-       bool "picoRTOS (single core)" if !CC_SDCC
+        bool "picoRTOS (single core)" if !DISABLE_SINGLE_CORE
 
 config SMP
-       bool "picoRTOS-SMP (SMP)" if !CC_SDCC
+        bool "picoRTOS-SMP (SMP)" if !DISABLE_SMP
 
 config LITE
-       bool "picoRTOS-lite (single core, no round-robin)"
+        bool "picoRTOS-lite (single core, no round-robin)"
 
 endchoice
 
 config CORE_COUNT
-       int
-       prompt "Number of cores (SMP)" if SMP
-       default 1 if SINGLE_CORE || LITE
-       default 2 if SMP
-       help
+        int
+        prompt "Number of cores (SMP)" if SMP
+        default 1 if SINGLE_CORE || LITE
+        default 2 if SMP
+        help
           The numbers of cores on which the system will run
 
 endmenu

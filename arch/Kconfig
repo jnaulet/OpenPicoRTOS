@@ -1,40 +1,55 @@
 
 choice
-	prompt "Architecture select"
-	default ARM
+        prompt "Architecture select"
+        default ARM
 
 config 8051
-       bool "8051 architecture"
+        bool "8051 architecture"
+        select DISABLE_SINGLE_CORE
+        select DISABLE_SMP
 
 config ARM
-       bool "ARM architecture"
+        bool "ARM architecture"
 
 config AVR
-       bool "AVR8 architecture"
+        bool "AVR8 architecture"
+        select DISABLE_SMP
 
 config C2000
-       bool "C2000 architecture"
+        bool "C2000 architecture"
+        select DISABLE_SMP
 
 config HCS08
-       bool "HCS08 architecture"
+        bool "HCS08 architecture"
+        select DISABLE_SINGLE_CORE
+        select DISABLE_SMP
 
 config MIPS
-	bool "MIPS architecture"
+        bool "MIPS architecture"
+
+config MSP430
+        bool "MSP430 architecture"
+        select DISABLE_SINGLE_CORE
+        select DISABLE_SMP
 
 config POWERPC
-	bool "PowerPC architecture"
+        bool "PowerPC architecture"
 
 config RISCV
-	bool "RISC-V architecture"
+        bool "RISC-V architecture"
 
 config STM8
         bool "STM8 architecture"
+        select DISABLE_SINGLE_CORE
+        select DISABLE_SMP
 
 config Z80
         bool "Z80 architecture"
+        select DISABLE_SINGLE_CORE
+        select DISABLE_SMP
 
 config PTHREAD
-	bool "PTHREAD simulation"
+        bool "PTHREAD simulation"
 
 config WIN32
         bool "WIN32 simulation"
@@ -42,22 +57,22 @@ config WIN32
 endchoice
 
 config CC
-       string
-       default "gcc" if ARM || AVR || MIPS || POWERPC || RISCV || PTHREAD || WIN32
-       default "sdcc" if 8051 || HCS08 || STM8 || Z80
-       default "cl2000" if C2000
+        string
+        default "gcc" if ARM || AVR || MIPS || MSP430 || POWERPC || RISCV || PTHREAD || WIN32
+        default "sdcc" if 8051 || HCS08 || STM8 || Z80
+        default "cl2000" if C2000
 
 config CC_GCC
-       bool
-       default y if CC="gcc"
+        bool
+        default y if CC="gcc"
 
 config CC_SDCC
-       bool
-       default y if CC="sdcc"
+        bool
+        default y if CC="sdcc"
 
 config CC_CL2000
-       bool
-       default y if CC="cl2000"
+        bool
+        default y if CC="cl2000"
 
 source "arch/8051/Kconfig"
 source "arch/arm/Kconfig"
@@ -65,6 +80,7 @@ source "arch/avr/Kconfig"
 source "arch/c2000/Kconfig"
 source "arch/hcs08/Kconfig"
 source "arch/mips/Kconfig"
+source "arch/msp430/Kconfig"
 source "arch/powerpc/Kconfig"
 source "arch/riscv/Kconfig"
 source "arch/stm8/Kconfig"

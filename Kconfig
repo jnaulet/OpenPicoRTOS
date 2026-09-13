@@ -12,8 +12,16 @@ source scheduler/Kconfig
 
 menu "General setup"
 
+config FIXED_TICK_HZ
+       bool
+       default n
+
+comment "System tick frequency (in hertz) is defined by arch"
+	depends on FIXED_TICK_HZ
+
 config TICK_HZ
        int "System tick frequency (in hertz)"
+       depends on !FIXED_TICK_HZ
        default 1000
        help
           Some more help here
@@ -50,6 +58,7 @@ config CROSS_COMPILE
         default avr- if AVR && ATMEGA
         default xc8- if AVR && ATTINY
         default x32- if MIPS
+        default msp430- if MSP430
         default riscv64-unknown-elf- if RISCV
 	default powerpc-eabivle- if POWERPC
         default '' if PTHREAD

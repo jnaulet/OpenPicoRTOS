@@ -1,0 +1,19 @@
+menu "MSP430 architecture"
+        depends on MSP430
+
+choice
+        prompt "Select device"
+
+config MACH_MSP430G2553
+        bool "TI MSP430G2553"
+        select FIXED_TICK_HZ
+
+endchoice
+
+config ACLK_FREQ
+        int "ACLK frequency in hz"
+        default 12000
+	help
+	    CONFIG_TICK_HZ frequency will be ACLK_FREQ / 64
+
+endmenu

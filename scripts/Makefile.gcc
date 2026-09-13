@@ -35,6 +35,13 @@ ifeq ($(CONFIG_MAP),y)
 map = -Wl,-Map=$@.map
 endif
 
+# version
+Wflags := $(shell printf "9\n%s\n" $$($(CC) -dumpversion) | \
+            sort --version-sort --check && echo y)
+
+# older versions of gcc don't support these flags
+c_flags-$(Wflags) := -Wpedantic
+
 # linker script
 ldscript  := $(subst ",,$(CONFIG_LDSCRIPT))
 ifneq ($(ldscript),)
@@ -55,7 +62,7 @@ endif
 
 inctree	 = $(patsubst %/,%,$(addprefix -I,$(dir $(1))))
 
-c_flags	 = -Wp,-MD,$(depfile) -Wpedantic -Wall -Wextra \
+c_flags	 = -Wp,-MD,$(depfile) $(c_flags-y) -Wall -Wextra \
 		 $(opt-y) $(debug-y) $(RTOSINCLUDE) \
 		 $(sort $(call inctree,$(c_src-y)) $(call inctree,$(a_src-y))) \
 		 $(ccflags-y) $(subst ",,$(CONFIG_EXTRA_CFLAGS)) $(ccattributes)
