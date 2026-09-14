@@ -1,0 +1,64 @@
+#include "picoRTOS.h"
+#include "picoRTOS_device.h"
+
+#include "msp430g2553.h"
+
+static void tick_main(void *priv)
+{
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
+
+    struct gpio *TICK = (struct gpio*)priv;
+
+    for (;;) {
+        gpio_toggle(TICK);
+        picoRTOS_schedule();
+    }
+}
+
+static void led_main(void *priv)
+{
+    picoRTOS_assert(priv != NULL, picoRTOS_kill(EINVAL));
+
+    struct gpio *LED = (struct gpio*)priv;
+    picoRTOS_tick_t ref = picoRTOS_get_tick();
+
+    for (;;) {
+        gpio_write(LED, true);
+        picoRTOS_sleep(PICORTOS_DELAY_MSEC(60l));
+        gpio_write(LED, false);
+        picoRTOS_sleep(PICORTOS_DELAY_MSEC(60l));
+        gpio_write(LED, true);
+        picoRTOS_sleep(PICORTOS_DELAY_MSEC(120l));
+        gpio_write(LED, false);
+
+        picoRTOS_sleep_until(&ref, PICORTOS_DELAY_SEC(1));
+    }
+}
+
+static void tasks_init(struct msp430g2553 *board)
+{
+    /* ensure task don't stay on the sys stack forever */
+    struct picoRTOS_task task;
+    static picoRTOS_stack_t stack0[CONFIG_DEFAULT_STACK_COUNT];
+    static picoRTOS_stack_t stack1[CONFIG_DEFAULT_STACK_COUNT];
+
+    picoRTOS_task_init(&task, tick_main, &board->TICK, stack0, PICORTOS_STACK_COUNT(stack0));
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+    picoRTOS_task_init(&task, led_main, &board->LED1, stack1, PICORTOS_STACK_COUNT(stack1));
+    picoRTOS_add_task(&task, picoRTOS_get_next_available_priority());
+}
+
+int main(void)
+{
+    static struct msp430g2553 msp430;
+
+    picoRTOS_init();
+    (void)msp430g2553_init(&msp430);
+    tasks_init(&msp430);
+
+    picoRTOS_start();
+
+    /* not supposed to end there */
+    picoRTOS_assert_void(false);
+    return 1;
+}
