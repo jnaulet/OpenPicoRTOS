@@ -13,7 +13,7 @@ new architecture.
 
 ---
 picoRTOS_stack_t \***picoRTOS_syscall**(**picoRTOS_stack_t** \*<ins>sp</ins>
-**syscall_t** <ins>syscall</ins>, **void** \*<ins>priv</ins>):
+**syscall_t** <ins>syscall</ins>, **void** \*<ins>priv</ins>);
 > Executes a syscall
 ### NOTES
 > This **MUST** be called from a syscall interrupt or equivalent & provide
@@ -28,7 +28,17 @@ picoRTOS_stack_t \***picoRTOS_syscall**(**picoRTOS_stack_t** \*<ins>sp</ins>
 > This call returns the stack you have to switch to (context restore)
 
 ---
-picoRTOS_stack_t \***picoRTOS_tick**(**picoRTOS_stack_t** *<ins>sp</ins>);
+picoRTOS_stack_t \***picoRTOS_tick**(**picoRTOS_stack_t** *<ins>sp</ins>
+**picoRTOS_irq_t** <ins>irq</ins>);
+> Executes an interrupt request
+### NOTES
+> This **MUST** be called from a default interrupt and provide
+> the current task's <ins>sp</ins> as a first parameter.
+### RETURN
+> This call will return the next task sp to restore.
+
+---
+picoRTOS_stack_t \***picoRTOS_irq**(**picoRTOS_stack_t** *<ins>sp</ins>);
 > Increments the tick & starts a new cycle
 ### NOTES
 > This **MUST** be called from your main tick timer interrupt and provide
@@ -150,24 +160,26 @@ picoRTOS_atomic_t **arch_compare_and_swap**(**picoRTOS_atomic_t** \*<ins>var</in
 ## Interrupts
 
 ---
-void **arch_register_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>,
-**arch_isr_fn** <ins>fn</ins>, **void** \*<ins>priv</ins>);
-> Registers an interrupt on the system
+void **arch_enable_interrupt_ext**(**picoRTOS_irq_t** <ins>irq</ins>,
+**picoRTOS_mask_t** <ins>core_mask</ins>);
+> Enables an <ins>irq</ins> on cores matched by <ins>core_mask</ins>
 ### NOTES
-> Make sure that when <ins>irq</ins> is asserted, <ins>fn</ins> is
-> called with <ins>priv</ins> as a parameter.
+> This function will be called by the relevant `picoRTOS_syscall()`
+
+---
+void **arch_disable_interrupt_ext**(**picoRTOS_irq_t** <ins>irq</ins>,
+**picoRTOS_mask_t** <ins>core_mask</ins>);
+> Disables an <ins>irq</ins> on cores matched by <ins>core_mask</ins>
+### NOTES
+> This function will be called by the relevant `picoRTOS_syscall()`
 
 ---
 void **arch_enable_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>);
-> Enables an <ins>irq</ins>
-### NOTES
-> This function will be called by the relevant `picoRTOS_syscall()`
+> Disables an <ins>irq</ins> on all cores
 
 ---
 void **arch_disable_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>);
-> Disables an <ins>irq</ins>
-### NOTES
-> This function will be called by the relevant `picoRTOS_syscall()`
+> Disables an <ins>irq</ins> on all cores
 
 
 ## Statistics
@@ -230,6 +242,8 @@ void **arch_mpu_add_region**(**int** <ins>pid</ins>, const **void** \*<ins>addr<
 ### NOTES
 > if <ins>pid</ins> is PID_KERNEL, the region is not linked to a task, but directly
 > to the kernel itself.<br>
+> if <ins>pid</ins> is PID_IRQ(x), the region is not linked to a task, but to
+> interrupt x's context.<br>
 > <ins>mode</ins> is a mask, not an enum that can cumulate the following values:
 >> MM_NON_CACHEABLE: the region is cache-inhibited<br>
 >> MM_PRIVILIEGED: the region is only accessible to the kernel<br>
@@ -287,20 +301,4 @@ void **arch_spin_lock**(void);
 ---
 void **arch_spin_unlock**(void);
 > Unlocks the SMP spinlock
-
-
-Interrupt management
-
----
-void **arch_smp_register_interrupt**(**picoRTOS_irq_t** <ins>irq</ins>,
-**arch_isr_fn** <ins>fn</ins>, **void** \*<ins>priv</ins>,
-**picoRTOS_mask_t** <ins>core_mask</ins>);
-> Registers an interrupt on the system & attach it to the core(s)
-> matching the <ins>core_mask</ins>
-### NOTES
-> Make sure that when <ins>irq</ins> is asserted, <ins>fn</ins> is
-> called with <ins>priv</ins> as a parameter.
->
-> <ins>core_mask</ins> is a bitfield where every core has it own bit,
-> for example, (1 << 0) for core0, (1 << 1) for core1, etc
 

@@ -65,20 +65,20 @@ struct adc \***adc_claim**(**struct adc** \*<ins>ctx</ins>);
 ## CAN
 
 ---
-int **can_setup**(**struct can** \*<ins>ctx</ins>, 
+int **can_setup**(**struct can** \*<ins>ctx</ins>,
 **const struct can_settings** \*<ins>settings</ins>);
 > Configures a CAN interface according to <ins>settings</ins>
 ### RETURN
 > Returns 0 in case of success, -errno otherwise
 
 ---
-int **can_accept**(**struct can** \*<ins>ctx</ins>, 
+int **can_accept**(**struct can** \*<ins>ctx</ins>,
 **can_id_t** <ins>id</ins>, **can_id_t** <ins>accept_mask</ins>);
 > Accepts messages according to <ins>id</ins> & <ins>accept_mask</ins> on
 > can interface <ins>ctx</ins>
 
 ### NOTES
-> CAN_ACCEPT_STRICT(_EXT) as acceptance mask means only the specified ID 
+> CAN_ACCEPT_STRICT(_EXT) as acceptance mask means only the specified ID
 > will be accepted.<br>
 > Acceptance masks act as a logical AND between the received ID, the
 > acceptance mask and the specified id
@@ -90,23 +90,23 @@ int **can_accept**(**struct can** \*<ins>ctx</ins>,
 > Returns 0 in case of success, -errno otherwise
 
 ---
-int **can_write**(**struct can** \*<ins>ctx</ins>, 
-**can_id_t** <ins>id</ins>, **const void** \*<ins>buf</ins>, 
+int **can_write**(**struct can** \*<ins>ctx</ins>,
+**can_id_t** <ins>id</ins>, **const void** \*<ins>buf</ins>,
 **size_t** <ins>n</ins>);
 > Sends a message on the CAN interface
 
 ### RETURN
-> Returns the number of bytes sent in case of success, 
+> Returns the number of bytes sent in case of success,
 > -errno otherwise
 
 ---
-int **can_read**(**struct can** \*<ins>ctx</ins>, 
+int **can_read**(**struct can** \*<ins>ctx</ins>,
 **can_id_t** \*<ins>id</ins>, **void** \*<ins>buf</ins>,
 **size_t** <ins>n</ins>);
 > Receives a message from the CAN interface
 
 ### RETURN
-> Returns the number of bytes received in case of success, 
+> Returns the number of bytes received in case of success,
 > -errno otherwise
 
 ---
@@ -170,7 +170,7 @@ struct dma \***dma_claim**(**struct dma** \*<ins>ctx</ins>);
 ## DMA Scatter-Gather
 
 ---
-int **dmasg_xfer**(**struct dmasg** \*<ins>ctx</ins>, 
+int **dmasg_xfer**(**struct dmasg** \*<ins>ctx</ins>,
 const **struct dmasg_xfer** \*<ins>xfer<ins>);
 > Starts a DMA scatter-gather transfer <ins>xfer</ins>
 
@@ -188,8 +188,8 @@ int **dmasg_xfer_done**(**struct dmasg** \*<ins>ctx</ins>);
 ## EEPROM
 
 ---
-int **eeprom_read**(**struct eeprom** \*<ins>ctx</ins>, 
-**size_t** <ins>addr</ins>, **void** \*<ins>buf</ins>, 
+int **eeprom_read**(**struct eeprom** \*<ins>ctx</ins>,
+**size_t** <ins>addr</ins>, **void** \*<ins>buf</ins>,
 **size_t** <ins>n</ins>);
 > Reads value from EEPROM
 
@@ -197,7 +197,7 @@ int **eeprom_read**(**struct eeprom** \*<ins>ctx</ins>,
 > Returns the number of bytes read if success, -errno otherwise
 
 ---
-int **eeprom_erase**(**struct eeprom** \*<ins>ctx</ins>, 
+int **eeprom_erase**(**struct eeprom** \*<ins>ctx</ins>,
 **size_t** <ins>addr</ins>, **size_t** <ins>n</ins>);
 > Erase data from EEPROM
 
@@ -205,7 +205,7 @@ int **eeprom_erase**(**struct eeprom** \*<ins>ctx</ins>,
 > Returns the number of bytes erased if success, -errno otherwise
 
 ---
-int **eeprom_write**(**struct eeprom** \*<ins>ctx</ins>, 
+int **eeprom_write**(**struct eeprom** \*<ins>ctx</ins>,
 **size_t** <ins>addr</ins>, const **void** \*<ins>buf</ins>,
 **size_t** <ins>n</ins>);
 > Write values to EEPROM
@@ -232,7 +232,7 @@ int **flash_ext_get_attributes**(**struct flash_ext** \*<ins>ctx</ins>,
 > Returns 0 if success, -errno otherwise
 
 ---
-int **flash_ext_erase**(**struct flash_ext** \*<ins>ctx</ins>, 
+int **flash_ext_erase**(**struct flash_ext** \*<ins>ctx</ins>,
 **size_t** <ins>offset</ins>);
 > Erases a sector from flash
 
@@ -240,7 +240,7 @@ int **flash_ext_erase**(**struct flash_ext** \*<ins>ctx</ins>,
 > Returns 0 in case of success, -errno otherwise
 
 ---
-int **flash_ext_read**(**struct flash_ext** \*<ins>ctx</ins>, 
+int **flash_ext_read**(**struct flash_ext** \*<ins>ctx</ins>,
 **size_t** <ins>offset</ins>, const **void** \*<ins>data</ins>,
 **size_t** <ins>n</ins>);
 > Reads data from flash
@@ -249,8 +249,8 @@ int **flash_ext_read**(**struct flash_ext** \*<ins>ctx</ins>,
 > Returns the number of bytes read if success, -errno otherwise
 
 ---
-int **flash_ext_write**(**struct flash_ext** \*<ins>ctx</ins>, 
-**size_t** <ins>offset</ins>, const **void** \*<ins>data</ins>, 
+int **flash_ext_write**(**struct flash_ext** \*<ins>ctx</ins>,
+**size_t** <ins>offset</ins>, const **void** \*<ins>data</ins>,
 **size_t** <ins>n</ins>);
 > Writes data to flash
 
@@ -365,7 +365,7 @@ int **ipwm_get_period**(**struct ipwm** \*<ins>ctx</ins>,
 > Returns 0 in case of success, -errno otherwise
 
 ---
-int **ipwm_get_duty_cycle**(**struct ipwm** \*<ins>ctx</ins>, 
+int **ipwm_get_duty_cycle**(**struct ipwm** \*<ins>ctx</ins>,
 **pwm_duty_cycle_t** \*<ins>duty_cycle</ins>);
 > Measures the <ins>duty cycle</ins> of a PWM
 
@@ -376,7 +376,7 @@ int **ipwm_get_duty_cycle**(**struct ipwm** \*<ins>ctx</ins>,
 ## LIN
 
 ---
-int **lin_setup**(**struct lin** \*<ins>ctx</ins>, 
+int **lin_setup**(**struct lin** \*<ins>ctx</ins>,
 const **struct lin_settings** \*<ins>settings</ins>);
 > Configures a LIN interface
 
@@ -449,14 +449,14 @@ struct rng \***rng_claim**(**struct rng** \*<ins>ctx</ins>);
 ## SPI
 
 ---
-int **spi_setup**(**struct spi** \*<ins>ctx</ins>, 
+int **spi_setup**(**struct spi** \*<ins>ctx</ins>,
 const **struct spi_settings** \*<ins>settings</ins>);
 > Configure a SPI interface
 ### RETURN
 Returns 0 in case of success, -errno otherwise
 
 ---
-int **spi_xfer**(**struct spi** \*<ins>ctx</ins>, **void** \*<ins>rx</ins>, 
+int **spi_xfer**(**struct spi** \*<ins>ctx</ins>, **void** \*<ins>rx</ins>,
 const **void** \*<ins>tx</ins>, **size_t** <ins>n</ins>);
 > Transfers data over a SPI interface
 ### RETURN
@@ -476,7 +476,7 @@ struct spi \***spi_claim**(**struct spi** \*<ins>ctx</ins>);
 ## TWI
 
 ---
-int **twi_setup**(**struct twi** \*<ins>ctx</ins>, 
+int **twi_setup**(**struct twi** \*<ins>ctx</ins>,
 const **struct twi_settings** \*<ins>settings</ins>);
 > Configures a TWI interface
 ### RETURN
@@ -492,14 +492,14 @@ int **twi_poll**(**struct twi** \*<ins>ctx<ins>);
 > - -errno otherwise
 
 ---
-int **twi_write**(**struct twi** \*<ins>ctx</ins>, const **void** \*<ins>buf</ins>, 
+int **twi_write**(**struct twi** \*<ins>ctx</ins>, const **void** \*<ins>buf</ins>,
 **size_t** <ins>n</ins>, **int** <ins>flags</ins>);
 > Write data to a TWI interface
 ### RETURN
 Returns the number of byte written if success, -errno otherwise
 
 ---
-int **twi_read**(**struct twi** \*<ins>ctx</ins>, **void** \*<ins>buf</ins>, 
+int **twi_read**(**struct twi** \*<ins>ctx</ins>, **void** \*<ins>buf</ins>,
 **size_t** <ins>n</ins>, **int** <ins>flags</ins>);
 > Read data from a TWI interface
 ### RETURN
@@ -509,21 +509,21 @@ int **twi_read**(**struct twi** \*<ins>ctx</ins>, **void** \*<ins>buf</ins>,
 ## UART
 
 ---
-int **uart_setup**(**struct uart** \*<ins>ctx</ins>, 
+int **uart_setup**(**struct uart** \*<ins>ctx</ins>,
 const **struct uart_settings** \*<ins>settings</ins>);
 > Configure a UART interface
 ### RETURN
 > Returns 0 in case of success, -errno otherwise
 
 ---
-int **uart_write**(**struct uart** \*<ins>ctx</ins>, 
+int **uart_write**(**struct uart** \*<ins>ctx</ins>,
 const **char** \*<ins>buf</ins>, **size_t** <ins>n</ins>);
 > Write data to a UART interface
 ### RETURN
 > Returns the number of bytes written if success, -errno otherwise
 
 ---
-int **uart_read**(**struct uart** \*<ins>ctx</ins>, 
+int **uart_read**(**struct uart** \*<ins>ctx</ins>,
 **char** \*<ins>buf</ins>, **size_t** <ins>n</ins>);
 > Read data from a UART interface
 ### RETURN
