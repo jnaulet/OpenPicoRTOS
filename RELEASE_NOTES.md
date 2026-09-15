@@ -1,6 +1,16 @@
 # Release notes
 
-## picoRTO v1.11.0
+## picoRTOS v1.12.0
+### What's new ?
+
+picoRTOS was lacking a safe interrupt management API, this is now solved.   
+Interrupts now loop back to the kernel to ensure they are correctly wrapped
+in memory protection.
+
+Various bugs have been fixed on arm & stm8, and a sample uart driver for safe
+interrupt management is provided (uart-atamx7x_usart_irqdriven)
+
+## picoRTOS v1.11.0
 ### What's new ?
 
 A lot of things have changed is this new major release:
