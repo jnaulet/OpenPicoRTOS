@@ -134,6 +134,9 @@ int adc_atmel_afec_init(struct adc_atmel_afec *ctx, int base, clock_id_t clkid)
     ctx->base = (struct ADC_ATMEL_AFEC*)base; // NOLINT
     ctx->clkid = clkid;
     ctx->seq = 0;
+    ctx->rshift = 0;
+    ctx->EOCx_mask = 0;
+    ctx->state = ADC_ATMEL_AFEC_STATE_IDLE;
 
     /*
      * Ensure clock frequency is typical
@@ -147,8 +150,7 @@ int adc_atmel_afec_init(struct adc_atmel_afec *ctx, int base, clock_id_t clkid)
 
     /* TODO: reset */
 
-    ctx->base->AFEC_MR = (uint32_t)(AFEC_MR_USEQ |
-                                    AFEC_MR_TRACKTIM(2) |
+    ctx->base->AFEC_MR = (uint32_t)(AFEC_MR_TRANSFER(2) |
                                     AFEC_MR_ONE |
                                     AFEC_MR_STARTUP(4) |
                                     AFEC_MR_PRESCAL(prescal - 1));
@@ -180,6 +182,28 @@ int adc_atmel_afec_protect(struct adc_atmel_afec *ctx)
     return 0;
 }
 
+int adc_atmel_afec_setup(struct adc_atmel_afec *ctx, const struct adc_atmel_afec_settings *settings)
+{
+    picoRTOS_assert(settings->res < ADC_ATMEL_AFEC_RES_COUNT, return -EINVAL);
+
+    ctx->base->AFEC_EMR &= ~AFEC_EMR_RES(AFEC_EMR_RES_M);
+    ctx->base->AFEC_EMR |= (AFEC_EMR_STM | AFEC_EMR_RES(settings->res));
+
+    switch (settings->res) {
+    case ADC_ATMEL_AFEC_RES_NO_AVERAGE: /*@fallthrough@*/
+    case ADC_ATMEL_AFEC_RES_LOW_RES: ctx->rshift = 0; break;
+    case ADC_ATMEL_AFEC_RES_OSR4: ctx->rshift = (size_t)1; break;
+    case ADC_ATMEL_AFEC_RES_OSR16: ctx->rshift = (size_t)2; break;
+    case ADC_ATMEL_AFEC_RES_OSR64: ctx->rshift = (size_t)3; break;
+    case ADC_ATMEL_AFEC_RES_OSR256: ctx->rshift = (size_t)4; break;
+    default:
+        picoRTOS_assert(false, return -EINVAL);
+    }
+
+    return 0;
+}
+
+#ifdef TODO_ADD_SUPPORT_FPOR_SEQ_BACK
 static int seq_add(struct adc_atmel_afec *ctx, size_t channel)
 {
     picoRTOS_assert(ctx->seq < (size_t)ADC_ATMEL_AFEC_SEQ_COUNT,
@@ -196,8 +220,10 @@ static int seq_add(struct adc_atmel_afec *ctx, size_t channel)
     }
 
     /* return seq num */
+    ctx->EOCx_mask |= (1u << channel);
     return (int)ctx->seq++;
 }
+#endif
 
 /* Function: adc_atmel_afec_adc_init
  * Initializes an ADC channel
@@ -215,24 +241,25 @@ int adc_atmel_afec_adc_init(struct adc *ctx, struct adc_atmel_afec *parent, size
     picoRTOS_assert(channel < (size_t)ADC_ATMEL_AFEC_CHANNEL_COUNT,
                     return -EINVAL);
 
-    int res;
-
     ctx->parent = parent;
     ctx->channel = channel;
     ctx->multiplier = 1;
     ctx->divider = 1;
     ctx->offset = 0;
 
+#ifdef TODO_ADD_SUPPORT_FPOR_SEQ_BACK
     /* add seq */
     if ((res = seq_add(parent, channel)) < 0)
         return res;
+#endif
 
     /* configure AOFF */
     parent->base->AFEC_CSELR = (uint32_t)AFEC_CSELR_CSEL(channel);
     parent->base->AFEC_COCR = (uint32_t)AFEC_COCR_AOFF(AOFF_DEFAULT);
 
     /* enable channel */
-    parent->base->AFEC_CHER = (uint32_t)(1 << (size_t)res);
+    parent->EOCx_mask |= (1u << channel);
+    parent->base->AFEC_CHER = (uint32_t)(1 << channel);
     return 0;
 }
 
@@ -247,21 +274,42 @@ int adc_setup(struct adc *ctx, const struct adc_settings *settings)
 
 int adc_read(struct adc *ctx, int *data)
 {
-    uint16_t cdr;
+#define AFEC_ISR_EOCx_M 0xfffu
+    int cdr;
     struct adc_atmel_afec *parent = ctx->parent;
 
-    if ((parent->base->AFEC_ISR & (1u << ctx->channel)) == 0) {
+    if (parent->state == ADC_ATMEL_AFEC_STATE_IDLE) {
+        picoRTOS_assert_void(((parent->base->AFEC_ISR) & AFEC_ISR_EOCx_M) == 0);
         /* launch conversion */
         parent->base->AFEC_CR = (uint32_t)AFEC_CR_START;
+        parent->state = ADC_ATMEL_AFEC_STATE_GATHER;
         return -EAGAIN;
     }
 
-    /* channel selection */
-    parent->base->AFEC_CSELR = (uint32_t)AFEC_CSELR_CSEL(ctx->channel);
-    cdr = (uint16_t)parent->base->AFEC_CDR;
+    if (parent->state == ADC_ATMEL_AFEC_STATE_GATHER) {
+        int n = ADC_ATMEL_AFEC_CHANNEL_COUNT;
+        if (((parent->base->AFEC_ISR) & AFEC_ISR_EOCx_M) != (unsigned)parent->EOCx_mask)
+            return -EAGAIN;
 
-    /* apply calibration */
-    *data = ((int)cdr * ctx->multiplier) / ctx->divider + ctx->offset;
+        /* buffer channels */
+        while (n-- != 0) {
+            parent->base->AFEC_CSELR = (uint32_t)AFEC_CSELR_CSEL(n);
+            parent->CDR[n] = (int)((uint16_t)parent->base->AFEC_CDR >> parent->rshift);
+        }
+
+        /* state machine */
+        parent->state = ADC_ATMEL_AFEC_STATE_PUBLISH;
+    }
+
+    /* channel selection */
+    if ((cdr = parent->CDR[ctx->channel]) < 0) {
+        parent->state = ADC_ATMEL_AFEC_STATE_IDLE;
+        return -EAGAIN;
+    }
+
+    /* apply calibration & reset cdr */
+    *data = (cdr * ctx->multiplier) / ctx->divider + ctx->offset;
+    parent->CDR[ctx->channel] = -1;
     return 1;
 }
 
