@@ -15,4 +15,8 @@
 #define DEVICE_DEFAULT_SYSCLK_HZ      3500000ul /* 3.5Mhz */
 #define DEVICE_INTERRUPT_VECTOR_COUNT 2         /* Hack to avoid warnings */
 
+/* TICK_HZ is device-specific */
+
+#define CONFIG_TICK_HZ 50
+
 #endif

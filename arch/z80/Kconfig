@@ -7,6 +7,7 @@ choice
 
 config MACH_ZXSPECTRUM
        bool "Sinclair ZX Spectrum series"
+       select FIXED_TICK_HZ
        
 endchoice
 
