@@ -98,6 +98,8 @@ static int mux_atmel_pio(struct mux *ctx, mux_atmel_pio_t mux, uint32_t mask)
     switch (mux) {
     case MUX_ATMEL_PIO_DISABLE:
         ctx->base->PIO_PDR = mask;
+        ctx->base->PIO_PPDDR = mask;
+        ctx->base->PIO_PUDR = mask;
         break;
 
     case MUX_ATMEL_PIO_GPIO:
