@@ -36,4 +36,8 @@ config CLOCK_CH552
        depends on 8051
        bool "WCH CH552 series clock"
 
+config CLOCK_MSP430G2XXX
+       depends on MSP430
+       bool "TI MSP430G2xxx series clock"
+
 endmenu
