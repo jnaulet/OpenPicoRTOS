@@ -128,6 +128,7 @@ OpenPicoRTOS will only enforce these permissions if you enable the MPU.
  - RISC-V RV32EC
  - STMicroelectronics STM8
  - TI C2000 / c28x
+ - TI MSP430
 
 ### Multi-core SMP
  - PowerPC e200z4 SMP
@@ -168,6 +169,7 @@ OpenPicoRTOS will only enforce these permissions if you enable the MPU.
  - STMicroelectronics STM32H743/750
  - STMicroelectronics STM8Sx03 series
  - Texas Instruments TMS320F2837xD
+ - Texas Instruments MSP430G2553
  - WCH CH32V003
 
 ## How to use
@@ -308,6 +310,7 @@ Basic demo code is provided for the following boards:
   - STMicro STM32F401RCT6 development board (staging)
   - STMicro STM8S003F3P3 development board (staging)
   - Texas Instruments Launchxl-f28379d
+  - Texas Instruments MSP-EXP430G2 LaunchPad
   - Raspberry Pi Pico (single core & SMP)
   - WCH CH32V003F4P6 eval board (staging)
 
