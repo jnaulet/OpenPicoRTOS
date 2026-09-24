@@ -10,3 +10,4 @@ c_src-$(CONFIG_MUX_WCH_CH32X) += $(staging-drivers-mux)/mux-wch_ch32x.c
 c_src-$(CONFIG_MUX_MC9S08PTXX) += $(staging-drivers-mux)/mux-mc9s08ptxx.c
 c_src-$(CONFIG_MUX_STM8) += $(staging-drivers-mux)/mux-stm8.c
 c_src-$(CONFIG_MUX_CH552) += $(staging-drivers-mux)/mux-ch552.c
+c_src-$(CONFIG_MUX_MSP430G2XXX) += $(staging-drivers-mux)/mux-msp430g2xxx.c

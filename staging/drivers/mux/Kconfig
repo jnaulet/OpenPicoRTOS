@@ -28,4 +28,8 @@ config MUX_CH552
        depends on 8051
        bool "WCH CH552 series MUX"
 
+config MUX_MSP430G2XXX
+       depends on MSP430
+       bool "TI MSP430G2xxx series MUX"
+
 endmenu
