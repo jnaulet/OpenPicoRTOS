@@ -23,5 +23,9 @@ config GPIO_MC9S08PTXX
 config GPIO_STM8
        depends on STM8
        bool "STMicro STM8 series GPIOs"
+       
+config GPIO_MSP430G2XXX
+       depends on MSP430
+       bool "TI MSP430G2xxx series GPIOs"
 
 endmenu
