@@ -1,9 +1,17 @@
 #include "picoRTOS.h"
+#include "picoRTOS_core.h"
 #include "picoRTOS_port.h"
-
 #include "picoRTOS_device.h"
 
 /* CHECK FOR OBVIOUS ERRORS */
+
+#if CONFIG_CORE_COUNT != 1
+# error picoRTOS only supports 1 core, use picoRTOS-SMP
+#endif
+
+#if CONFIG_TASK_COUNT < 1
+# error You must define at least 1 task
+#endif
 
 #if CONFIG_DEFAULT_STACK_COUNT < ARCH_MIN_STACK_COUNT
 # error Default stack is too small
@@ -62,9 +70,10 @@ struct picoRTOS_task_sub {
 };
 
 /* user-defined tasks + idle */
-#define TASK_COUNT     (CONFIG_TASK_COUNT + CONFIG_CORE_COUNT)
-#define TASK_IDLE_PRIO (TASK_COUNT - 1)
-#define TASK_IDLE_PID  (TASK_COUNT - 1)
+#define TASK_COUNT      (CONFIG_TASK_COUNT + CONFIG_CORE_COUNT)
+#define TASK_IDLE_PRIO  (TASK_COUNT - 1)
+#define TASK_IDLE_PID   (TASK_COUNT - 1)
+#define TASK_PRIO_UNDEF TASK_COUNT
 /* shortcut for current task */
 #define TASK_CURRENT() (picoRTOS.task[picoRTOS.index])
 #define TASK_BY_PID(x) (picoRTOS.task[(x)])
@@ -121,7 +130,7 @@ static void task_core_init(/*@out@*/ struct picoRTOS_task_core *task)
     task->stat.watermark_hi = (picoRTOS_cycles_t)0;
     task->stat.deadline_miss_count = 0;
     /* shared priority support */
-    task->prio = (picoRTOS_priority_t)TASK_COUNT;
+    task->prio = (picoRTOS_priority_t)TASK_PRIO_UNDEF;
     task->sub_prio = (picoRTOS_priority_t)0;
     /* deadline */
     task->deadline_miss_count = 0;
@@ -131,8 +140,8 @@ static bool task_core_is_available(const struct picoRTOS_task_core *task)
 {
     /* task is ready and it's its turn */
     return task->state == TASK_STATE_READY &&
-           ((picoRTOS_priority_t)picoRTOS.tick %
-            SUB_BY_PRIO(task->prio).count) == task->sub_prio;
+           ((picoRTOS_tick_t)task->sub_prio == picoRTOS.tick %
+            (picoRTOS_tick_t)SUB_BY_PRIO(task->prio).count);
 }
 
 static void task_core_quickcpy(/*@out@*/ struct picoRTOS_task_core *dst,
@@ -299,6 +308,8 @@ void picoRTOS_task_init(struct picoRTOS_task *task,
     /* ensure page cache alignment */
     task->stack = (picoRTOS_stack_t*)L1_CACHE_ALIGN((char*)stack, ARCH_L1_DCACHE_LINESIZE);
     task->stack_count = (size_t)((stack + stack_count) - task->stack) & ~STACK_COUNT_MASK;
+    /* re-check */
+    picoRTOS_assert(task->stack_count >= (size_t)ARCH_MIN_STACK_COUNT, return );
 }
 
 /**
@@ -343,7 +354,7 @@ picoRTOS_priority_t picoRTOS_get_next_available_priority(void)
 
     for (; pid < (picoRTOS_pid_t)CONFIG_TASK_COUNT; pid++)
         if (TASK_BY_PID(pid).prio == prio) {
-            pid = (picoRTOS_pid_t)0; /* "recursive" */
+            pid = (picoRTOS_pid_t)-1; /* "recursive" */
             prio++;
         }
 
@@ -382,7 +393,7 @@ picoRTOS_priority_t picoRTOS_get_last_available_priority(void)
 
     for (; pid < (picoRTOS_pid_t)CONFIG_TASK_COUNT; pid++)
         if (TASK_BY_PID(pid).prio == prio) {
-            pid = (picoRTOS_pid_t)0; /* "recursive" */
+            pid = (picoRTOS_pid_t)-1; /* "recursive" */
             prio--;
         }
 
@@ -420,7 +431,8 @@ static void core_arrange_shared_priorities(void)
         /* get current prio */
         picoRTOS_priority_t prio = TASK_BY_PID(pid).prio;
         /* increment sub priority & count */
-        if (prio == TASK_BY_PID(pid - 1).prio) {
+        if (prio != (picoRTOS_priority_t)TASK_PRIO_UNDEF &&
+            prio == TASK_BY_PID(pid - 1).prio) {
             TASK_BY_PID(pid).sub_prio = ++sub_prio;
             SUB_BY_PRIO(prio).count = sub_prio + 1;
         }else
@@ -473,12 +485,13 @@ void picoRTOS_start(void)
 /*@exposed@*/ static struct picoRTOS_task_core *
 syscall_switch_context(struct picoRTOS_task_core *task)
 {
-    int deadlock = CONFIG_DEADLOCK_COUNT;
+#define POSTPONED_WRAP_COUNT 2
+    int count = POSTPONED_WRAP_COUNT;
 
     /* stats */
     task_core_stat_finish(task);
 
-    while (deadlock-- != 0) {
+    while (count-- != 0) {
         /* choose next task to run */
         do {
             picoRTOS.index++;
@@ -501,7 +514,7 @@ syscall_switch_context(struct picoRTOS_task_core *task)
             break;
     }
 
-    picoRTOS_assert(deadlock != -1, fatal());
+    picoRTOS_assert(count != -1, fatal());
     task_core_stat_start(task); /* stats */
     return task;
 }
