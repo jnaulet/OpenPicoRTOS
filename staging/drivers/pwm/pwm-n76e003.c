@@ -177,13 +177,23 @@ int pwm_set_period(struct pwm *ctx, pwm_period_us_t period)
 {
     picoRTOS_assert(period > 0, return -EINVAL);
 
+    size_t pwmdiv = 0;
     clock_freq_t freq = clock_get_freq(ctx->parent->clkid);
 
     picoRTOS_assert(freq > 0, return -EIO);
     unsigned long pwmp = ((unsigned long)freq / 1000000ul) * period;
 
-    picoRTOS_assert(pwmp < 65536ul, return -EINVAL);
+    /* adjust freq */
+    while (pwmp >= 65536ul) {
+        pwmp >>= 1;
+        pwmdiv++;
+    }
 
+    picoRTOS_assert(pwmp != 0, return -EINVAL);
+
+    /* set PWMDIV */
+    PWMCON1 &= ~PWMCON1_PWMDIV(PWMCON1_PWMDIV_M);
+    PWMCON1 |= PWMCON1_PWMDIV(pwmdiv);
     /* set PWMPx, at last */
     PWMPL = (unsigned char)pwmp;
     PWMPH = (unsigned char)(pwmp >> 8);
