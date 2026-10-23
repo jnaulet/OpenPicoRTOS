@@ -342,8 +342,8 @@ extern void arch_invalidate_dcache(const void *addr, size_t n);
  */
 extern void arch_flush_dcache(const void *addr, size_t n);
 #else
-# define arch_invalidate_dcache(x, y) /*@ignore@*/ do { (void)(x); (void)(y); } while(false) /*@end@*/
-# define arch_flush_dcache(x, y)      /*@ignore@*/ do { (void)(x); (void)(y); } while(false) /*@end@*/
+# define arch_invalidate_dcache(x, y) /*@ignore@*/ do { (void)(x); (void)(y); } while(false)    /*@end@*/
+# define arch_flush_dcache(x, y)      /*@ignore@*/ do { (void)(x); (void)(y); } while(false)    /*@end@*/
 #endif /* CONFIG_CACHE */
 
 /**§
