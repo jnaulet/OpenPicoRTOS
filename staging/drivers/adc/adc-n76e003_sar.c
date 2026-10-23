@@ -55,8 +55,8 @@ static unsigned char ADCRL;
 
 int adc_n76e003_init(struct adc_n76e003 *ctx)
 {
-    ADCCON1 |= ADCCON1_ADCEN;       /* enable SAR */
-    AINDIDS = (unsigned char)0xff;  /* disable all inputs */
+    ADCCON0 = (unsigned char)0;
+    ADCCON1 = (unsigned char)ADCCON1_ADCEN; /* enable SAR */
 
     ctx->dummy = 0;
     return 0;
@@ -67,7 +67,7 @@ int adc_n76e003_adc_init(struct adc *ctx, size_t channel)
     picoRTOS_assert(channel < (size_t)ADC_N76E003_SAR_CHANNEL_COUNT, return -EINVAL);
 
     ctx->channel = (unsigned char)channel;
-    AINDIDS &= ~(1u << ctx->channel);
+    AINDIDS |= (1u << ctx->channel);
 
     /* basics */
     ctx->multiplier = 1;
@@ -90,12 +90,13 @@ int adc_setup(struct adc *ctx, const struct adc_settings *settings)
 int adc_read(struct adc *ctx, int *data)
 {
     if ((ADCCON0 & ADCCON0_ADCF) != (unsigned char)0) {
+        /* ack anyway */
+        ADCCON0 &= ~ADCCON0_ADCF;
         /* this is not the conversion you are looking for */
         if ((ADCCON0 & ADCCON0_ADCHS_M) != ctx->channel)
             return -EAGAIN;
         /* result & clear */
         unsigned adcr = (unsigned)ADCRH << 4 | (unsigned)ADCRL;
-        ADCCON0 &= ~ADCCON0_ADCF;
         /* apply calibration */
         *data = (((int)adcr * ctx->multiplier) /
                  ctx->divider) + ctx->offset;
@@ -104,8 +105,7 @@ int adc_read(struct adc *ctx, int *data)
 
     }else{
         ADCCON0 &= ~ADCCON0_ADCHS(ADCCON0_ADCHS_M);
-        ADCCON0 |= ADCCON0_ADCHS(ctx->channel);
-        ADCCON0 |= ADCCON0_ADCS;
+        ADCCON0 |= (ADCCON0_ADCHS(ctx->channel) | ADCCON0_ADCS);
     }
 
     return -EAGAIN;
