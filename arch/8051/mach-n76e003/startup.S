@@ -17,6 +17,9 @@
 	.include "macros.S"
 	.include "generated/autoconf.S"
 
+	.equ _TA, 0xc7
+	.equ _PORDIS, 0xfd
+
 	.area HOME (CODE)
 
 	.globl Reset_Handler
@@ -49,6 +52,13 @@ __non_interruptible_startup:
 	mov sp, #__start__stack - 1
 	ZERO_RAM s_XSEG, l_XSEG
 	COPY_TO_RAM s_XINIT, s_XISEG, l_XISEG
+	;; disable POR function (strongly suggested)
+	mov _TA, #0xaa
+	mov _TA, #0x55
+	mov _PORDIS, #0x5a
+	mov _TA, #0xaa
+	mov _TA, #0x55
+	mov _PORDIS, #0xa5
 	;; static variables init
 	ljmp __gsinit
 
