@@ -216,7 +216,8 @@ static void task_idle_init(void)
 {
     /* IDLE */
     struct picoRTOS_task idle;
-    static picoRTOS_stack_t stack[ARCH_MIN_STACK_COUNT] UNPRIVILEGED_STACK;
+    static picoRTOS_stack_t stack[ARCH_MIN_STACK_COUNT] UNPRIVILEGED_STACK
+    __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
 
     /* ensure proper stack alignment */
     picoRTOS_task_init(&idle, (picoRTOS_task_fn)arch_idle, NULL, stack,

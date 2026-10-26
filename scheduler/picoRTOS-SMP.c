@@ -233,8 +233,10 @@ static void task_idle_init(void)
     struct picoRTOS_task idle;
     size_t core = (size_t)CONFIG_CORE_COUNT;
 
-    static struct { picoRTOS_stack_t array[ARCH_MIN_STACK_COUNT]; }
-    stack[CONFIG_CORE_COUNT] UNPRIVILEGED_STACK;
+    static struct {
+        picoRTOS_stack_t array[ARCH_MIN_STACK_COUNT]
+        __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
+    } stack[CONFIG_CORE_COUNT] UNPRIVILEGED_STACK;
 
     while (core-- != 0) {
         /* ensure proper stack alignment */

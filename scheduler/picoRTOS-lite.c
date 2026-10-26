@@ -114,7 +114,8 @@ static void task_idle_init(void)
 {
     /* IDLE */
     struct picoRTOS_task idle;
-    static picoRTOS_stack_t stack[ARCH_MIN_STACK_COUNT];
+    static picoRTOS_stack_t stack[ARCH_MIN_STACK_COUNT]
+    __attribute__((aligned(ARCH_L1_DCACHE_LINESIZE)));
 
     /* ensure proper stack alignment */
     picoRTOS_task_init(&idle, (picoRTOS_task_fn)arch_idle, NULL, stack,
@@ -154,6 +155,8 @@ void picoRTOS_task_init(struct picoRTOS_task *task,
     /* ensure page cache alignment */
     task->stack = (picoRTOS_stack_t*)L1_CACHE_ALIGN((char*)stack, ARCH_L1_DCACHE_LINESIZE);
     task->stack_count = (size_t)((stack + stack_count) - task->stack) & ~STACK_COUNT_MASK;
+    /* re-check */
+    picoRTOS_assert(task->stack_count >= (size_t)ARCH_MIN_STACK_COUNT, return );
 }
 
 void picoRTOS_add_task(struct picoRTOS_task *task, picoRTOS_priority_t prio)
