@@ -17,17 +17,19 @@ typedef long picoRTOS_intptr_t;
 typedef unsigned long picoRTOS_uintptr_t;
 
 #ifdef CONFIG_ARMV7EM
-# define ARCH_INITIAL_STACK_COUNT   (50 + 1) /* +1 for aligner */
-# define ARCH_L1_DCACHE_LINESIZE    CONFIG_L1_CACHE_LINESIZE
-# define ARCH_L1_DCACHE_STACK_COUNT (CONFIG_L1_CACHE_LINESIZE / 4)
-# define ARCH_MIN_STACK_COUNT       (ARCH_INITIAL_STACK_COUNT +   \
-                                     ARCH_L1_DCACHE_STACK_COUNT + \
-                                     4)     /* in -O0 */
+# define ARCH_INITIAL_STACK_COUNT (50 + 1) /* +1 for aligner */
+# define ARCH_L1_DCACHE_LINESIZE  CONFIG_L1_CACHE_LINESIZE
 #else
-# define ARCH_INITIAL_STACK_COUNT (16 + 1)  /* +1 for aligner */
+# define ARCH_INITIAL_STACK_COUNT (16 + 1) /* +1 for aligner */
 # define ARCH_L1_DCACHE_LINESIZE  4
-# define ARCH_MIN_STACK_COUNT     (ARCH_INITIAL_STACK_COUNT + 4)
 #endif
+
+# define ARCH_IDLE_STACK_COUNT      (ARCH_INITIAL_STACK_COUNT + 4) /* in -O0 */
+# define ARCH_L1_DCACHE_STACK_COUNT (ARCH_L1_DCACHE_LINESIZE / 4)
+
+# define ARCH_MIN_STACK_COUNT       (ARCH_IDLE_STACK_COUNT + \
+				     (ARCH_L1_DCACHE_STACK_COUNT - \
+				      (ARCH_IDLE_STACK_COUNT % ARCH_L1_DCACHE_STACK_COUNT)))
 
 #define arch_break() ASM("bkpt")
 

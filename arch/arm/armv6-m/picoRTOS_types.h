@@ -17,7 +17,8 @@ typedef long picoRTOS_intptr_t;
 typedef unsigned long picoRTOS_uintptr_t;
 
 #define ARCH_INITIAL_STACK_COUNT (16 + 1)                       /* +1 for aligner */
-#define ARCH_MIN_STACK_COUNT     (ARCH_INITIAL_STACK_COUNT + 4) /* in -O0 */
+#define ARCH_IDLE_STACK_COUNT    (ARCH_INITIAL_STACK_COUNT + 4) /* in -O0 */
+#define ARCH_MIN_STACK_COUNT     ARCH_IDLE_STACK_COUNT
 #define ARCH_SMP_MIN_STACK_COUNT 1                              /* can't be 0 (ISO-C) */
 
 /* no cache */
