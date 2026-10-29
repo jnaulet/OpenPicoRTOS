@@ -10,6 +10,7 @@
 
 /* NVIC */
 #define NVIC_ISER  ((volatile unsigned long*)0xe000e100)
+#define NVIC_ICER  ((volatile unsigned long*)0xe000e180)
 
 /* SCB */
 #define SCB_SHPR2 ((volatile unsigned long*)0xe000ed1c)
@@ -83,14 +84,14 @@ void arch_enable_interrupt_ext(picoRTOS_irq_t irq, picoRTOS_mask_t core_mask)
 {
     /*@i@*/ (void)core_mask;
     arch_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return );
-    NVIC_ISER[irq >> 5] |= (1ul << (0x1fu & irq));
+    NVIC_ISER[irq >> 5] = (1ul << (0x1fu & irq));
 }
 
 void arch_disable_interrupt_ext(picoRTOS_irq_t irq, picoRTOS_mask_t core_mask)
 {
     /*@i@*/ (void)core_mask;
     arch_assert(irq < (picoRTOS_irq_t)DEVICE_INTERRUPT_VECTOR_COUNT, return );
-    NVIC_ISER[irq >> 5] &= ~(1ul << (0x1fu & irq));
+    NVIC_ICER[irq >> 5] = (1ul << (0x1fu & irq));
 }
 
 /* STATS */
