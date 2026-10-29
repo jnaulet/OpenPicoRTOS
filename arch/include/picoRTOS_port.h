@@ -74,12 +74,11 @@ picoRTOS_stack_t *picoRTOS_syscall(picoRTOS_stack_t *sp,
                                    /*@null@*/ void *priv);
 
 /**
- * picoRTOS_stack_t \***picoRTOS_tick**(**picoRTOS_stack_t** *<ins>sp</ins>
- * **picoRTOS_irq_t** <ins>irq</ins>);
- * > Executes an interrupt request
+ * picoRTOS_stack_t \***picoRTOS_tick**(**picoRTOS_stack_t** *<ins>sp</ins>);
+ * > Increments the tick & starts a new cycle
  * ### NOTES
- * > This **MUST** be called from a default interrupt and provide
- * > the current task's <ins>sp</ins> as a first parameter.
+ * > This **MUST** be called from your main tick timer interrupt and provide
+ * > the current task's <ins>sp</ins> as a single parameter.
  * ### RETURN
  * > This call will return the next task sp to restore.
  */
@@ -87,11 +86,12 @@ extern /*@exposed@*/
 picoRTOS_stack_t *picoRTOS_tick(picoRTOS_stack_t *sp);
 
 /**
- * picoRTOS_stack_t \***picoRTOS_irq**(**picoRTOS_stack_t** *<ins>sp</ins>);
- * > Increments the tick & starts a new cycle
+ * picoRTOS_stack_t \***picoRTOS_irq**(**picoRTOS_stack_t** *<ins>sp</ins>
+ * **picoRTOS_irq_t** <ins>irq</ins>);
+ * > Executes/dipatches an interrupt request
  * ### NOTES
- * > This **MUST** be called from your main tick timer interrupt and provide
- * > the current task's <ins>sp</ins> as a single parameter.
+ * > This **MUST** be called from a default interrupt and provide
+ * > the current task's <ins>sp</ins> as a first parameter.
  * ### RETURN
  * > This call will return the next task sp to restore.
  */

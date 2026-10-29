@@ -79,7 +79,7 @@ void picoRTOS_sleep_until(picoRTOS_tick_t *ref,                         /* put c
 #define picoRTOS_suspend() picoRTOS_run(false)
 
 /** u
- * **picoRTOS_suspend**();
+ * **picoRTOS_resume**();
  * > Resumes the scheduling. Typical use is critical sections
  *
  * > [!NOTE]
