@@ -13,10 +13,10 @@ struct ADC_ATMEL_AFEC;
 #define ADC_ATMEL_AFEC_CHANNEL_COUNT 12
 
 typedef enum {
-  ADC_ATMEL_AFEC_STATE_IDLE,
-  ADC_ATMEL_AFEC_STATE_GATHER,
-  ADC_ATMEL_AFEC_STATE_PUBLISH,
-  ADC_ATMEL_AFEC_STATE_COUNT
+    ADC_ATMEL_AFEC_STATE_IDLE,
+    ADC_ATMEL_AFEC_STATE_GATHER,
+    ADC_ATMEL_AFEC_STATE_PUBLISH,
+    ADC_ATMEL_AFEC_STATE_COUNT
 } adc_atmel_afec_state_t;
 
 struct adc_atmel_afec {
@@ -34,17 +34,17 @@ int adc_atmel_afec_init(/*@out@*/ struct adc_atmel_afec *ctx, int base, clock_id
 int adc_atmel_afec_protect(struct adc_atmel_afec *ctx);
 
 typedef enum {
-  ADC_ATMEL_AFEC_RES_NO_AVERAGE = 0,
-  ADC_ATMEL_AFEC_RES_LOW_RES = 1, /* 10bit */
-  ADC_ATMEL_AFEC_RES_OSR4 = 2,  /* 13bit */
-  ADC_ATMEL_AFEC_RES_OSR16 = 3, /* 14bit */
-  ADC_ATMEL_AFEC_RES_OSR64 = 4, /* 15bit */
-  ADC_ATMEL_AFEC_RES_OSR256 = 5, /* 16bit */
-  ADC_ATMEL_AFEC_RES_COUNT
+    ADC_ATMEL_AFEC_RES_NO_AVERAGE   = 0,
+    ADC_ATMEL_AFEC_RES_LOW_RES      = 1,    /* 10bit */
+    ADC_ATMEL_AFEC_RES_OSR4         = 2,    /* 13bit */
+    ADC_ATMEL_AFEC_RES_OSR16        = 3,    /* 14bit */
+    ADC_ATMEL_AFEC_RES_OSR64        = 4,    /* 15bit */
+    ADC_ATMEL_AFEC_RES_OSR256       = 5,    /* 16bit */
+    ADC_ATMEL_AFEC_RES_COUNT
 } adc_atmel_afec_res_t;
 
 struct adc_atmel_afec_settings {
-  adc_atmel_afec_res_t res;
+    adc_atmel_afec_res_t res;
 };
 
 int adc_atmel_afec_setup(struct adc_atmel_afec *ctx, const struct adc_atmel_afec_settings *settings);
