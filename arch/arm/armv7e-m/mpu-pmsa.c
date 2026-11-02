@@ -197,16 +197,16 @@ static void merge_contiguous_entries(int pid)
     if (pid < 0) {
         /* kernel */
         size_t i;
-        for (i = (size_t)MPU_PMSAV7_DREGION_COUNT; i-- != mpu.count;) {
+        for (i = (size_t)MPU_PMSAV7_DREGION_COUNT; i-- != (mpu.count + 1);) {
             struct mpu_entry *e = &mpu.MPU[i - 1];
             if (MPU_MATCH_CONTIGUOUS(&e[1], &e[0]))
                 MPU_MERGE_CONTIGUOUS(&e[1], &e[0]);
         }
 
     }else{
-        /* threads */
+        /* threads & irqs */
         size_t i;
-        for (i = 0; i < mpu.count; i++) {
+        for (i = 0; i < (mpu.count - 1); i++) {
             struct mpu_entry *e = &mpu.pid[pid].MPU[i];
             if (MPU_MATCH_CONTIGUOUS(&e[0], &e[1]))
                 MPU_MERGE_CONTIGUOUS(&e[0], &e[1]);
@@ -234,8 +234,9 @@ static int mpu_desc_from_addr_n(uintptr_t addr, size_t n,
         bottom = midpoint & ~mask;
         top = (bottom + size);
         /* out condition */
-        if (bottom <= addr && size >= n)
-            break;
+        if (bottom <= addr &&
+            top >= (addr + n) &&
+            size >= n) break;
     }
 
     size_t part_len = size >> 3;
@@ -244,8 +245,9 @@ static int mpu_desc_from_addr_n(uintptr_t addr, size_t n,
     size_t after = div_floor(top - (addr + n), part_len);
     size_t after_len = after * part_len;
 
-    /* underflow */
-    if (after > n) after_len = 0;
+    /* overflows */
+    arch_assert(after <= (size_t)8, after = 0);
+    arch_assert(before <= (size_t)8, before = 0);
 
     d->RBAR = bottom;
     d->SIZE = p2 - 1;
