@@ -28,8 +28,8 @@ typedef unsigned long picoRTOS_uintptr_t;
 # define ARCH_L1_DCACHE_STACK_COUNT (ARCH_L1_DCACHE_LINESIZE / 4)
 
 # define ARCH_MIN_STACK_COUNT       (ARCH_IDLE_STACK_COUNT + \
-				     (ARCH_L1_DCACHE_STACK_COUNT - \
-				      (ARCH_IDLE_STACK_COUNT % ARCH_L1_DCACHE_STACK_COUNT)))
+                                     (ARCH_L1_DCACHE_STACK_COUNT - \
+                                      (ARCH_IDLE_STACK_COUNT % ARCH_L1_DCACHE_STACK_COUNT)))
 
 #define arch_break() ASM("bkpt")
 
