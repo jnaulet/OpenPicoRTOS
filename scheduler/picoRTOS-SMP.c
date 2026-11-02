@@ -350,7 +350,7 @@ picoRTOS_priority_t picoRTOS_get_last_available_priority(void)
         }
 
     /* no slot available: overflow */
-    picoRTOS_assert(prio < (picoRTOS_priority_t)TASK_IDLE_PRIO,
+    picoRTOS_assert(prio != (picoRTOS_priority_t)-1,
                     return (picoRTOS_priority_t)-1);
 
     return prio;
