@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#define arch_assert(x, or_else)			\
+  if(!(x)){ fprintf(stderr, "assert failed at line __LINE__\n"); { or_else; }}
+
 struct mpu_desc {
     /* human-readable */
     uintptr_t bottom;
@@ -34,8 +37,9 @@ static int mpu_desc_from_addr_n(uintptr_t addr, size_t n,
         bottom = midpoint & ~mask;
         top = (bottom + size);
         /* out condition */
-        if (bottom <= addr && size >= n)
-            break;
+        if (bottom <= addr &&
+	    top >= (addr + n) &&
+	    size >= n) break;
     }
 
     size_t part_len = size >> 3;
@@ -44,8 +48,9 @@ static int mpu_desc_from_addr_n(uintptr_t addr, size_t n,
     size_t after = div_floor(top - (addr + n), part_len);
     size_t after_len = after * part_len;
 
-    /* underflow */
-    if (after > n) after_len = 0;
+    /* overflows */
+    arch_assert(after <= (size_t)8, after = 0);
+    arch_assert(before <= (size_t)8, before = 0);
 
     d->RBAR = bottom;
     d->SIZE = p2 - 1;
